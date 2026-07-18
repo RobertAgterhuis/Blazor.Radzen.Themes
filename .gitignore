@@ -63,7 +63,6 @@ BenchmarkDotNet.Artifacts/
 # .NET
 project.lock.json
 project.fragment.lock.json
-artifacts/
 
 # Tye
 .tye/
@@ -481,4 +480,19 @@ $RECYCLE.BIN/
 # Vim temporary swap files
 *.swp
 
-artifacts/
+# Repository artifacts policy:
+# keep generated outputs ignored, but allow tooling source under artifacts/
+/artifacts/*
+!/artifacts/*.ps1
+!/artifacts/*.txt
+!/artifacts/RadzenInventoryTool/
+/artifacts/RadzenInventoryTool/*
+!/artifacts/RadzenInventoryTool/Program.cs
+!/artifacts/RadzenInventoryTool/RadzenInventoryTool.csproj
+!/artifacts/RadzenInventoryTool/packages.lock.json
+/artifacts/RadzenInventoryTool/bin/
+/artifacts/RadzenInventoryTool/obj/
+/artifacts/a11y-report/
+/artifacts/packages/
+/artifacts/runlogs/
+/artifacts/test-results/
