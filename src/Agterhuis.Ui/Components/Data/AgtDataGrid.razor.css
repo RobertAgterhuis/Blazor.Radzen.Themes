@@ -1,0 +1,4 @@
+.agt-data-grid {
+    border-radius: var(--agt-border-radius-md);
+    overflow: hidden;
+}

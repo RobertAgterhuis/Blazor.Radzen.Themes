@@ -1,0 +1,24 @@
+@page "/components/layout/tabs"
+
+<PageTitle>Tabs</PageTitle>
+
+<div class="agt-page agt-stack">
+    <AgtPageHeader Title="AgtTabs + AgtTabItem" Description="Tabs wrapper met lazy-render optie en thematische indicator." />
+
+    <AgtCard>
+        <ChildContent>
+            <AgtTabs @bind-SelectedIndex="_tabIndex" LazyRender="true">
+                <AgtTabItem Index="0" Text="Overzicht" Icon="dashboard">
+                    <p>Overzichtsinhoud.</p>
+                </AgtTabItem>
+                <AgtTabItem Index="1" Text="Instellingen" Icon="settings">
+                    <p>Instellingeninhoud.</p>
+                </AgtTabItem>
+            </AgtTabs>
+        </ChildContent>
+    </AgtCard>
+</div>
+
+@code {
+    private int _tabIndex;
+}

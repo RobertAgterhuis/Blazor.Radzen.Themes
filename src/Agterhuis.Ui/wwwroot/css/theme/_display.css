@@ -1,0 +1,62 @@
+.rz-chart,
+.rz-arcgauge,
+.rz-radialgauge,
+.rz-timeline,
+.rz-image,
+.rz-icon,
+.rz-htmleditor,
+.rz-gravatar {
+    border-radius: var(--agt-border-radius-lg);
+}
+
+.rz-htmleditor-toolbar {
+    background: var(--agt-gradient-surface);
+    border-bottom: 1px solid var(--agt-alpha-accent-20);
+    color: var(--agt-text-heading);
+}
+
+.rz-timeline-item-marker {
+    background: var(--agt-color-primary-500);
+    border-color: var(--agt-color-primary-500);
+}
+
+.rz-icon {
+    color: var(--agt-color-primary-500);
+}
+
+.rz-markdown,
+.rz-markdown-rendered {
+    color: inherit;
+    line-height: 1.6;
+}
+
+.rz-markdown h1,
+.rz-markdown-rendered h1,
+.rz-markdown h2,
+.rz-markdown-rendered h2 {
+    font-size: var(--agt-heading-size-lg);
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    line-height: var(--agt-heading-line-height);
+    margin: 0 0 var(--agt-spacing-3);
+    position: relative;
+}
+
+.rz-markdown h1::after,
+.rz-markdown-rendered h1::after,
+.rz-markdown h2::after,
+.rz-markdown-rendered h2::after {
+    background: linear-gradient(90deg, var(--agt-color-primary-400), var(--agt-color-primary-600));
+    border-radius: 999px;
+    content: "";
+    display: block;
+    height: 3px;
+    margin-top: var(--agt-spacing-2);
+    width: 4.75rem;
+}
+
+.rz-markdown a,
+.rz-markdown-rendered a {
+    color: var(--agt-link-color);
+    text-decoration-thickness: 2px;
+}

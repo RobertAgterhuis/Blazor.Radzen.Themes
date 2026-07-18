@@ -1,0 +1,70 @@
+<div class="agt-form-actions @CssClass" role="group" aria-label="Formulieracties">
+    @if (LeadingActions is not null)
+    {
+        <div class="agt-form-actions__leading">@LeadingActions</div>
+    }
+    <div class="agt-form-actions__trailing">
+        @if (TrailingActions is not null)
+        {
+            @TrailingActions
+        }
+        else
+        {
+            <AgtSecondaryButton Text="@CancelText"
+                                Disabled="@CancelDisabled"
+                                Click="@OnCancelClick" />
+            <AgtPrimaryButton Text="@SaveText"
+                              Disabled="@SaveDisabled"
+                              IsBusy="@IsBusy"
+                              BusyText="@BusyText"
+                              Click="@OnSaveClick" />
+        }
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(StatusMessage))
+    {
+        <p class="agt-sr-only" role="status" aria-live="polite">@StatusMessage</p>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public string SaveText { get; set; } = "Opslaan";
+
+    [Parameter]
+    public string CancelText { get; set; } = "Annuleren";
+
+    [Parameter]
+    public string BusyText { get; set; } = "Bezig...";
+
+    [Parameter]
+    public bool SaveDisabled { get; set; }
+
+    [Parameter]
+    public bool CancelDisabled { get; set; }
+
+    [Parameter]
+    public bool IsBusy { get; set; }
+
+    [Parameter]
+    public string? StatusMessage { get; set; }
+
+    [Parameter]
+    public EventCallback<MouseEventArgs> Save { get; set; }
+
+    [Parameter]
+    public EventCallback<MouseEventArgs> Cancel { get; set; }
+
+    [Parameter]
+    public RenderFragment? LeadingActions { get; set; }
+
+    [Parameter]
+    public RenderFragment? TrailingActions { get; set; }
+
+    [Parameter]
+    public string? CssClass { get; set; }
+
+    private Task OnSaveClick(MouseEventArgs args) => Save.InvokeAsync(args);
+
+    private Task OnCancelClick(MouseEventArgs args) => Cancel.InvokeAsync(args);
+}

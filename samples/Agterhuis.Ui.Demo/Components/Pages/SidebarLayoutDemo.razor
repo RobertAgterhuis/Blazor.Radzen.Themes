@@ -1,0 +1,32 @@
+@page "/components/layout/sidebar-layout"
+
+<PageTitle>Sidebar layout</PageTitle>
+
+<div class="agt-page agt-stack">
+    <AgtPageHeader Title="AgtSidebarLayout" Description="Sidebar layout met theme-token header, sidebar en content." />
+
+    <div class="sidebar-layout-demo-frame">
+        <AgtSidebarLayout>
+            <Logo>
+                Agterhuis
+            </Logo>
+            <HeaderActions>
+                <AgtThemeToggle />
+            </HeaderActions>
+            <Sidebar>
+                <nav class="sidebar-demo-nav">
+                    <a href="/components/layout/sidebar-layout">Dashboard</a>
+                    <a href="/components/forms/text-field">Forms</a>
+                    <a href="/components/data/grid">Data</a>
+                </nav>
+            </Sidebar>
+            <ChildContent>
+                <AgtCard>
+                    <ChildContent>
+                        Voorbeeldinhoud binnen AgtSidebarLayout.
+                    </ChildContent>
+                </AgtCard>
+            </ChildContent>
+        </AgtSidebarLayout>
+    </div>
+</div>

@@ -1,0 +1,39 @@
+@page "/components/feedback/confirm-dialog"
+
+@inject IAgtConfirmDialog ConfirmDialog
+
+<PageTitle>Confirm dialog</PageTitle>
+
+<div class="agt-page agt-stack">
+    <AgtPageHeader Title="AgtConfirmDialog" Description="Service wrapper rondom Radzen DialogService." />
+
+    <AgtCard>
+        <ChildContent>
+            <RadzenStack Orientation="Orientation.Horizontal" Gap="0.75rem" Wrap="FlexWrap.Wrap">
+                <AgtSecondaryButton Text="Toon bevestiging" Click="OnAskConfirmation" />
+                <AgtSecondaryButton Text="Toon verwijderbevestiging" Click="OnAskDeleteConfirmation" />
+            </RadzenStack>
+            <p>Laatst antwoord: @_lastDecision</p>
+        </ChildContent>
+    </AgtCard>
+</div>
+
+@code {
+    private string _lastDecision = "Nog geen keuze";
+
+    private async Task OnAskConfirmation(MouseEventArgs _)
+    {
+        var confirmed = await ConfirmDialog.ConfirmAsync(
+            "Wilt u doorgaan met deze actie?",
+            "Actie bevestigen",
+            new AgtConfirmOptions { Intent = AgtIntent.Danger, OkText = "Doorgaan", CancelText = "Stop" });
+
+        _lastDecision = confirmed ? "Bevestigd" : "Geannuleerd";
+    }
+
+    private async Task OnAskDeleteConfirmation(MouseEventArgs _)
+    {
+        var confirmed = await ConfirmDialog.ConfirmDeleteAsync("Klantrecord");
+        _lastDecision = confirmed ? "Verwijderen bevestigd" : "Verwijderen geannuleerd";
+    }
+}

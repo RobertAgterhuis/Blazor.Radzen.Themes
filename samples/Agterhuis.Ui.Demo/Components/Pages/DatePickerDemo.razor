@@ -1,0 +1,18 @@
+@page "/components/forms/date-picker"
+
+<PageTitle>Date picker</PageTitle>
+
+<div class="agt-page agt-stack">
+    <AgtPageHeader Title="AgtDatePicker" Description="Datumselectie met format en optional time." />
+
+    <AgtCard>
+        <ChildContent>
+            <AgtDatePicker @bind-Value="_date" Label="Datum" DateFormat="dd-MM-yyyy" />
+            <p>Geselecteerde datum: @(_date?.ToString("dd-MM-yyyy") ?? "-" )</p>
+        </ChildContent>
+    </AgtCard>
+</div>
+
+@code {
+    private DateTime? _date = DateTime.Today;
+}

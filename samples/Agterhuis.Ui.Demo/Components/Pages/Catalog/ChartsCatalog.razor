@@ -1,0 +1,38 @@
+@page "/catalog/charts"
+
+<PageTitle>Charts (Radzen)</PageTitle>
+
+<div class="catalog-page">
+    <h1>Charts (Radzen)</h1>
+
+    @if (PreviewOnly)
+    {
+        <RadzenCard>Chart preview (interactive rendering disabled).</RadzenCard>
+    }
+    else
+    {
+        <RadzenChart>
+            <RadzenColumnSeries Data="ChartData" CategoryProperty="Label" ValueProperty="Value" />
+            <RadzenLineSeries Data="ChartData" CategoryProperty="Label" ValueProperty="Value2" />
+        </RadzenChart>
+
+        <RadzenChart>
+            <RadzenDonutSeries Data="ChartData" CategoryProperty="Label" ValueProperty="Value" />
+        </RadzenChart>
+    }
+
+</div>
+
+@code {
+    [Parameter]
+    public bool PreviewOnly { get; set; }
+
+    private static readonly IReadOnlyList<ChartItem> ChartData =
+    [
+        new("Jan", 10, 7),
+        new("Feb", 12, 9),
+        new("Mar", 18, 11)
+    ];
+
+    private sealed record ChartItem(string Label, double Value, double Value2);
+}

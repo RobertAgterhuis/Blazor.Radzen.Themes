@@ -1,0 +1,9 @@
+.agt-badge {
+    align-items: center;
+    display: inline-flex;
+    gap: var(--agt-spacing-1);
+}
+
+.agt-badge__icon {
+    font-size: var(--agt-font-size-sm);
+}

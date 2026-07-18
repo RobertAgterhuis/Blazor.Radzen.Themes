@@ -1,0 +1,46 @@
+@page "/catalog/data-advanced"
+
+<PageTitle>Data Advanced (Radzen)</PageTitle>
+
+<div class="catalog-page">
+    <h1>Data Advanced (Radzen)</h1>
+
+    <RadzenDataFilter TItem="DataRow" Data="Rows" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+
+    <RadzenPickList TItem="DataRow" TValue="int" Data="Rows" TextProperty="Name" ValueProperty="Id" />
+
+    <RadzenCard>
+        <strong>PivotDataGrid</strong>
+        <p class="agt-muted">PivotDataGrid is included in the installed Radzen package. This catalog route keeps rendering stable while advanced pivot configuration is expanded safely.</p>
+    </RadzenCard>
+
+    <RadzenTable>
+        <RadzenTableHeader>
+            <RadzenTableHeaderRow>
+                <RadzenTableHeaderCell>Naam</RadzenTableHeaderCell>
+                <RadzenTableHeaderCell>Score</RadzenTableHeaderCell>
+            </RadzenTableHeaderRow>
+        </RadzenTableHeader>
+        <RadzenTableBody>
+            @foreach (var row in Rows)
+            {
+                <RadzenTableRow>
+                    <RadzenTableCell>@row.Name</RadzenTableCell>
+                    <RadzenTableCell>@row.Score</RadzenTableCell>
+                </RadzenTableRow>
+            }
+        </RadzenTableBody>
+    </RadzenTable>
+</div>
+
+@code {
+    private static readonly IReadOnlyList<DataRow> Rows =
+    [
+        new(1, "Alpha", "A", 10),
+        new(2, "Bravo", "A", 20),
+        new(3, "Charlie", "B", 15),
+        new(4, "Delta", "B", 30)
+    ];
+
+    private sealed record DataRow(int Id, string Name, string Category, int Score);
+}

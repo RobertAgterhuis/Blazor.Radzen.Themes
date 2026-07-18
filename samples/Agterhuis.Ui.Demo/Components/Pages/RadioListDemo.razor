@@ -1,0 +1,30 @@
+@page "/components/forms/radio-list"
+
+<PageTitle>Radio list</PageTitle>
+
+<div class="agt-page agt-stack">
+    <AgtPageHeader Title="AgtRadioList" Description="Radiolijst met fieldset/legend-semantiek en configureerbare orientatie." />
+
+    <AgtCard>
+        <ChildContent>
+            <AgtRadioList TValue="int"
+                          Data="_choices"
+                          Label="Prioriteit"
+                          TextProperty="Text"
+                          ValueProperty="Value"
+                          @bind-Value="_selectedValue" />
+            <p>Gekozen waarde: @_selectedValue</p>
+        </ChildContent>
+    </AgtCard>
+</div>
+
+@code {
+    private int _selectedValue = 2;
+
+    private readonly IReadOnlyList<object> _choices =
+    [
+        new { Text = "Laag", Value = 1 },
+        new { Text = "Normaal", Value = 2 },
+        new { Text = "Hoog", Value = 3 }
+    ];
+}

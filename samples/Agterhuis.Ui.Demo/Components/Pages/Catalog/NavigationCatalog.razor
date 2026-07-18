@@ -1,0 +1,44 @@
+@page "/catalog/navigation"
+
+<PageTitle>Navigation (Radzen)</PageTitle>
+
+<div class="catalog-page">
+    <h1>Navigation (Radzen)</h1>
+
+    <RadzenMenu>
+        <RadzenMenuItem Text="Home" Path="/" />
+        <RadzenMenuItem Text="Catalog" Path="/catalog" />
+    </RadzenMenu>
+
+    <RadzenPanelMenu>
+        <RadzenPanelMenuItem Text="Section A" Icon="folder">
+            <RadzenPanelMenuItem Text="Item A1" />
+        </RadzenPanelMenuItem>
+    </RadzenPanelMenu>
+
+    <RadzenTabs>
+        <Tabs>
+            <RadzenTabsItem Text="First">First tab</RadzenTabsItem>
+            <RadzenTabsItem Text="Second">Second tab</RadzenTabsItem>
+        </Tabs>
+    </RadzenTabs>
+
+    <RadzenSteps>
+        <RadzenStepsItem Text="Start" />
+        <RadzenStepsItem Text="Finish" />
+    </RadzenSteps>
+
+    <RadzenBreadCrumb>
+        <RadzenBreadCrumbItem Text="Home" Path="/" />
+        <RadzenBreadCrumbItem Text="Catalog" Path="/catalog" />
+    </RadzenBreadCrumb>
+
+    <RadzenProfileMenu>
+        <ChildContent>
+            <RadzenProfileMenuItem Text="Account" Icon="person" />
+            <RadzenProfileMenuItem Text="Sign out" Icon="logout" />
+        </ChildContent>
+    </RadzenProfileMenu>
+
+    <RadzenLink Path="/catalog" Text="Link" />
+</div>

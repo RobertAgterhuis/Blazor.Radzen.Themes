@@ -1,0 +1,259 @@
+.rz-button,
+.rz-splitbutton,
+.rz-togglebutton,
+.rz-selectbutton .rz-button,
+.rz-fab,
+.rz-speed-dial-button {
+    border-radius: 999px;
+    font-weight: 600;
+    min-height: 2.75rem;
+    min-width: 2.75rem;
+    transition: background-color var(--agt-transition-normal), border-color var(--agt-transition-normal), color var(--agt-transition-normal), box-shadow var(--agt-transition-normal), transform var(--agt-transition-fast);
+}
+
+.rz-button,
+.rz-splitbutton .rz-button,
+.rz-togglebutton,
+.rz-selectbutton .rz-button {
+    --agt-btn-fill: var(--agt-btn-primary-fill);
+    --agt-btn-on-fill: var(--agt-on-primary);
+    --agt-btn-ink: color-mix(in srgb, var(--agt-btn-fill) 28%, var(--agt-btn-on-fill) 72%);
+}
+
+.rz-button.rz-primary,
+.rz-splitbutton .rz-button.rz-primary,
+.rz-togglebutton.rz-primary,
+.rz-selectbutton .rz-button.rz-primary {
+    --agt-btn-fill: var(--agt-btn-primary-fill);
+    --agt-btn-on-fill: var(--agt-on-primary);
+    --agt-btn-ink: color-mix(in srgb, var(--agt-btn-fill) 72%, var(--agt-btn-on-fill) 28%);
+}
+
+.rz-button.rz-secondary,
+.rz-splitbutton .rz-button.rz-secondary,
+.rz-togglebutton.rz-secondary,
+.rz-selectbutton .rz-button.rz-secondary {
+    --agt-btn-fill: var(--agt-btn-secondary-fill);
+    --agt-btn-on-fill: var(--agt-on-secondary);
+    --agt-btn-ink: color-mix(in srgb, var(--agt-btn-fill) 72%, var(--agt-btn-on-fill) 28%);
+}
+
+.rz-button.rz-base,
+.rz-splitbutton .rz-button.rz-base,
+.rz-togglebutton.rz-base,
+.rz-selectbutton .rz-button.rz-base {
+    --agt-btn-fill: var(--agt-btn-base-fill);
+    --agt-btn-on-fill: var(--agt-on-base);
+    --agt-btn-ink: color-mix(in srgb, var(--agt-btn-fill) 46%, var(--agt-btn-on-fill) 54%);
+}
+
+.rz-button.rz-light,
+.rz-splitbutton .rz-button.rz-light,
+.rz-togglebutton.rz-light,
+.rz-selectbutton .rz-button.rz-light {
+    --agt-btn-fill: var(--agt-btn-light-fill);
+    --agt-btn-on-fill: var(--agt-on-light);
+    --agt-btn-ink: var(--agt-btn-light-ink);
+}
+
+.rz-button.rz-dark,
+.rz-splitbutton .rz-button.rz-dark,
+.rz-togglebutton.rz-dark,
+.rz-selectbutton .rz-button.rz-dark {
+    --agt-btn-fill: var(--agt-btn-dark-fill);
+    --agt-btn-on-fill: var(--agt-on-dark);
+    --agt-btn-ink: var(--agt-btn-dark-ink);
+}
+
+.rz-button.rz-info,
+.rz-splitbutton .rz-button.rz-info,
+.rz-togglebutton.rz-info,
+.rz-selectbutton .rz-button.rz-info {
+    --agt-btn-fill: var(--agt-btn-info-fill);
+    --agt-btn-on-fill: var(--agt-on-info);
+    --agt-btn-ink: color-mix(in srgb, var(--agt-btn-fill) 72%, var(--agt-btn-on-fill) 28%);
+}
+
+.rz-button.rz-success,
+.rz-splitbutton .rz-button.rz-success,
+.rz-togglebutton.rz-success,
+.rz-selectbutton .rz-button.rz-success {
+    --agt-btn-fill: var(--agt-btn-success-fill);
+    --agt-btn-on-fill: var(--agt-on-success);
+    --agt-btn-ink: color-mix(in srgb, var(--agt-btn-fill) 72%, var(--agt-btn-on-fill) 28%);
+}
+
+.rz-button.rz-warning,
+.rz-splitbutton .rz-button.rz-warning,
+.rz-togglebutton.rz-warning,
+.rz-selectbutton .rz-button.rz-warning {
+    --agt-btn-fill: var(--agt-btn-warning-fill);
+    --agt-btn-on-fill: var(--agt-on-warning);
+    --agt-btn-ink: color-mix(in srgb, var(--agt-btn-fill) 72%, var(--agt-btn-on-fill) 28%);
+}
+
+.rz-button.rz-danger,
+.rz-splitbutton .rz-button.rz-danger,
+.rz-togglebutton.rz-danger,
+.rz-selectbutton .rz-button.rz-danger {
+    --agt-btn-fill: var(--agt-btn-danger-fill);
+    --agt-btn-on-fill: var(--agt-on-danger);
+    --agt-btn-ink: color-mix(in srgb, var(--agt-btn-fill) 72%, var(--agt-btn-on-fill) 28%);
+}
+
+.rz-button:focus-visible,
+.rz-splitbutton .rz-button:focus-visible,
+.rz-togglebutton:focus-visible,
+.rz-selectbutton .rz-button:focus-visible,
+.rz-fab:focus-visible,
+.rz-speed-dial-button:focus-visible {
+    box-shadow: var(--agt-focus-ring), var(--agt-focus-ring-style);
+    outline: 3px solid var(--agt-nav-focus-outline);
+    outline-offset: 2px;
+}
+
+.rz-button.rz-variant-filled,
+.rz-splitbutton .rz-button.rz-variant-filled,
+.rz-togglebutton.rz-variant-filled,
+.rz-selectbutton .rz-button.rz-variant-filled,
+.rz-fab,
+.rz-speed-dial-button {
+    background: var(--agt-btn-fill) !important;
+    border-color: color-mix(in srgb, var(--agt-btn-fill) 86%, var(--agt-color-gray-900)) !important;
+    color: var(--agt-btn-on-fill) !important;
+}
+
+.rz-button.rz-variant-filled:hover,
+.rz-splitbutton .rz-button.rz-variant-filled:hover,
+.rz-togglebutton.rz-variant-filled:hover,
+.rz-selectbutton .rz-button.rz-variant-filled:hover,
+.rz-fab:hover,
+.rz-speed-dial-button:hover {
+    background: color-mix(in srgb, var(--agt-btn-fill) 88%, var(--agt-color-white)) !important;
+    border-color: color-mix(in srgb, var(--agt-btn-fill) 74%, var(--agt-color-gray-900)) !important;
+    color: var(--agt-btn-on-fill) !important;
+    box-shadow: var(--agt-shadow-sm);
+    transform: translateY(calc(var(--agt-lift-distance) * -0.5));
+}
+
+.rz-button.rz-variant-filled:active,
+.rz-button.rz-variant-filled.rz-state-active,
+.rz-splitbutton .rz-button.rz-variant-filled:active,
+.rz-splitbutton .rz-button.rz-variant-filled.rz-state-active,
+.rz-togglebutton.rz-variant-filled:active,
+.rz-togglebutton.rz-variant-filled.rz-state-active,
+.rz-fab:active,
+.rz-speed-dial-button:active {
+    background: color-mix(in srgb, var(--agt-btn-fill) 82%, var(--agt-color-gray-900)) !important;
+    border-color: color-mix(in srgb, var(--agt-btn-fill) 68%, var(--agt-color-gray-900)) !important;
+    color: var(--agt-btn-on-fill) !important;
+    transform: scale(var(--agt-press-scale));
+}
+
+.rz-button.agt-cta-create,
+.rz-fab.agt-cta-create,
+.rz-speed-dial-button.agt-cta-create {
+    background: var(--agt-color-accent-400);
+    border-color: var(--agt-color-accent-400);
+    color: var(--agt-on-accent);
+}
+
+.rz-button.agt-cta-create:hover,
+.rz-button.agt-cta-create:focus-visible,
+.rz-fab.agt-cta-create:hover,
+.rz-speed-dial-button.agt-cta-create:hover {
+    background: var(--agt-color-accent-300);
+    border-color: var(--agt-color-accent-300);
+    color: var(--agt-on-accent);
+}
+
+.rz-button.rz-variant-outlined,
+.rz-splitbutton .rz-button.rz-variant-outlined,
+.rz-togglebutton.rz-variant-outlined,
+.rz-selectbutton .rz-button.rz-variant-outlined {
+    background: transparent;
+    border-color: var(--agt-btn-ink) !important;
+    color: var(--agt-btn-ink) !important;
+}
+
+.rz-button.rz-variant-flat,
+.rz-splitbutton .rz-button.rz-variant-flat,
+.rz-togglebutton.rz-variant-flat,
+.rz-selectbutton .rz-button.rz-variant-flat {
+    background: color-mix(in srgb, var(--agt-btn-ink) 10%, transparent) !important;
+    border-color: transparent;
+    color: var(--agt-btn-ink) !important;
+}
+
+.rz-button.rz-variant-text,
+.rz-splitbutton .rz-button.rz-variant-text,
+.rz-togglebutton.rz-variant-text,
+.rz-selectbutton .rz-button.rz-variant-text {
+    background: transparent;
+    border-color: transparent;
+    color: var(--agt-btn-ink) !important;
+}
+
+.rz-button.rz-variant-outlined:hover,
+.rz-button.rz-variant-flat:hover,
+.rz-button.rz-variant-text:hover,
+.rz-button.rz-variant-outlined:focus-visible,
+.rz-button.rz-variant-flat:focus-visible,
+.rz-button.rz-variant-text:focus-visible,
+.rz-splitbutton .rz-button.rz-variant-outlined:hover,
+.rz-splitbutton .rz-button.rz-variant-flat:hover,
+.rz-splitbutton .rz-button.rz-variant-text:hover,
+.rz-splitbutton .rz-button.rz-variant-outlined:focus-visible,
+.rz-splitbutton .rz-button.rz-variant-flat:focus-visible,
+.rz-splitbutton .rz-button.rz-variant-text:focus-visible,
+.rz-togglebutton.rz-variant-outlined:hover,
+.rz-togglebutton.rz-variant-flat:hover,
+.rz-togglebutton.rz-variant-text:hover,
+.rz-togglebutton.rz-variant-outlined:focus-visible,
+.rz-togglebutton.rz-variant-flat:focus-visible,
+.rz-togglebutton.rz-variant-text:focus-visible,
+.rz-selectbutton .rz-button.rz-variant-outlined:hover,
+.rz-selectbutton .rz-button.rz-variant-flat:hover,
+.rz-selectbutton .rz-button.rz-variant-text:hover,
+.rz-selectbutton .rz-button.rz-variant-outlined:focus-visible,
+.rz-selectbutton .rz-button.rz-variant-flat:focus-visible,
+.rz-selectbutton .rz-button.rz-variant-text:focus-visible {
+    background: color-mix(in srgb, var(--agt-btn-ink) 14%, transparent) !important;
+    border-color: var(--agt-btn-ink) !important;
+    color: var(--agt-btn-ink) !important;
+}
+
+.rz-selectbar .rz-button.rz-state-active,
+.rz-togglebutton.rz-state-active,
+.rz-togglebutton.rz-state-active:hover {
+    background: var(--agt-color-accent-400);
+    border-color: var(--agt-color-accent-500);
+    color: var(--agt-on-accent);
+}
+
+.rz-chip,
+.rz-chip-list .rz-chip {
+    background: var(--agt-surface-3);
+    border: 1px solid var(--agt-input-border);
+    color: var(--agt-text-body);
+}
+
+.rz-chip.rz-state-highlight,
+.rz-chip.rz-state-active,
+.rz-chip-list .rz-chip.rz-state-highlight,
+.rz-chip-list .rz-chip.rz-state-active {
+    background: var(--agt-color-accent-400);
+    border-color: var(--agt-color-accent-500);
+    color: var(--agt-on-accent);
+}
+
+.rz-button.rz-state-disabled,
+.rz-button:disabled,
+.rz-selectbutton .rz-button:disabled {
+    background: var(--agt-control-disabled-bg);
+    border-color: var(--agt-input-border);
+    color: var(--agt-text-disabled);
+    box-shadow: none;
+    opacity: 1;
+    transform: none;
+}

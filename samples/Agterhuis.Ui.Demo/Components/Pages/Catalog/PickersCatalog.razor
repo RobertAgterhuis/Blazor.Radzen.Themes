@@ -1,0 +1,44 @@
+@page "/catalog/pickers"
+
+<PageTitle>Pickers (Radzen)</PageTitle>
+
+<div class="catalog-page">
+    <h1>Pickers (Radzen)</h1>
+
+    @if (PreviewOnly)
+    {
+        <RadzenCard>Picker preview (interactive rendering disabled).</RadzenCard>
+    }
+    else
+    {
+        <RadzenStack Gap="0.75rem">
+            <RadzenDropDown TValue="int" Data="People" TextProperty="Text" ValueProperty="Value" Placeholder="DropDown" />
+            <RadzenDropDownDataGrid TValue="int" Data="People" TextProperty="Text" ValueProperty="Value" Placeholder="DropDownDataGrid" />
+            <RadzenTree Data="TreeNodes" TextProperty="Text" ChildrenProperty="Children" />
+            <RadzenListBox TValue="int" Data="People" TextProperty="Text" ValueProperty="Value" />
+            <RadzenDatePicker TValue="DateTime?" ShowTime="true" Value="@DateTime.Today" />
+            <RadzenTimeSpanPicker TValue="TimeSpan?" Value="@TimeSpan.FromHours(1)" />
+        </RadzenStack>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public bool PreviewOnly { get; set; }
+
+    private static readonly IReadOnlyList<PersonOption> People =
+    [
+        new("Anna", 1),
+        new("Bram", 2),
+        new("Cato", 3)
+    ];
+
+    private static readonly IReadOnlyList<TreeNodeOption> TreeNodes =
+    [
+        new("Root", "root", [new TreeNodeOption("Child", "child", [])])
+    ];
+
+    private sealed record PersonOption(string Text, int Value);
+
+    private sealed record TreeNodeOption(string Text, string Value, IReadOnlyList<TreeNodeOption> Children);
+}

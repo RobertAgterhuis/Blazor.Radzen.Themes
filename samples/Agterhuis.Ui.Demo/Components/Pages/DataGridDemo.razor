@@ -1,0 +1,29 @@
+@page "/components/data/grid"
+
+<PageTitle>Data grid</PageTitle>
+
+<div class="agt-page agt-stack">
+    <AgtPageHeader Title="AgtDataGrid" Description="Datagrid wrapper met paging en sorting defaults." />
+
+    <AgtCard>
+        <ChildContent>
+            <AgtDataGrid TItem="DemoRow" Data="_rows">
+                <Columns>
+                    <RadzenDataGridColumn TItem="DemoRow" Property="Name" Title="Naam" />
+                    <RadzenDataGridColumn TItem="DemoRow" Property="Score" Title="Score" />
+                </Columns>
+            </AgtDataGrid>
+        </ChildContent>
+    </AgtCard>
+</div>
+
+@code {
+    private readonly IReadOnlyList<DemoRow> _rows =
+    [
+        new("Alfa", 95),
+        new("Bravo", 88),
+        new("Charlie", 76)
+    ];
+
+    private sealed record DemoRow(string Name, int Score);
+}

@@ -1,0 +1,62 @@
+@namespace Agterhuis.Ui.Demo.Components.Pages.App
+<RadzenStack Gap="0.75rem">
+    <div>
+        <h3 class="showcase-page__section-title">@WorkOrder.Number</h3>
+        <p class="showcase-page__muted">@WorkOrder.CustomerName · @WorkOrder.Address</p>
+    </div>
+
+    <div class="showcase-page__badge-row">
+        <AgtBadge Text="@WorkOrder.TypeLabel" Icon="handyman" Intent="AgtIntent.Primary" />
+        <AgtBadge Text="@WorkOrder.StatusLabel" Icon="schedule" Intent="@StatusIntent" />
+        <AgtBadge Text="@WorkOrder.PriorityLabel" Icon="priority_high" Intent="@PriorityIntent" />
+    </div>
+
+    <div class="showcase-page__detail-grid">
+        <AgtCard>
+            <Header>Planning</Header>
+            <ChildContent>
+                <p><strong>Monteur:</strong> @WorkOrder.TechnicianName</p>
+                <p><strong>Tijdvak:</strong> @WorkOrder.TimeWindow</p>
+                <p><strong>Bedrag:</strong> @WorkOrder.Amount.ToString("C0", System.Globalization.CultureInfo.GetCultureInfo("nl-NL"))</p>
+            </ChildContent>
+        </AgtCard>
+        <AgtCard>
+            <Header>Omschrijving</Header>
+            <ChildContent>
+                <p>@WorkOrder.Description</p>
+            </ChildContent>
+        </AgtCard>
+    </div>
+
+    <AgtPrimaryButton Text="Sluiten" Click="OnClose" />
+</RadzenStack>
+
+@code {
+    [Parameter]
+    public ShowcaseWorkOrder WorkOrder { get; set; } = default!;
+
+    [Inject]
+    private DialogService DialogService { get; set; } = default!;
+
+    private AgtIntent StatusIntent => WorkOrder.Status switch
+    {
+        ShowcaseWorkOrderStatus.Afgerond => AgtIntent.Success,
+        ShowcaseWorkOrderStatus.Onderweg => AgtIntent.Info,
+        ShowcaseWorkOrderStatus.InUitvoering => AgtIntent.Warning,
+        ShowcaseWorkOrderStatus.Geannuleerd => AgtIntent.Danger,
+        _ => AgtIntent.Secondary
+    };
+
+    private AgtIntent PriorityIntent => WorkOrder.Priority switch
+    {
+        ShowcaseWorkOrderPriority.Laag => AgtIntent.Info,
+        ShowcaseWorkOrderPriority.Normaal => AgtIntent.Secondary,
+        ShowcaseWorkOrderPriority.Hoog => AgtIntent.Warning,
+        _ => AgtIntent.Danger
+    };
+
+    private void OnClose(MouseEventArgs _)
+    {
+        DialogService.Close();
+    }
+}

@@ -1,0 +1,19 @@
+<div class="agt-page-header">
+    <div class="agt-page-header__content">
+        @if (!string.IsNullOrWhiteSpace(Kicker))
+        {
+            <span class="agt-page-header__kicker">@Kicker</span>
+        }
+        <h1 class="agt-page-header__title">@Title</h1>
+        @if (!string.IsNullOrWhiteSpace(Description))
+        {
+            <p class="agt-page-header__description">@Description</p>
+        }
+    </div>
+    @if (Actions is not null)
+    {
+        <div class="agt-page-header__actions">
+            @Actions
+        </div>
+    }
+</div>

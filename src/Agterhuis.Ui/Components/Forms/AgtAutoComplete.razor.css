@@ -1,0 +1,7 @@
+.agt-auto-complete {
+    width: 100%;
+}
+
+.agt-auto-complete__empty {
+    color: var(--agt-text-muted);
+}

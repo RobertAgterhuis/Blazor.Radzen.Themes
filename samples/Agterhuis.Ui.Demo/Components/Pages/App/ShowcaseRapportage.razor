@@ -1,0 +1,210 @@
+@page "/app/rapportage"
+@layout ShowcaseLayout
+
+@inject ShowcaseDataService DataService
+@inject IJSRuntime JS
+
+@using System.Collections.Generic
+
+<PageTitle>Werkorders - Rapportage</PageTitle>
+
+<AgtBreadcrumb CssClass="showcase-page__breadcrumbs" Items="Breadcrumbs" />
+<AgtPageHeader Kicker="Werkorders" Title="Rapportage" Description="Charts per monteur, omzet en type, met export naar CSV." />
+
+<div class="showcase-page__metric-grid">
+    @foreach (var metric in MiniMetrics)
+    {
+        <AgtCard>
+            <Header>@metric.Title</Header>
+            <ChildContent>
+                <div class="showcase-page__metric-value">@metric.Value</div>
+                @if (PreviewOnly)
+                {
+                    <small class="showcase-page__muted">Trendpreview</small>
+                }
+                else
+                {
+                    <RadzenSparkline Data="@metric.Trend" />
+                }
+            </ChildContent>
+        </AgtCard>
+    }
+</div>
+
+<div class="showcase-page__toolbar">
+    <div />
+    <div />
+    <div />
+    <AgtPrimaryButton Text="Exporteer CSV" Click="ExportCsv" />
+</div>
+
+<div class="showcase-page__chart-grid">
+    @if (PreviewOnly)
+    {
+        <AgtCard><ChildContent>Rapportage preview</ChildContent></AgtCard>
+    }
+    else
+    {
+        <AgtCard>
+            <Header>Omzet per maand</Header>
+            <ChildContent>
+                <RadzenChart Style="height: 24rem;">
+                    <RadzenLineSeries Data="@DataService.MonthlyPerformance" CategoryProperty="Month" ValueProperty="Revenue" Title="Omzet" />
+                    <RadzenColumnOptions Radius="5" />
+                </RadzenChart>
+            </ChildContent>
+        </AgtCard>
+
+        <AgtCard>
+            <Header>Werkorders per monteur</Header>
+            <ChildContent>
+                <RadzenChart Style="height: 24rem;">
+                    <RadzenBarSeries Data="@DataService.TechnicianPerformance" CategoryProperty="Technician" ValueProperty="Orders" Title="Aantal" />
+                </RadzenChart>
+            </ChildContent>
+        </AgtCard>
+    }
+</div>
+
+<AgtCard>
+    <Header>Typeverdeling per maand</Header>
+    <ChildContent>
+        @if (PreviewOnly)
+        {
+            <RadzenCard>Stacked chart preview</RadzenCard>
+        }
+        else
+        {
+            <RadzenChart Style="height: 24rem;">
+                <RadzenStackedColumnSeries Data="@DataService.MonthlyPerformance" CategoryProperty="Month" Title="Installatie" ValueProperty="Installations" />
+                <RadzenStackedColumnSeries Data="@DataService.MonthlyPerformance" CategoryProperty="Month" Title="Reparatie" ValueProperty="Repairs" />
+                <RadzenStackedColumnSeries Data="@DataService.MonthlyPerformance" CategoryProperty="Month" Title="Onderhoud" ValueProperty="Maintenance" />
+                <RadzenStackedColumnSeries Data="@DataService.MonthlyPerformance" CategoryProperty="Month" Title="Inspectie" ValueProperty="Inspections" />
+            </RadzenChart>
+        }
+    </ChildContent>
+</AgtCard>
+
+@if (PreviewOnly)
+{
+    <AgtCard>
+        <Header>Visualisatiepreview</Header>
+        <ChildContent>
+            <RadzenCard>Gauge- en sankeyvisualisaties zijn actief in runtime en worden in preview vervangen door deze placeholder.</RadzenCard>
+        </ChildContent>
+    </AgtCard>
+}
+else
+{
+    <div class="showcase-page__chart-grid">
+        <AgtCard>
+            <Header>Bezettingsgraad</Header>
+            <ChildContent>
+                <RadzenArcGauge>
+                    <RadzenArcGaugeScale Min="0" Max="100">
+                        <RadzenArcGaugeScaleValue Value="74" />
+                    </RadzenArcGaugeScale>
+                </RadzenArcGauge>
+            </ChildContent>
+        </AgtCard>
+        <AgtCard>
+            <Header>SLA-score</Header>
+            <ChildContent>
+                <RadzenRadialGauge Min="0" Max="100" Value="88" />
+            </ChildContent>
+        </AgtCard>
+    </div>
+
+    <AgtCard>
+        <Header>Voorraadniveau</Header>
+        <ChildContent>
+            <RadzenLinearGauge Min="0" Max="100" Value="63" />
+        </ChildContent>
+    </AgtCard>
+
+    <AgtCard>
+        <Header>Orderstroom type → status</Header>
+        <ChildContent>
+            <RadzenSankeyDiagram Data="@SankeyFlow" SourceProperty="Source" TargetProperty="Target" ValueProperty="Value" />
+        </ChildContent>
+    </AgtCard>
+}
+
+<AgtCard>
+    <Header>Service calls (DataList)</Header>
+    <ChildContent>
+        <RadzenDataList Data="@DataService.TechnicianPerformance" TItem="ShowcaseTechnicianPerformance">
+            <Template Context="row">
+                <div class="showcase-page__list-item">
+                    <strong>@row.Technician</strong>
+                    <span>@row.Orders opdrachten · @row.Completed afgerond</span>
+                </div>
+            </Template>
+        </RadzenDataList>
+        <div style="margin-top: 0.5rem;"><strong>Totaal opdrachten: @DataService.TechnicianPerformance.Sum(x => x.Orders)</strong></div>
+    </ChildContent>
+</AgtCard>
+
+<AgtCard>
+    <Header>Pivotoverzicht</Header>
+    <ChildContent>
+        <RadzenCard>
+            PivotDataGrid is opgenomen als workflow-placeholder (omzet per monteur x type) en wordt in een vervolgstap volledig geconfigureerd.
+        </RadzenCard>
+    </ChildContent>
+</AgtCard>
+
+@code {
+    [Parameter]
+    public bool PreviewOnly { get; set; }
+
+    private IReadOnlyList<(string Text, string? Href)> Breadcrumbs =>
+    [
+        ("Rapportage", "/app/rapportage")
+    ];
+
+    private IReadOnlyList<ReportMetric> MiniMetrics =>
+    [
+        new("Open volume", DataService.OpenOrderCount.ToString(), [12, 15, 14, 17, 19, DataService.OpenOrderCount]),
+        new("Gem. herstel", "3,4u", [4, 3.7, 3.2, 3.6, 3.4, 3.4]),
+        new("First-time-fix", "86%", [79, 81, 84, 83, 85, 86]),
+        new("Escalaties", "4", [8, 7, 6, 5, 5, 4])
+    ];
+
+    private IReadOnlyList<FlowItem> SankeyFlow =>
+    [
+        new("Installatie", "Afgerond", 14),
+        new("Installatie", "In uitvoering", 7),
+        new("Reparatie", "Afgerond", 16),
+        new("Reparatie", "Onderweg", 5),
+        new("Onderhoud", "Afgerond", 11),
+        new("Inspectie", "Gepland", 8)
+    ];
+
+    private async Task ExportCsv(MouseEventArgs _)
+    {
+        var rows = DataService.MonthlyPerformance;
+        var lines = new List<string>
+        {
+            "maand,omzet,volume,afgerond,installaties,reparaties,onderhoud,inspecties"
+        };
+
+        lines.AddRange(rows.Select(row => string.Join(",", new[]
+        {
+            row.Month,
+            row.Revenue.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture),
+            row.Volume.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            row.Completed.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            row.Installations.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            row.Repairs.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            row.Maintenance.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            row.Inspections.ToString(System.Globalization.CultureInfo.InvariantCulture)
+        })));
+
+        await JS.InvokeVoidAsync("agtTheme.downloadCsv", "werkorders-rapportage.csv", string.Join("\r\n", lines));
+    }
+
+    private sealed record ReportMetric(string Title, string Value, IReadOnlyList<double> Trend);
+
+    private sealed record FlowItem(string Source, string Target, double Value);
+}

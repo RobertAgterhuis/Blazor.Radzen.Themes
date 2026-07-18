@@ -1,0 +1,210 @@
+.rz-menu,
+.rz-panel-menu,
+.rz-context-menu,
+.rz-tabview-nav,
+.rz-steps,
+.rz-breadcrumb,
+.rz-accordion,
+.rz-paginator,
+.rz-profile-menu {
+    border-radius: var(--agt-border-radius-lg);
+}
+
+.rz-panel-menu {
+    background: transparent;
+    border: 0;
+}
+
+.rz-panel-menu .rz-navigation-item,
+.rz-panel-menu .rz-navigation-item-wrapper,
+.rz-panel-menu .rz-navigation-item-link,
+.rz-panel-menu .rz-navigation-item-text,
+.rz-menuitem-link {
+    color: var(--agt-nav-item-text);
+    text-decoration: none;
+}
+
+.rz-panel-menu .rz-navigation-item-link,
+.rz-menuitem-link,
+.rz-breadcrumb-item,
+.rz-tabview-nav li a,
+.rz-accordion-header a,
+.rz-steps-item {
+    border-radius: var(--agt-border-radius-md);
+    min-height: 2.5rem;
+    min-width: 2.5rem;
+    padding: var(--agt-spacing-2) var(--agt-spacing-3);
+    position: relative;
+    transition: transform var(--agt-indicator-transition), opacity 150ms ease;
+}
+
+.rz-tabview-panels,
+.rz-tabview-panel,
+.rz-steps,
+.rz-steps-content {
+    transition: opacity 150ms var(--agt-ease-spring), transform 150ms var(--agt-ease-spring);
+}
+
+.rz-panel-menu .rz-navigation-item-link::before,
+.rz-menuitem-link::before,
+.rz-tabview-nav li a::before,
+.rz-steps-item::before {
+    background: var(--agt-color-accent-400);
+    border-radius: 999px;
+    content: "";
+    inset-block: 20%;
+    inset-inline-start: 0.2rem;
+    opacity: 0;
+    position: absolute;
+    transform: scaleY(0.2);
+    transform-origin: center;
+    transition: transform var(--agt-indicator-transition), opacity var(--agt-indicator-transition);
+    width: 0.2rem;
+}
+
+.rz-menuitem-link:hover,
+.rz-panel-menu .rz-navigation-item:hover,
+.rz-panel-menu .rz-navigation-item-link:hover,
+.rz-tabview-nav li:hover,
+.rz-steps-item:hover {
+    background: var(--agt-hover-tint);
+    color: var(--agt-nav-item-hover-text);
+}
+
+.rz-menuitem-link.rz-state-active,
+.rz-panel-menu .rz-navigation-item.rz-state-active,
+.rz-panel-menu .rz-navigation-item-link.rz-state-active,
+.rz-tabview-nav li.rz-tabview-selected,
+.rz-steps-item.rz-state-highlight {
+    background: var(--agt-selection-tint);
+    color: var(--agt-nav-item-active-text);
+}
+
+.rz-menuitem-link.rz-state-active::before,
+.rz-panel-menu .rz-navigation-item-link.rz-state-active::before,
+.rz-panel-menu .rz-navigation-item.rz-state-active > .rz-navigation-item-wrapper > .rz-navigation-item-link::before,
+.rz-tabview-nav li.rz-tabview-selected a::before,
+.rz-steps-item.rz-state-highlight::before {
+    opacity: 1;
+    transform: scaleY(1);
+}
+
+.rz-menu .rz-navigation-item-link.rz-state-active,
+.rz-menu .rz-menuitem-link.rz-state-active,
+.rz-menu .rz-navigation-item-wrapper.rz-state-active > .rz-navigation-item-link {
+    background: var(--agt-color-accent-400);
+    color: var(--agt-on-accent);
+}
+
+.rz-menu .rz-navigation-item-link.rz-state-active .rzi,
+.rz-menu .rz-menuitem-link.rz-state-active .rzi {
+    color: var(--agt-on-accent);
+}
+
+.rz-panel-menu .rzi,
+.rz-menuitem-link .rzi {
+    color: var(--agt-nav-item-icon);
+}
+
+.rz-panel-menu .rz-navigation-item-link.rz-state-active .rzi,
+.rz-panel-menu .rz-navigation-item.rz-state-active .rzi,
+.rz-menuitem-link.rz-state-active .rzi {
+    color: var(--agt-nav-item-active-icon);
+    filter: drop-shadow(0 0 6px color-mix(in srgb, var(--agt-color-accent-400) 65%, transparent));
+}
+
+.rz-panel-menu .rz-navigation-item-link:focus-visible,
+.rz-menuitem-link:focus-visible,
+.rz-tabview-nav li a:focus-visible,
+.rz-steps-item:focus-visible,
+.rz-accordion-header a:focus-visible {
+    box-shadow: var(--agt-focus-ring), var(--agt-focus-ring-style);
+    outline: 2px solid var(--agt-nav-focus-outline);
+    outline-offset: 2px;
+}
+
+.rz-tabview-nav,
+.rz-steps {
+    background: transparent;
+}
+
+.rz-tabview-nav li.rz-tabview-selected,
+.rz-steps .rz-state-highlight {
+    border-bottom: 2px solid var(--agt-color-accent-400);
+}
+
+.rz-tabview-panels .rz-tabview-panel {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.rz-tabview-panels .rz-tabview-panel.rz-hidden {
+    opacity: 0;
+    transform: translateY(2px);
+}
+
+.rz-tabview-nav li a .rzi,
+.rz-steps-item .rzi,
+.rz-datatable-thead th .rzi,
+.rz-grid-table thead th .rzi {
+    transition: transform 150ms var(--agt-ease-spring), color 150ms var(--agt-ease-spring);
+}
+
+.rz-datatable-thead th.rz-state-active .rzi,
+.rz-grid-table thead th.rz-state-active .rzi,
+.rz-datatable-thead th[aria-sort="ascending"] .rzi,
+.rz-grid-table thead th[aria-sort="ascending"] .rzi {
+    transform: rotate(180deg);
+}
+
+.rz-panel-menu .rz-navigation-item-text {
+    color: inherit;
+}
+
+.rz-panel-menu > .rz-navigation-item > .rz-navigation-item-wrapper > .rz-navigation-item-link {
+    color: var(--agt-nav-group-text);
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.rz-accordion-item {
+    background: var(--agt-surface-1);
+    border: 1px solid var(--agt-input-border);
+}
+
+:is([data-agt-theme="dark"], [data-agt-theme$="-dark"]) .rz-menuitem-link:hover,
+:is([data-agt-theme="dark"], [data-agt-theme$="-dark"]) .rz-panel-menu .rz-navigation-item:hover,
+:is([data-agt-theme="dark"], [data-agt-theme$="-dark"]) .rz-tabview-nav li:hover,
+:is([data-agt-theme="dark"], [data-agt-theme$="-dark"]) .rz-steps-item:hover {
+    background: var(--agt-nav-item-hover-bg);
+}
+
+.rz-breadcrumb a {
+    text-decoration: none;
+}
+
+.rz-breadcrumb a:hover {
+    color: var(--agt-link-hover-color);
+}
+
+.rz-sidebar.rz-sidebar-collapsed .rz-panel-menu .rz-navigation-item-text {
+    display: none;
+}
+
+.rz-sidebar.rz-sidebar-collapsed .rz-panel-menu .rz-navigation-item-link {
+    justify-content: center;
+    padding-inline: var(--agt-spacing-2);
+}
+
+.rz-sidebar.rz-sidebar-collapsed .rz-panel-menu .rzi {
+    margin-inline-end: 0;
+    filter: drop-shadow(0 0 8px color-mix(in srgb, var(--agt-color-accent-400) 50%, transparent));
+}
+
+@media (max-width: 900px) {
+    .rz-sidebar {
+        box-shadow: var(--agt-shadow-md);
+    }
+}

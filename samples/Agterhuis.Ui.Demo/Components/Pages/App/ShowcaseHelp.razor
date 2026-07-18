@@ -1,0 +1,52 @@
+@page "/app/help"
+@layout ShowcaseLayout
+
+@inject ShowcaseDataService DataService
+
+<PageTitle>Werkorders - Help</PageTitle>
+
+<AgtBreadcrumb CssClass="showcase-page__breadcrumbs" Items="Breadcrumbs" />
+<AgtPageHeader Kicker="Werkorders" Title="Help" Description="Handleiding, navigatie en links voor planners en monteurs." />
+
+<div class="showcase-page__split">
+    <AgtCard>
+        <Header>Inhoudsopgave</Header>
+        <ChildContent>
+            <RadzenToc Selector="h1,h2,h3" />
+        </ChildContent>
+    </AgtCard>
+
+    <AgtCard>
+        <Header>Handleiding</Header>
+        <ChildContent>
+            <RadzenMarkdown Value="@DataService.HelpMarkdown" />
+            <RadzenStack Gap="0.5rem">
+                @foreach (var link in DataService.HelpLinks)
+                {
+                    <RadzenLink Path="@link.Url" Target="_blank" Text="@link.Title" />
+                    <small>@link.Description</small>
+                }
+            </RadzenStack>
+
+            <RadzenButton Text="Uitleg popup" Icon="help" Click="ShowPopup" />
+            <RadzenPopup Visible="@_showPopup" Style="padding: 0.75rem;">
+                Tooltip: gebruik de bell voor recente meldingen en de FAB voor snelle acties.
+            </RadzenPopup>
+        </ChildContent>
+    </AgtCard>
+</div>
+
+@code {
+    private bool _showPopup;
+
+    private IReadOnlyList<(string Text, string? Href)> Breadcrumbs =>
+    [
+        ("Help", "/app/help")
+    ];
+
+    private Task ShowPopup(MouseEventArgs _)
+    {
+        _showPopup = !_showPopup;
+        return Task.CompletedTask;
+    }
+}

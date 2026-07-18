@@ -1,0 +1,236 @@
+.agt-theme-switcher {
+    align-items: center;
+    display: inline-flex;
+    gap: var(--agt-spacing-2);
+}
+
+.agt-theme-switcher-label {
+    color: var(--agt-text-muted);
+    font-size: var(--agt-font-size-sm);
+    font-weight: 600;
+}
+
+.agt-theme-switcher-dropdown {
+    max-width: 16rem;
+    min-width: 11rem;
+}
+
+.agt-theme-switcher-dropdown.rz-dropdown {
+    align-items: center;
+    background: var(--agt-surface-1);
+    border-color: var(--agt-input-border);
+    color: var(--agt-text-body);
+    min-height: 2.75rem;
+    padding-inline: var(--agt-spacing-3);
+}
+
+.agt-theme-option,
+.agt-theme-value {
+    align-items: center;
+    display: inline-flex;
+    gap: var(--agt-spacing-2);
+    width: 100%;
+}
+
+.agt-theme-option__swatches {
+    display: inline-flex;
+    gap: 0.2rem;
+    flex-shrink: 0;
+}
+
+.agt-theme-option__swatch {
+    border-radius: 999px;
+    height: 0.55rem;
+    width: 0.55rem;
+}
+
+.agt-theme-option__swatch--canvas {
+    background: var(--agt-surface-2);
+    border: 1px solid var(--agt-input-border);
+}
+
+.agt-theme-option__swatch--primary {
+    background: var(--agt-color-primary-500);
+}
+
+.agt-theme-option__swatch--accent {
+    background: var(--agt-color-accent-400);
+}
+
+.agt-theme-option__text,
+.agt-theme-value {
+    flex-wrap: nowrap;
+    gap: 0.35rem;
+    min-width: 0;
+    white-space: nowrap;
+}
+
+.agt-theme-option__name,
+.agt-theme-value__name {
+    color: var(--agt-text-heading);
+    font-size: var(--agt-font-size-sm);
+    font-weight: 600;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.agt-theme-option__variant,
+.agt-theme-value__variant {
+    color: var(--agt-text-muted);
+    font-size: var(--agt-font-size-xs);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.agt-theme-option__hint {
+    background: var(--agt-surface-3);
+    border-radius: 999px;
+    color: var(--agt-text-muted);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    line-height: 1.2;
+    padding: 0.12rem 0.4rem;
+    white-space: nowrap;
+}
+
+.agt-theme-value__separator {
+    color: var(--agt-text-muted);
+    flex: 0 0 auto;
+}
+
+.agt-theme-option--active {
+    background: var(--agt-color-accent-400);
+    border-radius: var(--agt-border-radius-md);
+    color: var(--agt-on-accent);
+    padding: 0.2rem 0.35rem;
+}
+
+.agt-theme-option--active .agt-theme-option__name,
+.agt-theme-option--active .agt-theme-option__variant,
+.rz-dropdown-item.rz-state-highlight .agt-theme-option__name,
+.rz-dropdown-item.rz-state-highlight .agt-theme-option__variant {
+    color: inherit;
+}
+
+.rz-dropdown-item:hover .agt-theme-option {
+    background: var(--agt-surface-3);
+    border-radius: var(--agt-border-radius-md);
+}
+
+.rz-dropdown-item.rz-state-highlight .agt-theme-option {
+    background: var(--agt-color-accent-400);
+    color: var(--agt-on-accent);
+    border-radius: var(--agt-border-radius-md);
+}
+
+.agt-theme-option--plum .agt-theme-option__swatch--canvas,
+.agt-theme-option--plum .agt-theme-option__swatch--primary {
+    background: linear-gradient(135deg, #f5ebfb 0%, #680898 100%);
+}
+
+.agt-theme-option--plum .agt-theme-option__swatch--accent {
+    background: #f1ce05;
+}
+
+.agt-theme-option--ocean .agt-theme-option__swatch--canvas,
+.agt-theme-option--ocean .agt-theme-option__swatch--primary {
+    background: linear-gradient(135deg, #e7f6f6 0%, #0b6e6e 100%);
+}
+
+.agt-theme-option--ocean .agt-theme-option__swatch--accent {
+    background: #e8a13d;
+}
+
+.agt-theme-option--dagobah .agt-theme-option__swatch--canvas,
+.agt-theme-option--dagobah .agt-theme-option__swatch--primary {
+    background: linear-gradient(135deg, #edf5e6 0%, #6f9c4f 100%);
+}
+
+.agt-theme-option--dagobah .agt-theme-option__swatch--accent {
+    background: #7cfc5a;
+}
+
+.agt-theme-option--dathomir .agt-theme-option__swatch--canvas,
+.agt-theme-option--dathomir .agt-theme-option__swatch--primary {
+    background: linear-gradient(135deg, #fbe7e5 0%, #a8211c 100%);
+}
+
+.agt-theme-option--dathomir .agt-theme-option__swatch--accent {
+    background: #ff3b30;
+}
+
+.agt-theme-option--hoth .agt-theme-option__swatch--canvas,
+.agt-theme-option--hoth .agt-theme-option__swatch--primary {
+    background: linear-gradient(135deg, #eef6fb 0%, #35678f 100%);
+}
+
+.agt-theme-option--hoth .agt-theme-option__swatch--accent {
+    background: #ff8c42;
+}
+
+.agt-theme-option--tatooine .agt-theme-option__swatch--canvas,
+.agt-theme-option--tatooine .agt-theme-option__swatch--primary {
+    background: linear-gradient(135deg, #f8efe0 0%, #b0761d 100%);
+}
+
+.agt-theme-option--tatooine .agt-theme-option__swatch--accent {
+    background: #e8622c;
+}
+
+.agt-theme-option--imperial .agt-theme-option__swatch--canvas,
+.agt-theme-option--imperial .agt-theme-option__swatch--primary {
+    background: linear-gradient(135deg, #f5f6f8 0%, #3d4956 100%);
+}
+
+.agt-theme-option--imperial .agt-theme-option__swatch--accent {
+    background: #e5231b;
+}
+
+.agt-theme-option--autotaalglas .agt-theme-option__swatch--canvas,
+.agt-theme-option--autotaalglas .agt-theme-option__swatch--primary {
+    background: linear-gradient(135deg, #f8fafe 0%, #002575 100%);
+}
+
+.agt-theme-option--autotaalglas .agt-theme-option__swatch--accent {
+    background: #e4002b;
+}
+
+.agt-theme-option--autotaalglas-contrast .agt-theme-option__swatch--canvas,
+.agt-theme-option--autotaalglas-contrast .agt-theme-option__swatch--primary {
+    background: linear-gradient(135deg, #ffffff 0%, #002575 100%);
+}
+
+.agt-theme-option--autotaalglas-contrast .agt-theme-option__swatch--accent {
+    background: #b3001f;
+}
+
+.agt-theme-option--autotaalglas-portal .agt-theme-option__swatch--canvas,
+.agt-theme-option--autotaalglas-portal .agt-theme-option__swatch--primary {
+    background: linear-gradient(135deg, #f5fbff 0%, #005fc5 100%);
+}
+
+.agt-theme-option--autotaalglas-portal .agt-theme-option__swatch--accent {
+    background: #00b5e2;
+}
+
+.agt-theme-option--autotaalglas-mono .agt-theme-option__swatch--canvas,
+.agt-theme-option--autotaalglas-mono .agt-theme-option__swatch--primary {
+    background: linear-gradient(135deg, #f6f8fb 0%, #003b87 100%);
+}
+
+.agt-theme-option--autotaalglas-mono .agt-theme-option__swatch--accent {
+    background: #5e789f;
+}
+
+@media (max-width: 640px) {
+    .agt-theme-switcher-label {
+        display: none;
+    }
+
+    .agt-theme-switcher-dropdown {
+        min-width: 10.5rem;
+    }
+}

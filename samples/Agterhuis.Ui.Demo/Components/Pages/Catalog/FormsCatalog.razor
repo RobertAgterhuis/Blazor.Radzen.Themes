@@ -1,0 +1,42 @@
+@page "/catalog/forms"
+
+<PageTitle>Forms (Radzen)</PageTitle>
+
+<div class="catalog-page">
+    <h1>Forms (Radzen)</h1>
+
+    <RadzenTemplateForm TItem="FormModel" Data="Model" Submit="OnSubmit">
+        <RadzenStack Gap="0.75rem">
+            <RadzenFormField Text="Name" Variant="Variant.Outlined">
+                <RadzenTextBox Name="name" @bind-Value="Model.Name" />
+            </RadzenFormField>
+
+            <RadzenLabel Text="File input" Component="file-input" />
+            <RadzenFileInput TValue="string" Name="file-input" ChooseText="Choose" />
+
+            <RadzenUpload Url="upload" ChooseText="Upload" Auto="false" />
+
+            <RadzenFieldset Text="Dropzone">
+                <RadzenDropZone TItem="DropItem" Value='@("A")' />
+            </RadzenFieldset>
+
+            <RadzenButton Text="Submit" ButtonType="ButtonType.Submit" />
+        </RadzenStack>
+    </RadzenTemplateForm>
+</div>
+
+@code {
+    private readonly FormModel Model = new();
+    private void OnSubmit(FormModel _) { }
+
+    public sealed class FormModel
+    {
+        public string? Name { get; set; }
+    }
+
+    public sealed class DropItem
+    {
+        public string Text { get; set; } = string.Empty;
+        public string Zone { get; set; } = "A";
+    }
+}

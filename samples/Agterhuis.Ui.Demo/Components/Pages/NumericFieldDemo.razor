@@ -1,0 +1,18 @@
+@page "/components/forms/numeric-field"
+
+<PageTitle>Numeric field</PageTitle>
+
+<div class="agt-page agt-stack">
+    <AgtPageHeader Title="AgtNumericField" Description="Wrapper voor numerieke invoer." />
+
+    <AgtCard>
+        <ChildContent>
+            <AgtNumericField @bind-Value="_amount" Label="Bedrag" Min="0" Max="1000" Step="0.5" />
+            <p>Waarde: @_amount</p>
+        </ChildContent>
+    </AgtCard>
+</div>
+
+@code {
+    private decimal? _amount = 42.5m;
+}

@@ -1,0 +1,28 @@
+<RadzenButton class="agt-theme-toggle"
+              Icon="@Icon"
+              AriaLabel="@Label"
+              Variant="Variant.Text"
+              ButtonStyle="ButtonStyle.Secondary"
+              title="@Label"
+              Click="@OnToggleClick" />
+
+@code {
+    [CascadingParameter]
+    public AgtThemeState ThemeState { get; set; } = default!;
+
+    [Parameter]
+    public string LightLabel { get; set; } = "Donkere modus";
+
+    [Parameter]
+    public string DarkLabel { get; set; } = "Lichte modus";
+
+    private string Label => ThemeState.IsDark ? DarkLabel : LightLabel;
+
+    private string Icon => ThemeState.IsDark ? "light_mode" : "dark_mode";
+
+    private Task OnToggleClick(MouseEventArgs _)
+    {
+        ThemeState.ToggleTheme();
+        return Task.CompletedTask;
+    }
+}

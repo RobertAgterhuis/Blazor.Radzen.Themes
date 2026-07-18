@@ -1,0 +1,155 @@
+@page "/app/instellingen"
+@layout ShowcaseLayout
+
+@inject ShowcaseDataService DataService
+
+<PageTitle>Werkorders - Instellingen</PageTitle>
+
+<AgtBreadcrumb CssClass="showcase-page__breadcrumbs" Items="Breadcrumbs" />
+<AgtPageHeader Kicker="Werkorders" Title="Instellingen" Description="Sla het operationele profiel lokaal op in de in-memory service." />
+
+<EditForm EditContext="@_editContext">
+    <DataAnnotationsValidator />
+    <RadzenSplitter Style="height: 24rem;">
+        <RadzenSplitterPane Size="55%">
+            <RadzenFieldset Text="Operatie">
+                <div class="showcase-page__settings-grid">
+                    <AgtTextField Label="Contact e-mail" Value="@_draft.ContactEmail" ValueChanged="OnEmailChanged" ValueExpression="@(() => _draft.ContactEmail)" ValidationMessage="@FieldMessage(() => _draft.ContactEmail)" />
+                    <AgtTextField Label="Regio" Value="@_draft.DefaultRegion" ValueChanged="OnRegionChanged" ValueExpression="@(() => _draft.DefaultRegion)" />
+                    <AgtDropdown TValue="string" Label="Planningvenster" Data="@PlanningWindows" Value="@_draft.PlanningWindow" ValueChanged="OnPlanningWindowChanged" ValueExpression="@(() => _draft.PlanningWindow)" TextProperty="Label" ValueProperty="Value" />
+                    <AgtSwitch Label="Automatisch monteurs toewijzen" Value="@_draft.AutoAssignTechnicians" ValueChanged="OnAutoAssignChanged" />
+                    <AgtCheckbox Label="Sms-meldingen" Value="@_draft.SmsAlerts" ValueChanged="OnSmsChanged" />
+                    <AgtCheckbox Label="Omzet excl. btw tonen" Value="@_draft.ShowRevenueExclVat" ValueChanged="OnVatChanged" />
+                    <RadzenFormField Text="Standaard reistijd (minuten)" Variant="Variant.Outlined">
+                        <RadzenSlider Min="10" Max="90" Step="5" @bind-Value="_draft.DefaultTravelMinutes" />
+                    </RadzenFormField>
+                    <RadzenToggleButton @bind-Value="_draft.CompactGridDensity" Text="Compacte griddichtheid" />
+                </div>
+            </RadzenFieldset>
+        </RadzenSplitterPane>
+
+        <RadzenSplitterPane>
+            <RadzenFieldset Text="Beveiliging (demo)">
+                <RadzenStack Gap="0.75rem">
+                    <RadzenPassword Name="pwd" @bind-Value="_password" Placeholder="Nieuw wachtwoord" />
+                    <RadzenPassword Name="pwdRepeat" @bind-Value="_passwordRepeat" Placeholder="Herhaal wachtwoord" />
+                    <RadzenCompareValidator Component="pwdRepeat" Value="@_password" Text="Wachtwoorden komen niet overeen" Popup="false" />
+                    <RadzenSecurityCode Name="twofa" Placeholder="2FA code" />
+                </RadzenStack>
+            </RadzenFieldset>
+        </RadzenSplitterPane>
+    </RadzenSplitter>
+
+    <AgtFormActions SaveText="Opslaan" CancelText="Herstellen" Save="Save" Cancel="Reset" />
+</EditForm>
+
+<AgtCard>
+    <Header>Actieve instellingen</Header>
+    <ChildContent>
+        <p><strong>Regio:</strong> @DataService.Settings.DefaultRegion</p>
+        <p><strong>Contact:</strong> @DataService.Settings.ContactEmail</p>
+        <p><strong>Planningvenster:</strong> @DataService.Settings.PlanningWindow</p>
+        <p><strong>Auto toewijzen:</strong> @(DataService.Settings.AutoAssignTechnicians ? "Ja" : "Nee")</p>
+    </ChildContent>
+</AgtCard>
+
+@code {
+    private ShowcaseSettings _draft = default!;
+    private EditContext _editContext = default!;
+    private string _password = string.Empty;
+    private string _passwordRepeat = string.Empty;
+
+    private IReadOnlyList<(string Text, string? Href)> Breadcrumbs =>
+    [
+        ("Instellingen", "/app/instellingen")
+    ];
+
+    private IReadOnlyList<object> PlanningWindows => new[]
+    {
+        new PlanningWindowOption("Hele dag", "Hele dag"),
+        new PlanningWindowOption("Ochtend", "Ochtend"),
+        new PlanningWindowOption("Middag", "Middag"),
+        new PlanningWindowOption("Avond", "Avond")
+    }.Cast<object>().ToList();
+
+    protected override void OnInitialized()
+    {
+        _draft = Clone(DataService.Settings);
+        _editContext = new EditContext(_draft);
+    }
+
+    private Task OnEmailChanged(string? value)
+    {
+        _draft.ContactEmail = value ?? string.Empty;
+        return Task.CompletedTask;
+    }
+
+    private Task OnRegionChanged(string? value)
+    {
+        _draft.DefaultRegion = value ?? string.Empty;
+        return Task.CompletedTask;
+    }
+
+    private Task OnPlanningWindowChanged(string value)
+    {
+        _draft.PlanningWindow = value;
+        return Task.CompletedTask;
+    }
+
+    private Task OnAutoAssignChanged(bool value)
+    {
+        _draft.AutoAssignTechnicians = value;
+        return Task.CompletedTask;
+    }
+
+    private Task OnSmsChanged(bool value)
+    {
+        _draft.SmsAlerts = value;
+        return Task.CompletedTask;
+    }
+
+    private Task OnVatChanged(bool value)
+    {
+        _draft.ShowRevenueExclVat = value;
+        return Task.CompletedTask;
+    }
+
+    private Task Save(MouseEventArgs _)
+    {
+        if (!_editContext.Validate())
+        {
+            return Task.CompletedTask;
+        }
+
+        DataService.UpdateSettings(Clone(_draft));
+        return Task.CompletedTask;
+    }
+
+    private Task Reset(MouseEventArgs _)
+    {
+        _draft = Clone(DataService.Settings);
+        _editContext = new EditContext(_draft);
+        return Task.CompletedTask;
+    }
+
+    private string? FieldMessage<TValue>(Expression<Func<TValue>> expression)
+    {
+        var fieldIdentifier = FieldIdentifier.Create(expression);
+        return _editContext.GetValidationMessages(fieldIdentifier).FirstOrDefault();
+    }
+
+    private static ShowcaseSettings Clone(ShowcaseSettings source)
+    {
+        return new ShowcaseSettings
+        {
+            DefaultRegion = source.DefaultRegion,
+            PlanningWindow = source.PlanningWindow,
+            ContactEmail = source.ContactEmail,
+            AutoAssignTechnicians = source.AutoAssignTechnicians,
+            SmsAlerts = source.SmsAlerts,
+            ShowRevenueExclVat = source.ShowRevenueExclVat
+        };
+    }
+
+    private sealed record PlanningWindowOption(string Value, string Label);
+}

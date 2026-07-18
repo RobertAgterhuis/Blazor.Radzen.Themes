@@ -1,0 +1,33 @@
+<div class="agt-sidebar-layout @CssClass">
+    <header class="agt-sidebar-layout__header">
+        <div class="agt-sidebar-layout__logo">@Logo</div>
+        <div class="agt-sidebar-layout__header-actions">@HeaderActions</div>
+    </header>
+
+    <div class="agt-sidebar-layout__main">
+        <RadzenSidebar class="agt-sidebar-layout__sidebar" Responsive="false">
+            @Sidebar
+        </RadzenSidebar>
+
+        <div class="agt-sidebar-layout__content">
+            @ChildContent
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public RenderFragment? Logo { get; set; }
+
+    [Parameter]
+    public RenderFragment? HeaderActions { get; set; }
+
+    [Parameter]
+    public RenderFragment? Sidebar { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    [Parameter]
+    public string? CssClass { get; set; }
+}

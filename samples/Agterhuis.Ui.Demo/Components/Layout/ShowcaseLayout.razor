@@ -1,0 +1,147 @@
+@inherits LayoutComponentBase
+
+<CascadingValue Value="ThemeState" IsFixed="true">
+    <div class="showcase-theme-root">
+        <RadzenLayout class="showcase-layout">
+            <RadzenHeader class="showcase-topbar" role="banner">
+                <div class="showcase-topbar__inner">
+                    <RadzenSidebarToggle Icon="menu" Click="@OnSidebarToggle" ToggleAriaLabel="Navigatie in- of uitklappen" />
+                    <div class="showcase-topbar__brand-wrap">
+                        <span class="showcase-topbar__brand">Werkorders</span>
+                        <span class="showcase-topbar__tagline">Field service in actieve theme</span>
+                    </div>
+                    <div class="showcase-topbar__actions" aria-label="Werkorders acties">
+                        <AgtThemeSwitcher />
+                        <div class="showcase-notifications" @ref="_notificationsBellHostRef">
+                            <RadzenButton
+                                          Icon="notifications"
+                                          ButtonStyle="ButtonStyle.Base"
+                                          Variant="Variant.Flat"
+                                          class="showcase-topbar__bell"
+                                          Size="ButtonSize.Small"
+                                          AriaLabel="@BellAriaLabel"
+                                          Click="OnNotificationsToggle"
+                                          MouseEnter="OnActionTooltip" />
+                            <span class="showcase-topbar__bell-badge" aria-live="polite" aria-atomic="true">@UnreadNotificationCount</span>
+
+                            @if (NotificationsOpen)
+                            {
+                                <section @ref="_notificationsPanelRef"
+                                         class="showcase-notifications__panel"
+                                         tabindex="-1"
+                                         role="dialog"
+                                         aria-label="Recente meldingen">
+                                    <header class="showcase-notifications__header">
+                                        <strong>Recente meldingen</strong>
+                                        <RadzenButton Text="Alles gelezen"
+                                                      ButtonStyle="ButtonStyle.Base"
+                                                      Variant="Variant.Text"
+                                                      Size="ButtonSize.Small"
+                                                      Click="OnMarkAllRead" />
+                                    </header>
+
+                                    @if (NotificationItems.Count == 0)
+                                    {
+                                        <AgtEmptyState Icon="notifications_off"
+                                                       Title="Geen nieuwe meldingen"
+                                                       Description="Alles is bijgewerkt." />
+                                    }
+                                    else
+                                    {
+                                        <div class="showcase-notifications__list">
+                                            @foreach (var item in NotificationItems)
+                                            {
+                                                <article class="showcase-notifications__item @(IsUnread(item) ? "showcase-notifications__item--unread" : string.Empty)">
+                                                    <span class="showcase-notifications__icon @NotificationIntentClass(item.Intent)" aria-hidden="true">
+                                                        <RadzenIcon Icon="@NotificationIcon(item)" />
+                                                    </span>
+                                                    <div class="showcase-notifications__body">
+                                                        <div class="showcase-notifications__title-row">
+                                                            <strong>@item.Title</strong>
+                                                            <span>@RelativeTime(item.When)</span>
+                                                        </div>
+                                                        <p>@item.Detail</p>
+                                                    </div>
+                                                    @if (IsUnread(item))
+                                                    {
+                                                        <span class="showcase-notifications__unread-dot" aria-label="Ongelezen"></span>
+                                                    }
+                                                </article>
+                                            }
+                                        </div>
+                                    }
+                                </section>
+                            }
+                        </div>
+
+                        <RadzenButton Icon="visibility"
+                                      ButtonStyle="ButtonStyle.Base"
+                                      Variant="Variant.Flat"
+                                      class="showcase-topbar__bell"
+                                      Size="ButtonSize.Small"
+                                      Title="Snelle preview"
+                                      Click="OnQuickPreview"
+                                      MouseEnter="OnActionTooltip" />
+                        <span class="showcase-topbar__avatar" aria-hidden="true">PT</span>
+                        <RadzenButton Text="Planner Team"
+                                      Icon="person"
+                                      ButtonStyle="ButtonStyle.Base"
+                                      Variant="Variant.Flat"
+                                      Size="ButtonSize.Small"
+                                      MouseEnter="OnActionTooltip" />
+                    </div>
+                </div>
+            </RadzenHeader>
+
+            <RadzenSidebar class="showcase-sidebar"
+                           @bind-Expanded="SidebarExpanded"
+                           Responsive="true"
+                           FullHeight="true"
+                           Position="SidebarPosition.Left"
+                           ResponsiveMaxWidth="1024px"
+                           role="navigation"
+                           aria-label="Werkorders navigatie">
+                <div class="showcase-sidebar__inner">
+                    <div>
+                        <div class="showcase-sidebar__title">Navigatie</div>
+                        <div class="showcase-sidebar__subtitle">Compacte werkorder-shell</div>
+                    </div>
+
+                    <nav class="showcase-panel-menu" aria-label="Werkorders navigatie">
+                        <RadzenPanelMenu Multiple="false" DisplayStyle="MenuItemDisplayStyle.Text">
+                            <RadzenPanelMenuItem Text="Dashboard" Icon="space_dashboard" Path="/app" Match="NavLinkMatch.All" />
+                            <RadzenPanelMenuItem Text="Werkorders" Icon="assignment" Path="/app/werkorders" />
+                            <RadzenPanelMenuItem Text="Planning" Icon="event" Path="/app/planning" />
+                            <RadzenPanelMenuItem Text="Klanten" Icon="groups" Path="/app/klanten" />
+                            <RadzenPanelMenuItem Text="Projecten" Icon="account_tree" Path="/app/projecten" />
+                            <RadzenPanelMenuItem Text="Assets" Icon="hub" Path="/app/assets" />
+                            <RadzenPanelMenuItem Text="Servicedesk" Icon="support_agent" Path="/app/servicedesk" />
+                            <RadzenPanelMenuItem Text="Rapportage" Icon="query_stats" Path="/app/rapportage" />
+                            <RadzenPanelMenuItem Text="Instellingen" Icon="settings" Path="/app/instellingen" />
+                            <RadzenPanelMenuItem Text="Help" Icon="help" Path="/app/help" />
+                        </RadzenPanelMenu>
+                    </nav>
+
+                    <div class="showcase-sidebar__footer">
+                        <a href="/">← Terug naar componentbibliotheek</a>
+                    </div>
+                </div>
+            </RadzenSidebar>
+
+            <RadzenBody Expanded="@SidebarExpanded" class="showcase-body">
+                <main id="showcase-main" class="showcase-main" tabindex="-1">
+                    <div class="showcase-page">
+                        @Body
+                    </div>
+                </main>
+
+                <RadzenFabMenu class="showcase-fab" Icon="add" Text="Nieuwe werkorder">
+                    <RadzenFabMenuItem Text="Nieuwe werkorder" Icon="assignment_add" Path="/app/werkorders" />
+                    <RadzenFabMenuItem Text="Nieuw project" Icon="account_tree" Path="/app/projecten" />
+                </RadzenFabMenu>
+            </RadzenBody>
+        </RadzenLayout>
+
+        <RadzenComponents />
+    </div>
+</CascadingValue>

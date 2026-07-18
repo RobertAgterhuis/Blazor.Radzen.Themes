@@ -1,0 +1,217 @@
+@page "/app/assets"
+@layout ShowcaseLayout
+
+@inject ShowcaseDataService DataService
+@inject IAgtNotificationService Notifications
+
+<PageTitle>Werkorders - Assets</PageTitle>
+
+<AgtBreadcrumb CssClass="showcase-page__breadcrumbs" Items="Breadcrumbs" />
+<AgtPageHeader Kicker="Werkorders" Title="Assets en locaties" Description="Beheer assetstructuur en maak direct werkorders vanuit context." />
+
+<div class="showcase-page__toolbar">
+    <AgtTextField Label="Filter assets" Value="@_filter" ValueChanged="OnFilterChanged" ValueExpression="@(() => _filter)" Placeholder="Zoek op locatie of installatie" />
+    <div></div>
+    <div></div>
+    <AgtPrimaryButton Text="Werkorder uit asset" Click="CreateFromSelectedAsset" />
+</div>
+
+@if (FilteredAssets.Count == 0)
+{
+    <AgtEmptyState Icon="hub" Title="Geen assets gevonden" Description="Pas het filter aan om assets te tonen." />
+}
+else
+{
+    <div class="showcase-page__split">
+        <AgtCard>
+            <Header>Assetboom</Header>
+            <ChildContent>
+                <RadzenTree Data="@TreeRoots" TextProperty="Name" ChildrenProperty="Children" AllowCheckBoxes="true" Change="OnTreeChange" />
+            </ChildContent>
+        </AgtCard>
+
+        <AgtCard>
+            <Header>Assetdetail</Header>
+            <ChildContent>
+                @if (_selectedAsset is null)
+                {
+                    <AgtEmptyState Icon="home_work" Title="Kies een asset" Description="Selecteer een node in de boom om details te zien." />
+                }
+                else
+                {
+                    <RadzenStack Gap="0.75rem">
+                        <h3 class="showcase-page__section-title">@_selectedAsset.Name</h3>
+                        <p class="showcase-page__muted">@_selectedAsset.KindLabel · @_selectedAsset.Location</p>
+
+                        <RadzenTable>
+                            <RadzenTableHeader>
+                                <RadzenTableHeaderRow>
+                                    <RadzenTableHeaderCell>Specificatie</RadzenTableHeaderCell>
+                                    <RadzenTableHeaderCell>Waarde</RadzenTableHeaderCell>
+                                </RadzenTableHeaderRow>
+                            </RadzenTableHeader>
+                            <RadzenTableBody>
+                                @foreach (var spec in _selectedAsset.Specs)
+                                {
+                                    <RadzenTableRow>
+                                        <RadzenTableCell>@spec.Name</RadzenTableCell>
+                                        <RadzenTableCell>@spec.Value</RadzenTableCell>
+                                    </RadzenTableRow>
+                                }
+                            </RadzenTableBody>
+                        </RadzenTable>
+
+                        <RadzenChipList TValue="string" Data="@AssetTags" />
+
+                        <RadzenFormField Text="Labelkleur" Variant="Variant.Outlined">
+                            <RadzenColorPicker @bind-Value="_selectedColor" Change="OnColorChanged" />
+                        </RadzenFormField>
+
+                        <RadzenButton Text="Contextmenu: werkorder aanmaken" Icon="more_vert" Click="OpenAssetContext" />
+                    </RadzenStack>
+                }
+            </ChildContent>
+        </AgtCard>
+    </div>
+
+    <AgtCard>
+        <Header>Werkorderformulier (assetselectie)</Header>
+        <ChildContent>
+            <RadzenTemplateForm TItem="ShowcaseWorkOrder" Data="@_draft" Submit="OnAssetFormSubmit">
+                <RadzenStack Gap="0.75rem">
+                    @if (DropDownTreeType is not null)
+                    {
+                        <DynamicComponent Type="DropDownTreeType" Parameters="DropDownTreeParameters" />
+                    }
+                    <AgtTextField Label="Omschrijving" Value="@_draft.Description" ValueChanged="@(v => _draft.Description = v ?? string.Empty)" ValueExpression="@(() => _draft.Description)" />
+                    <AgtPrimaryButton Text="Opslaan" Click="OnAssetDraftSave" />
+                </RadzenStack>
+            </RadzenTemplateForm>
+        </ChildContent>
+    </AgtCard>
+}
+
+@code {
+    private string _filter = string.Empty;
+    private ShowcaseAssetNode? _selectedAsset;
+    private string _selectedColor = "rebeccapurple";
+    private readonly ShowcaseWorkOrder _draft = new();
+
+    private static readonly Type? DropDownTreeType =
+        Type.GetType("Radzen.Blazor.RadzenDropDownTree`1, Radzen.Blazor")?.MakeGenericType(typeof(int?));
+
+    private IReadOnlyList<(string Text, string? Href)> Breadcrumbs =>
+    [
+        ("Assets", "/app/assets")
+    ];
+
+    private IReadOnlyList<ShowcaseAssetNode> FilteredAssets => DataService.Assets
+        .Where(a => string.IsNullOrWhiteSpace(_filter)
+            || a.Name.Contains(_filter, StringComparison.OrdinalIgnoreCase)
+            || a.Location.Contains(_filter, StringComparison.OrdinalIgnoreCase)
+            || a.KindLabel.Contains(_filter, StringComparison.OrdinalIgnoreCase))
+        .ToList();
+
+    private IReadOnlyList<AssetTreeNode> TreeRoots => BuildTree(FilteredAssets);
+
+    private IReadOnlyList<object> AssetTags => (_selectedAsset?.Tags ?? []).Select(tag => new TagItem(tag)).Cast<object>().ToList();
+
+    private IDictionary<string, object?> DropDownTreeParameters => new Dictionary<string, object?>
+    {
+        ["Data"] = TreeRoots,
+        ["TextProperty"] = "Name",
+        ["ValueProperty"] = "Id",
+        ["ChildrenProperty"] = "Children",
+        ["Name"] = "asset-select",
+        ["Placeholder"] = "Selecteer asset"
+    };
+
+    protected override void OnInitialized()
+    {
+        _selectedAsset = FilteredAssets.FirstOrDefault(a => a.KindLabel == "Installatie");
+        if (_selectedAsset is not null)
+        {
+            _selectedColor = _selectedAsset.LabelColor;
+            _draft.AssetId = _selectedAsset.Id;
+        }
+    }
+
+    private Task OnFilterChanged(string? value)
+    {
+        _filter = value ?? string.Empty;
+        _selectedAsset = FilteredAssets.FirstOrDefault();
+        return Task.CompletedTask;
+    }
+
+    private void OnTreeChange(TreeEventArgs args)
+    {
+        if (args.Value is int id)
+        {
+            _selectedAsset = DataService.Assets.FirstOrDefault(a => a.Id == id);
+            if (_selectedAsset is not null)
+            {
+                _selectedColor = _selectedAsset.LabelColor;
+                _draft.AssetId = _selectedAsset.Id;
+            }
+        }
+    }
+
+    private void OpenAssetContext(MouseEventArgs _)
+    {
+        if (_selectedAsset is null)
+        {
+            return;
+        }
+
+        var created = DataService.CreateWorkOrderFromAsset(_selectedAsset.Id);
+        Notifications.Info("Contextactie uitgevoerd", $"{created.Number} aangemaakt vanuit {_selectedAsset.Name}.");
+    }
+
+    private Task CreateFromSelectedAsset(MouseEventArgs _)
+    {
+        if (_selectedAsset is null)
+        {
+            Notifications.Warning("Geen asset geselecteerd", "Selecteer eerst een asset.");
+            return Task.CompletedTask;
+        }
+
+        var created = DataService.CreateWorkOrderFromAsset(_selectedAsset.Id);
+        Notifications.Success("Werkorder aangemaakt", created.Number);
+        return Task.CompletedTask;
+    }
+
+    private void OnColorChanged(object value)
+    {
+        _selectedColor = value?.ToString() ?? "rebeccapurple";
+    }
+
+    private Task OnAssetFormSubmit(ShowcaseWorkOrder _)
+    {
+        Notifications.Success("Assetformulier opgeslagen", "Wijzigingen zijn verwerkt.");
+        return Task.CompletedTask;
+    }
+
+    private Task OnAssetDraftSave(MouseEventArgs _)
+    {
+        Notifications.Info("Assetselectie opgeslagen", "Asset is gekoppeld aan de werkorderdraft.");
+        return Task.CompletedTask;
+    }
+
+    private static IReadOnlyList<AssetTreeNode> BuildTree(IReadOnlyList<ShowcaseAssetNode> assets)
+    {
+        var lookup = assets.ToLookup(a => a.ParentId);
+
+        List<AssetTreeNode> Build(int? parentId)
+        {
+            return lookup[parentId]
+                .Select(item => new AssetTreeNode(item.Id, item.Name, Build(item.Id)))
+                .ToList();
+        }
+
+        return Build(null);
+    }
+
+    private sealed record TagItem(string Text);
+
+    private sealed record AssetTreeNode(int Id, string Name, IReadOnlyList<AssetTreeNode> Children);
+}

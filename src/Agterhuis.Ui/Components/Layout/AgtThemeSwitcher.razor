@@ -1,0 +1,109 @@
+@using Microsoft.JSInterop
+@inject IJSRuntime JS
+
+<div class="agt-theme-switcher" role="group" aria-label="Themakeuze">
+    <label class="agt-theme-switcher-label" for="agt-theme-family">Thema</label>
+    <RadzenDropDown id="agt-theme-family"
+                    Name="agt-theme-family"
+                    class="agt-theme-switcher-dropdown"
+                    TValue="string"
+                    Data="ThemeOptions"
+                    TextProperty="DisplayName"
+                    ValueProperty="Name"
+                    @bind-Value="@SelectedThemeFamily"
+                    Change="@OnThemeFamilyChanged"
+                    AriaLabel="Kies themafamilie">
+        <Template Context="theme">
+            <span class="agt-theme-option @GetOptionClass(theme) @GetPreviewClass(theme)">
+                <span class="agt-theme-option__swatches" aria-hidden="true">
+                    <span class="agt-theme-option__swatch agt-theme-option__swatch--canvas"></span>
+                    <span class="agt-theme-option__swatch agt-theme-option__swatch--primary"></span>
+                    <span class="agt-theme-option__swatch agt-theme-option__swatch--accent"></span>
+                </span>
+                <span class="agt-theme-option__text">
+                    <span class="agt-theme-option__name">@theme.DisplayName</span>
+                    <span class="agt-theme-option__variant">@CurrentVariantLabel</span>
+                    @if (!string.IsNullOrWhiteSpace(GetOptionHint(theme)))
+                    {
+                        <span class="agt-theme-option__hint">@GetOptionHint(theme)</span>
+                    }
+                </span>
+            </span>
+        </Template>
+        <ValueTemplate Context="theme">
+            <span class="agt-theme-value">
+                <span class="agt-theme-value__name">@theme.DisplayName</span>
+                <span class="agt-theme-value__separator" aria-hidden="true">·</span>
+                <span class="agt-theme-value__variant">@CurrentVariantLabel</span>
+            </span>
+        </ValueTemplate>
+    </RadzenDropDown>
+    <AgtThemeToggle LightLabel="Donkere variant" DarkLabel="Lichte variant" />
+</div>
+
+@code {
+    [CascadingParameter]
+    public AgtThemeState ThemeState { get; set; } = default!;
+
+    private IReadOnlyList<AgtTheme> ThemeOptions => ThemeState.AvailableThemes;
+
+    private string SelectedThemeFamily { get; set; } = string.Empty;
+
+    protected override void OnParametersSet()
+    {
+        SelectedThemeFamily = ThemeState.ActiveTheme.Name;
+    }
+
+    private async Task OnThemeFamilyChanged(object? value)
+    {
+        if (value is not string family || string.IsNullOrWhiteSpace(family))
+        {
+            return;
+        }
+
+        SelectedThemeFamily = family;
+
+        // Sluit de Radzen-popup expliciet VOORDAT het theme wisselt: de
+        // ThemeChanged-rerender van de shell plus de view transition racen
+        // anders met Radzen's eigen sluit-JS, waardoor de popup open blijft.
+        try
+        {
+            await JS.InvokeVoidAsync("agtTheme.closeAllPopups");
+        }
+        catch (Microsoft.JSInterop.JSException)
+        {
+            // Popup sluiten is best-effort; de theme-wissel mag nooit falen.
+        }
+
+        // Geef de popup-close een tick om in de DOM te landen voordat de
+        // zware rerender + view transition start.
+        await Task.Yield();
+
+        ThemeState.SetThemeFamily(family);
+    }
+
+    private string CurrentVariantLabel => ThemeState.IsDark ? "Donkere variant" : "Lichte variant";
+
+    private string GetOptionClass(AgtTheme theme)
+    {
+        return string.Equals(theme.Name, ThemeState.ActiveTheme.Name, StringComparison.OrdinalIgnoreCase)
+            ? "agt-theme-option--active"
+            : string.Empty;
+    }
+
+    private static string GetPreviewClass(AgtTheme theme)
+    {
+        return $"agt-theme-option--{theme.Name}";
+    }
+
+    private static string GetOptionHint(AgtTheme theme)
+    {
+        return theme.Name switch
+        {
+            "autotaalglas-contrast" => "AAA / hoge contrast",
+            "autotaalglas-portal" => "Klantgerichte cyaanregister",
+            "autotaalglas-mono" => "Monochroom rapportagebeeld",
+            _ => string.Empty
+        };
+    }
+}

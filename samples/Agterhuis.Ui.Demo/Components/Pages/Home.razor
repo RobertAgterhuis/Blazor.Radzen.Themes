@@ -1,0 +1,256 @@
+@page "/"
+@implements IDisposable
+@using Agterhuis.Ui.Options
+@using Agterhuis.Ui.Theming
+@using System.Globalization
+@using Microsoft.Extensions.Options
+@inject IJSRuntime JS
+@inject IOptions<AgtUiOptions> UiOptions
+
+<PageTitle>Agterhuis.Ui Demo</PageTitle>
+
+<div class="agt-page agt-stack agt-home">
+    <AgtPageHeader Title="Agterhuis.Ui"
+                   Description="Interne componentbibliotheek met Radzen wrappers, design tokens en thema's.">
+        <Actions>
+            <AgtThemeToggle />
+        </Actions>
+    </AgtPageHeader>
+
+    <section class="agt-home-hero">
+        @if (UiOptions.Value.EnableAmbientEffects && !_prefersReducedMotion)
+        {
+            <div class="agt-home-hero__ambient agt-home-hero__ambient--@ThemeState.ActiveTheme.Name" aria-hidden="true">
+                <span class="agt-home-hero__ambient-layer agt-home-hero__ambient-layer--one"></span>
+                <span class="agt-home-hero__ambient-layer agt-home-hero__ambient-layer--two"></span>
+            </div>
+        }
+
+        <div class="agt-home-hero__copy">
+            <p class="agt-home-kicker">Signature experience</p>
+            <h2>@ThemeState.ActiveTheme.DisplayName</h2>
+            <p class="agt-home-description">@ThemeDescription</p>
+
+            <div class="agt-home-badges">
+                <span class="agt-home-badge">Variant @ThemeState.Theme</span>
+                <span class="agt-home-badge">Ambient @AmbientStatus</span>
+                <span class="agt-home-badge">@ThemeState.AvailableThemes.Count themafamilies</span>
+            </div>
+        </div>
+
+        <div class="agt-home-metrics" aria-label="Kerncijfers">
+            @for (var index = 0; index < Metrics.Count; index++)
+            {
+                var metric = Metrics[index];
+                <article class="agt-home-metric" style="--agt-stagger-index: @index;">
+                    <span class="agt-home-metric__value">@FormatNumber(_metricValues[index])</span>
+                    <span class="agt-home-metric__label">@metric.Label</span>
+                    <span class="agt-home-metric__caption">@metric.Caption</span>
+                </article>
+            }
+        </div>
+    </section>
+
+    <div class="agt-home-grid">
+        <AgtCard CssClass="agt-home-panel agt-home-panel--sparkline">
+            <Header>Theme pulse</Header>
+            <ChildContent>
+                <p class="agt-home-panel__text">Korte signal strip in de actieve themekleuren, gehouden binnen het accentbudget.</p>
+                <svg class="agt-home-sparkline" viewBox="0 0 320 120" role="img" aria-label="Theme pulse strip">
+                    <defs>
+                        <linearGradient id="homeSparklineGradient" x1="0%" x2="100%" y1="0%" y2="0%">
+                            <stop offset="0%" stop-color="var(--agt-color-primary-500)" />
+                            <stop offset="100%" stop-color="var(--agt-color-accent-400)" />
+                        </linearGradient>
+                    </defs>
+                    <path d="@SparklinePath"
+                          fill="none"
+                          stroke="url(#homeSparklineGradient)"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="6" />
+                </svg>
+                <div class="agt-home-sparkline__legend">
+                    <span><span class="agt-home-legend-swatch agt-home-legend-swatch--primary"></span> Primary</span>
+                    <span><span class="agt-home-legend-swatch agt-home-legend-swatch--accent"></span> Accent</span>
+                    <span><span class="agt-home-legend-swatch agt-home-legend-swatch--surface"></span> Surface</span>
+                </div>
+                @if (ThemeState.ActiveTheme.Name == "tatooine")
+                {
+                    <svg class="agt-home-hero__heat" viewBox="0 0 320 160" aria-hidden="true" focusable="false">
+                        <defs>
+                            <filter id="agt-home-heat-shimmer">
+                                <feTurbulence type="fractalNoise" baseFrequency="0.011" numOctaves="2" seed="3" result="noise">
+                                    <animate attributeName="baseFrequency"
+                                             values="0.010;0.0125;0.010"
+                                             dur="8s"
+                                             repeatCount="indefinite" />
+                                </feTurbulence>
+                                <feDisplacementMap in="SourceGraphic" in2="noise" scale="5" />
+                            </filter>
+                        </defs>
+                        <rect width="100%" height="100%" filter="url(#agt-home-heat-shimmer)" />
+                    </svg>
+                }
+            </ChildContent>
+        </AgtCard>
+
+        <AgtCard CssClass="agt-home-panel agt-home-panel--links">
+            <Header>Explore the catalog</Header>
+            <ChildContent>
+                <div class="agt-home-link-grid">
+                    @for (var index = 0; index < QuickLinks.Count; index++)
+                    {
+                        var link = QuickLinks[index];
+                        <a class="agt-home-link-card" href="@link.Href" style="--agt-stagger-index: @index;">
+                            <span class="agt-home-link-card__kicker">@link.Kicker</span>
+                            <span class="agt-home-link-card__title">@link.Title</span>
+                            <span class="agt-home-link-card__description">@link.Description</span>
+                        </a>
+                    }
+                </div>
+            </ChildContent>
+        </AgtCard>
+    </div>
+</div>
+
+@code {
+    [CascadingParameter]
+    public AgtThemeState ThemeState { get; set; } = default!;
+
+    private readonly double[] _metricValues = [0, 0, 0, 0];
+    private readonly CancellationTokenSource _animationCts = new();
+    private bool _prefersReducedMotion;
+
+    private static readonly IReadOnlyDictionary<string, string> ThemeTaglines = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+    {
+        [AgtTheme.Plum.Name] = "Diepe paarslagen met een strakke redactionele rand.",
+        [AgtTheme.Ocean.Name] = "Koele oceaantinten met luchtige ruimte en rustige diepte.",
+        [AgtTheme.Dagobah.Name] = "Nevelige groentinten met zachte schaduwen en kalme lagen.",
+        [AgtTheme.Dathomir.Name] = "Donkere vulkanische spanning met gloeiende accenten.",
+        [AgtTheme.Hoth.Name] = "Heldere, koude vlakken met veel ademruimte en strakke lijnen.",
+        [AgtTheme.Tatooine.Name] = "Warme zandlagen met koperkleurige accenten en zachte hitte.",
+        [AgtTheme.Imperial.Name] = "Monochroom staal met een koud signaalrood op strikte plekken.",
+        [AgtTheme.Autotaalglas.Name] = "Corporate blauw met een rood signaal en koele informatietinten.",
+        [AgtTheme.AutotaalglasContrast.Name] = "Stark blauw-wit met nadruk op AAA-waardige leesbaarheid.",
+        [AgtTheme.AutotaalglasPortal.Name] = "Fris cyaan-voorwaarts klantbeeld met zachtere randen.",
+        [AgtTheme.AutotaalglasMono.Name] = "Staalblauw rapportagebeeld met rood uitsluitend voor gevaar."
+    };
+
+    private static readonly IReadOnlyList<HomeMetric> Metrics =
+    [
+        new("Wrappers", 19, "Agt components"),
+        new("Themes", 11, "Light + dark families"),
+        new("Tokens", 86, "Design primitives"),
+        new("Smoke tests", 25, "Theme and catalog coverage")
+    ];
+
+    private static readonly IReadOnlyList<HomeLink> QuickLinks =
+    [
+        new("Buttons", "/components/buttons", "Action states", "Busy, disabled, and default button patterns."),
+        new("Layout", "/components/layout", "Shell", "Sidebar, top bar, and density-aware composition."),
+        new("Theme", "/components/theme", "Tokens", "Color, elevation, glow, and preview swatches."),
+        new("Data", "/components/data/grid", "Calm data", "A data-grid slice that stays motion-light.")
+    ];
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        ThemeState.ThemeChanged += HandleThemeChanged;
+
+        _prefersReducedMotion = await JS.InvokeAsync<bool>("agtTheme.prefersReducedMotion");
+
+        if (_prefersReducedMotion || !UiOptions.Value.EnableAnimations)
+        {
+            for (var index = 0; index < Metrics.Count; index++)
+            {
+                _metricValues[index] = Metrics[index].Value;
+            }
+
+            StateHasChanged();
+            return;
+        }
+
+        _ = AnimateMetricsAsync();
+    }
+
+    public void Dispose()
+    {
+        ThemeState.ThemeChanged -= HandleThemeChanged;
+        _animationCts.Cancel();
+        _animationCts.Dispose();
+    }
+
+    private string AmbientStatus => !UiOptions.Value.EnableAmbientEffects
+        ? "uit"
+        : _prefersReducedMotion
+            ? "uit"
+            : "aan";
+
+    private string ThemeDescription => ThemeTaglines.TryGetValue(ThemeState.ActiveTheme.Name, out var tagline)
+        ? tagline
+        : "Een themafamilie die visueel onderscheidend blijft zonder druk te worden.";
+
+    private void HandleThemeChanged()
+    {
+        _ = InvokeAsync(StateHasChanged);
+    }
+
+    private string SparklinePath => BuildSparklinePath();
+
+    private async Task AnimateMetricsAsync()
+    {
+        const int durationMilliseconds = 600;
+        const int frames = 18;
+
+        for (var frame = 1; frame <= frames; frame++)
+        {
+            if (_animationCts.IsCancellationRequested)
+            {
+                return;
+            }
+
+            var progress = frame / (double)frames;
+            for (var index = 0; index < Metrics.Count; index++)
+            {
+                _metricValues[index] = Math.Round(Metrics[index].Value * progress);
+            }
+
+            await InvokeAsync(StateHasChanged);
+            await Task.Delay(durationMilliseconds / frames, _animationCts.Token);
+        }
+    }
+
+    private static string FormatNumber(double value)
+    {
+        return value.ToString("N0", CultureInfo.CurrentCulture);
+    }
+
+    private static string BuildSparklinePath()
+    {
+        var values = new[] { 18d, 24d, 31d, 27d, 39d, 45d, 41d, 52d, 49d, 60d, 58d };
+        var max = values.Max();
+        var min = values.Min();
+        var usableHeight = 78d;
+        var widthStep = 32d;
+
+        var points = new List<string>();
+        for (var index = 0; index < values.Length; index++)
+        {
+            var normalized = (values[index] - min) / (max - min);
+            var x = index * widthStep;
+            var y = 96d - normalized * usableHeight;
+            points.Add($"{(index == 0 ? "M" : "L")}{x:0} {y:0}");
+        }
+
+        return string.Join(" ", points);
+    }
+
+    private sealed record HomeMetric(string Label, int Value, string Caption);
+
+    private sealed record HomeLink(string Kicker, string Href, string Title, string Description);
+}

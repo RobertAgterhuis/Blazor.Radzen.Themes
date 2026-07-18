@@ -1,0 +1,28 @@
+@page "/catalog/gauges"
+
+<PageTitle>Gauges (Radzen)</PageTitle>
+
+<div class="catalog-page">
+    <h1>Gauges (Radzen)</h1>
+
+    @if (PreviewOnly)
+    {
+        <RadzenCard>Gauge preview (interactive rendering disabled).</RadzenCard>
+    }
+    else
+    {
+        <RadzenArcGauge>
+            <RadzenArcGaugeScale Min="0" Max="100">
+                <RadzenArcGaugeScaleValue Value="64" />
+            </RadzenArcGaugeScale>
+        </RadzenArcGauge>
+
+        <RadzenRadialGauge Min="0" Max="100" Value="42" />
+        <RadzenLinearGauge Min="0" Max="100" Value="78" />
+    }
+</div>
+
+@code {
+    [Parameter]
+    public bool PreviewOnly { get; set; }
+}

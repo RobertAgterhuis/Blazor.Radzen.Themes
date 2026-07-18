@@ -1,0 +1,262 @@
+@page "/app/werkorders/{Id:int}"
+@layout ShowcaseLayout
+
+@inject ShowcaseDataService DataService
+@inject IAgtNotificationService Notifications
+@inject NavigationManager Nav
+
+<PageTitle>Werkorders - Detail</PageTitle>
+
+<AgtBreadcrumb CssClass="showcase-page__breadcrumbs" Items="Breadcrumbs" />
+<AgtPageHeader Kicker="Werkorders" Title="Werkorderdetail" Description="Volledige workflow voor dossier, foto's, historie en werkbon." />
+
+@if (_order is null)
+{
+    <AgtEmptyState Icon="assignment_late"
+                   Title="Werkorder niet gevonden"
+                   Description="Deze werkorder bestaat niet of is verwijderd.">
+        <Action>
+            <AgtSecondaryButton Text="Terug naar werkorders" Click="BackToGrid" />
+        </Action>
+    </AgtEmptyState>
+}
+else
+{
+    <div class="showcase-page__badge-row">
+        <AgtBadge Text="@_order.Number" Icon="tag" Intent="AgtIntent.Primary" />
+        <AgtBadge Text="@_order.StatusLabel" Icon="schedule" Intent="StatusIntent(_order.Status)" />
+            <AgtBadge Text="@($"Voortgang {_order.ProgressPercent}%")" Icon="trending_up" Intent="AgtIntent.Info" />
+    </div>
+
+    <RadzenProgressBar Value="@_order.ProgressPercent" ShowValue="true" Unit="%" />
+
+    <RadzenSplitButton Text="Opslaan" ButtonStyle="ButtonStyle.Primary">
+        <ChildContent>
+            <RadzenSplitButtonItem Text="Opslaan en sluiten" Value="close" />
+            <RadzenSplitButtonItem Text="Opslaan en nieuwe" Value="new" />
+        </ChildContent>
+    </RadzenSplitButton>
+
+    <RadzenTabs>
+        <Tabs>
+            <RadzenTabsItem Text="Gegevens">
+                <AgtLoadingPanel IsLoading="@_isSaving" LoadingText="Wijzigingen worden opgeslagen...">
+                    <RadzenTemplateForm TItem="ShowcaseWorkOrder" Data="@_order" Submit="OnSubmit">
+                        <RadzenStack Gap="0.75rem">
+                            <RadzenFormField Text="Klant" Variant="Variant.Outlined">
+                                <AgtTextField Label="Klant" Value="@_order.CustomerName" ValueChanged="OnCustomerChanged" ValueExpression="@(() => _order.CustomerName)" />
+                            </RadzenFormField>
+                            <RadzenFormField Text="Adres" Variant="Variant.Outlined">
+                                <AgtAutoComplete TItem="string" Label="Adres" Data="AddressOptions" Value="@_order.Address" ValueChanged="OnAddressChanged" />
+                            </RadzenFormField>
+                            <RadzenFormField Text="Postcode" Variant="Variant.Outlined">
+                                <RadzenMask Mask="9999 AA" @bind-Value="_order.Postcode" Name="postcode" />
+                            </RadzenFormField>
+                            <RadzenFormField Text="Asset" Variant="Variant.Outlined">
+                                @if (DropDownTreeType is not null)
+                                {
+                                    <DynamicComponent Type="DropDownTreeType" Parameters="AssetTreeParameters" />
+                                }
+                                else
+                                {
+                                    <RadzenTextBox Disabled="true" Placeholder="DropDownTree niet beschikbaar" />
+                                }
+                            </RadzenFormField>
+                            <RadzenRequiredValidator Component="postcode" Text="Postcode verplicht" Popup="false" />
+                        </RadzenStack>
+                    </RadzenTemplateForm>
+                </AgtLoadingPanel>
+            </RadzenTabsItem>
+
+            <RadzenTabsItem Text="Notities">
+                <RadzenStack Gap="0.75rem">
+                    <RadzenHtmlEditor @bind-Value="_order.NotesHtml" Style="height: 18rem;" />
+                    <RadzenSpeechToTextButton />
+                </RadzenStack>
+            </RadzenTabsItem>
+
+            <RadzenTabsItem Text="Foto's">
+                <RadzenStack Gap="0.75rem">
+                    <RadzenUpload Url="upload" ChooseText="Bestanden uploaden" Auto="false" />
+                    <RadzenFileInput TValue="string" Name="bijlage" ChooseText="Kies bijlage" />
+                        <RadzenDropZone TItem="string" Value="@("fotodrop")" />
+                    <RadzenCarousel>
+                        <Items>
+                            @foreach (var photo in DataService.GetWorkOrderPhotos(_order.Id))
+                            {
+                                <RadzenCarouselItem>
+                                    <RadzenImage Path="@photo.Url" AlternateText="@photo.Name" Style="width:100%;max-height:280px;object-fit:cover;" />
+                                </RadzenCarouselItem>
+                            }
+                        </Items>
+                    </RadzenCarousel>
+                </RadzenStack>
+            </RadzenTabsItem>
+
+            <RadzenTabsItem Text="Historie">
+                <RadzenTimeline>
+                    @foreach (var item in DataService.GetWorkOrderHistory(_order.Id))
+                    {
+                        <RadzenTimelineItem Date="@item.When" Text="@item.Note">
+                            <ChildContent>
+                                <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem">
+                                    <RadzenGravatar Email="@item.TechnicianEmail" />
+                                    <span>@item.TechnicianName · @item.Status</span>
+                                </RadzenStack>
+                            </ChildContent>
+                        </RadzenTimelineItem>
+                    }
+                </RadzenTimeline>
+            </RadzenTabsItem>
+
+            <RadzenTabsItem Text="Werkbon">
+                <RadzenStack Orientation="Orientation.Horizontal" Gap="1rem" Wrap="FlexWrap.Wrap">
+                    <RadzenCard>
+                        <RadzenQRCode Value="@($"https://demo.werkorders.local/app/werkorders/{_order.Id}")" />
+                    </RadzenCard>
+                    <RadzenCard>
+                        <RadzenBarcode Value="@_order.Number" />
+                    </RadzenCard>
+                </RadzenStack>
+                <AgtSecondaryButton Text="Print werkbon" Click="PrintBon" />
+                @if (_order.Status == ShowcaseWorkOrderStatus.Afgerond)
+                {
+                    <RadzenFormField Text="Klanttevredenheid" Variant="Variant.Outlined">
+                        <RadzenRating @bind-Value="_order.SatisfactionRating" />
+                    </RadzenFormField>
+                }
+            </RadzenTabsItem>
+        </Tabs>
+    </RadzenTabs>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private ShowcaseWorkOrder? _order;
+    private bool _isSaving;
+
+    private static readonly Type? DropDownTreeType =
+        Type.GetType("Radzen.Blazor.RadzenDropDownTree`1, Radzen.Blazor")?.MakeGenericType(typeof(int?));
+
+    private IDictionary<string, object?> AssetTreeParameters => new Dictionary<string, object?>
+    {
+        ["Data"] = DataService.Assets,
+        ["TextProperty"] = "Name",
+        ["ValueProperty"] = "Id",
+        ["ChildrenProperty"] = "Children",
+        ["Value"] = _order?.AssetId,
+        ["Name"] = "assetTree",
+        ["Placeholder"] = "Kies asset"
+    };
+
+    private IReadOnlyList<(string Text, string? Href)> Breadcrumbs =>
+    [
+        ("Werkorders", "/app/werkorders"),
+        (_order?.Number ?? "Detail", $"/app/werkorders/{Id}")
+    ];
+
+    private IReadOnlyList<string> AddressOptions => DataService.Customers.Select(c => c.Address).Distinct().ToList();
+
+    protected override void OnInitialized()
+    {
+        _order = DataService.GetWorkOrderById(Id);
+    }
+
+    private Task OnCustomerChanged(string? value)
+    {
+        if (_order is not null)
+        {
+            _order.CustomerName = value ?? string.Empty;
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private Task OnAddressChanged(string value)
+    {
+        if (_order is not null)
+        {
+            _order.Address = value;
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private async Task SavePrimary()
+    {
+        await SaveCore();
+    }
+
+    private async Task SaveAndClose()
+    {
+        await SaveCore();
+        Nav.NavigateTo("/app/werkorders");
+    }
+
+    private async Task SaveAndNew()
+    {
+        await SaveCore();
+        Nav.NavigateTo("/app/werkorders");
+    }
+
+    private async Task OnSplitAction(MenuItemEventArgs args)
+    {
+        var action = args.Value?.ToString();
+
+        if (string.Equals(action, "close", StringComparison.OrdinalIgnoreCase))
+        {
+            await SaveAndClose();
+            return;
+        }
+
+        if (string.Equals(action, "new", StringComparison.OrdinalIgnoreCase))
+        {
+            await SaveAndNew();
+            return;
+        }
+
+        await SavePrimary();
+    }
+
+    private async Task SaveCore()
+    {
+        if (_order is null)
+        {
+            return;
+        }
+
+        _isSaving = true;
+        await Task.Delay(300);
+        DataService.SaveWorkOrderDetail(_order);
+        Notifications.Success("Werkorder opgeslagen", _order.Number);
+        _isSaving = false;
+    }
+
+    private async Task OnSubmit(ShowcaseWorkOrder _)
+    {
+        await SaveCore();
+    }
+
+    private Task PrintBon(MouseEventArgs _)
+    {
+        Notifications.Info("Print gestart", "Werkbon staat in de printwachtrij.");
+        return Task.CompletedTask;
+    }
+
+    private Task BackToGrid(MouseEventArgs _)
+    {
+        Nav.NavigateTo("/app/werkorders");
+        return Task.CompletedTask;
+    }
+
+    private static AgtIntent StatusIntent(ShowcaseWorkOrderStatus status) => status switch
+    {
+        ShowcaseWorkOrderStatus.Afgerond => AgtIntent.Success,
+        ShowcaseWorkOrderStatus.Onderweg => AgtIntent.Info,
+        ShowcaseWorkOrderStatus.InUitvoering => AgtIntent.Warning,
+        ShowcaseWorkOrderStatus.Geannuleerd => AgtIntent.Danger,
+        _ => AgtIntent.Secondary
+    };
+}

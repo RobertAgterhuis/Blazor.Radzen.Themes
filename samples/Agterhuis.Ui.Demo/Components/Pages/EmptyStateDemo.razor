@@ -1,0 +1,19 @@
+@page "/components/feedback/empty-state"
+
+<PageTitle>Empty state</PageTitle>
+
+<div class="agt-page agt-stack">
+    <AgtPageHeader Title="AgtEmptyState" Description="Lege toestand met icon, tekst en actie." />
+
+    <AgtCard>
+        <ChildContent>
+            <AgtEmptyState Icon="search_off"
+                           Title="Geen resultaten"
+                           Description="Pas uw filters aan om resultaten te vinden.">
+                <Action>
+                    <AgtSecondaryButton Text="Filters resetten" />
+                </Action>
+            </AgtEmptyState>
+        </ChildContent>
+    </AgtCard>
+</div>

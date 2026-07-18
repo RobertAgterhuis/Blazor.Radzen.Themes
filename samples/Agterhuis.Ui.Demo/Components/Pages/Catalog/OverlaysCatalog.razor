@@ -1,0 +1,51 @@
+@page "/catalog/overlays"
+
+<PageTitle>Overlays (Radzen)</PageTitle>
+
+<div class="catalog-page">
+    <h1>Overlays (Radzen)</h1>
+
+    <RadzenStack Orientation="Orientation.Horizontal" Gap="0.75rem">
+        <RadzenButton Text="Dialog" Click="OpenDialog" />
+        <RadzenButton Text="Notification" Click="ShowNotification" />
+        <RadzenButton Text="Popup" Click="TogglePopup" />
+        <RadzenButton Text="Tooltip" MouseEnter="ShowTooltip" />
+    </RadzenStack>
+
+    <RadzenPopup Style="padding:0.75rem;" Visible="PopupVisible">
+        Popup content
+    </RadzenPopup>
+</div>
+
+@code {
+    [Inject]
+    private DialogService DialogService { get; set; } = default!;
+
+    [Inject]
+    private NotificationService NotificationService { get; set; } = default!;
+
+    [Inject]
+    private TooltipService TooltipService { get; set; } = default!;
+
+    private bool PopupVisible;
+
+    private async Task OpenDialog()
+    {
+        await DialogService.OpenAsync("Catalog dialog", ds => @<div style="padding:1rem;">Dialog content</div>);
+    }
+
+    private void ShowNotification()
+    {
+        NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Info, Summary = "Catalog", Detail = "Notification sample" });
+    }
+
+    private void TogglePopup()
+    {
+        PopupVisible = !PopupVisible;
+    }
+
+    private void ShowTooltip(ElementReference reference)
+    {
+        TooltipService.Open(reference, "Tooltip sample");
+    }
+}

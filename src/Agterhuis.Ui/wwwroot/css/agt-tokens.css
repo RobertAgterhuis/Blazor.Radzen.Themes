@@ -1,0 +1,103 @@
+@font-face {
+    font-display: swap;
+    font-family: "AgtSora";
+    font-style: normal;
+    font-weight: 400;
+    src: url("../fonts/sora-latin-400.woff2") format("woff2");
+}
+
+@font-face {
+    font-display: swap;
+    font-family: "AgtSora";
+    font-style: normal;
+    font-weight: 600;
+    src: url("../fonts/sora-latin-600.woff2") format("woff2");
+}
+
+@font-face {
+    font-display: swap;
+    font-family: "AgtSora";
+    font-style: normal;
+    font-weight: 700;
+    src: url("../fonts/sora-latin-700.woff2") format("woff2");
+}
+
+@font-face {
+    font-display: swap;
+    font-family: "AgtBarlowCondensed";
+    font-style: normal;
+    font-weight: 500;
+    src: url("../fonts/barlow-condensed-latin-500.woff2") format("woff2");
+}
+
+@font-face {
+    font-display: swap;
+    font-family: "AgtBarlowCondensed";
+    font-style: normal;
+    font-weight: 700;
+    src: url("../fonts/barlow-condensed-latin-700.woff2") format("woff2");
+}
+
+@font-face {
+    font-display: swap;
+    font-family: "AgtBitter";
+    font-style: normal;
+    font-weight: 500;
+    src: url("../fonts/bitter-latin-500.woff2") format("woff2");
+}
+
+@font-face {
+    font-display: swap;
+    font-family: "AgtBitter";
+    font-style: normal;
+    font-weight: 700;
+    src: url("../fonts/bitter-latin-700.woff2") format("woff2");
+}
+
+:root {
+    /* Typography */
+    --agt-font-family: "Segoe UI Variable", "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+    --agt-font-display: "AgtSora", "Segoe UI Variable", "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+    --agt-font-body: "Segoe UI Variable", "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+    --agt-heading-weight: 700;
+    --agt-heading-tracking: -0.01em;
+    --agt-font-size-xs: 0.75rem;
+    --agt-font-size-sm: 0.875rem;
+    --agt-font-size-md: 1rem;
+    --agt-font-size-lg: 1.125rem;
+    --agt-font-size-xl: 1.5rem;
+
+    /* Spacing */
+    --agt-spacing-1: 0.25rem;
+    --agt-spacing-2: 0.5rem;
+    --agt-spacing-3: 0.75rem;
+    --agt-spacing-4: 1rem;
+    --agt-spacing-6: 1.5rem;
+    --agt-spacing-8: 2rem;
+
+    /* Borders / motion */
+    --agt-radius-scale: 1;
+    --agt-border-radius-sm: calc(0.25rem * var(--agt-radius-scale));
+    --agt-border-radius-md: calc(0.5rem * var(--agt-radius-scale));
+    --agt-border-radius-lg: calc(0.75rem * var(--agt-radius-scale));
+    --agt-transition-fast: 120ms ease-in-out;
+    --agt-transition-normal: 200ms ease-in-out;
+    --agt-ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+    --agt-ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+    --agt-hover-tint: color-mix(in srgb, var(--agt-color-primary-500) 10%, transparent);
+    --agt-selection-tint: color-mix(in srgb, var(--agt-color-accent-400) 20%, var(--agt-surface-1));
+    --agt-focus-ring-style: 0 0 0 1px;
+    --agt-glow-strength: 1;
+    --agt-press-scale: 0.98;
+    --agt-lift-distance: 2px;
+    --agt-indicator-transition: 180ms cubic-bezier(0.22, 1, 0.36, 1);
+
+    /* Glass mechanics */
+    --agt-glass-blur: 12px;
+    --agt-canvas-backdrop: none;
+
+    /* Typography rhythm */
+    --agt-heading-size-xl: clamp(1.75rem, 1.25rem + 1.4vw, 2.5rem);
+    --agt-heading-size-lg: clamp(1.35rem, 1.1rem + 0.9vw, 1.95rem);
+    --agt-heading-line-height: 1.15;
+}

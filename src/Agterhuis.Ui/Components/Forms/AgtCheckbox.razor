@@ -1,0 +1,57 @@
+<div class="agt-field-wrapper @CssClass" role="group">
+    <label class="agt-checkbox" for="@ResolvedName">
+        <RadzenCheckBox TValue="bool"
+                        Name="@ResolvedName"
+                        Value="@Value"
+                        ValueChanged="@ValueChanged"
+                        ValueExpression="@ValueExpression"
+                        Disabled="@Disabled"
+                        TriState="false"
+                        InputAttributes="@ResolvedInputAttributes" />
+        <span class="agt-checkbox__label">@ResolvedLabel</span>
+    </label>
+</div>
+
+@code {
+    [Parameter]
+    public bool Value { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> ValueChanged { get; set; }
+
+    [Parameter]
+    public Expression<Func<bool>>? ValueExpression { get; set; }
+
+    [Parameter]
+    public string? Name { get; set; }
+
+    [Parameter]
+    public string? Label { get; set; }
+
+    [Parameter]
+    public string? AriaLabel { get; set; }
+
+    [Parameter]
+    public bool Disabled { get; set; }
+
+    [Parameter]
+    public string? CssClass { get; set; }
+
+    private readonly string _fallbackName = $"agt-checkbox-{Guid.NewGuid():N}";
+
+    private string ResolvedName => string.IsNullOrWhiteSpace(Name) ? _fallbackName : Name;
+
+    private string ResolvedLabel => string.IsNullOrWhiteSpace(Label) ? AriaLabel ?? string.Empty : Label;
+
+    private IReadOnlyDictionary<string, object> ResolvedInputAttributes =>
+        string.IsNullOrWhiteSpace(AriaLabel)
+            ? new Dictionary<string, object>()
+            : new Dictionary<string, object> { ["aria-label"] = AriaLabel! };
+
+    protected override void OnParametersSet()
+    {
+        System.Diagnostics.Debug.Assert(
+            !string.IsNullOrWhiteSpace(Label) || !string.IsNullOrWhiteSpace(AriaLabel),
+            "AgtCheckbox requires Label or AriaLabel for accessibility.");
+    }
+}

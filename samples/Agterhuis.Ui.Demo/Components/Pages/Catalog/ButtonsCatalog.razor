@@ -1,0 +1,62 @@
+@page "/catalog/buttons"
+
+<PageTitle>Buttons (Radzen)</PageTitle>
+
+<div class="catalog-page">
+    <h1>Buttons (Radzen)</h1>
+    <p>Hover and focus states are validated visually. Disabled and busy-like states are rendered below.</p>
+
+    @foreach (var variant in Variants)
+    {
+        <section class="catalog-card">
+            <h2>@variant.Name</h2>
+            <RadzenStack Orientation="Orientation.Horizontal" Gap="0.75rem" Wrap="FlexWrap.Wrap">
+                @foreach (var style in Styles)
+                {
+                    <RadzenButton Text="@style.Name" ButtonStyle="@style.Value" Variant="@variant.Value" />
+                }
+            </RadzenStack>
+        </section>
+    }
+
+    <section class="catalog-card">
+        <h2>State Samples</h2>
+        <RadzenStack Orientation="Orientation.Horizontal" Gap="0.75rem" Wrap="FlexWrap.Wrap">
+            <RadzenButton Text="Disabled" Disabled="true" />
+            <RadzenToggleButton Value="true" Text="Toggle" />
+            <RadzenFab Icon="add" Text="Fab" />
+        </RadzenStack>
+    </section>
+
+    <RadzenStack Orientation="Orientation.Horizontal" Gap="0.75rem">
+        <RadzenSplitButton Text="Split">
+            <ChildContent>
+                <RadzenSplitButtonItem Text="Action A" Value="a" />
+                <RadzenSplitButtonItem Text="Action B" Value="b" />
+            </ChildContent>
+        </RadzenSplitButton>
+    </RadzenStack>
+</div>
+
+@code {
+    private static readonly IReadOnlyList<(string Name, ButtonStyle Value)> Styles =
+    [
+        ("Primary", ButtonStyle.Primary),
+        ("Secondary", ButtonStyle.Secondary),
+        ("Base", ButtonStyle.Base),
+        ("Light", ButtonStyle.Light),
+        ("Dark", ButtonStyle.Dark),
+        ("Info", ButtonStyle.Info),
+        ("Success", ButtonStyle.Success),
+        ("Warning", ButtonStyle.Warning),
+        ("Danger", ButtonStyle.Danger)
+    ];
+
+    private static readonly IReadOnlyList<(string Name, Variant Value)> Variants =
+    [
+        ("Filled", Variant.Filled),
+        ("Flat", Variant.Flat),
+        ("Outlined", Variant.Outlined),
+        ("Text", Variant.Text)
+    ];
+}

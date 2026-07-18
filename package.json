@@ -1,0 +1,13 @@
+{
+  "name": "agterhuis-ui-a11y",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "a11y:install": "playwright install --with-deps chromium",
+    "a11y:test": "playwright test tests/a11y/axe.spec.mjs"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.11.0",
+    "@playwright/test": "^1.54.2"
+  }
+}

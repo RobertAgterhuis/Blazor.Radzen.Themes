@@ -1,0 +1,30 @@
+@page "/components/feedback/notification-service"
+
+@inject IAgtNotificationService Notifications
+
+<PageTitle>Notification service</PageTitle>
+
+<div class="agt-page agt-stack">
+    <AgtPageHeader Title="AgtNotificationService" Description="Intent-helpers bovenop Radzen NotificationService met NL-defaults." />
+
+    <AgtCard>
+        <ChildContent>
+            <RadzenStack Orientation="Orientation.Horizontal" Gap="0.75rem" Wrap="FlexWrap.Wrap">
+                <AgtSecondaryButton Text="Info" Click="@(_ => ShowInfo())" />
+                <AgtSecondaryButton Text="Succes" Click="@(_ => ShowSuccess())" />
+                <AgtSecondaryButton Text="Waarschuwing" Click="@(_ => ShowWarning())" />
+                <AgtSecondaryButton Text="Fout" Click="@(_ => ShowDanger())" />
+            </RadzenStack>
+        </ChildContent>
+    </AgtCard>
+</div>
+
+@code {
+    private void ShowInfo() => Notifications.Info("Informatie", "Dit is een informatieve melding.");
+
+    private void ShowSuccess() => Notifications.Success("Opgeslagen", "De wijzigingen zijn bewaard.");
+
+    private void ShowWarning() => Notifications.Warning("Controle", "Controleer de ingevoerde gegevens.");
+
+    private void ShowDanger() => Notifications.Danger("Fout", "Er ging iets mis tijdens verwerken.");
+}

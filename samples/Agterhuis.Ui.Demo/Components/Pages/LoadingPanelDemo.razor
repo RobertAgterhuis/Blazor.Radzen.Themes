@@ -1,0 +1,28 @@
+@page "/components/feedback/loading-panel"
+
+<PageTitle>Loading panel</PageTitle>
+
+<div class="agt-page agt-stack">
+    <AgtPageHeader Title="AgtLoadingPanel" Description="Overlay loading state met child content." />
+
+    <AgtCard>
+        <ChildContent>
+            <AgtSecondaryButton Text="Toggle loading" Click="OnToggle" />
+            <AgtLoadingPanel IsLoading="_loading" LoadingText="Gegevens laden..." CssClass="loading-demo">
+                <ChildContent>
+                    <div class="agt-surface">Inhoud van paneel</div>
+                </ChildContent>
+            </AgtLoadingPanel>
+        </ChildContent>
+    </AgtCard>
+</div>
+
+@code {
+    private bool _loading = true;
+
+    private Task OnToggle(MouseEventArgs _)
+    {
+        _loading = !_loading;
+        return Task.CompletedTask;
+    }
+}

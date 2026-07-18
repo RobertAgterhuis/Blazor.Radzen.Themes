@@ -1,0 +1,19 @@
+@page "/components/forms/switch"
+
+<PageTitle>Switch</PageTitle>
+
+<div class="agt-page agt-stack">
+    <AgtPageHeader Title="AgtSwitch" Description="Switch met standaardlabels Aan/Uit en overridable teksten." />
+
+    <AgtCard>
+        <ChildContent>
+            <AgtSwitch @bind-Value="_enabled" Label="Meldingen" />
+            <AgtSwitch @bind-Value="_power" Label="Stroom" OnText="Actief" OffText="Inactief" />
+        </ChildContent>
+    </AgtCard>
+</div>
+
+@code {
+    private bool _enabled = true;
+    private bool _power;
+}

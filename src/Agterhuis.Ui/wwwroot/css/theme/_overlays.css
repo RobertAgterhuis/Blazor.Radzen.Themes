@@ -1,0 +1,163 @@
+.rz-dialog,
+.rz-dialog-content,
+.rz-side-dialog,
+.rz-tooltip,
+.rz-notification,
+.rz-context-menu,
+.rz-popup {
+    animation: agt-overlay-enter 200ms var(--agt-ease-spring);
+    background: var(--agt-glass-bg);
+    border: var(--agt-glass-border);
+    border-radius: var(--agt-border-radius-lg);
+    backdrop-filter: blur(var(--agt-glass-blur));
+    -webkit-backdrop-filter: blur(var(--agt-glass-blur));
+    box-shadow: var(--agt-shadow-md);
+    filter: saturate(var(--agt-glow-strength));
+}
+
+@keyframes agt-overlay-enter {
+    from {
+        opacity: 0;
+        transform: translateY(6px) scale(0.96);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.rz-dialog-titlebar,
+.rz-notification-title {
+    background: var(--agt-gradient-surface);
+    border-bottom: 1px solid var(--agt-input-border);
+    color: var(--agt-text-heading);
+}
+
+.rz-notification.rz-notification-warning {
+    border-inline-start: 4px solid var(--agt-color-accent-400);
+}
+
+.rz-notification.rz-notification-success {
+    border-inline-start: 4px solid var(--agt-color-success);
+}
+
+.rz-notification.rz-notification-info {
+    border-inline-start: 4px solid var(--agt-color-info);
+}
+
+.rz-notification.rz-notification-error {
+    border-inline-start: 4px solid var(--agt-color-danger);
+}
+
+.rz-notification {
+    overflow: hidden;
+}
+
+.rz-notification::after {
+    background: linear-gradient(90deg, transparent 0%, var(--agt-color-accent-400) 50%, transparent 100%);
+    content: "";
+    inset-inline: 0;
+    inset-block-start: 0;
+    height: 2px;
+    position: absolute;
+}
+
+.rz-dialog .rz-dialog-titlebar-close:hover,
+.rz-notification .rz-notification-close:hover {
+    color: var(--agt-color-accent-400);
+}
+
+.rz-dialog .rz-dialog-titlebar-close,
+.rz-notification .rz-notification-close,
+.rz-popup .rzi,
+.rz-dialog .rzi {
+    min-height: 1.5rem;
+    min-width: 1.5rem;
+}
+
+.rz-dialog,
+.rz-popup,
+.rz-tooltip {
+    box-shadow: var(--agt-shadow-md), var(--agt-glow-primary);
+}
+
+.rz-chat,
+.rz-aichat {
+    background: var(--agt-surface-1);
+    border: 1px solid var(--agt-input-border);
+    color: var(--agt-text-body);
+}
+
+.rz-chat-header,
+.rz-aichat-header {
+    background: var(--agt-surface-1);
+    border-bottom: 1px solid var(--agt-input-border);
+    color: var(--agt-text-heading);
+}
+
+.rz-chat-message.rz-user,
+.rz-aichat-message.rz-user {
+    background: var(--agt-color-primary-600);
+    color: var(--agt-color-white);
+}
+
+.rz-chat-message,
+.rz-aichat-message {
+    background: var(--agt-surface-3);
+    color: var(--agt-text-body);
+}
+
+.rz-chat textarea::placeholder,
+.rz-chat input::placeholder,
+.rz-aichat textarea::placeholder,
+.rz-aichat input::placeholder {
+    color: var(--agt-text-muted);
+    opacity: 1;
+}
+
+.rz-chat .rzi,
+.rz-aichat .rzi,
+.rz-chat button,
+.rz-aichat button {
+    color: var(--agt-text-body);
+}
+
+:is([data-agt-theme="dark"], [data-agt-theme$="-dark"]) .rz-dialog-titlebar,
+:is([data-agt-theme="dark"], [data-agt-theme$="-dark"]) .rz-notification-title {
+    color: var(--agt-color-white);
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .rz-dialog,
+    .rz-dialog-content,
+    .rz-side-dialog,
+    .rz-tooltip,
+    .rz-notification,
+    .rz-context-menu,
+    .rz-popup {
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        background: var(--agt-surface-2);
+    }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+    .rz-dialog,
+    .rz-dialog-content,
+    .rz-side-dialog,
+    .rz-tooltip,
+    .rz-notification,
+    .rz-context-menu,
+    .rz-popup {
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        background: var(--agt-surface-2);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .rz-notification::after {
+        animation: none;
+    }
+}

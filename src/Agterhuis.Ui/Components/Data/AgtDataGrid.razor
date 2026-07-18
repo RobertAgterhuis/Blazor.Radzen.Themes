@@ -1,0 +1,72 @@
+@typeparam TItem where TItem : notnull
+
+<RadzenDataGrid TItem="TItem"
+                Data="@Data"
+                AllowPaging="@AllowPaging"
+                AllowSorting="@AllowSorting"
+                AllowFiltering="@AllowFiltering"
+                FilterMode="@FilterMode"
+                AllowRowSelectOnRowClick="@AllowRowSelectOnRowClick"
+                PageSize="@PageSize"
+                RowSelect="@RowSelect"
+                class="@CombinedClass"
+                EmptyText="@EmptyText">
+    <Columns>
+        @if (Columns is not null)
+        {
+            @Columns
+        }
+    </Columns>
+    <EmptyTemplate>
+        @if (EmptyTemplate is not null)
+        {
+            @EmptyTemplate
+        }
+        else
+        {
+            <AgtEmptyState Icon="inbox"
+                           Title="Geen resultaten"
+                           Description="Er zijn geen records gevonden voor de huidige selectie." />
+        }
+    </EmptyTemplate>
+</RadzenDataGrid>
+
+@code {
+    [Parameter]
+    public IEnumerable<TItem>? Data { get; set; }
+
+    [Parameter]
+    public bool AllowPaging { get; set; } = true;
+
+    [Parameter]
+    public bool AllowSorting { get; set; } = true;
+
+    [Parameter]
+    public bool AllowFiltering { get; set; }
+
+    [Parameter]
+    public FilterMode FilterMode { get; set; } = FilterMode.Simple;
+
+    [Parameter]
+    public bool AllowRowSelectOnRowClick { get; set; }
+
+    [Parameter]
+    public int PageSize { get; set; } = 20;
+
+    [Parameter]
+    public EventCallback<TItem> RowSelect { get; set; }
+
+    [Parameter]
+    public string EmptyText { get; set; } = "Geen resultaten";
+
+    [Parameter]
+    public RenderFragment? Columns { get; set; }
+
+    [Parameter]
+    public RenderFragment? EmptyTemplate { get; set; }
+
+    [Parameter]
+    public string? CssClass { get; set; }
+
+    private string CombinedClass => string.IsNullOrWhiteSpace(CssClass) ? "agt-data-grid" : $"agt-data-grid {CssClass}";
+}

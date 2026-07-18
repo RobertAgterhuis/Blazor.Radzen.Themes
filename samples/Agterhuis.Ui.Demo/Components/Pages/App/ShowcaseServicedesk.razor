@@ -1,0 +1,138 @@
+@page "/app/servicedesk"
+@layout ShowcaseLayout
+
+@inject ShowcaseDataService DataService
+@inject IAgtNotificationService Notifications
+
+<PageTitle>Werkorders - Servicedesk</PageTitle>
+
+<AgtBreadcrumb CssClass="showcase-page__breadcrumbs" Items="Breadcrumbs" />
+<AgtPageHeader Kicker="Werkorders" Title="Servicedesk" Description="Tickettriage met chatgesprekken en assistent-ondersteuning." />
+
+<div class="showcase-page__toolbar">
+    <div></div>
+    <RadzenSelectBar TValue="string" Data="StatusOptions" TextProperty="Text" ValueProperty="Value" @bind-Value="_statusFilter" />
+    <div></div>
+    <AgtSecondaryButton Text="Sessie verlopen demo" Click="ToggleSessionExpired" />
+</div>
+
+@if (_sessionExpired)
+{
+    <AgtCard>
+        <Header>Sessie verlopen</Header>
+        <ChildContent>
+            <RadzenLogin AllowRegister="false" AllowResetPassword="true" />
+        </ChildContent>
+    </AgtCard>
+}
+
+<div class="showcase-page__split">
+    <AgtCard>
+        <Header>Open tickets</Header>
+        <ChildContent>
+            <RadzenListBox TValue="int" Data="FilteredTickets" TextProperty="Subject" ValueProperty="Id" Change="OnTicketChanged" />
+        </ChildContent>
+    </AgtCard>
+
+    <AgtCard>
+        <Header>Gesprek</Header>
+        <ChildContent>
+            @if (_selectedTicket is null)
+            {
+                <AgtEmptyState Icon="chat" Title="Kies een ticket" Description="Selecteer links een ticket om het gesprek te openen." />
+            }
+            else
+            {
+                <RadzenStack Gap="0.5rem">
+                    @foreach (var message in Messages)
+                    {
+                        <RadzenCard>
+                            <strong>@message.Sender</strong>
+                            <div>@message.Text</div>
+                            <small>@message.When.ToString("dd-MM HH:mm")</small>
+                        </RadzenCard>
+                    }
+                </RadzenStack>
+
+                <div class="showcase-page__toolbar">
+                    <AgtTextArea Label="Nieuw bericht" Value="@_newMessage" ValueChanged="OnMessageChanged" ValueExpression="@(() => _newMessage)" />
+                    <AgtPrimaryButton Text="Versturen" Click="SendMessage" />
+                    <div></div>
+                    <div></div>
+                </div>
+
+                <AgtCard>
+                    <Header>AI assistent</Header>
+                    <ChildContent>
+                        <RadzenAIChat />
+                    </ChildContent>
+                </AgtCard>
+            }
+        </ChildContent>
+    </AgtCard>
+</div>
+
+@code {
+    private string _statusFilter = "Open";
+    private bool _sessionExpired;
+    private ShowcaseTicket? _selectedTicket;
+    private string _newMessage = string.Empty;
+
+    private IReadOnlyList<(string Text, string? Href)> Breadcrumbs =>
+    [
+        ("Servicedesk", "/app/servicedesk")
+    ];
+
+    private IReadOnlyList<object> StatusOptions =>
+    [
+        new StatusItem("Open", "Open"),
+        new StatusItem("Bezig", "Bezig"),
+        new StatusItem("Gesloten", "Gesloten")
+    ];
+
+    private IReadOnlyList<ShowcaseTicket> FilteredTickets => DataService.Tickets.Where(t => t.Status == _statusFilter).ToList();
+
+    private IReadOnlyList<ShowcaseChatMessage> Messages => _selectedTicket is null ? [] : DataService.GetMessages(_selectedTicket.Id);
+
+    protected override void OnInitialized()
+    {
+        _selectedTicket = DataService.Tickets.FirstOrDefault();
+    }
+
+    private Task ToggleSessionExpired(MouseEventArgs _)
+    {
+        _sessionExpired = !_sessionExpired;
+        return Task.CompletedTask;
+    }
+
+    private Task OnTicketChanged(object value)
+    {
+        if (value is int id)
+        {
+            _selectedTicket = DataService.Tickets.FirstOrDefault(t => t.Id == id);
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private Task OnMessageChanged(string? value)
+    {
+        _newMessage = value ?? string.Empty;
+        return Task.CompletedTask;
+    }
+
+    private Task SendMessage(MouseEventArgs _)
+    {
+        if (_selectedTicket is null)
+        {
+            return Task.CompletedTask;
+        }
+
+        DataService.SendChatMessage(_selectedTicket.Id, _newMessage);
+        _newMessage = string.Empty;
+        Notifications.Success("Bericht verzonden", _selectedTicket.Subject);
+        return Task.CompletedTask;
+    }
+
+    private sealed record StatusItem(string Value, string Text);
+}

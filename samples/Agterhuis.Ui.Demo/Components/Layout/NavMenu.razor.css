@@ -1,0 +1,56 @@
+.demo-panel-menu {
+    min-height: 100%;
+    padding: var(--agt-spacing-4) var(--agt-spacing-3);
+}
+
+.demo-panel-menu :deep(.demo-panel-menu__subtitle > .rz-navigation-item-wrapper),
+.demo-panel-menu :deep(.demo-panel-menu__subtitle > .rz-navigation-item-wrapper:hover),
+.demo-panel-menu :deep(.demo-panel-menu__subtitle > .rz-navigation-item-wrapper:focus-visible) {
+    color: var(--agt-text-muted);
+    cursor: default;
+    font-size: var(--agt-font-size-xs);
+    letter-spacing: 0.01em;
+    opacity: 0.95;
+    pointer-events: none;
+}
+
+.demo-panel-menu :deep(.demo-panel-menu__subtitle .rz-navigation-item-icon-children) {
+    color: var(--agt-text-muted);
+}
+
+.demo-panel-menu :deep(.demo-panel-menu__section > .rz-navigation-item-wrapper),
+.demo-panel-menu :deep(.demo-panel-menu__section > .rz-navigation-item-wrapper:hover),
+.demo-panel-menu :deep(.demo-panel-menu__section > .rz-navigation-item-wrapper:focus-visible) {
+    border-top: 1px solid var(--agt-input-border);
+    color: var(--agt-text-muted);
+    cursor: default;
+    font-size: var(--agt-font-size-xs);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    margin-top: var(--agt-spacing-2);
+    padding-top: var(--agt-spacing-3);
+    pointer-events: none;
+    text-transform: uppercase;
+}
+
+.demo-panel-menu :deep(.demo-panel-menu__section .rz-navigation-item-icon-children) {
+    color: transparent;
+}
+
+.demo-panel-menu :deep(.demo-panel-menu__group--catalog > .rz-navigation-item-wrapper) {
+    color: var(--agt-text-muted);
+}
+
+.demo-panel-menu :deep(.demo-panel-menu__group--catalog > .rz-navigation-item-wrapper .rz-navigation-item-text) {
+    font-weight: 600;
+}
+
+.demo-panel-menu :deep(.demo-panel-menu__group--catalog .rz-navigation-item-wrapper) {
+    color: color-mix(in srgb, var(--agt-text-body) 86%, var(--agt-text-muted));
+}
+
+.demo-panel-menu :deep(.demo-panel-menu__group--catalog .rz-navigation-item.rz-state-active > .rz-navigation-item-wrapper),
+.demo-panel-menu :deep(.demo-panel-menu__group--catalog .rz-navigation-item-wrapper:hover),
+.demo-panel-menu :deep(.demo-panel-menu__group--catalog .rz-navigation-item-wrapper:focus-visible) {
+    color: var(--agt-text-body);
+}

@@ -1,0 +1,373 @@
+.theme-showcase-card {
+    overflow: hidden;
+}
+
+.theme-showcase {
+    display: grid;
+    gap: var(--agt-spacing-4);
+    grid-template-columns: minmax(0, 1.2fr) auto;
+    min-height: 12rem;
+    position: relative;
+}
+
+.theme-showcase::before {
+    background: radial-gradient(circle at 18% 24%, color-mix(in srgb, var(--agt-color-primary-500) 20%, transparent) 0%, transparent 42%), radial-gradient(circle at 82% 18%, color-mix(in srgb, var(--agt-color-accent-400) 20%, transparent) 0%, transparent 32%);
+    content: "";
+    inset: 0;
+    pointer-events: none;
+    position: absolute;
+}
+
+.theme-showcase__copy,
+.theme-showcase__chips,
+.theme-showcase__ambient {
+    position: relative;
+    z-index: 1;
+}
+
+.theme-showcase__copy {
+    align-content: center;
+    display: grid;
+    gap: var(--agt-spacing-2);
+}
+
+.theme-showcase__kicker {
+    color: var(--agt-text-muted);
+    font-size: var(--agt-font-size-xs);
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    margin: 0;
+    text-transform: uppercase;
+}
+
+.theme-showcase h2 {
+    color: var(--agt-text-heading);
+    font-family: var(--agt-font-display);
+    font-size: clamp(1.75rem, 1.2rem + 1vw, 2.4rem);
+    margin: 0;
+}
+
+.theme-showcase p {
+    color: var(--agt-text-muted);
+    margin: 0;
+    max-width: 50ch;
+}
+
+.theme-showcase__chips {
+    align-content: center;
+    display: grid;
+    gap: var(--agt-spacing-2);
+    min-width: 12rem;
+}
+
+.theme-showcase__chip {
+    background: color-mix(in srgb, var(--agt-color-primary-500) 10%, transparent);
+    border: 1px solid var(--agt-input-border);
+    border-radius: 999px;
+    color: var(--agt-text-body);
+    font-size: var(--agt-font-size-sm);
+    padding: 0.35rem 0.7rem;
+}
+
+.theme-showcase__ambient {
+    inset: 0;
+    pointer-events: none;
+    position: absolute;
+}
+
+.theme-showcase__ambient-layer {
+    border-radius: inherit;
+    filter: blur(18px);
+    inset: 0;
+    opacity: 0.85;
+    position: absolute;
+}
+
+.theme-showcase--plum .theme-showcase__ambient-layer--one {
+    background: radial-gradient(circle at 18% 20%, color-mix(in srgb, var(--agt-color-primary-500) 30%, transparent) 0%, transparent 42%);
+    animation: theme-showcase-drift 120s linear infinite;
+}
+
+.theme-showcase--plum .theme-showcase__ambient-layer--two {
+    background: radial-gradient(circle at 76% 24%, color-mix(in srgb, var(--agt-color-accent-400) 18%, transparent) 0%, transparent 28%);
+    animation: theme-showcase-drift 150s linear infinite reverse;
+}
+
+.theme-showcase--dagobah .theme-showcase__ambient-layer--one {
+    background: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--agt-color-primary-500) 20%, transparent) 50%, transparent 100%);
+    animation: theme-showcase-mist-left 90s linear infinite;
+}
+
+.theme-showcase--dagobah .theme-showcase__ambient-layer--two {
+    background: linear-gradient(270deg, transparent 0%, color-mix(in srgb, var(--agt-color-primary-500) 16%, transparent) 45%, transparent 100%);
+    animation: theme-showcase-mist-right 120s linear infinite;
+}
+
+.theme-showcase--dathomir .theme-showcase__ambient-layer--one {
+    background: radial-gradient(circle at 28% 70%, color-mix(in srgb, var(--agt-color-accent-400) 24%, transparent) 0%, transparent 30%);
+    animation: theme-showcase-ember 8s ease-in-out infinite;
+}
+
+.theme-showcase--dathomir .theme-showcase__ambient-layer--two {
+    background: radial-gradient(circle at 78% 30%, color-mix(in srgb, var(--agt-color-primary-500) 24%, transparent) 0%, transparent 32%);
+    animation: theme-showcase-ember 11s ease-in-out infinite reverse;
+}
+
+.theme-showcase--hoth .theme-showcase__ambient-layer--one {
+    background-image: radial-gradient(circle at 10% 16%, color-mix(in srgb, var(--agt-color-white) 72%, transparent) 0 1px, transparent 1.5px), radial-gradient(circle at 24% 52%, color-mix(in srgb, var(--agt-color-white) 64%, transparent) 0 1px, transparent 1.5px), radial-gradient(circle at 40% 24%, color-mix(in srgb, var(--agt-color-white) 56%, transparent) 0 1px, transparent 1.5px), radial-gradient(circle at 62% 70%, color-mix(in srgb, var(--agt-color-white) 68%, transparent) 0 1px, transparent 1.5px), radial-gradient(circle at 84% 30%, color-mix(in srgb, var(--agt-color-white) 60%, transparent) 0 1px, transparent 1.5px);
+    animation: theme-showcase-snow 32s linear infinite;
+    opacity: 0.55;
+}
+
+.theme-showcase--hoth .theme-showcase__ambient-layer--two {
+    background-image: radial-gradient(circle at 16% 74%, color-mix(in srgb, var(--agt-color-white) 52%, transparent) 0 1px, transparent 1.5px), radial-gradient(circle at 48% 16%, color-mix(in srgb, var(--agt-color-white) 58%, transparent) 0 1px, transparent 1.5px), radial-gradient(circle at 76% 12%, color-mix(in srgb, var(--agt-color-white) 48%, transparent) 0 1px, transparent 1.5px);
+    animation: theme-showcase-snow 44s linear infinite reverse;
+    opacity: 0.42;
+}
+
+.theme-showcase--tatooine .theme-showcase__ambient-layer--one {
+    background: linear-gradient(180deg, transparent 0%, color-mix(in srgb, var(--agt-color-accent-400) 18%, transparent) 40%, transparent 100%);
+    animation: theme-showcase-heat 8s ease-in-out infinite;
+}
+
+.theme-showcase--tatooine .theme-showcase__ambient-layer--two {
+    background: radial-gradient(circle at 62% 34%, color-mix(in srgb, var(--agt-color-accent-400) 14%, transparent) 0%, transparent 30%);
+    animation: theme-showcase-heat 10s ease-in-out infinite reverse;
+}
+
+.theme-showcase--imperial .theme-showcase__ambient-layer--one {
+    background: linear-gradient(94deg, transparent 0%, color-mix(in srgb, var(--agt-color-primary-500) 14%, transparent) 48%, transparent 100%);
+    animation: theme-showcase-drift 120s linear infinite;
+}
+
+.theme-showcase--imperial .theme-showcase__ambient-layer--two {
+    background: radial-gradient(circle at 74% 24%, color-mix(in srgb, var(--agt-color-accent-400) 10%, transparent) 0%, transparent 30%);
+    animation: theme-showcase-drift 150s linear infinite reverse;
+}
+
+@keyframes theme-showcase-drift {
+    from {
+        transform: translate3d(-1%, 0, 0) scale(1);
+    }
+
+    to {
+        transform: translate3d(1%, -1%, 0) scale(1.03);
+    }
+}
+
+@keyframes theme-showcase-mist-left {
+    from {
+        transform: translate3d(-4%, 0, 0);
+    }
+
+    to {
+        transform: translate3d(4%, 0, 0);
+    }
+}
+
+@keyframes theme-showcase-mist-right {
+    from {
+        transform: translate3d(4%, 0, 0);
+    }
+
+    to {
+        transform: translate3d(-4%, 0, 0);
+    }
+}
+
+@keyframes theme-showcase-ember {
+    0%, 100% {
+        opacity: 0.3;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.6;
+        transform: scale(1.03);
+    }
+}
+
+@keyframes theme-showcase-snow {
+    from {
+        transform: translate3d(-1%, -1%, 0);
+    }
+
+    to {
+        transform: translate3d(1%, 1%, 0);
+    }
+}
+
+@keyframes theme-showcase-heat {
+    0%, 100% {
+        opacity: 0.24;
+        transform: translateY(0);
+    }
+
+    50% {
+        opacity: 0.46;
+        transform: translateY(-0.2rem);
+    }
+}
+
+@media (max-width: 720px) {
+    .theme-showcase {
+        grid-template-columns: 1fr;
+    }
+
+    .theme-showcase__chips {
+        min-width: 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .theme-showcase__ambient-layer {
+        animation: none !important;
+    }
+}
+
+.theme-token-grid {
+    display: grid;
+    gap: var(--agt-spacing-3);
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+}
+
+.theme-family-grid {
+    display: grid;
+    gap: var(--agt-spacing-3);
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.theme-family-card {
+    background: var(--agt-surface-1);
+    border: 1px solid var(--agt-input-border);
+    border-radius: var(--agt-border-radius-md);
+    padding: var(--agt-spacing-3);
+}
+
+.theme-family-card h3 {
+    color: var(--agt-text-heading);
+    font-size: var(--agt-font-size-md);
+    margin: 0 0 var(--agt-spacing-2);
+}
+
+.theme-family-row {
+    align-items: center;
+    display: flex;
+    gap: var(--agt-spacing-2);
+    margin-bottom: var(--agt-spacing-2);
+}
+
+.theme-family-label {
+    color: var(--agt-text-muted);
+    font-size: var(--agt-font-size-sm);
+    min-width: 2.5rem;
+}
+
+.theme-family-chip {
+    background: var(--agt-alpha-primary-10);
+    border: 1px solid var(--agt-input-border);
+    border-radius: 999px;
+    color: var(--agt-text-body);
+    font-size: var(--agt-font-size-sm);
+    padding: 0.25rem 0.6rem;
+}
+
+.theme-token-card {
+    align-items: center;
+    background: var(--agt-surface-1);
+    border: 1px solid var(--agt-input-border);
+    border-radius: var(--agt-border-radius-md);
+    display: grid;
+    gap: var(--agt-spacing-3);
+    grid-template-columns: 3.5rem 1fr;
+    padding: var(--agt-spacing-3);
+}
+
+.theme-token-swatch {
+    border: 1px solid var(--agt-input-border);
+    border-radius: var(--agt-border-radius-sm);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--agt-color-white) 15%, transparent);
+    height: 3rem;
+}
+
+.theme-token-name {
+    font-size: var(--agt-font-size-sm);
+    font-weight: 700;
+    word-break: break-word;
+}
+
+.theme-token-value {
+    color: var(--agt-color-gray-700);
+    font-size: var(--agt-font-size-sm);
+}
+
+.swatch-primary-50 { background: var(--agt-color-primary-50); }
+.swatch-primary-100 { background: var(--agt-color-primary-100); }
+.swatch-primary-200 { background: var(--agt-color-primary-200); }
+.swatch-primary-300 { background: var(--agt-color-primary-300); }
+.swatch-primary-400 { background: var(--agt-color-primary-400); }
+.swatch-primary-500 { background: var(--agt-color-primary-500); }
+.swatch-primary-600 { background: var(--agt-color-primary-600); }
+.swatch-primary-700 { background: var(--agt-color-primary-700); }
+.swatch-primary-800 { background: var(--agt-color-primary-800); }
+.swatch-primary-900 { background: var(--agt-color-primary-900); }
+.swatch-primary-950 { background: var(--agt-color-primary-950); }
+.swatch-accent-300 { background: var(--agt-color-accent-300); }
+.swatch-accent-400 { background: var(--agt-color-accent-400); }
+.swatch-accent-500 { background: var(--agt-color-accent-500); }
+.swatch-accent-600 { background: var(--agt-color-accent-600); }
+.swatch-accent-700 { background: var(--agt-color-accent-700); }
+.swatch-success { background: var(--agt-color-success); }
+.swatch-warning { background: var(--agt-color-warning); }
+.swatch-danger { background: var(--agt-color-danger); }
+.swatch-info { background: var(--agt-color-info); }
+.swatch-gray-50 { background: var(--agt-color-gray-50); }
+.swatch-gray-100 { background: var(--agt-color-gray-100); }
+.swatch-gray-200 { background: var(--agt-color-gray-200); }
+.swatch-gray-500 { background: var(--agt-color-gray-500); }
+.swatch-gray-700 { background: var(--agt-color-gray-700); }
+.swatch-gray-900 { background: var(--agt-color-gray-900); }
+.swatch-white { background: var(--agt-color-white); }
+
+.swatch-surface-0 { background: var(--agt-surface-0); }
+.swatch-surface-1 { background: var(--agt-surface-1); }
+.swatch-surface-2 { background: var(--agt-surface-2); }
+.swatch-surface-3 { background: var(--agt-surface-3); }
+
+.swatch-glass {
+    background: var(--agt-glass-bg);
+    border: var(--agt-glass-border);
+    box-shadow: var(--agt-shadow-sm);
+}
+
+.swatch-glow-primary {
+    background: var(--agt-color-primary-700);
+    box-shadow: var(--agt-glow-primary);
+}
+
+.swatch-glow-accent {
+    background: var(--agt-color-accent-400);
+    box-shadow: var(--agt-glow-accent);
+}
+
+.swatch-gradient-hero { background: var(--agt-gradient-hero); }
+.swatch-gradient-accent { background: var(--agt-gradient-accent); }
+.swatch-gradient-surface { background: var(--agt-gradient-surface); }
+
+.swatch-alpha-primary-5 { background: var(--agt-alpha-primary-5); }
+.swatch-alpha-primary-10 { background: var(--agt-alpha-primary-10); }
+.swatch-alpha-primary-20 { background: var(--agt-alpha-primary-20); }
+.swatch-alpha-primary-40 { background: var(--agt-alpha-primary-40); }
+.swatch-alpha-accent-5 { background: var(--agt-alpha-accent-5); }
+.swatch-alpha-accent-10 { background: var(--agt-alpha-accent-10); }
+.swatch-alpha-accent-20 { background: var(--agt-alpha-accent-20); }
+.swatch-alpha-accent-40 { background: var(--agt-alpha-accent-40); }
+
+:is([data-agt-theme="dark"], [data-agt-theme$="-dark"]) .theme-token-card {
+    background: var(--agt-color-primary-900);
+    border-color: color-mix(in srgb, var(--agt-color-white) 18%, transparent);
+}
+
+:is([data-agt-theme="dark"], [data-agt-theme$="-dark"]) .theme-token-value {
+    color: var(--agt-color-gray-100);
+}

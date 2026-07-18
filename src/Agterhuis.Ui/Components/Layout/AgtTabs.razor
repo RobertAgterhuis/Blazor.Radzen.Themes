@@ -1,0 +1,44 @@
+<RadzenTabs SelectedIndex="@SelectedIndex"
+            Change="OnTabChanged"
+            RenderMode="@RenderMode"
+            TabPosition="@TabPosition"
+            class="@CombinedClass">
+    <Tabs>
+        <CascadingValue Name="AgtTabsLazy" Value="LazyRender" IsFixed="true">
+            <CascadingValue Name="AgtTabsSelectedIndex" Value="SelectedIndex" IsFixed="false">
+                @ChildContent
+            </CascadingValue>
+        </CascadingValue>
+    </Tabs>
+</RadzenTabs>
+
+@code {
+    [Parameter]
+    public int SelectedIndex { get; set; }
+
+    [Parameter]
+    public EventCallback<int> SelectedIndexChanged { get; set; }
+
+    [Parameter]
+    public bool LazyRender { get; set; }
+
+    [Parameter]
+    public TabRenderMode RenderMode { get; set; } = TabRenderMode.Client;
+
+    [Parameter]
+    public TabPosition TabPosition { get; set; } = TabPosition.Top;
+
+    [Parameter]
+    public string? CssClass { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    private string CombinedClass => string.IsNullOrWhiteSpace(CssClass) ? "agt-tabs" : $"agt-tabs {CssClass}";
+
+    private Task OnTabChanged(int index)
+    {
+        SelectedIndex = index;
+        return SelectedIndexChanged.InvokeAsync(index);
+    }
+}

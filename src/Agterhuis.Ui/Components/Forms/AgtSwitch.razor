@@ -1,0 +1,58 @@
+<div class="agt-field-wrapper @CssClass" role="group">
+    <label class="agt-switch" for="@ResolvedName">
+        <span class="agt-switch__label">@ResolvedLabel</span>
+        <RadzenSwitch Name="@ResolvedName"
+                      Value="@Value"
+                      ValueChanged="@ValueChanged"
+                      Disabled="@Disabled"
+                      InputAttributes="@ResolvedInputAttributes" />
+        <span class="agt-switch__state" aria-live="polite">@(Value ? OnText : OffText)</span>
+    </label>
+</div>
+
+@code {
+    [Parameter]
+    public bool Value { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> ValueChanged { get; set; }
+
+    [Parameter]
+    public string? Name { get; set; }
+
+    [Parameter]
+    public string? Label { get; set; }
+
+    [Parameter]
+    public string? AriaLabel { get; set; }
+
+    [Parameter]
+    public string OnText { get; set; } = "Aan";
+
+    [Parameter]
+    public string OffText { get; set; } = "Uit";
+
+    [Parameter]
+    public bool Disabled { get; set; }
+
+    [Parameter]
+    public string? CssClass { get; set; }
+
+    private readonly string _fallbackName = $"agt-switch-{Guid.NewGuid():N}";
+
+    private string ResolvedName => string.IsNullOrWhiteSpace(Name) ? _fallbackName : Name;
+
+    private string ResolvedLabel => string.IsNullOrWhiteSpace(Label) ? AriaLabel ?? string.Empty : Label;
+
+    private IReadOnlyDictionary<string, object> ResolvedInputAttributes =>
+        string.IsNullOrWhiteSpace(AriaLabel)
+            ? new Dictionary<string, object>()
+            : new Dictionary<string, object> { ["aria-label"] = AriaLabel! };
+
+    protected override void OnParametersSet()
+    {
+        System.Diagnostics.Debug.Assert(
+            !string.IsNullOrWhiteSpace(Label) || !string.IsNullOrWhiteSpace(AriaLabel),
+            "AgtSwitch requires Label or AriaLabel for accessibility.");
+    }
+}

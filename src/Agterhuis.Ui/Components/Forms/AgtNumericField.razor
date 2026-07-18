@@ -1,0 +1,98 @@
+<div class="agt-field-wrapper @CssClass"
+    role="group"
+    aria-describedby="@ResolvedDescribedBy"
+    aria-invalid="@(!string.IsNullOrWhiteSpace(ValidationMessage))">
+    @if (!string.IsNullOrWhiteSpace(Label))
+    {
+        <RadzenLabel Text="@Label" Component="@ResolvedName" class="agt-field-wrapper__label" />
+    }
+    else if (!string.IsNullOrWhiteSpace(AriaLabel))
+    {
+        <label class="agt-sr-only" for="@ResolvedName">@AriaLabel</label>
+    }
+
+    <RadzenNumeric TValue="decimal?"
+                   Value="@Value"
+                   ValueChanged="@ValueChanged"
+                   ValueExpression="@ValueExpression"
+                   Name="@ResolvedName"
+                   Min="@Min"
+                   Max="@Max"
+                   Step="@Step"
+                   Placeholder="@Placeholder"
+                   Disabled="@Disabled"
+                   ReadOnly="@ReadOnly"
+                   AriaLabel="@AriaLabel"
+                   class="@CombinedClass"
+                   Style="@Style" />
+
+    @if (!string.IsNullOrWhiteSpace(ValidationMessage))
+    {
+        <p id="@MessageId" class="agt-field-wrapper__message" role="status" aria-live="polite">@ValidationMessage</p>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public decimal? Value { get; set; }
+
+    [Parameter]
+    public EventCallback<decimal?> ValueChanged { get; set; }
+
+    [Parameter]
+    public Expression<Func<decimal?>>? ValueExpression { get; set; }
+
+    [Parameter]
+    public string? Name { get; set; }
+
+    [Parameter]
+    public string? Label { get; set; }
+
+    [Parameter]
+    public string? AriaLabel { get; set; }
+
+    [Parameter]
+    public decimal? Min { get; set; }
+
+    [Parameter]
+    public decimal? Max { get; set; }
+
+    [Parameter]
+    public string? Step { get; set; }
+
+    [Parameter]
+    public string? Placeholder { get; set; }
+
+    [Parameter]
+    public bool Disabled { get; set; }
+
+    [Parameter]
+    public bool ReadOnly { get; set; }
+
+    [Parameter]
+    public string? CssClass { get; set; }
+
+    [Parameter]
+    public string? ValidationMessage { get; set; }
+
+    [Parameter]
+    public string? Style { get; set; }
+
+    private readonly string _fallbackName = $"agt-numeric-field-{Guid.NewGuid():N}";
+    private readonly string _messageId = $"agt-numeric-field-msg-{Guid.NewGuid():N}";
+
+    private string ResolvedName => string.IsNullOrWhiteSpace(Name) ? _fallbackName : Name;
+
+    private string MessageId => _messageId;
+
+    private string? ResolvedDescribedBy => string.IsNullOrWhiteSpace(ValidationMessage) ? null : MessageId;
+
+    private string CombinedClass => "agt-numeric-field";
+
+    protected override void OnParametersSet()
+    {
+        System.Diagnostics.Debug.Assert(
+            !string.IsNullOrWhiteSpace(Label) || !string.IsNullOrWhiteSpace(AriaLabel),
+            "AgtNumericField requires Label or AriaLabel for accessibility.");
+    }
+}

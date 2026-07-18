@@ -1,0 +1,122 @@
+@page "/app/projecten"
+@layout ShowcaseLayout
+
+@inject ShowcaseDataService DataService
+@inject IAgtNotificationService Notifications
+
+<PageTitle>Werkorders - Projecten</PageTitle>
+
+<AgtBreadcrumb CssClass="showcase-page__breadcrumbs" Items="Breadcrumbs" />
+<AgtPageHeader Kicker="Werkorders" Title="Projecten" Description="Projectoverzicht met Gantt, wizard en fasebeheer." />
+
+<AgtLoadingPanel IsLoading="@_loading" LoadingText="Projecten laden...">
+    <div class="showcase-page__chart-grid">
+        <AgtCard>
+            <Header>Projecten</Header>
+            <ChildContent>
+                <RadzenCardGroup>
+                    @foreach (var project in DataService.Projects)
+                    {
+                        <RadzenCard>
+                            <h3 class="showcase-page__section-title">@project.Name</h3>
+                            <p class="showcase-page__muted">@project.CustomerName</p>
+                            <RadzenProgressBar Value="@(project.Progress * 100)" Unit="%" ShowValue="true" />
+                        </RadzenCard>
+                    }
+                </RadzenCardGroup>
+            </ChildContent>
+        </AgtCard>
+
+        <AgtCard>
+            <Header>Nieuw project</Header>
+            <ChildContent>
+                <RadzenSteps @bind-Value="_wizardStep">
+                    <RadzenStepsItem Text="Basis">
+                        <AgtTextField Label="Projectnaam" Value="@_newProjectName" ValueChanged="@(v => _newProjectName = v ?? string.Empty)" ValueExpression="@(() => _newProjectName)" />
+                        <AgtDropdown TValue="int" Label="Klant" Data="@CustomerOptions" Value="@_selectedCustomerId" ValueChanged="@(v => _selectedCustomerId = v)" ValueExpression="@(() => _selectedCustomerId)" TextProperty="Company" ValueProperty="Id" />
+                    </RadzenStepsItem>
+                    <RadzenStepsItem Text="Planning">
+                        <AgtDatePicker Label="Start" Value="@_start" ValueChanged="@(v => _start = v ?? DateTime.Today)" />
+                        <AgtDatePicker Label="Einde" Value="@_end" ValueChanged="@(v => _end = v ?? DateTime.Today.AddDays(14))" />
+                    </RadzenStepsItem>
+                    <RadzenStepsItem Text="Team">
+                        <RadzenPickList TValue="int" TItem="ShowcaseTechnician" Data="@DataService.Technicians" TextProperty="Name" ValueProperty="Id" @bind-Value="_selectedTechnicians" />
+                        <AgtPrimaryButton Text="Project aanmaken" Click="CreateProject" />
+                    </RadzenStepsItem>
+                </RadzenSteps>
+            </ChildContent>
+        </AgtCard>
+    </div>
+
+    <AgtCard>
+        <Header>Projectplanning (Gantt)</Header>
+        <ChildContent>
+            @if (PreviewOnly)
+            {
+                <RadzenCard>Gantt preview</RadzenCard>
+            }
+            else
+            {
+                <RadzenGantt Data="@DataService.ProjectTasks"
+                             TItem="ShowcaseProjectTask"
+                             StartProperty="Start"
+                             EndProperty="End"
+                             TextProperty="Text"
+                             ProgressProperty="Progress"
+                             Style="height: 26rem;" />
+            }
+        </ChildContent>
+    </AgtCard>
+
+    <AgtCard>
+        <Header>Fases</Header>
+        <ChildContent>
+            <RadzenAccordion>
+                <Items>
+                    <RadzenAccordionItem Text="Intake">Scope en planningbevestiging met klant.</RadzenAccordionItem>
+                    <RadzenAccordionItem Text="Uitvoering">Werkorders en assets per team verwerken.</RadzenAccordionItem>
+                    <RadzenAccordionItem Text="Oplevering">Validatie, rapportage en klantakkoord.</RadzenAccordionItem>
+                </Items>
+            </RadzenAccordion>
+        </ChildContent>
+    </AgtCard>
+</AgtLoadingPanel>
+
+@code {
+    [Parameter]
+    public bool PreviewOnly { get; set; }
+
+    private bool _loading = true;
+    private int _wizardStep;
+    private string _newProjectName = "Nieuw installatieproject";
+    private int _selectedCustomerId = 1;
+    private DateTime _start = DateTime.Today;
+    private DateTime _end = DateTime.Today.AddDays(14);
+    private IEnumerable<int> _selectedTechnicians = [1, 2];
+
+    private IReadOnlyList<(string Text, string? Href)> Breadcrumbs =>
+    [
+        ("Projecten", "/app/projecten")
+    ];
+
+    private IReadOnlyList<object> CustomerOptions => DataService.Customers.Cast<object>().ToList();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (PreviewOnly)
+        {
+            _loading = false;
+            return;
+        }
+
+        await Task.Delay(250);
+        _loading = false;
+    }
+
+    private Task CreateProject(MouseEventArgs _)
+    {
+        var project = DataService.CreateProject(_newProjectName, _selectedCustomerId, _start, _end, _selectedTechnicians);
+        Notifications.Success("Project aangemaakt", project.Name);
+        return Task.CompletedTask;
+    }
+}

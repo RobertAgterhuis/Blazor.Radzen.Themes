@@ -1,0 +1,55 @@
+.rz-alert,
+.rz-badge,
+.rz-progressbar,
+.rz-progressbar-circular {
+    border-radius: var(--agt-border-radius-md);
+}
+
+.rz-alert,
+.rz-tooltip,
+.rz-notification {
+    background: var(--agt-surface-2);
+    border: 1px solid var(--agt-input-border);
+    box-shadow: var(--agt-shadow-sm);
+}
+
+.rz-alert.rz-alert-warning,
+.rz-badge.rz-badge-warning {
+    background: var(--agt-alpha-accent-20);
+    border-inline-start: 4px solid var(--agt-color-accent-400);
+    color: var(--agt-color-gray-900);
+}
+
+.rz-alert.rz-alert-success,
+.rz-badge.rz-badge-success,
+.rz-progressbar-value {
+    background: color-mix(in srgb, var(--agt-color-success) 75%, var(--agt-surface-1));
+    border-inline-start: 4px solid var(--agt-color-success);
+    color: var(--agt-color-gray-900);
+}
+
+.rz-alert.rz-alert-info,
+.rz-badge.rz-badge-info {
+    background: color-mix(in srgb, var(--agt-color-info) 70%, var(--agt-surface-1));
+    border-inline-start: 4px solid var(--agt-color-info);
+    color: var(--agt-color-gray-900);
+}
+
+.rz-alert.rz-alert-danger,
+.rz-badge.rz-badge-danger {
+    background: color-mix(in srgb, var(--agt-color-danger) 75%, var(--agt-surface-1));
+    border-inline-start: 4px solid var(--agt-color-danger);
+    color: var(--agt-color-gray-900);
+}
+
+.rz-progressbar-circular path {
+    stroke: var(--agt-color-primary-500);
+}
+
+.rz-tooltip {
+    color: var(--agt-tooltip-text);
+}
+
+.rz-progressbar {
+    background: var(--agt-alpha-primary-10);
+}

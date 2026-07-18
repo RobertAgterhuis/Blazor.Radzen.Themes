@@ -1,0 +1,105 @@
+.rz-layout,
+.rz-sidebar,
+.rz-panel,
+.rz-card,
+.rz-splitter,
+.rz-fieldset,
+.rz-stack,
+.rz-row {
+    border-radius: var(--agt-border-radius-lg);
+}
+
+.rz-sidebar {
+    background: var(--agt-surface-1);
+    border-inline-end: 1px solid var(--agt-input-border);
+    box-shadow: var(--agt-shadow-sm);
+    color: var(--agt-text-body);
+}
+
+.rz-panel-titlebar,
+.rz-fieldset-legend {
+    background: var(--agt-gradient-surface);
+    border-bottom: 2px solid var(--agt-alpha-accent-40);
+    color: var(--agt-text-heading);
+}
+
+.rz-card,
+.rz-panel,
+.rz-fieldset {
+    background: var(--agt-surface-1);
+    border: 1px solid var(--agt-input-border);
+    border-radius: var(--agt-border-radius-lg);
+    box-shadow: var(--agt-shadow-sm);
+}
+
+.rz-card.rz-clickable,
+.rz-panel.rz-clickable,
+.rz-card[role="button"] {
+    transition: transform var(--agt-transition-normal), box-shadow var(--agt-transition-normal), background-color var(--agt-transition-normal);
+}
+
+.rz-card.rz-clickable:hover,
+.rz-panel.rz-clickable:hover,
+.rz-card[role="button"]:hover {
+    box-shadow: var(--agt-shadow-md);
+    transform: translateY(calc(var(--agt-lift-distance) * -1));
+}
+
+.rz-card.rz-clickable:active,
+.rz-panel.rz-clickable:active,
+.rz-card[role="button"]:active {
+    transform: scale(var(--agt-press-scale));
+}
+
+.rz-column,
+.rz-row,
+.rz-stack {
+    min-width: 0;
+}
+
+.rz-layout,
+.rz-body,
+.rz-main,
+.rz-content {
+    background: transparent;
+}
+
+.rz-body {
+    color: inherit;
+}
+
+.agt-theme-toggle.rz-button {
+    border: var(--agt-glass-border);
+    border-radius: 999px;
+    color: var(--agt-topbar-icon-color);
+    min-height: 2.25rem;
+    min-width: 2.25rem;
+    padding: 0;
+}
+
+.agt-theme-toggle.rz-button:hover {
+    background: var(--agt-hover-tint);
+    box-shadow: var(--agt-glow-accent);
+    color: var(--agt-topbar-icon-hover-color);
+}
+
+:is([data-agt-theme="dark"], [data-agt-theme$="-dark"]) .rz-sidebar {
+    color: var(--agt-color-white);
+}
+
+:is([data-agt-theme="dark"], [data-agt-theme$="-dark"]) .rz-panel-titlebar,
+:is([data-agt-theme="dark"], [data-agt-theme$="-dark"]) .rz-fieldset-legend {
+    color: var(--agt-color-white);
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .rz-sidebar {
+        background: var(--agt-surface-1);
+    }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+    .rz-sidebar {
+        background: var(--agt-surface-1);
+    }
+}

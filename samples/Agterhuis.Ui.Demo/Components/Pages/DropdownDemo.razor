@@ -1,0 +1,33 @@
+@page "/components/forms/dropdown"
+
+<PageTitle>Dropdown</PageTitle>
+
+<div class="agt-page agt-stack">
+    <AgtPageHeader Title="AgtDropdown" Description="Generic dropdown wrapper met Text/Value properties." />
+
+    <AgtCard>
+        <ChildContent>
+            <AgtDropdown TValue="int"
+                         Data="_options"
+                         Label="Optie"
+                         TextProperty="Name"
+                         ValueProperty="Id"
+                         Placeholder="Kies een optie"
+                         @bind-Value="_selectedId" />
+            <p>Geselecteerd: @_selectedId</p>
+        </ChildContent>
+    </AgtCard>
+</div>
+
+@code {
+    private int _selectedId = 2;
+
+    private readonly IReadOnlyList<OptionItem> _options =
+    [
+        new(1, "Alpha"),
+        new(2, "Bravo"),
+        new(3, "Charlie")
+    ];
+
+    private sealed record OptionItem(int Id, string Name);
+}

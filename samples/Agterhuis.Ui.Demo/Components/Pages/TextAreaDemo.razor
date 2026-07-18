@@ -1,0 +1,20 @@
+@page "/components/forms/text-area"
+
+<PageTitle>Text area</PageTitle>
+
+<div class="agt-page agt-stack">
+    <AgtPageHeader Title="AgtTextArea" Description="TextArea met default 3 rijen en tekenenteller bij MaxLength." />
+
+    <AgtCard>
+        <ChildContent>
+            <AgtTextArea @bind-Value="_notes"
+                         Label="Toelichting"
+                         Placeholder="Typ uw toelichting"
+                         MaxLength="160" />
+        </ChildContent>
+    </AgtCard>
+</div>
+
+@code {
+    private string? _notes = "Starttekst";
+}

@@ -1,0 +1,34 @@
+@page "/components/forms/auto-complete"
+
+<PageTitle>Auto complete</PageTitle>
+
+<div class="agt-page agt-stack">
+    <AgtPageHeader Title="AgtAutoComplete" Description="AutoComplete met debounce-default van 300ms en leegtekst in NL." />
+
+    <AgtCard>
+        <ChildContent>
+            <AgtAutoComplete TItem="string"
+                             Data="_items"
+                             Label="Zoek medewerker"
+                             Placeholder="Begin met typen"
+                             @bind-Value="_query"
+                             LoadData="OnLoadData" />
+            <p>Zoekterm: @_query</p>
+        </ChildContent>
+    </AgtCard>
+</div>
+
+@code {
+    private string? _query;
+
+    private readonly IReadOnlyList<string> _all = ["Anna", "Bram", "Cato", "Daan", "Eva"];
+
+    private IReadOnlyList<string> _items = ["Anna", "Bram", "Cato", "Daan", "Eva"];
+
+    private Task OnLoadData(LoadDataArgs args)
+    {
+        var filter = args.Filter ?? string.Empty;
+        _items = _all.Where(x => x.Contains(filter, StringComparison.OrdinalIgnoreCase)).ToArray();
+        return Task.CompletedTask;
+    }
+}

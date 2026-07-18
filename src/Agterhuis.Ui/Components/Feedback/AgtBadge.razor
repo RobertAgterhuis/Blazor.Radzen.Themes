@@ -1,0 +1,59 @@
+<RadzenBadge class="@CombinedClass"
+             BadgeStyle="@ResolvedStyle"
+             Variant="@Variant"
+             Shade="@Shade"
+             Style="@Style">
+    <ChildContent>
+        @if (!string.IsNullOrWhiteSpace(Icon))
+        {
+            <span class="agt-badge__icon" aria-hidden="true">@Icon</span>
+        }
+        @if (!string.IsNullOrWhiteSpace(Text))
+        {
+            <span>@Text</span>
+        }
+    </ChildContent>
+</RadzenBadge>
+
+@code {
+    [Parameter]
+    public string? Text { get; set; }
+
+    [Parameter]
+    public string? Icon { get; set; }
+
+    [Parameter]
+    public AgtIntent Intent { get; set; } = AgtIntent.Neutral;
+
+    [Parameter]
+    public Variant Variant { get; set; } = Variant.Filled;
+
+    [Parameter]
+    public Shade Shade { get; set; } = Shade.Default;
+
+    [Parameter]
+    public string? CssClass { get; set; }
+
+    [Parameter]
+    public string? Style { get; set; }
+
+    private string CombinedClass => string.IsNullOrWhiteSpace(CssClass) ? "agt-badge" : $"agt-badge {CssClass}";
+
+    private BadgeStyle ResolvedStyle => Intent switch
+    {
+        AgtIntent.Success => BadgeStyle.Success,
+        AgtIntent.Warning => BadgeStyle.Warning,
+        AgtIntent.Danger => BadgeStyle.Danger,
+        AgtIntent.Info => BadgeStyle.Info,
+        AgtIntent.Primary => BadgeStyle.Primary,
+        AgtIntent.Secondary => BadgeStyle.Secondary,
+        _ => BadgeStyle.Secondary
+    };
+
+    protected override void OnParametersSet()
+    {
+        System.Diagnostics.Debug.Assert(
+            !string.IsNullOrWhiteSpace(Text) || !string.IsNullOrWhiteSpace(Icon),
+            "AgtBadge requires Text or Icon so meaning is never color-only.");
+    }
+}

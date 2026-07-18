@@ -1,0 +1,242 @@
+@namespace Agterhuis.Ui.Demo.Components.Pages.App
+@inject ShowcaseDataService DataService
+
+<EditForm EditContext="@_editContext">
+    <DataAnnotationsValidator />
+    <div class="showcase-page__form">
+        <AgtDropdown TValue="int"
+                     Label="Klant"
+                     Data="@CustomerOptions"
+                     Value="@_draft.CustomerId"
+                     ValueChanged="OnCustomerIdChanged"
+                     ValueExpression="@(() => _draft.CustomerId)"
+                     TextProperty="Company"
+                     ValueProperty="Id"
+                     ValidationMessage="@FieldMessage(() => _draft.CustomerId)" />
+        <AgtTextField Label="Adres" Value="@_draft.Address" ValueChanged="OnAddressChanged" ValueExpression="@(() => _draft.Address)" ValidationMessage="@FieldMessage(() => _draft.Address)" />
+        <AgtDropdown TValue="ShowcaseWorkOrderType"
+                     Label="Type"
+                     Data="@TypeOptions"
+                     Value="@_draft.Type"
+                     ValueChanged="OnTypeChanged"
+                     ValueExpression="@(() => _draft.Type)"
+                     TextProperty="Label"
+                     ValueProperty="Value"
+                     ValidationMessage="@FieldMessage(() => _draft.Type)" />
+        <AgtDropdown TValue="ShowcaseWorkOrderPriority"
+                     Label="Prioriteit"
+                     Data="@PriorityOptions"
+                     Value="@_draft.Priority"
+                     ValueChanged="OnPriorityChanged"
+                     ValueExpression="@(() => _draft.Priority)"
+                     TextProperty="Label"
+                     ValueProperty="Value" />
+        <AgtDropdown TValue="int"
+                     Label="Monteur"
+                     Data="@TechnicianOptions"
+                     Value="@_draft.TechnicianId"
+                     ValueChanged="OnTechnicianChanged"
+                     ValueExpression="@(() => _draft.TechnicianId)"
+                     TextProperty="Name"
+                     ValueProperty="Id"
+                     ValidationMessage="@FieldMessage(() => _draft.TechnicianId)" />
+        <AgtDropdown TValue="ShowcaseWorkOrderStatus"
+                     Label="Status"
+                     Data="@StatusOptions"
+                     Value="@_draft.Status"
+                     ValueChanged="OnStatusChanged"
+                     ValueExpression="@(() => _draft.Status)"
+                     TextProperty="Label"
+                     ValueProperty="Value" />
+        <AgtDatePicker Label="Startdatum" ShowTime="true" Value="@((DateTime?)_draft.PlannedStart)" ValueChanged="OnStartChanged" ValueExpression="@(() => _draft.PlannedStart)" ValidationMessage="@FieldMessage(() => _draft.PlannedStart)" />
+        <AgtDatePicker Label="Einddatum" ShowTime="true" Value="@((DateTime?)_draft.PlannedEnd)" ValueChanged="OnEndChanged" ValueExpression="@(() => _draft.PlannedEnd)" ValidationMessage="@FieldMessage(() => _draft.PlannedEnd)" />
+        <AgtNumericField Label="Bedrag" Value="@((decimal?)_draft.Amount)" ValueChanged="OnAmountChanged" ValueExpression="@(() => _draft.Amount)" Min="50" Step="25" />
+        <AgtTextField Label="Omschrijving" Value="@_draft.Description" ValueChanged="OnDescriptionChanged" ValueExpression="@(() => _draft.Description)" />
+
+        <AgtFormActions SaveText="Opslaan" CancelText="Annuleren" IsBusy="@_saving" Save="OnSave" Cancel="OnCancel" />
+        @if (!string.IsNullOrWhiteSpace(_statusMessage))
+        {
+            <p class="showcase-page__muted" role="status">@_statusMessage</p>
+        }
+    </div>
+</EditForm>
+
+@code {
+    [Parameter]
+    public ShowcaseWorkOrder Draft { get; set; } = default!;
+
+    [Parameter]
+    public bool IsEditMode { get; set; }
+
+    [Inject]
+    private DialogService DialogService { get; set; } = default!;
+
+    private ShowcaseWorkOrder _draft = default!;
+    private EditContext _editContext = default!;
+    private bool _saving;
+    private string? _statusMessage;
+
+    private IReadOnlyList<object> CustomerOptions => DataService.Customers.Cast<object>().ToList();
+
+    private IReadOnlyList<object> TechnicianOptions => DataService.Technicians.Cast<object>().ToList();
+
+    private IReadOnlyList<object> TypeOptions => Enum.GetValues<ShowcaseWorkOrderType>().Select(value => new SelectOption<ShowcaseWorkOrderType>(value, value switch
+    {
+        ShowcaseWorkOrderType.Installatie => "Installatie",
+        ShowcaseWorkOrderType.Reparatie => "Reparatie",
+        ShowcaseWorkOrderType.Onderhoud => "Onderhoud",
+        _ => "Inspectie"
+    })).Cast<object>().ToList();
+
+    private IReadOnlyList<object> PriorityOptions => Enum.GetValues<ShowcaseWorkOrderPriority>().Select(value => new SelectOption<ShowcaseWorkOrderPriority>(value, value switch
+    {
+        ShowcaseWorkOrderPriority.Laag => "Laag",
+        ShowcaseWorkOrderPriority.Normaal => "Normaal",
+        ShowcaseWorkOrderPriority.Hoog => "Hoog",
+        _ => "Kritiek"
+    })).Cast<object>().ToList();
+
+    private IReadOnlyList<object> StatusOptions => Enum.GetValues<ShowcaseWorkOrderStatus>().Select(value => new SelectOption<ShowcaseWorkOrderStatus>(value, value switch
+    {
+        ShowcaseWorkOrderStatus.Gepland => "Gepland",
+        ShowcaseWorkOrderStatus.Onderweg => "Onderweg",
+        ShowcaseWorkOrderStatus.InUitvoering => "In uitvoering",
+        ShowcaseWorkOrderStatus.Afgerond => "Afgerond",
+        _ => "Geannuleerd"
+    })).Cast<object>().ToList();
+
+    protected override void OnParametersSet()
+    {
+        _draft = Clone(Draft);
+        _editContext = new EditContext(_draft);
+    }
+
+    private Task OnCustomerIdChanged(int value)
+    {
+        _draft.CustomerId = value;
+        var customer = DataService.GetCustomer(value);
+        if (customer is not null)
+        {
+            _draft.CustomerName = customer.Company;
+            _draft.Address = customer.Address;
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private Task OnAddressChanged(string? value)
+    {
+        _draft.Address = value ?? string.Empty;
+        return Task.CompletedTask;
+    }
+
+    private Task OnTypeChanged(ShowcaseWorkOrderType value)
+    {
+        _draft.Type = value;
+        return Task.CompletedTask;
+    }
+
+    private Task OnPriorityChanged(ShowcaseWorkOrderPriority value)
+    {
+        _draft.Priority = value;
+        return Task.CompletedTask;
+    }
+
+    private Task OnTechnicianChanged(int value)
+    {
+        _draft.TechnicianId = value;
+        var technician = DataService.GetTechnician(value);
+        if (technician is not null)
+        {
+            _draft.TechnicianName = technician.Name;
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private Task OnStatusChanged(ShowcaseWorkOrderStatus value)
+    {
+        _draft.Status = value;
+        return Task.CompletedTask;
+    }
+
+    private Task OnStartChanged(DateTime? value)
+    {
+        if (value.HasValue)
+        {
+            _draft.PlannedStart = value.Value;
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private Task OnEndChanged(DateTime? value)
+    {
+        if (value.HasValue)
+        {
+            _draft.PlannedEnd = value.Value;
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private Task OnAmountChanged(decimal? value)
+    {
+        _draft.Amount = value ?? 0m;
+        return Task.CompletedTask;
+    }
+
+    private Task OnDescriptionChanged(string? value)
+    {
+        _draft.Description = value ?? string.Empty;
+        return Task.CompletedTask;
+    }
+
+    private async Task OnSave(MouseEventArgs _)
+    {
+        if (!_editContext.Validate())
+        {
+            _statusMessage = "Vul de verplichte velden in.";
+            return;
+        }
+
+        _saving = true;
+        _statusMessage = null;
+        await Task.Yield();
+        DialogService.Close(_draft);
+    }
+
+    private void OnCancel(MouseEventArgs _)
+    {
+        DialogService.Close(null);
+    }
+
+    private string? FieldMessage<TValue>(Expression<Func<TValue>> expression)
+    {
+        var fieldIdentifier = FieldIdentifier.Create(expression);
+        return _editContext.GetValidationMessages(fieldIdentifier).FirstOrDefault();
+    }
+
+    private static ShowcaseWorkOrder Clone(ShowcaseWorkOrder source)
+    {
+        return new ShowcaseWorkOrder
+        {
+            Id = source.Id,
+            Number = source.Number,
+            CustomerId = source.CustomerId,
+            CustomerName = source.CustomerName,
+            Address = source.Address,
+            Type = source.Type,
+            Status = source.Status,
+            Priority = source.Priority,
+            TechnicianId = source.TechnicianId,
+            TechnicianName = source.TechnicianName,
+            PlannedStart = source.PlannedStart,
+            PlannedEnd = source.PlannedEnd,
+            Amount = source.Amount,
+            Description = source.Description
+        };
+    }
+
+    private sealed record SelectOption<TValue>(TValue Value, string Label);
+}

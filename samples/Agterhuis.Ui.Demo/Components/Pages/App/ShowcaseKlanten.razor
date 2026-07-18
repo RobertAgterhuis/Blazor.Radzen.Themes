@@ -1,0 +1,116 @@
+@page "/app/klanten"
+@layout ShowcaseLayout
+
+@inject ShowcaseDataService DataService
+
+<PageTitle>Werkorders - Klanten</PageTitle>
+
+<AgtBreadcrumb CssClass="showcase-page__breadcrumbs" Items="Breadcrumbs" />
+<AgtPageHeader Kicker="Werkorders" Title="Klanten" Description="Zoek klanten en open hun werkorderhistorie in tabs." />
+
+<div class="showcase-page__split">
+    <AgtCard>
+        <Header>Zoeken</Header>
+        <ChildContent>
+            <AgtTextField Label="Zoek klant" AriaLabel="Zoek klant" Placeholder="Bedrijf, contact of plaats" Value="@_searchText" ValueChanged="OnSearchChanged" ValueExpression="@(() => _searchText)" />
+            <AgtDataGrid TItem="ShowcaseCustomer"
+                         Data="@FilteredCustomers"
+                         AllowFiltering="true"
+                         AllowRowSelectOnRowClick="true"
+                         RowSelect="OnCustomerSelected"
+                         PageSize="8">
+                <Columns>
+                    <RadzenDataGridColumn TItem="ShowcaseCustomer" Property="Company" Title="Bedrijf" />
+                    <RadzenDataGridColumn TItem="ShowcaseCustomer" Property="ContactPerson" Title="Contact" />
+                    <RadzenDataGridColumn TItem="ShowcaseCustomer" Property="City" Title="Plaats" />
+                </Columns>
+            </AgtDataGrid>
+        </ChildContent>
+    </AgtCard>
+
+    <AgtCard>
+        <Header>Klantdetail</Header>
+        <ChildContent>
+            @if (_selectedCustomer is null)
+            {
+                <AgtEmptyState Icon="groups" Title="Selecteer een klant" Description="Klik een klant in de lijst om details en historie te zien." />
+            }
+            else
+            {
+                <div class="showcase-page__list">
+                    <div>
+                        <h3 class="showcase-page__section-title">@_selectedCustomer.Company</h3>
+                        <p class="showcase-page__muted">@_selectedCustomer.ContactPerson · @_selectedCustomer.City</p>
+                    </div>
+
+                    <RadzenTabs>
+                        <Tabs>
+                            <RadzenTabsItem Text="Gegevens">
+                                <div class="showcase-page__detail-grid">
+                                    <AgtCard>
+                                        <Header>Contactgegevens</Header>
+                                        <ChildContent>
+                                            <p><strong>E-mail:</strong> @_selectedCustomer.Email</p>
+                                            <p><strong>Telefoon:</strong> @_selectedCustomer.Phone</p>
+                                            <p><strong>Adres:</strong> @_selectedCustomer.Address</p>
+                                        </ChildContent>
+                                    </AgtCard>
+                                    <AgtCard>
+                                        <Header>Planning</Header>
+                                        <ChildContent>
+                                            <p><strong>Open werkorders:</strong> @CustomerOrders.Count(order => order.Status is ShowcaseWorkOrderStatus.Gepland or ShowcaseWorkOrderStatus.Onderweg or ShowcaseWorkOrderStatus.InUitvoering)</p>
+                                            <p><strong>Afgerond:</strong> @CustomerOrders.Count(order => order.Status == ShowcaseWorkOrderStatus.Afgerond)</p>
+                                        </ChildContent>
+                                    </AgtCard>
+                                </div>
+                            </RadzenTabsItem>
+                            <RadzenTabsItem Text="Werkorderhistorie">
+                                <AgtDataGrid TItem="ShowcaseWorkOrder" Data="@CustomerOrders" PageSize="6">
+                                    <Columns>
+                                        <RadzenDataGridColumn TItem="ShowcaseWorkOrder" Property="Number" Title="Nummer" />
+                                        <RadzenDataGridColumn TItem="ShowcaseWorkOrder" Property="TypeLabel" Title="Type" />
+                                        <RadzenDataGridColumn TItem="ShowcaseWorkOrder" Property="StatusLabel" Title="Status" />
+                                        <RadzenDataGridColumn TItem="ShowcaseWorkOrder" Title="Bedrag">
+                                            <Template Context="order">@order.Amount.ToString("C0", System.Globalization.CultureInfo.GetCultureInfo("nl-NL"))</Template>
+                                        </RadzenDataGridColumn>
+                                    </Columns>
+                                </AgtDataGrid>
+                            </RadzenTabsItem>
+                        </Tabs>
+                    </RadzenTabs>
+                </div>
+            }
+        </ChildContent>
+    </AgtCard>
+</div>
+
+@code {
+    private string _searchText = string.Empty;
+    private ShowcaseCustomer? _selectedCustomer;
+
+    private IReadOnlyList<(string Text, string? Href)> Breadcrumbs =>
+    [
+        ("Klanten", "/app/klanten")
+    ];
+
+    private IReadOnlyList<ShowcaseCustomer> FilteredCustomers => DataService.Customers
+        .Where(customer => string.IsNullOrWhiteSpace(_searchText)
+            || customer.Company.Contains(_searchText, StringComparison.OrdinalIgnoreCase)
+            || customer.ContactPerson.Contains(_searchText, StringComparison.OrdinalIgnoreCase)
+            || customer.City.Contains(_searchText, StringComparison.OrdinalIgnoreCase))
+        .ToList();
+
+    private IReadOnlyList<ShowcaseWorkOrder> CustomerOrders => _selectedCustomer is null ? [] : DataService.GetWorkOrdersForCustomer(_selectedCustomer.Id).OrderByDescending(order => order.PlannedStart).ToList();
+
+    private Task OnSearchChanged(string? value)
+    {
+        _searchText = value ?? string.Empty;
+        return Task.CompletedTask;
+    }
+
+    private Task OnCustomerSelected(ShowcaseCustomer customer)
+    {
+        _selectedCustomer = customer;
+        return Task.CompletedTask;
+    }
+}

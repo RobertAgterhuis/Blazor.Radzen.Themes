@@ -1,0 +1,27 @@
+<div class="agt-loading-panel @CssClass" aria-busy="@IsLoading">
+    <div class="agt-loading-panel__content @(IsLoading ? "agt-loading-panel__content--loading" : string.Empty)">
+        @ChildContent
+    </div>
+
+    @if (IsLoading)
+    {
+        <div class="agt-loading-panel__overlay" role="status" aria-live="polite" aria-label="@LoadingText">
+            <RadzenProgressBarCircular Mode="ProgressBarMode.Indeterminate" class="agt-loading-panel__spinner" />
+            <span class="agt-loading-panel__text">@LoadingText</span>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public bool IsLoading { get; set; }
+
+    [Parameter]
+    public string LoadingText { get; set; } = "Laden...";
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    [Parameter]
+    public string? CssClass { get; set; }
+}

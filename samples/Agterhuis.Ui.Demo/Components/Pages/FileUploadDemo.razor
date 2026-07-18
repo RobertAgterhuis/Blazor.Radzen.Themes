@@ -1,0 +1,13 @@
+@page "/components/forms/file-upload"
+
+<PageTitle>File upload</PageTitle>
+
+<div class="agt-page agt-stack">
+    <AgtPageHeader Title="AgtFileUpload" Description="Upload wrapper met NL-teksten, extensiecontrole en voortgang." />
+
+    <AgtCard>
+        <ChildContent>
+            <AgtFileUpload Label="Document upload" Url="upload" AllowedExtensions="@(new[] { ".pdf", ".docx" })" MaxFileSize="2_000_000" />
+        </ChildContent>
+    </AgtCard>
+</div>

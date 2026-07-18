@@ -1,0 +1,29 @@
+<section class="agt-empty-state @CssClass" aria-live="polite">
+    <RadzenIcon Icon="@Icon" class="agt-empty-state__icon" aria-hidden="true" />
+    <h3 class="agt-empty-state__title">@Title</h3>
+    @if (!string.IsNullOrWhiteSpace(Description))
+    {
+        <p class="agt-empty-state__description">@Description</p>
+    }
+    @if (Action is not null)
+    {
+        <div class="agt-empty-state__action">@Action</div>
+    }
+</section>
+
+@code {
+    [Parameter]
+    public string Icon { get; set; } = "inbox";
+
+    [Parameter]
+    public string Title { get; set; } = "Geen data";
+
+    [Parameter]
+    public string? Description { get; set; }
+
+    [Parameter]
+    public RenderFragment? Action { get; set; }
+
+    [Parameter]
+    public string? CssClass { get; set; }
+}

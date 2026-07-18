@@ -1,0 +1,36 @@
+@page "/catalog/layout-advanced"
+
+<PageTitle>Layout Advanced (Radzen)</PageTitle>
+
+<div class="catalog-page">
+    <h1>Layout Advanced (Radzen)</h1>
+
+    <RadzenCardGroup>
+        <RadzenCard>CardGroup item 1</RadzenCard>
+        <RadzenCard>CardGroup item 2</RadzenCard>
+    </RadzenCardGroup>
+
+    <RadzenSplitter Style="height: 240px;">
+        <RadzenSplitterPane Size="35%">
+            Links paneel
+        </RadzenSplitterPane>
+        <RadzenSplitterPane>
+            Rechts paneel
+        </RadzenSplitterPane>
+    </RadzenSplitter>
+
+    <RadzenTileLayout>
+        <RadzenTileLayoutItem>
+            <ChildContent>
+                <RadzenCard>Tile 1</RadzenCard>
+            </ChildContent>
+        </RadzenTileLayoutItem>
+        <RadzenTileLayoutItem>
+            <ChildContent>
+                <RadzenCard>Tile 2</RadzenCard>
+            </ChildContent>
+        </RadzenTileLayoutItem>
+    </RadzenTileLayout>
+
+    <RadzenToc Selector="h1,h2" />
+</div>

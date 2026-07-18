@@ -1,0 +1,22 @@
+@page "/components/layout/breadcrumb"
+
+<PageTitle>Breadcrumb</PageTitle>
+
+<div class="agt-page agt-stack">
+    <AgtPageHeader Title="AgtBreadcrumb" Description="Breadcrumb wrapper met nav-semantiek en tuple-input." />
+
+    <AgtCard>
+        <ChildContent>
+            <AgtBreadcrumb Items="_items" AriaLabel="Padnavigatie" />
+        </ChildContent>
+    </AgtCard>
+</div>
+
+@code {
+    private readonly IReadOnlyList<(string Text, string? Href)> _items =
+    [
+        ("Home", "/"),
+        ("Componenten", "/components/layout"),
+        ("Breadcrumb", null)
+    ];
+}

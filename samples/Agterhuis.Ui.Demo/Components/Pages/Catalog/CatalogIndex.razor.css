@@ -1,0 +1,76 @@
+.catalog-index-page {
+    gap: var(--agt-spacing-4);
+}
+
+.catalog-index-hero {
+    animation: catalog-card-enter 500ms var(--agt-ease-out-expo) both;
+}
+
+.catalog-feature-grid {
+    display: grid;
+    gap: var(--agt-spacing-3);
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+}
+
+.catalog-feature-card {
+    animation: catalog-card-enter 480ms var(--agt-ease-out-expo) both;
+    animation-delay: calc(var(--catalog-stagger) * 30ms);
+    background: linear-gradient(180deg, var(--agt-surface-1), var(--agt-surface-2)) padding-box, linear-gradient(135deg, var(--agt-color-primary-500), var(--agt-color-accent-400)) border-box;
+    border: 1px solid transparent;
+    border-radius: var(--agt-border-radius-lg);
+    box-shadow: var(--agt-shadow-sm);
+    color: var(--agt-text-body);
+    display: grid;
+    gap: 0.25rem;
+    min-height: 8.25rem;
+    padding: var(--agt-spacing-4);
+    text-decoration: none;
+    transition: transform 180ms var(--agt-ease-spring), opacity 180ms var(--agt-ease-spring);
+}
+
+.catalog-feature-card:hover,
+.catalog-feature-card:focus-visible {
+    box-shadow: var(--agt-shadow-md), var(--agt-glow-primary);
+    transform: translateY(calc(var(--agt-lift-distance) * -1));
+}
+
+.catalog-feature-card__kicker {
+    color: var(--agt-text-muted);
+    font-size: var(--agt-font-size-xs);
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+.catalog-feature-card__title {
+    color: var(--agt-text-heading);
+    font-family: var(--agt-font-display);
+    font-size: var(--agt-font-size-lg);
+    font-weight: 700;
+}
+
+.catalog-feature-card__description {
+    color: var(--agt-text-muted);
+    font-size: var(--agt-font-size-sm);
+    line-height: 1.5;
+}
+
+@keyframes catalog-card-enter {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .catalog-feature-card,
+    .catalog-index-hero {
+        animation: none !important;
+        transition: none;
+    }
+}

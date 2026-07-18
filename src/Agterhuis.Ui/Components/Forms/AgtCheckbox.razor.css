@@ -1,0 +1,10 @@
+.agt-checkbox {
+    align-items: center;
+    cursor: pointer;
+    display: inline-flex;
+    gap: var(--agt-spacing-2);
+}
+
+.agt-checkbox__label {
+    color: var(--agt-text-body);
+}

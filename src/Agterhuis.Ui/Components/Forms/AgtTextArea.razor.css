@@ -1,0 +1,10 @@
+.agt-text-area {
+    width: 100%;
+}
+
+.agt-text-area__counter {
+    color: var(--agt-text-muted);
+    font-size: var(--agt-font-size-xs);
+    margin-top: var(--agt-spacing-1);
+    text-align: right;
+}

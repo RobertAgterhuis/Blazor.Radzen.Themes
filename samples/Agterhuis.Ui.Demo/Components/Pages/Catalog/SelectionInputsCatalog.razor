@@ -1,0 +1,29 @@
+@page "/catalog/selection-inputs"
+
+<PageTitle>Selection Inputs (Radzen)</PageTitle>
+
+<div class="catalog-page">
+    <h1>Selection Inputs (Radzen)</h1>
+
+    <RadzenStack Gap="0.75rem">
+        <RadzenCheckBox TValue="bool" Value="true" Name="cb" />
+        <RadzenSwitch Value="true" Name="sw" />
+        <RadzenSlider Min="0" Max="100" Value="35" Name="sl" />
+        <RadzenRating Stars="5" Value="3" Name="rt" />
+        <RadzenColorPicker Value="#680898" Name="cp" />
+        <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem">
+            <RadzenChip Text="Chip A" />
+            <RadzenChip Text="Chip B" />
+        </RadzenStack>
+        <RadzenCheckBoxList TValue="int" Data="ChoiceData" TextProperty="Text" ValueProperty="Value" Name="cbl" />
+        <RadzenRadioButtonList TValue="int" Data="ChoiceData" TextProperty="Text" ValueProperty="Value" Name="rbl" />
+    </RadzenStack>
+</div>
+
+@code {
+    private static readonly IReadOnlyList<object> ChoiceData =
+    [
+        new { Text = "One", Value = 1 },
+        new { Text = "Two", Value = 2 }
+    ];
+}

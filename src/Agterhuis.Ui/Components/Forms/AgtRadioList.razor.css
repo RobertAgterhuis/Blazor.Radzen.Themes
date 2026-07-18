@@ -1,0 +1,12 @@
+.agt-radio-list {
+    border: 0;
+    margin: 0;
+    padding: 0;
+}
+
+.agt-radio-list__legend {
+    color: var(--agt-text-heading);
+    font-size: var(--agt-font-size-sm);
+    font-weight: 600;
+    margin-bottom: var(--agt-spacing-2);
+}

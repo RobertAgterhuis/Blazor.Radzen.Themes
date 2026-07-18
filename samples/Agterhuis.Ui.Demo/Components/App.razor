@@ -1,0 +1,78 @@
+@using Agterhuis.Ui.Demo.Components.Layout
+@using Agterhuis.Ui.Demo.Components.Pages
+
+@*noinspection HtmlUnknownTarget *@
+<!DOCTYPE html>
+<html lang="nl" data-agt-theme="plum-dark">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="/" />
+    <ResourcePreloader />
+    <link rel="stylesheet" href="_content/Radzen.Blazor/css/material-base.css" />
+    <link rel="stylesheet" href="_content/Agterhuis.Ui/css/agt-theme.css" />
+    <link rel="stylesheet" href="_content/Agterhuis.Ui/css/agt-utilities.css" />
+    <link rel="stylesheet" href="@Assets["app.css"]" />
+    <link rel="stylesheet" href="@Assets["Agterhuis.Ui.Demo.styles.css"]" />
+    <script>
+        (() => {
+            const key = "agt-ui-theme";
+            const normalizeTheme = (value, fallback = "plum-dark") => {
+                const raw = (value || "").toString().trim().toLowerCase();
+                if (!raw) {
+                    return fallback;
+                }
+
+                if (raw === "dark") {
+                    return "plum-dark";
+                }
+
+                if (raw === "light") {
+                    return "plum-light";
+                }
+
+                return raw;
+            };
+
+            const applyTheme = (theme) => {
+                const normalized = normalizeTheme(theme);
+                document.documentElement.setAttribute("data-agt-theme", normalized);
+                if (document.body) {
+                    document.body.setAttribute("data-agt-theme", normalized);
+                }
+
+                return normalized;
+            };
+
+            const syncVisibility = () => {
+                const hidden = document.visibilityState === "hidden";
+                document.documentElement.toggleAttribute("data-agt-tab-hidden", hidden);
+                if (document.body) {
+                    document.body.toggleAttribute("data-agt-tab-hidden", hidden);
+                }
+            };
+
+            applyTheme(normalizeTheme(localStorage.getItem(key), "plum-dark"));
+            syncVisibility();
+            document.addEventListener("visibilitychange", syncVisibility, { passive: true });
+
+            if (!sessionStorage.getItem("agt-brand-sheen-seen")) {
+                document.documentElement.setAttribute("data-agt-brand-sheen", "ready");
+                sessionStorage.setItem("agt-brand-sheen-seen", "1");
+            }
+        })();
+    </script>
+    <ImportMap />
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <HeadOutlet @rendermode="InteractiveServer" />
+</head>
+
+<body>
+    <Routes @rendermode="InteractiveServer" />
+    <script src="_content/Radzen.Blazor/Radzen.Blazor.min.js"></script>
+    <script src="_content/Agterhuis.Ui/theme-interop.js"></script>
+    <script src="@Assets["_framework/blazor.web.js"]"></script>
+</body>
+
+</html>

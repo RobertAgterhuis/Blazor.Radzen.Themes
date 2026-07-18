@@ -1,0 +1,115 @@
+@page "/app/planning"
+@layout ShowcaseLayout
+
+@inject ShowcaseDataService DataService
+@inject IAgtNotificationService Notifications
+
+@using System.Collections.Generic
+@using System.Globalization
+
+<PageTitle>Werkorders - Planning</PageTitle>
+
+<AgtBreadcrumb CssClass="showcase-page__breadcrumbs" Items="Breadcrumbs" />
+<AgtPageHeader Kicker="Werkorders" Title="Planning" Description="Weekplanning met versleepbare werkorder-afspraken." />
+
+<div class="showcase-page__toolbar">
+    <div></div>
+    <AgtDatePicker Label="Van" Value="@_startFilter" ValueChanged="@(v => _startFilter = v ?? DateTime.Today.AddDays(-7))" />
+    <AgtDatePicker Label="Tot" Value="@_endFilter" ValueChanged="@(v => _endFilter = v ?? DateTime.Today.AddDays(14))" />
+    <RadzenTimeSpanPicker TValue="TimeSpan?" Value="@_defaultDuration" Change="OnDurationChanged" />
+</div>
+
+<RadzenRadioButtonList TValue="string" Data="SlotOptions" TextProperty="Text" ValueProperty="Value" @bind-Value="_selectedSlot" />
+
+<AgtCard>
+    <Header>Planbord</Header>
+    <ChildContent>
+        @if (PreviewOnly)
+        {
+            <RadzenCard>Scheduler preview</RadzenCard>
+        }
+        else
+        {
+            <div class="showcase-planning__scheduler-surface">
+                <RadzenScheduler TItem="ShowcaseWorkOrder"
+                                 Data="@Appointments"
+                                 StartProperty="PlannedStart"
+                                 EndProperty="PlannedEnd"
+                                 TextProperty="Number"
+                                 Culture="@DutchCulture"
+                                 TodayText="Vandaag"
+                                 AppointmentMove="OnAppointmentMove"
+                                 AppointmentRender="OnAppointmentRender"
+                                 Style="height: 34rem;">
+                    <RadzenWeekView Text="Week" />
+                    <RadzenMonthView Text="Maand" />
+                    <RadzenDayView Text="Dag" />
+                </RadzenScheduler>
+            </div>
+        }
+    </ChildContent>
+</AgtCard>
+
+@code {
+    private string _selectedSlot = "hele-dag";
+    private DateTime _startFilter = DateTime.Today.AddDays(-7);
+    private DateTime _endFilter = DateTime.Today.AddDays(14);
+    private TimeSpan? _defaultDuration = TimeSpan.FromHours(2);
+    private static readonly CultureInfo DutchCulture = CultureInfo.GetCultureInfo("nl-NL");
+
+    private IReadOnlyList<ShowcaseWorkOrder> Appointments => DataService.WorkOrders
+        .Where(order => order.Status != ShowcaseWorkOrderStatus.Geannuleerd)
+        .Where(order => order.PlannedStart.Date >= _startFilter.Date && order.PlannedStart.Date <= _endFilter.Date)
+        .ToList();
+
+    [Parameter]
+    public bool PreviewOnly { get; set; }
+
+    private IReadOnlyList<(string Text, string? Href)> Breadcrumbs =>
+    [
+        ("Planning", "/app/planning")
+    ];
+
+    private IReadOnlyList<object> SlotOptions =>
+    [
+        new OptionItem("ochtend", "Ochtend"),
+        new OptionItem("middag", "Middag"),
+        new OptionItem("avond", "Avond"),
+        new OptionItem("hele-dag", "Hele dag")
+    ];
+
+    private void OnDurationChanged(TimeSpan? value)
+    {
+        if (value.HasValue)
+        {
+            _defaultDuration = value.Value;
+        }
+    }
+
+    private void OnAppointmentMove(SchedulerAppointmentMoveEventArgs args)
+    {
+        if (args.Appointment is null || args.Appointment.Data is not ShowcaseWorkOrder order)
+        {
+            return;
+        }
+
+        var duration = _defaultDuration ?? args.TimeSpan;
+        DataService.RescheduleWorkOrder(order.Id, args.SlotDate, args.SlotDate.Add(duration));
+        Notifications.Info("Planning aangepast", $"{order.Number} is verplaatst.");
+    }
+
+    private void OnAppointmentRender(SchedulerAppointmentRenderEventArgs<ShowcaseWorkOrder> args)
+    {
+        if (args.Data is null || args.Attributes is null)
+        {
+            return;
+        }
+
+        if (args.Attributes is not null)
+        {
+            args.Attributes["class"] = $"showcase-planning__appointment showcase-planning__appointment--{args.Data.Status.ToString().ToLowerInvariant()}";
+        }
+    }
+
+    private sealed record OptionItem(string Value, string Text);
+}

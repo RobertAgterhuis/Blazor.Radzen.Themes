@@ -1,0 +1,91 @@
+@page "/catalog/forms-advanced"
+
+<PageTitle>Forms Advanced (Radzen)</PageTitle>
+
+<div class="catalog-page">
+    <h1>Forms Advanced (Radzen)</h1>
+    <p>Aanvullende form/input componenten met Plum Ink theming.</p>
+
+    <RadzenTemplateForm TItem="AdvancedModel" Data="Model" Submit="OnSubmit" InvalidSubmit="OnInvalidSubmit">
+        <RadzenStack Gap="0.75rem">
+            <RadzenFormField Text="Naam" Variant="Variant.Outlined">
+                <RadzenTextBox Name="name" @bind-Value="Model.Name" Placeholder="Naam" />
+            </RadzenFormField>
+
+            <RadzenFormField Text="Categorie" Variant="Variant.Outlined">
+                @if (DropDownTreeType is not null)
+                {
+                    <DynamicComponent Type="DropDownTreeType"
+                                      Parameters="DropDownTreeParameters" />
+                }
+                else
+                {
+                    <RadzenTextBox Name="tree-fallback" Placeholder="DropDownTree niet beschikbaar in deze Radzen-versie" Disabled="true" />
+                }
+            </RadzenFormField>
+
+            <RadzenDropDownDataGrid TValue="int" Name="griddrop" Data="Options" TextProperty="Text" ValueProperty="Value" Placeholder="Kies item" />
+            <RadzenListBox TValue="int" Name="listbox" Data="Options" TextProperty="Text" ValueProperty="Value" />
+            <RadzenTimeSpanPicker TValue="TimeSpan?" Name="timespan" Value="@TimeSpan.FromHours(1)" />
+            <RadzenColorPicker Name="color" Value="#680898" />
+            <RadzenRating Name="rating" Value="4" />
+            <RadzenSecurityCode Name="security" Placeholder="Code" />
+
+            <RadzenFileInput TValue="string" Name="file-input" ChooseText="Bestand kiezen" />
+            <RadzenUpload Url="upload" Auto="false" ChooseText="Upload" />
+
+            <RadzenRequiredValidator Component="name" Text="Naam is verplicht" Popup="false" />
+            <RadzenLengthValidator Component="name" Min="2" Text="Minimaal 2 tekens" Popup="false" />
+            <RadzenEmailValidator Component="name" Text="Geen geldig e-mailadres" Popup="true" />
+            <RadzenRegexValidator Component="name" Pattern="^[A-Za-z0-9 .-]+$" Text="Ongeldige tekens" Popup="false" />
+            <RadzenDataAnnotationValidator />
+            <RadzenCustomValidator Component="name" Text="Custom validatie" Validator="@(() => true)" Popup="false" />
+            <RadzenCompareValidator Component="name" Value="@Model.Name" Text="Vergelijking" Popup="false" />
+            <RadzenNumericRangeValidator Component="name" Min="0" Max="100" Text="Numerieke range" Popup="true" />
+
+            <RadzenButton Text="Valideren" ButtonType="ButtonType.Submit" ButtonStyle="ButtonStyle.Primary" class="agt-cta-create" />
+        </RadzenStack>
+    </RadzenTemplateForm>
+</div>
+
+@code {
+    private readonly AdvancedModel Model = new();
+
+    private static readonly Type? DropDownTreeType =
+        Type.GetType("Radzen.Blazor.RadzenDropDownTree`1, Radzen.Blazor")?.MakeGenericType(typeof(string));
+
+    private static readonly IDictionary<string, object?> DropDownTreeParameters =
+        new Dictionary<string, object?>
+        {
+            ["Data"] = TreeItems,
+            ["Name"] = "tree",
+            ["TextProperty"] = "Text",
+            ["ValueProperty"] = "Value",
+            ["Placeholder"] = "Kies categorie"
+        };
+
+    private static readonly IReadOnlyList<OptionItem> Options =
+    [
+        new("Alpha", 1),
+        new("Bravo", 2),
+        new("Charlie", 3)
+    ];
+
+    private static readonly IReadOnlyList<TreeItem> TreeItems =
+    [
+        new("Root", "root", [new TreeItem("Child", "child", [])])
+    ];
+
+    private void OnSubmit(AdvancedModel _) { }
+
+    private void OnInvalidSubmit(FormInvalidSubmitEventArgs _) { }
+
+    private sealed class AdvancedModel
+    {
+        public string? Name { get; set; }
+    }
+
+    private sealed record OptionItem(string Text, int Value);
+
+    private sealed record TreeItem(string Text, string Value, IReadOnlyList<TreeItem> Children);
+}

@@ -1,0 +1,19 @@
+@page "/components/feedback/badge"
+
+<PageTitle>Badge</PageTitle>
+
+<div class="agt-page agt-stack">
+    <AgtPageHeader Title="AgtBadge" Description="Badge wrapper met intentmapping en icon+tekst." />
+
+    <AgtCard>
+        <ChildContent>
+            <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" Wrap="FlexWrap.Wrap">
+                <AgtBadge Intent="AgtIntent.Neutral" Icon="label" Text="Concept" />
+                <AgtBadge Intent="AgtIntent.Info" Icon="info" Text="Info" />
+                <AgtBadge Intent="AgtIntent.Success" Icon="check_circle" Text="Succes" />
+                <AgtBadge Intent="AgtIntent.Warning" Icon="warning" Text="Let op" />
+                <AgtBadge Intent="AgtIntent.Danger" Icon="error" Text="Fout" />
+            </RadzenStack>
+        </ChildContent>
+    </AgtCard>
+</div>

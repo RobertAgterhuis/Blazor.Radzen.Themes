@@ -1,0 +1,444 @@
+.agt-home {
+    overflow: clip;
+}
+
+.agt-home-hero {
+    display: grid;
+    gap: var(--agt-spacing-5);
+    grid-template-columns: minmax(0, 1.35fr) minmax(16rem, 0.85fr);
+    min-height: 20rem;
+    background: linear-gradient(180deg, var(--agt-surface-1), var(--agt-surface-2));
+    border: 1px solid var(--agt-input-border);
+    border-radius: var(--agt-border-radius-lg);
+    box-shadow: var(--agt-shadow-sm);
+    overflow: hidden;
+    position: relative;
+}
+
+.agt-home-hero::before {
+    background: radial-gradient(circle at 18% 20%, var(--agt-alpha-primary-20), transparent 48%), radial-gradient(circle at 84% 12%, var(--agt-alpha-accent-20), transparent 38%);
+    content: "";
+    inset: 0;
+    opacity: 0.8;
+    pointer-events: none;
+    position: absolute;
+}
+
+.agt-home-hero__copy,
+.agt-home-metrics,
+.agt-home-hero__ambient {
+    position: relative;
+    z-index: 1;
+}
+
+.agt-home-hero__copy {
+    display: flex;
+    flex-direction: column;
+    gap: var(--agt-spacing-3);
+    justify-content: center;
+    min-width: 0;
+    padding: clamp(var(--agt-spacing-2), 1vw, var(--agt-spacing-4));
+}
+
+.agt-home-kicker {
+    color: var(--agt-text-muted);
+    font-size: var(--agt-font-size-xs);
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    margin: 0;
+    text-transform: uppercase;
+}
+
+.agt-home-hero h2 {
+    color: var(--agt-text-heading);
+    font-family: var(--agt-font-display);
+    font-size: clamp(2rem, 1.4rem + 2.3vw, 3.5rem);
+    line-height: 0.95;
+    margin: 0;
+}
+
+.agt-home-description {
+    color: var(--agt-text-muted);
+    font-size: var(--agt-font-size-lg);
+    line-height: 1.6;
+    margin: 0;
+    max-width: 56ch;
+}
+
+.agt-home-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--agt-spacing-2);
+}
+
+.agt-home-badge {
+    background: transparent;
+    border: 1px solid var(--agt-input-border);
+    border-radius: 999px;
+    color: var(--agt-text-body);
+    font-size: var(--agt-font-size-sm);
+    padding: 0.35rem 0.75rem;
+}
+
+.agt-home-metrics {
+    align-content: center;
+    display: grid;
+    gap: var(--agt-spacing-3);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.agt-home-metric {
+    animation: agt-home-card-enter 520ms var(--agt-ease-out-expo) both;
+    animation-delay: calc(var(--agt-stagger-index) * 30ms);
+    background: linear-gradient(180deg, var(--agt-surface-2), var(--agt-surface-1));
+    border: 1px solid transparent;
+    border-radius: var(--agt-border-radius-lg);
+    box-shadow: var(--agt-shadow-sm);
+    display: grid;
+    gap: 0.15rem;
+    min-height: 7rem;
+    padding: var(--agt-spacing-4);
+    position: relative;
+}
+
+.agt-home-metric::before {
+    background: linear-gradient(135deg, var(--agt-color-primary-500), var(--agt-color-accent-400));
+    border-radius: inherit;
+    content: "";
+    inset: 0;
+    opacity: 0.08;
+    pointer-events: none;
+    position: absolute;
+}
+
+.agt-home-metric__value,
+.agt-home-metric__label,
+.agt-home-metric__caption {
+    position: relative;
+    z-index: 1;
+}
+
+.agt-home-metric__value {
+    color: var(--agt-text-heading);
+    font-family: var(--agt-font-display);
+    font-size: clamp(1.5rem, 1.15rem + 1vw, 2.4rem);
+    font-weight: 700;
+    line-height: 1;
+}
+
+.agt-home-metric__label {
+    color: var(--agt-text-body);
+    font-weight: 700;
+}
+
+.agt-home-metric__caption,
+.agt-home-panel__text {
+    color: var(--agt-text-muted);
+    font-size: var(--agt-font-size-sm);
+    line-height: 1.5;
+}
+
+.agt-home-grid {
+    display: grid;
+    gap: var(--agt-spacing-4);
+    grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+}
+
+.agt-home-panel {
+    animation: agt-home-card-enter 500ms var(--agt-ease-out-expo) both;
+    animation-delay: 30ms;
+    border: 1px solid var(--agt-input-border);
+    overflow: clip;
+}
+
+.agt-home-sparkline {
+    display: block;
+    height: 8rem;
+    width: 100%;
+}
+
+.agt-home-sparkline path {
+    filter: drop-shadow(0 0 10px color-mix(in srgb, var(--agt-color-primary-500) 20%, transparent));
+}
+
+.agt-home-sparkline__legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--agt-spacing-3);
+    margin-top: var(--agt-spacing-3);
+}
+
+.agt-home-sparkline__legend span {
+    align-items: center;
+    color: var(--agt-text-muted);
+    display: inline-flex;
+    font-size: var(--agt-font-size-sm);
+    gap: 0.35rem;
+}
+
+.agt-home-legend-swatch {
+    border-radius: 999px;
+    display: inline-block;
+    height: 0.55rem;
+    width: 0.55rem;
+}
+
+.agt-home-legend-swatch--primary { background: var(--agt-color-primary-500); }
+.agt-home-legend-swatch--accent { background: var(--agt-color-accent-400); }
+.agt-home-legend-swatch--surface { background: var(--agt-surface-2); border: 1px solid var(--agt-input-border); }
+
+.agt-home-link-grid {
+    display: grid;
+    gap: var(--agt-spacing-3);
+    grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+}
+
+.agt-home-link-card {
+    animation: agt-home-card-enter 480ms var(--agt-ease-out-expo) both;
+    animation-delay: calc(var(--agt-stagger-index) * 30ms);
+    background: linear-gradient(180deg, var(--agt-surface-1), var(--agt-surface-2)) padding-box, linear-gradient(135deg, var(--agt-color-primary-500), var(--agt-color-accent-400)) border-box;
+    border: 1px solid transparent;
+    border-radius: var(--agt-border-radius-lg);
+    box-shadow: var(--agt-shadow-sm);
+    color: var(--agt-text-body);
+    display: grid;
+    gap: 0.25rem;
+    min-height: 8.5rem;
+    padding: var(--agt-spacing-4);
+    text-decoration: none;
+    transition: transform 180ms var(--agt-ease-spring), opacity 180ms var(--agt-ease-spring);
+}
+
+.agt-home-link-card:hover,
+.agt-home-link-card:focus-visible {
+    border-color: transparent;
+    box-shadow: var(--agt-shadow-md), var(--agt-glow-primary);
+    transform: translateY(calc(var(--agt-lift-distance) * -1));
+}
+
+.agt-home-link-card__kicker {
+    color: var(--agt-text-muted);
+    font-size: var(--agt-font-size-xs);
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+.agt-home-link-card__title {
+    color: var(--agt-text-heading);
+    font-family: var(--agt-font-display);
+    font-size: var(--agt-font-size-lg);
+    font-weight: 700;
+}
+
+.agt-home-link-card__description {
+    color: var(--agt-text-muted);
+    font-size: var(--agt-font-size-sm);
+    line-height: 1.5;
+}
+
+.agt-home-hero__ambient {
+    inset: 0;
+    pointer-events: none;
+    position: absolute;
+    z-index: 0;
+}
+
+.agt-home-hero__ambient-layer,
+.agt-home-hero__heat {
+    inset: 0;
+    position: absolute;
+}
+
+.agt-home-hero__ambient-layer {
+    border-radius: inherit;
+    opacity: 0.9;
+}
+
+.agt-home-hero__ambient-layer--one {
+    filter: blur(30px);
+}
+
+.agt-home-hero__ambient-layer--two {
+    filter: blur(16px);
+}
+
+.agt-home-hero__ambient--plum .agt-home-hero__ambient-layer--one {
+    background: radial-gradient(circle at 18% 20%, color-mix(in srgb, var(--agt-color-primary-500) 42%, transparent) 0%, transparent 45%), radial-gradient(circle at 82% 18%, color-mix(in srgb, var(--agt-color-accent-400) 18%, transparent) 0%, transparent 32%);
+    animation: agt-aurora-drift 120s linear infinite;
+}
+
+.agt-home-hero__ambient--plum .agt-home-hero__ambient-layer--two {
+    background: radial-gradient(circle at 64% 72%, color-mix(in srgb, var(--agt-color-primary-500) 24%, transparent) 0%, transparent 38%);
+    animation: agt-aurora-drift 150s linear infinite reverse;
+}
+
+.agt-home-hero__ambient--dagobah .agt-home-hero__ambient-layer--one {
+    background: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--agt-color-primary-500) 22%, transparent) 50%, transparent 100%);
+    animation: agt-mist-left 90s linear infinite;
+}
+
+.agt-home-hero__ambient--dagobah .agt-home-hero__ambient-layer--two {
+    background: linear-gradient(270deg, transparent 0%, color-mix(in srgb, var(--agt-color-primary-500) 18%, transparent) 42%, transparent 100%);
+    animation: agt-mist-right 120s linear infinite;
+}
+
+.agt-home-hero__ambient--dathomir .agt-home-hero__ambient-layer--one {
+    background: radial-gradient(circle at 20% 74%, color-mix(in srgb, var(--agt-color-accent-400) 24%, transparent) 0%, transparent 30%), radial-gradient(circle at 74% 28%, color-mix(in srgb, var(--agt-color-primary-500) 28%, transparent) 0%, transparent 34%);
+    animation: agt-ember-pulse 8s ease-in-out infinite;
+}
+
+.agt-home-hero__ambient--dathomir .agt-home-hero__ambient-layer--two {
+    background: radial-gradient(circle at 62% 80%, color-mix(in srgb, var(--agt-color-accent-400) 14%, transparent) 0%, transparent 25%);
+    animation: agt-ember-pulse 11s ease-in-out infinite reverse;
+}
+
+.agt-home-hero__ambient--hoth .agt-home-hero__ambient-layer--one {
+    background-image: radial-gradient(circle at 10% 16%, color-mix(in srgb, var(--agt-color-white) 72%, transparent) 0 1px, transparent 1.5px), radial-gradient(circle at 22% 44%, color-mix(in srgb, var(--agt-color-white) 62%, transparent) 0 1px, transparent 1.5px), radial-gradient(circle at 38% 22%, color-mix(in srgb, var(--agt-color-white) 58%, transparent) 0 1px, transparent 1.5px), radial-gradient(circle at 54% 68%, color-mix(in srgb, var(--agt-color-white) 68%, transparent) 0 1px, transparent 1.5px), radial-gradient(circle at 72% 28%, color-mix(in srgb, var(--agt-color-white) 66%, transparent) 0 1px, transparent 1.5px), radial-gradient(circle at 86% 62%, color-mix(in srgb, var(--agt-color-white) 54%, transparent) 0 1px, transparent 1.5px);
+    animation: agt-snow-drift 32s linear infinite;
+    opacity: 0.55;
+}
+
+.agt-home-hero__ambient--hoth .agt-home-hero__ambient-layer--two {
+    background-image: radial-gradient(circle at 16% 76%, color-mix(in srgb, var(--agt-color-white) 52%, transparent) 0 1px, transparent 1.5px), radial-gradient(circle at 44% 14%, color-mix(in srgb, var(--agt-color-white) 58%, transparent) 0 1px, transparent 1.5px), radial-gradient(circle at 58% 42%, color-mix(in srgb, var(--agt-color-white) 66%, transparent) 0 1px, transparent 1.5px), radial-gradient(circle at 78% 12%, color-mix(in srgb, var(--agt-color-white) 50%, transparent) 0 1px, transparent 1.5px);
+    animation: agt-snow-drift 44s linear infinite reverse;
+    opacity: 0.45;
+}
+
+.agt-home-hero__ambient--tatooine .agt-home-hero__ambient-layer--one {
+    background: linear-gradient(180deg, transparent 0%, color-mix(in srgb, var(--agt-color-accent-400) 18%, transparent) 40%, transparent 100%);
+    animation: agt-heat-shimmer 8s ease-in-out infinite;
+}
+
+.agt-home-hero__ambient--tatooine .agt-home-hero__ambient-layer--two {
+    background: radial-gradient(circle at 58% 32%, color-mix(in srgb, var(--agt-color-accent-400) 16%, transparent) 0%, transparent 34%);
+    animation: agt-heat-shimmer 10s ease-in-out infinite reverse;
+}
+
+.agt-home-hero__ambient--imperial .agt-home-hero__ambient-layer--one {
+    background: linear-gradient(95deg, transparent 0%, color-mix(in srgb, var(--agt-color-primary-500) 14%, transparent) 46%, transparent 100%);
+    animation: agt-aurora-drift 120s linear infinite;
+}
+
+.agt-home-hero__ambient--imperial .agt-home-hero__ambient-layer--two {
+    background: radial-gradient(circle at 72% 24%, color-mix(in srgb, var(--agt-color-accent-400) 9%, transparent) 0%, transparent 30%);
+    animation: agt-aurora-drift 150s linear infinite reverse;
+}
+
+.agt-home-hero__heat {
+    height: 100%;
+    mix-blend-mode: screen;
+    opacity: 0.42;
+    width: 100%;
+}
+
+.agt-home-hero__heat rect {
+    fill: color-mix(in srgb, var(--agt-color-accent-400) 10%, transparent);
+}
+
+@keyframes agt-home-card-enter {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes agt-aurora-drift {
+    from {
+        transform: translate3d(-1%, 0, 0) scale(1);
+    }
+
+    to {
+        transform: translate3d(1%, -1%, 0) scale(1.03);
+    }
+}
+
+@keyframes agt-mist-left {
+    from {
+        transform: translate3d(-4%, 0, 0);
+    }
+
+    to {
+        transform: translate3d(4%, 0, 0);
+    }
+}
+
+@keyframes agt-mist-right {
+    from {
+        transform: translate3d(4%, 0, 0);
+    }
+
+    to {
+        transform: translate3d(-4%, 0, 0);
+    }
+}
+
+@keyframes agt-ember-pulse {
+    0%, 100% {
+        opacity: 0.35;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.65;
+        transform: scale(1.03);
+    }
+}
+
+@keyframes agt-snow-drift {
+    from {
+        transform: translate3d(-1%, -1%, 0);
+    }
+
+    to {
+        transform: translate3d(1%, 1%, 0);
+    }
+}
+
+@keyframes agt-heat-shimmer {
+    0%, 100% {
+        opacity: 0.26;
+        transform: translateY(0);
+    }
+
+    50% {
+        opacity: 0.48;
+        transform: translateY(-0.25rem);
+    }
+}
+
+@media (max-width: 960px) {
+    .agt-home-hero {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 640px) {
+    .agt-home-metrics {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .agt-home-metric,
+    .agt-home-panel,
+    .agt-home-link-card,
+    .agt-home-hero__ambient-layer,
+    .agt-home-hero__heat {
+        animation: none !important;
+    }
+
+    .agt-home-link-card {
+        transition: none;
+    }
+}
+
+[data-agt-tab-hidden="true"] .agt-home-hero__ambient-layer,
+[data-agt-tab-hidden="true"] .agt-home-hero__heat {
+    animation-play-state: paused;
+}

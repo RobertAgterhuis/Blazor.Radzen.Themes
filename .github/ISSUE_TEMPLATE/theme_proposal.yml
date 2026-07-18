@@ -1,0 +1,39 @@
+name: Theme proposal
+description: Propose a new theme family or variant behavior
+title: "[Theme]: "
+labels:
+  - theme
+body:
+  - type: input
+    id: family
+    attributes:
+      label: Proposed family name
+      placeholder: forest
+    validations:
+      required: true
+  - type: textarea
+    id: concept
+    attributes:
+      label: Visual concept
+      description: Describe palette, mood, and intended use.
+    validations:
+      required: true
+  - type: textarea
+    id: tokens
+    attributes:
+      label: Token considerations
+      description: Mention primary/accent/on-accent/neutral approach and contrast plan.
+    validations:
+      required: true
+  - type: textarea
+    id: accessibility
+    attributes:
+      label: Accessibility plan
+      description: Explain how WCAG 2.2 AA contrast and focus visibility will be validated.
+    validations:
+      required: true
+  - type: textarea
+    id: examples
+    attributes:
+      label: References or screenshots
+      placeholder: Links to inspiration boards or mockups.

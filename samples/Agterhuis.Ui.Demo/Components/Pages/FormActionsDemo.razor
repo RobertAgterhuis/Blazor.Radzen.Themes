@@ -1,0 +1,34 @@
+@page "/components/forms/form-actions"
+
+<PageTitle>Form actions</PageTitle>
+
+<div class="agt-page agt-stack">
+    <AgtPageHeader Title="AgtFormActions" Description="Rechts uitgelijnde save/cancel rij." />
+
+    <AgtCard>
+        <ChildContent>
+            <AgtFormActions Save="OnSave" Cancel="OnCancel" IsBusy="_saving" />
+            <p>Status: @_status</p>
+        </ChildContent>
+    </AgtCard>
+</div>
+
+@code {
+    private string _status = "Nog geen actie";
+    private bool _saving;
+
+    private async Task OnSave(MouseEventArgs _)
+    {
+        _saving = true;
+        _status = "Opslaan gestart";
+        await Task.Delay(150);
+        _saving = false;
+        _status = "Opgeslagen";
+    }
+
+    private Task OnCancel(MouseEventArgs _)
+    {
+        _status = "Geannuleerd";
+        return Task.CompletedTask;
+    }
+}

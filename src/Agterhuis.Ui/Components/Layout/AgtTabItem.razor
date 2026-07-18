@@ -1,0 +1,42 @@
+<RadzenTabsItem Text="@Text"
+                Icon="@Icon"
+                Disabled="@Disabled"
+                Visible="@Visible"
+                Class="@CssClass"
+                Index="@Index">
+    @if (!LazyRender || IsActive)
+    {
+        @ChildContent
+    }
+</RadzenTabsItem>
+
+@code {
+    [Parameter, EditorRequired]
+    public string Text { get; set; } = string.Empty;
+
+    [Parameter]
+    public string? Icon { get; set; }
+
+    [Parameter]
+    public int Index { get; set; }
+
+    [Parameter]
+    public bool Disabled { get; set; }
+
+    [Parameter]
+    public bool Visible { get; set; } = true;
+
+    [Parameter]
+    public string? CssClass { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    [CascadingParameter(Name = "AgtTabsLazy")]
+    public bool LazyRender { get; set; }
+
+    [CascadingParameter(Name = "AgtTabsSelectedIndex")]
+    public int SelectedIndex { get; set; }
+
+    private bool IsActive => Index == SelectedIndex;
+}

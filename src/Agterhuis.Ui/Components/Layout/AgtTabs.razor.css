@@ -1,0 +1,8 @@
+.agt-tabs :deep(.rz-tabview-nav li a) {
+    color: var(--agt-text-body);
+}
+
+.agt-tabs :deep(.rz-tabview-selected a) {
+    box-shadow: inset 0 -2px 0 var(--agt-color-primary-500);
+    color: var(--agt-text-heading);
+}

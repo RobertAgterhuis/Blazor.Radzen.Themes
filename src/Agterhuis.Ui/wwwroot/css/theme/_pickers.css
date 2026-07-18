@@ -1,0 +1,216 @@
+.rz-dropdown-panel,
+.rz-multiselect-panel,
+.rz-listbox,
+.rz-datepicker-calendar,
+.rz-timespanpicker,
+.rz-dropdown-datagrid {
+    animation: agt-fade-scale 160ms ease;
+    background: var(--agt-surface-2);
+    border: 1px solid var(--agt-input-border);
+    border-radius: var(--agt-border-radius-lg);
+    box-shadow: var(--agt-shadow-md);
+}
+
+.rz-dropdown-panel {
+    padding-block: 0.25rem;
+}
+
+@keyframes agt-fade-scale {
+    from {
+        opacity: 0;
+        transform: translateY(4px) scale(0.99);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.rz-dropdown-item.rz-state-highlight,
+.rz-multiselect-item.rz-state-highlight,
+.rz-listbox-item.rz-state-highlight,
+.rz-dropdown-datagrid .rz-cell-data.rz-state-highlight {
+    background: var(--agt-color-accent-400);
+    border-inline-start: 2px solid var(--agt-color-accent-600);
+    color: var(--agt-on-accent);
+}
+
+.rz-dropdown-item:hover,
+.rz-multiselect-item:hover,
+.rz-listbox-item:hover {
+    background: var(--agt-hover-tint);
+}
+
+:is([data-agt-theme="dark"], [data-agt-theme$="-dark"]) .rz-dropdown-item:hover,
+:is([data-agt-theme="dark"], [data-agt-theme$="-dark"]) .rz-multiselect-item:hover,
+:is([data-agt-theme="dark"], [data-agt-theme$="-dark"]) .rz-listbox-item:hover {
+    background: var(--agt-hover-tint);
+}
+
+.rz-dropdown,
+.rz-multiselect,
+.rz-datepicker,
+.rz-timespanpicker {
+    align-items: center;
+    background: var(--agt-surface-1);
+    border: 1px solid var(--agt-input-border);
+    border-radius: var(--agt-border-radius-md);
+    display: flex;
+    min-height: 2.5rem;
+    overflow: visible;
+    padding: 0 var(--agt-spacing-3);
+    transition: box-shadow var(--agt-transition-fast), border-color var(--agt-transition-fast), background-color var(--agt-transition-fast);
+    width: 100%;
+}
+
+.rz-dropdown:focus-within,
+.rz-multiselect:focus-within,
+.rz-datepicker:focus-within,
+.rz-timespanpicker:focus-within {
+    box-shadow: var(--agt-focus-ring);
+    border-color: var(--agt-input-focus-border);
+}
+
+.rz-dropdown:hover,
+.rz-multiselect:hover,
+.rz-datepicker:hover,
+.rz-timespanpicker:hover {
+    border-color: color-mix(in srgb, var(--agt-input-border) 45%, var(--agt-text-body));
+}
+
+.rz-dropdown.rz-state-focus,
+.rz-dropdown.rz-state-open,
+.rz-multiselect.rz-state-focus,
+.rz-multiselect.rz-state-open,
+.rz-datepicker.rz-state-focus,
+.rz-timespanpicker.rz-state-focus {
+    border-color: var(--agt-input-focus-border);
+}
+
+.rz-dropdown .rz-dropdown-label,
+.rz-multiselect .rz-multiselect-label,
+.rz-autocomplete .rz-autocomplete-input,
+.rz-datepicker .rz-inputtext,
+.rz-timespanpicker .rz-inputtext {
+    align-items: center;
+    background: transparent;
+    border: 0;
+    color: var(--agt-text-body);
+    display: inline-flex;
+    min-height: calc(2.5rem - 2px);
+    overflow: hidden;
+    padding: 0;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rz-dropdown .rz-dropdown-trigger,
+.rz-multiselect .rz-multiselect-trigger,
+.rz-datepicker .rz-datepicker-trigger,
+.rz-timespanpicker .rz-timespanpicker-trigger {
+    align-items: center;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    color: var(--agt-text-muted);
+    display: inline-flex;
+    justify-content: center;
+    margin-inline-start: var(--agt-spacing-2);
+    min-height: 1.5rem;
+    min-width: 1.5rem;
+    padding: 0;
+}
+
+.rz-dropdown .rz-dropdown-trigger::before,
+.rz-dropdown .rz-dropdown-trigger::after,
+.rz-multiselect .rz-multiselect-trigger::before,
+.rz-multiselect .rz-multiselect-trigger::after,
+.rz-datepicker .rz-datepicker-trigger::before,
+.rz-datepicker .rz-datepicker-trigger::after,
+.rz-timespanpicker .rz-timespanpicker-trigger::before,
+.rz-timespanpicker .rz-timespanpicker-trigger::after {
+    display: none;
+}
+
+.rz-dropdown .rz-dropdown-trigger-icon,
+.rz-multiselect .rz-multiselect-trigger-icon,
+.rz-datepicker .rz-datepicker-trigger-icon,
+.rz-timespanpicker .rz-timespanpicker-trigger-icon,
+.rz-dropdown .rzi-chevron-down,
+.rz-multiselect .rzi-chevron-down,
+.rz-datepicker .rzi,
+.rz-timespanpicker .rzi {
+    color: var(--agt-text-muted);
+    transition: transform var(--agt-transition-fast), color var(--agt-transition-fast);
+}
+
+.rz-dropdown.rz-state-open .rz-dropdown-trigger-icon,
+.rz-dropdown.rz-state-open .rzi-chevron-down,
+.rz-multiselect.rz-state-open .rz-multiselect-trigger-icon,
+.rz-multiselect.rz-state-open .rzi-chevron-down {
+    color: var(--agt-input-focus-border);
+    transform: rotate(180deg);
+}
+
+.rz-dropdown.rz-state-disabled,
+.rz-multiselect.rz-state-disabled,
+.rz-datepicker.rz-state-disabled,
+.rz-timespanpicker.rz-state-disabled {
+    background: var(--agt-control-disabled-bg);
+    color: var(--agt-text-disabled);
+    opacity: 1;
+}
+
+.rz-datepicker-calendar td a,
+.rz-datepicker-calendar td span {
+    color: var(--agt-text-body);
+}
+
+.rz-datepicker-calendar .rz-state-active,
+.rz-datepicker-calendar td.rz-state-highlight > a,
+.rz-datepicker-calendar td.rz-state-highlight > span,
+.rz-datepicker-calendar td.rz-state-selected > a,
+.rz-datepicker-calendar td.rz-state-selected > span {
+    background: var(--agt-color-primary-600);
+    color: var(--agt-color-white);
+}
+
+.rz-datepicker-calendar td.rz-datepicker-today > a,
+.rz-datepicker-calendar td.rz-datepicker-today > span {
+    box-shadow: inset 0 0 0 2px var(--agt-color-accent-400);
+}
+
+.rz-datepicker .rz-dropdown,
+.rz-timepicker .rz-dropdown,
+.rz-timespanpicker .rz-dropdown {
+    background: var(--agt-surface-1);
+    color: var(--agt-text-body);
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .rz-dropdown-panel,
+    .rz-multiselect-panel,
+    .rz-listbox,
+    .rz-datepicker-calendar,
+    .rz-timespanpicker,
+    .rz-dropdown-datagrid {
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        background: var(--agt-surface-2);
+    }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+    .rz-dropdown-panel,
+    .rz-multiselect-panel,
+    .rz-listbox,
+    .rz-datepicker-calendar,
+    .rz-timespanpicker,
+    .rz-dropdown-datagrid {
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        background: var(--agt-surface-2);
+    }
+}

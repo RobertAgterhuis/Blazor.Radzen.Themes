@@ -1,0 +1,18 @@
+@page "/components/forms/text-field"
+
+<PageTitle>Text field</PageTitle>
+
+<div class="agt-page agt-stack">
+    <AgtPageHeader Title="AgtTextField" Description="Wrapper voor tekstinvoer met RadzenTextBox." />
+
+    <AgtCard>
+        <ChildContent>
+            <AgtTextField @bind-Value="_value" Label="Naam" Placeholder="Typ een naam" />
+            <p>Waarde: @_value</p>
+        </ChildContent>
+    </AgtCard>
+</div>
+
+@code {
+    private string? _value = "Agterhuis";
+}

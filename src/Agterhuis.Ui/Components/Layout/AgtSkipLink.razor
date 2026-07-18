@@ -1,0 +1,12 @@
+<a class="agt-skip-link @CssClass" href="#@TargetId">@Text</a>
+
+@code {
+    [Parameter]
+    public string Text { get; set; } = "Naar hoofdinhoud";
+
+    [Parameter]
+    public string TargetId { get; set; } = "main";
+
+    [Parameter]
+    public string? CssClass { get; set; }
+}

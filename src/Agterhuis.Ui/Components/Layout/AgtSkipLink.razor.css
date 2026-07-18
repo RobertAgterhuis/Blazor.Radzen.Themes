@@ -1,0 +1,24 @@
+.agt-skip-link {
+    background: var(--agt-surface-1);
+    border: 2px solid var(--agt-nav-focus-outline);
+    border-radius: var(--agt-border-radius-md);
+    color: var(--agt-link-color);
+    left: var(--agt-spacing-3);
+    min-height: 2.75rem;
+    min-width: 2.75rem;
+    padding: var(--agt-spacing-2) var(--agt-spacing-3);
+    position: fixed;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+    top: 0.25rem;
+    transform: translateY(-140%);
+    transition: transform var(--agt-transition-fast);
+    z-index: 2000;
+}
+
+.agt-skip-link:focus-visible {
+    box-shadow: var(--agt-focus-ring);
+    outline: 2px solid var(--agt-nav-focus-outline);
+    outline-offset: 2px;
+    transform: translateY(0);
+}

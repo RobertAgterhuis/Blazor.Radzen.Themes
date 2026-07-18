@@ -1,0 +1,38 @@
+@page "/catalog/validators"
+
+<PageTitle>Validators (Radzen)</PageTitle>
+
+<div class="catalog-page">
+    <h1>Validators (Radzen)</h1>
+
+    <RadzenTemplateForm TItem="ValidationModel" Data="Model" Submit="OnSubmit" InvalidSubmit="OnInvalidSubmit">
+        <RadzenStack Gap="0.75rem">
+            <RadzenTextBox Name="email" @bind-Value="Model.Email" Placeholder="Email" />
+            <RadzenRequiredValidator Component="email" Text="Required" Popup="false" />
+            <RadzenEmailValidator Component="email" Text="Invalid email" Popup="true" />
+
+            <RadzenTextBox Name="code" @bind-Value="Model.Code" Placeholder="Code AA00" />
+            <RadzenRegexValidator Component="code" Pattern="^[A-Z]{2}[0-9]{2}$" Text="AA00 format" Popup="false" />
+
+            <RadzenDataAnnotationValidator />
+            <RadzenButton Text="Validate" ButtonType="ButtonType.Submit" />
+        </RadzenStack>
+    </RadzenTemplateForm>
+</div>
+
+@code {
+    private readonly ValidationModel Model = new();
+
+    private void OnSubmit(ValidationModel _) { }
+
+    private void OnInvalidSubmit(FormInvalidSubmitEventArgs _) { }
+
+    public sealed class ValidationModel
+    {
+        [System.ComponentModel.DataAnnotations.Required]
+        [System.ComponentModel.DataAnnotations.EmailAddress]
+        public string? Email { get; set; }
+
+        public string? Code { get; set; }
+    }
+}

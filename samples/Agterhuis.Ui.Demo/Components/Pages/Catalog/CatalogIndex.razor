@@ -1,0 +1,38 @@
+@page "/catalog"
+
+<PageTitle>Radzen catalogus (Radzen)</PageTitle>
+
+<div class="catalog-page catalog-index-page">
+    <RadzenCard class="catalog-index-hero">
+        <h1>Radzen catalogus (Radzen)</h1>
+        <p>Deze catalogus is bedoeld voor theme-QA: rauwe Radzen-componenten controleren in het actieve theme, los van de Agt wrapper-API.</p>
+        <p>Zie ook de dekking in <a href="/docs/THEME-COVERAGE.md">docs/THEME-COVERAGE.md</a>.</p>
+    </RadzenCard>
+
+    <div class="catalog-feature-grid">
+        @foreach (var item in FeaturedItems)
+        {
+            <a class="catalog-feature-card" href="@item.Href" style="--catalog-stagger: @item.Index;">
+                <span class="catalog-feature-card__kicker">@item.Kicker</span>
+                <span class="catalog-feature-card__title">@item.Title</span>
+                <span class="catalog-feature-card__description">@item.Description</span>
+            </a>
+        }
+    </div>
+</div>
+
+@code {
+    private static readonly IReadOnlyList<FeatureItem> FeaturedItems =
+    [
+        new(0, "/catalog/buttons", "Buttons (Radzen)", "Action states", "Hover, focus, disabled, and CTA variants."),
+        new(1, "/catalog/forms", "Forms (Radzen)", "Inputs", "Text, date, dropdown, validation, and layout glue."),
+        new(2, "/catalog/data", "Data (Radzen)", "Calm grids", "DataGrid, list, and pager patterns."),
+        new(3, "/catalog/scheduling", "Scheduling (Radzen)", "Timeline", "Scheduler surfaces tuned for quiet density."),
+        new(4, "/catalog/overlays", "Overlays (Radzen)", "Dialogs and popups", "Modal, notification, and tooltip motion."),
+        new(5, "/catalog/layout", "Layout (Radzen)", "Shell primitives", "Panels, grids, stacks, and card composition."),
+        new(6, "/catalog/charts", "Charts (Radzen)", "Signals", "Series, sparkline, and data-visual accents."),
+        new(7, "/catalog/all-components", "All Components (Radzen)", "Inventory", "Matrix view of every demo surface.")
+    ];
+
+    private sealed record FeatureItem(int Index, string Href, string Title, string Kicker, string Description);
+}

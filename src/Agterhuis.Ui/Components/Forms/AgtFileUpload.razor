@@ -1,0 +1,161 @@
+<div class="agt-field-wrapper @CssClass" role="group" aria-describedby="@ResolvedDescribedBy">
+    @if (!string.IsNullOrWhiteSpace(Label))
+    {
+        <RadzenLabel Text="@Label" Component="@ResolvedName" class="agt-field-wrapper__label" />
+    }
+    else if (!string.IsNullOrWhiteSpace(AriaLabel))
+    {
+        <label class="agt-sr-only" for="@ResolvedName">@AriaLabel</label>
+    }
+
+    <RadzenUpload Name="@ResolvedName"
+                  Url="@Url"
+                  Auto="@Auto"
+                  Multiple="@Multiple"
+                  Accept="@ResolvedAccept"
+                  ChooseText="@ChooseText"
+                  DeleteText="@DeleteText"
+                  Disabled="@Disabled"
+                  MaxFileSize="@MaxFileSize"
+                  InputAttributes="@ResolvedInputAttributes"
+                  Change="OnChangeInternal"
+                  Progress="OnProgressInternal"
+                  Complete="OnCompleteInternal"
+                  Error="OnErrorInternal"
+                  class="agt-file-upload" />
+
+    @if (!string.IsNullOrWhiteSpace(ValidationMessage))
+    {
+        <p id="@MessageId" class="agt-field-wrapper__message" role="status" aria-live="polite">@ValidationMessage</p>
+    }
+
+    @if (_progressVisible)
+    {
+        <RadzenProgressBar Value="@_progressPercent" ShowValue="true" />
+    }
+</div>
+
+@code {
+    [Parameter]
+    public string? Name { get; set; }
+
+    [Parameter]
+    public string? Label { get; set; }
+
+    [Parameter]
+    public string? AriaLabel { get; set; }
+
+    [Parameter]
+    public string Url { get; set; } = "upload";
+
+    [Parameter]
+    public bool Auto { get; set; }
+
+    [Parameter]
+    public bool Multiple { get; set; }
+
+    [Parameter]
+    public bool Disabled { get; set; }
+
+    [Parameter]
+    public long MaxFileSize { get; set; } = 5_000_000;
+
+    [Parameter]
+    public IReadOnlyList<string> AllowedExtensions { get; set; } = [".pdf", ".docx", ".png", ".jpg"];
+
+    [Parameter]
+    public string ChooseText { get; set; } = "Bestand kiezen";
+
+    [Parameter]
+    public string DeleteText { get; set; } = "Verwijderen";
+
+    [Parameter]
+    public EventCallback<UploadChangeEventArgs> Change { get; set; }
+
+    [Parameter]
+    public EventCallback<UploadProgressArgs> Progress { get; set; }
+
+    [Parameter]
+    public EventCallback<UploadCompleteEventArgs> Complete { get; set; }
+
+    [Parameter]
+    public EventCallback<UploadErrorEventArgs> Error { get; set; }
+
+    [Parameter]
+    public string? CssClass { get; set; }
+
+    private readonly string _fallbackName = $"agt-file-upload-{Guid.NewGuid():N}";
+    private readonly string _messageId = $"agt-file-upload-msg-{Guid.NewGuid():N}";
+
+    private string? ValidationMessage { get; set; }
+
+    private double _progressPercent;
+
+    private bool _progressVisible;
+
+    private string ResolvedName => string.IsNullOrWhiteSpace(Name) ? _fallbackName : Name;
+
+    private string MessageId => _messageId;
+
+    private string? ResolvedDescribedBy => string.IsNullOrWhiteSpace(ValidationMessage) ? null : MessageId;
+
+    private string? ResolvedAccept => AllowedExtensions.Count == 0 ? null : string.Join(',', AllowedExtensions);
+
+    private IReadOnlyDictionary<string, object> ResolvedInputAttributes =>
+        string.IsNullOrWhiteSpace(AriaLabel)
+            ? new Dictionary<string, object>()
+            : new Dictionary<string, object> { ["aria-label"] = AriaLabel! };
+
+    protected override void OnParametersSet()
+    {
+        System.Diagnostics.Debug.Assert(
+            !string.IsNullOrWhiteSpace(Label) || !string.IsNullOrWhiteSpace(AriaLabel),
+            "AgtFileUpload requires Label or AriaLabel for accessibility.");
+    }
+
+    private async Task OnChangeInternal(UploadChangeEventArgs args)
+    {
+        ValidationMessage = ValidateSelection(args.Files ?? []);
+        await Change.InvokeAsync(args);
+    }
+
+    private async Task OnProgressInternal(UploadProgressArgs args)
+    {
+        _progressVisible = true;
+        _progressPercent = args.Progress;
+        await Progress.InvokeAsync(args);
+    }
+
+    private async Task OnCompleteInternal(UploadCompleteEventArgs args)
+    {
+        _progressVisible = false;
+        _progressPercent = 0;
+        await Complete.InvokeAsync(args);
+    }
+
+    private async Task OnErrorInternal(UploadErrorEventArgs args)
+    {
+        ValidationMessage = string.IsNullOrWhiteSpace(args.Message) ? "Uploaden is mislukt." : args.Message;
+        _progressVisible = false;
+        await Error.InvokeAsync(args);
+    }
+
+    private string? ValidateSelection(IEnumerable<Radzen.FileInfo> files)
+    {
+        foreach (var file in files)
+        {
+            if (file.Size > MaxFileSize)
+            {
+                return $"Bestand '{file.Name}' is groter dan de toegestane grootte van {MaxFileSize / 1_000_000} MB.";
+            }
+
+            var extension = Path.GetExtension(file.Name ?? string.Empty);
+            if (AllowedExtensions.Count > 0 && !AllowedExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase))
+            {
+                return $"Bestandstype '{extension}' is niet toegestaan.";
+            }
+        }
+
+        return null;
+    }
+}

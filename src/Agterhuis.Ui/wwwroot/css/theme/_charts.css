@@ -1,0 +1,51 @@
+.rz-chart .rz-series-0 :is(path, rect, circle, polygon, polyline, line),
+.rz-chart .rz-series-item-0 :is(path, rect, circle, polygon, polyline, line) { stroke: var(--agt-chart-series-1); fill: var(--agt-chart-series-1); }
+
+.rz-chart .rz-series-1 :is(path, rect, circle, polygon, polyline, line),
+.rz-chart .rz-series-item-1 :is(path, rect, circle, polygon, polyline, line) { stroke: var(--agt-chart-series-2); fill: var(--agt-chart-series-2); }
+
+.rz-chart .rz-series-2 :is(path, rect, circle, polygon, polyline, line),
+.rz-chart .rz-series-item-2 :is(path, rect, circle, polygon, polyline, line) { stroke: var(--agt-chart-series-3); fill: var(--agt-chart-series-3); }
+
+.rz-chart .rz-series-3 :is(path, rect, circle, polygon, polyline, line),
+.rz-chart .rz-series-item-3 :is(path, rect, circle, polygon, polyline, line) { stroke: var(--agt-chart-series-4); fill: var(--agt-chart-series-4); }
+
+.rz-chart .rz-series-4 :is(path, rect, circle, polygon, polyline, line),
+.rz-chart .rz-series-item-4 :is(path, rect, circle, polygon, polyline, line) { stroke: var(--agt-chart-series-5); fill: var(--agt-chart-series-5); }
+
+.rz-chart .rz-series-5 :is(path, rect, circle, polygon, polyline, line),
+.rz-chart .rz-series-item-5 :is(path, rect, circle, polygon, polyline, line) { stroke: var(--agt-chart-series-6); fill: var(--agt-chart-series-6); }
+
+.rz-chart .rz-series-6 :is(path, rect, circle, polygon, polyline, line),
+.rz-chart .rz-series-item-6 :is(path, rect, circle, polygon, polyline, line) { stroke: var(--agt-chart-series-7); fill: var(--agt-chart-series-7); }
+
+.rz-chart .rz-series-7 :is(path, rect, circle, polygon, polyline, line),
+.rz-chart .rz-series-item-7 :is(path, rect, circle, polygon, polyline, line) { stroke: var(--agt-chart-series-8); fill: var(--agt-chart-series-8); }
+
+.rz-chart-grid line,
+.rz-chart .rz-grid-lines line,
+.rz-chart-gridline {
+    stroke: var(--agt-chart-gridline);
+}
+
+.rz-chart-axis,
+.rz-chart-axis text,
+.rz-chart-legend,
+.rz-chart-legend text {
+    color: inherit;
+    fill: currentcolor;
+}
+
+.rz-chart-tooltip {
+    background: var(--agt-glass-bg);
+    border: var(--agt-glass-border);
+    box-shadow: var(--agt-shadow-sm);
+    color: var(--agt-tooltip-text);
+    backdrop-filter: blur(var(--agt-glass-blur));
+    -webkit-backdrop-filter: blur(var(--agt-glass-blur));
+}
+
+.rz-chart-axis text,
+.rz-chart-legend text {
+    fill: var(--agt-chart-axis-text);
+}

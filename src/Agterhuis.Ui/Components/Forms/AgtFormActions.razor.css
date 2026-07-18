@@ -1,0 +1,21 @@
+.agt-form-actions {
+    align-items: center;
+    display: flex;
+    gap: var(--agt-spacing-3);
+    justify-content: space-between;
+    width: 100%;
+}
+
+.agt-form-actions__leading {
+    align-items: center;
+    display: flex;
+    gap: var(--agt-spacing-2);
+}
+
+.agt-form-actions__trailing {
+    align-items: center;
+    display: flex;
+    gap: var(--agt-spacing-2);
+    justify-content: flex-end;
+    margin-left: auto;
+}

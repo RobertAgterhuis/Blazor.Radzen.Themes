@@ -1,0 +1,114 @@
+<div class="agt-field-wrapper @CssClass"
+     role="group"
+     aria-describedby="@ResolvedDescribedBy"
+     aria-invalid="@(!string.IsNullOrWhiteSpace(ValidationMessage))">
+    @if (!string.IsNullOrWhiteSpace(Label))
+    {
+        <RadzenLabel Text="@Label" Component="@ResolvedName" class="agt-field-wrapper__label" />
+    }
+    else if (!string.IsNullOrWhiteSpace(AriaLabel))
+    {
+        <label class="agt-sr-only" for="@ResolvedName">@AriaLabel</label>
+    }
+
+    <RadzenTextArea Value="@Value"
+                    ValueChanged="@ValueChanged"
+                    ValueExpression="@ValueExpression"
+                    Name="@ResolvedName"
+                    Placeholder="@Placeholder"
+                    Disabled="@Disabled"
+                    ReadOnly="@ReadOnly"
+                    Rows="@Rows"
+                    MaxLength="@MaxLength"
+                    AriaLabel="@AriaLabel"
+                    class="agt-text-area"
+                    Style="@Style" />
+
+    @if (MaxLength.HasValue)
+    {
+        <div class="agt-text-area__counter" aria-live="polite">
+            @if (CounterTemplate is not null)
+            {
+                @CounterTemplate(new CharCounterContext(CurrentLength, MaxLength.Value))
+            }
+            else
+            {
+                <span>@DefaultCounterText</span>
+            }
+        </div>
+    }
+
+    @if (!string.IsNullOrWhiteSpace(ValidationMessage))
+    {
+        <p id="@MessageId" class="agt-field-wrapper__message" role="status" aria-live="polite">@ValidationMessage</p>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public string? Value { get; set; }
+
+    [Parameter]
+    public EventCallback<string?> ValueChanged { get; set; }
+
+    [Parameter]
+    public Expression<Func<string?>>? ValueExpression { get; set; }
+
+    [Parameter]
+    public string? Name { get; set; }
+
+    [Parameter]
+    public string? Label { get; set; }
+
+    [Parameter]
+    public string? AriaLabel { get; set; }
+
+    [Parameter]
+    public string? Placeholder { get; set; }
+
+    [Parameter]
+    public bool Disabled { get; set; }
+
+    [Parameter]
+    public bool ReadOnly { get; set; }
+
+    [Parameter]
+    public int Rows { get; set; } = 3;
+
+    [Parameter]
+    public long? MaxLength { get; set; }
+
+    [Parameter]
+    public RenderFragment<CharCounterContext>? CounterTemplate { get; set; }
+
+    [Parameter]
+    public string? CssClass { get; set; }
+
+    [Parameter]
+    public string? ValidationMessage { get; set; }
+
+    [Parameter]
+    public string? Style { get; set; }
+
+    private readonly string _fallbackName = $"agt-text-area-{Guid.NewGuid():N}";
+    private readonly string _messageId = $"agt-text-area-msg-{Guid.NewGuid():N}";
+
+    private string ResolvedName => string.IsNullOrWhiteSpace(Name) ? _fallbackName : Name;
+
+    private string MessageId => _messageId;
+
+    private string? ResolvedDescribedBy => string.IsNullOrWhiteSpace(ValidationMessage) ? null : MessageId;
+
+    private int CurrentLength => Value?.Length ?? 0;
+
+    private string DefaultCounterText => $"{CurrentLength}/{MaxLength ?? 0} tekens";
+
+    protected override void OnParametersSet()
+    {
+        System.Diagnostics.Debug.Assert(
+            !string.IsNullOrWhiteSpace(Label) || !string.IsNullOrWhiteSpace(AriaLabel),
+            "AgtTextArea requires Label or AriaLabel for accessibility.");
+    }
+
+    public sealed record CharCounterContext(int Current, long Max);
+}

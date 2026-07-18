@@ -1,0 +1,44 @@
+@page "/catalog/overlays-advanced"
+
+<PageTitle>Overlays Advanced (Radzen)</PageTitle>
+
+<div class="catalog-page">
+    <h1>Overlays Advanced (Radzen)</h1>
+
+    <RadzenStack Orientation="Orientation.Horizontal" Gap="0.75rem" Wrap="FlexWrap.Wrap">
+        <RadzenFabMenu>
+            <RadzenFabMenuItem Text="Nieuw" Icon="add" />
+            <RadzenFabMenuItem Text="Opslaan" Icon="save" />
+        </RadzenFabMenu>
+
+        <RadzenSelectBar TValue="string" Data="SelectItems" TextProperty="Text" ValueProperty="Value" />
+
+        <RadzenChipList TValue="string" Data="ChipItems" TextProperty="Text" ValueProperty="Value" />
+    </RadzenStack>
+
+    <RadzenPopup Style="padding: 1rem;" Visible="true">
+        Plum Ink popup voorbeeld
+    </RadzenPopup>
+
+    <RadzenLogin AllowRegister="false" AllowResetPassword="false" />
+
+    <RadzenAIChat />
+
+    <RadzenSpeechToTextButton />
+</div>
+
+@code {
+    private static readonly IReadOnlyList<SimpleItem> SelectItems =
+    [
+        new("A", "A"),
+        new("B", "B")
+    ];
+
+    private static readonly IReadOnlyList<SimpleItem> ChipItems =
+    [
+        new("Plum", "plum"),
+        new("Ink", "ink")
+    ];
+
+    private sealed record SimpleItem(string Text, string Value);
+}

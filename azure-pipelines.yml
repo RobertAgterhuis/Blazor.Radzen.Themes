@@ -1,0 +1,97 @@
+trigger:
+# Public OSS CI/release runs on GitHub Actions (.github/workflows).
+# This Azure DevOps pipeline is kept for existing internal feed workflows.
+  branches:
+    include:
+      - main
+      - develop
+  tags:
+    include:
+      - v*
+
+pr:
+  branches:
+    include:
+      - main
+      - develop
+
+stages:
+  - stage: Validate
+    displayName: Validate
+    jobs:
+      - job: Validate
+        pool:
+          vmImage: windows-latest
+        steps:
+          - task: UseDotNet@2
+            inputs:
+              packageType: sdk
+              version: 10.0.x
+          - task: NuGetAuthenticate@1
+          - script: dotnet restore --locked-mode
+            displayName: Restore (locked)
+          - script: dotnet build Agterhuis.Ui.sln -c Release --no-restore
+            displayName: Build
+          - script: dotnet test Agterhuis.Ui.sln -c Release --no-build --logger "trx;LogFileName=tests.trx" --collect:"XPlat Code Coverage"
+            displayName: Test
+          - task: PublishTestResults@2
+            condition: always()
+            inputs:
+              testResultsFormat: VSTest
+              testResultsFiles: '**/*.trx'
+
+  - stage: Package
+    displayName: Package
+    dependsOn: Validate
+    jobs:
+      - job: Package
+        pool:
+          vmImage: windows-latest
+        steps:
+          - task: UseDotNet@2
+            inputs:
+              packageType: sdk
+              version: 10.0.x
+          - powershell: |
+              $branch = "$(Build.SourceBranch)"
+              $branchName = "$(Build.SourceBranchName)"
+              if ($branch.StartsWith('refs/tags/v')) {
+                $version = $branchName.TrimStart('v')
+              }
+              elseif ($branch -eq 'refs/heads/main') {
+                $version = "1.0.$(Build.BuildId)"
+              }
+              else {
+                $version = "1.1.0-beta.$(Build.BuildId)"
+              }
+              Write-Host "##vso[task.setvariable variable=PackageVersion]$version"
+              Write-Host "PackageVersion=$version"
+            displayName: Compute package version
+          - script: dotnet restore --locked-mode
+            displayName: Restore
+          - script: dotnet build Agterhuis.Ui.sln -c Release --no-restore
+            displayName: Build
+          - script: dotnet pack src/Agterhuis.Ui/Agterhuis.Ui.csproj -c Release --no-build -o $(Build.ArtifactStagingDirectory)/nuget -p:PackageVersion=$(PackageVersion)
+            displayName: Pack
+          - task: PublishPipelineArtifact@1
+            inputs:
+              targetPath: '$(Build.ArtifactStagingDirectory)/nuget'
+              artifact: nuget-packages
+
+  - stage: Publish
+    displayName: Publish
+    dependsOn: Package
+    condition: or(eq(variables['Build.SourceBranch'], 'refs/heads/main'), startsWith(variables['Build.SourceBranch'], 'refs/tags/v'))
+    jobs:
+      - job: Publish
+        pool:
+          vmImage: windows-latest
+        steps:
+          - task: NuGetAuthenticate@1
+          - task: DotNetCoreCLI@2
+            displayName: Push package
+            inputs:
+              command: push
+              packagesToPush: '$(Pipeline.Workspace)/nuget-packages/*.nupkg;!$(Pipeline.Workspace)/nuget-packages/*.snupkg'
+              nuGetFeedType: internal
+              publishVstsFeed: 'ICT365.NuGet/ict365-nuget'

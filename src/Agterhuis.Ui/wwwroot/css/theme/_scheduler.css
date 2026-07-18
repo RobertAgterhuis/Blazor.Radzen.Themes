@@ -1,0 +1,78 @@
+.rz-scheduler,
+.rz-scheduler-view,
+.rz-scheduler-table,
+.rz-scheduler-content {
+    border: 1px solid var(--agt-input-border);
+    border-radius: var(--agt-border-radius-lg);
+    overflow: hidden;
+}
+
+.rz-scheduler-header,
+.rz-scheduler-slot-header {
+    background: var(--agt-grid-header-bg);
+    border-bottom: 2px solid var(--agt-grid-header-border);
+    color: var(--agt-grid-header-text);
+}
+
+.rz-scheduler table td,
+.rz-scheduler table th,
+.rz-scheduler-slot,
+.rz-scheduler-cell {
+    background: var(--agt-surface-1);
+    border-color: var(--agt-input-border);
+    color: var(--agt-text-body);
+}
+
+:is([data-agt-theme="dark"], [data-agt-theme$="-dark"]) .rz-scheduler table td,
+:is([data-agt-theme="dark"], [data-agt-theme$="-dark"]) .rz-scheduler table th,
+:is([data-agt-theme="dark"], [data-agt-theme$="-dark"]) .rz-scheduler-slot,
+:is([data-agt-theme="dark"], [data-agt-theme$="-dark"]) .rz-scheduler-cell {
+    background: var(--agt-surface-2);
+}
+
+.rz-scheduler-appointment {
+    background: linear-gradient(140deg, var(--agt-color-primary-500), var(--agt-color-primary-700));
+    border: 1px solid var(--agt-alpha-primary-40);
+    color: var(--agt-color-white);
+}
+
+.rz-scheduler-appointment.rz-state-highlight,
+.rz-scheduler-cell.rz-state-highlight {
+    background: var(--agt-grid-row-selected-bg);
+    border-inline-start: 3px solid var(--agt-color-accent-400);
+    color: var(--agt-grid-row-selected-text);
+}
+
+.rz-scheduler-today {
+    box-shadow: inset 0 0 0 2px var(--agt-alpha-accent-40);
+}
+
+.rz-scheduler .rz-button.rz-state-active,
+.rz-scheduler .rz-scheduler-views button.rz-state-active,
+.rz-gantt .rz-button.rz-state-active,
+.rz-gantt .rz-gantt-toolbar .rz-button.rz-state-active {
+    background: var(--agt-color-accent-400);
+    border-color: var(--agt-color-accent-500);
+    color: var(--agt-on-accent);
+}
+
+.rz-gantt,
+.rz-gantt .rz-gantt-grid,
+.rz-gantt .rz-gantt-timeline {
+    background: var(--agt-surface-1);
+    border: 1px solid var(--agt-input-border);
+}
+
+.rz-gantt .rz-gantt-task,
+.rz-gantt .rz-task-bar {
+    background: var(--agt-color-primary-600);
+    border-color: var(--agt-color-primary-700);
+    color: var(--agt-color-white);
+}
+
+.rz-gantt .rz-gantt-task.rz-critical,
+.rz-gantt .rz-task-bar.rz-critical {
+    background: var(--agt-color-accent-400);
+    border-color: var(--agt-color-accent-500);
+    color: var(--agt-on-accent);
+}

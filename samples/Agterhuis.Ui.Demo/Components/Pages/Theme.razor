@@ -1,0 +1,219 @@
+@page "/components/theme"
+@using Agterhuis.Ui.Options
+@using Agterhuis.Ui.Theming
+@using Microsoft.Extensions.Options
+
+@inject IOptions<AgtUiOptions> UiOptions
+
+<PageTitle>Theme</PageTitle>
+
+<div class="agt-page agt-stack">
+    <AgtPageHeader Title="Theme tokens"
+                   Description="Overzicht van kleur, elevation, glass, glow en gradient tokens in de actieve theme-variant." />
+
+    <AgtCard CssClass="theme-showcase-card">
+        <Header>Active theme showcase</Header>
+        <ChildContent>
+            <section class="theme-showcase theme-showcase--@ThemeState.ActiveTheme.Name">
+                <div class="theme-showcase__copy">
+                    <p class="theme-showcase__kicker">@ThemeState.ActiveTheme.DisplayName</p>
+                    <h2>@ThemeState.Theme</h2>
+                    <p>@ThemeDescription</p>
+                </div>
+
+                <div class="theme-showcase__chips">
+                    <span class="theme-showcase__chip">@ThemeState.ActiveTheme.LightVariantId</span>
+                    <span class="theme-showcase__chip">@ThemeState.ActiveTheme.DarkVariantId</span>
+                    <span class="theme-showcase__chip">Ambient @AmbientStatus</span>
+                </div>
+            </section>
+        </ChildContent>
+    </AgtCard>
+
+    <AgtCard>
+        <Header>Actieve theme variant</Header>
+        <ChildContent>
+            <p><strong>Variant:</strong> @ThemeState.Theme</p>
+            <p><strong>Familie:</strong> @ThemeState.ActiveTheme.DisplayName</p>
+        </ChildContent>
+    </AgtCard>
+
+    <AgtCard>
+        <Header>Theme families</Header>
+        <ChildContent>
+            <div class="theme-family-grid">
+                @foreach (var family in ThemeState.AvailableThemes)
+                {
+                    <article class="theme-family-card">
+                        <h3>@family.DisplayName</h3>
+                        <div class="theme-family-row">
+                            <span class="theme-family-label">Light</span>
+                            <span class="theme-family-chip" data-agt-theme-preview="@family.LightVariantId">@family.LightVariantId</span>
+                        </div>
+                        <div class="theme-family-row">
+                            <span class="theme-family-label">Dark</span>
+                            <span class="theme-family-chip" data-agt-theme-preview="@family.DarkVariantId">@family.DarkVariantId</span>
+                        </div>
+                    </article>
+                }
+            </div>
+        </ChildContent>
+    </AgtCard>
+
+    <AgtCard>
+        <Header>Kleuren</Header>
+        <ChildContent>
+            <div class="theme-token-grid">
+                @foreach (var token in ColorTokens)
+                {
+                    <article class="theme-token-card">
+                        <div class="theme-token-swatch @token.CssClass"></div>
+                        <div class="theme-token-meta">
+                            <div class="theme-token-name">@token.Name</div>
+                            <div class="theme-token-value">@token.Value</div>
+                        </div>
+                    </article>
+                }
+            </div>
+        </ChildContent>
+    </AgtCard>
+
+    <AgtCard>
+        <Header>Elevation</Header>
+        <ChildContent>
+            <div class="theme-token-grid">
+                @foreach (var token in ElevationTokens)
+                {
+                    <article class="theme-token-card">
+                        <div class="theme-token-swatch @token.CssClass"></div>
+                        <div class="theme-token-meta">
+                            <div class="theme-token-name">@token.Name</div>
+                            <div class="theme-token-value">@token.Value</div>
+                        </div>
+                    </article>
+                }
+            </div>
+        </ChildContent>
+    </AgtCard>
+
+    <AgtCard>
+        <Header>Glass / Glow / Gradients</Header>
+        <ChildContent>
+            <div class="theme-token-grid">
+                @foreach (var token in EffectTokens)
+                {
+                    <article class="theme-token-card">
+                        <div class="theme-token-swatch @token.CssClass"></div>
+                        <div class="theme-token-meta">
+                            <div class="theme-token-name">@token.Name</div>
+                            <div class="theme-token-value">@token.Value</div>
+                        </div>
+                    </article>
+                }
+            </div>
+        </ChildContent>
+    </AgtCard>
+
+    <AgtCard>
+        <Header>Alpha scale</Header>
+        <ChildContent>
+            <div class="theme-token-grid">
+                @foreach (var token in AlphaTokens)
+                {
+                    <article class="theme-token-card">
+                        <div class="theme-token-swatch @token.CssClass"></div>
+                        <div class="theme-token-meta">
+                            <div class="theme-token-name">@token.Name</div>
+                            <div class="theme-token-value">@token.Value</div>
+                        </div>
+                    </article>
+                }
+            </div>
+        </ChildContent>
+    </AgtCard>
+</div>
+
+@code {
+    [CascadingParameter]
+    public AgtThemeState ThemeState { get; set; } = default!;
+
+    private string AmbientStatus => UiOptions.Value.EnableAmbientEffects ? "on" : "off";
+
+    private string ThemeDescription => ThemeState.ActiveTheme.Name switch
+    {
+        "plum" => "Editorial contrast with a polished plum shell and restrained glow.",
+        "dagobah" => "Soft low-contrast layers with misty motion and quiet depth.",
+        "dathomir" => "Smouldering highlights, dark velvet surfaces, and a theatrical edge.",
+        "hoth" => "Crisp surfaces and cool spacing tuned for bright clarity.",
+        "tatooine" => "Sun-baked warmth with a subtle heat-haze and golden accents.",
+        "imperial" => "Monochrome gunmetal layers with one cold signal accent for decisive states.",
+        "autotaalglas" => "Corporate contrast with measured signal use and koele informatietinten.",
+        "autotaalglas-contrast" => "High-contrast brand rendering tuned for AAA-minded reading and controls.",
+        "autotaalglas-portal" => "Customer-facing cyan-forward energy with brighter interaction cues.",
+        "autotaalglas-mono" => "Staalachtige rapportagediscipline met signaalkleur uitsluitend voor gevaar.",
+        _ => "A theme family built to feel distinctive without becoming noisy."
+    };
+
+    private static readonly IReadOnlyList<TokenSwatch> ColorTokens =
+    [
+        new("--agt-color-primary-50", "var(--agt-color-primary-50)", "swatch-primary-50"),
+        new("--agt-color-primary-100", "var(--agt-color-primary-100)", "swatch-primary-100"),
+        new("--agt-color-primary-200", "var(--agt-color-primary-200)", "swatch-primary-200"),
+        new("--agt-color-primary-300", "var(--agt-color-primary-300)", "swatch-primary-300"),
+        new("--agt-color-primary-400", "var(--agt-color-primary-400)", "swatch-primary-400"),
+        new("--agt-color-primary-500", "var(--agt-color-primary-500)", "swatch-primary-500"),
+        new("--agt-color-primary-600", "var(--agt-color-primary-600)", "swatch-primary-600"),
+        new("--agt-color-primary-700", "var(--agt-color-primary-700)", "swatch-primary-700"),
+        new("--agt-color-primary-800", "var(--agt-color-primary-800)", "swatch-primary-800"),
+        new("--agt-color-primary-900", "var(--agt-color-primary-900)", "swatch-primary-900"),
+        new("--agt-color-primary-950", "var(--agt-color-primary-950)", "swatch-primary-950"),
+        new("--agt-color-accent-300", "var(--agt-color-accent-300)", "swatch-accent-300"),
+        new("--agt-color-accent-400", "var(--agt-color-accent-400)", "swatch-accent-400"),
+        new("--agt-color-accent-500", "var(--agt-color-accent-500)", "swatch-accent-500"),
+        new("--agt-color-accent-600", "var(--agt-color-accent-600)", "swatch-accent-600"),
+        new("--agt-color-accent-700", "var(--agt-color-accent-700)", "swatch-accent-700"),
+        new("--agt-color-success", "var(--agt-color-success)", "swatch-success"),
+        new("--agt-color-warning", "var(--agt-color-warning)", "swatch-warning"),
+        new("--agt-color-danger", "var(--agt-color-danger)", "swatch-danger"),
+        new("--agt-color-info", "var(--agt-color-info)", "swatch-info"),
+        new("--agt-color-gray-50", "var(--agt-color-gray-50)", "swatch-gray-50"),
+        new("--agt-color-gray-100", "var(--agt-color-gray-100)", "swatch-gray-100"),
+        new("--agt-color-gray-200", "var(--agt-color-gray-200)", "swatch-gray-200"),
+        new("--agt-color-gray-500", "var(--agt-color-gray-500)", "swatch-gray-500"),
+        new("--agt-color-gray-700", "var(--agt-color-gray-700)", "swatch-gray-700"),
+        new("--agt-color-gray-900", "var(--agt-color-gray-900)", "swatch-gray-900"),
+        new("--agt-color-white", "var(--agt-color-white)", "swatch-white")
+    ];
+
+    private static readonly IReadOnlyList<TokenSwatch> ElevationTokens =
+    [
+        new("--agt-surface-0", "base surface", "swatch-surface-0"),
+        new("--agt-surface-1", "card surface", "swatch-surface-1"),
+        new("--agt-surface-2", "elevated panel", "swatch-surface-2"),
+        new("--agt-surface-3", "high elevation", "swatch-surface-3")
+    ];
+
+    private static readonly IReadOnlyList<TokenSwatch> EffectTokens =
+    [
+        new("--agt-glass-bg", "glass background", "swatch-glass"),
+        new("--agt-glow-primary", "primary glow", "swatch-glow-primary"),
+        new("--agt-glow-accent", "accent glow", "swatch-glow-accent"),
+        new("--agt-gradient-hero", "hero stage", "swatch-gradient-hero"),
+        new("--agt-gradient-accent", "accent gradient", "swatch-gradient-accent"),
+        new("--agt-gradient-surface", "surface gradient", "swatch-gradient-surface")
+    ];
+
+    private static readonly IReadOnlyList<TokenSwatch> AlphaTokens =
+    [
+        new("--agt-alpha-primary-5", "primary alpha 5%", "swatch-alpha-primary-5"),
+        new("--agt-alpha-primary-10", "primary alpha 10%", "swatch-alpha-primary-10"),
+        new("--agt-alpha-primary-20", "primary alpha 20%", "swatch-alpha-primary-20"),
+        new("--agt-alpha-primary-40", "primary alpha 40%", "swatch-alpha-primary-40"),
+        new("--agt-alpha-accent-5", "accent alpha 5%", "swatch-alpha-accent-5"),
+        new("--agt-alpha-accent-10", "accent alpha 10%", "swatch-alpha-accent-10"),
+        new("--agt-alpha-accent-20", "accent alpha 20%", "swatch-alpha-accent-20"),
+        new("--agt-alpha-accent-40", "accent alpha 40%", "swatch-alpha-accent-40")
+    ];
+
+    private sealed record TokenSwatch(string Name, string Value, string CssClass);
+}

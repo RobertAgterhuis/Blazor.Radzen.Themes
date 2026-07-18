@@ -1,0 +1,15 @@
+.agt-switch {
+    align-items: center;
+    cursor: pointer;
+    display: inline-flex;
+    gap: var(--agt-spacing-2);
+}
+
+.agt-switch__label {
+    color: var(--agt-text-body);
+}
+
+.agt-switch__state {
+    color: var(--agt-text-muted);
+    font-size: var(--agt-font-size-sm);
+}

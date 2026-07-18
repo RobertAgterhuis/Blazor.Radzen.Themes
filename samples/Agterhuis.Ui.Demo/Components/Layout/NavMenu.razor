@@ -1,0 +1,101 @@
+@inject IJSRuntime JS
+
+<nav aria-label="Hoofdnavigatie">
+<RadzenPanelMenu class="demo-panel-menu" Multiple="true" DisplayStyle="MenuItemDisplayStyle.Text">
+    <RadzenPanelMenuItem Text="Getting started" Icon="rocket_launch" Expanded="true">
+        <RadzenPanelMenuItem Text="Home" Icon="home" Path="/" Match="NavLinkMatch.All" />
+        <RadzenPanelMenuItem Text="Voorbeeldapplicatie" Icon="rocket_launch" Path="/app" Match="NavLinkMatch.Prefix" />
+        <RadzenPanelMenuItem Text="Theme" Icon="palette" Path="/components/theme" />
+    </RadzenPanelMenuItem>
+
+    <RadzenPanelMenuItem Text="Agt componenten" Icon="widgets" Expanded="true" Class="demo-panel-menu__group demo-panel-menu__group--agt">
+        <RadzenPanelMenuItem Text="De wrapper-API voor consumers" Icon="notes" Disabled="true" Class="demo-panel-menu__subtitle" />
+
+        <RadzenPanelMenuItem Text="Knoppen" Icon="horizontal_rule" Disabled="true" Class="demo-panel-menu__section" />
+        <RadzenPanelMenuItem Text="Buttons" Icon="smart_button" Path="/components/buttons" />
+
+        <RadzenPanelMenuItem Text="Formulieren" Icon="horizontal_rule" Disabled="true" Class="demo-panel-menu__section" />
+        <RadzenPanelMenuItem Text="Checkbox" Icon="check_box" Path="/components/forms/checkbox" />
+        <RadzenPanelMenuItem Text="Switch" Icon="toggle_on" Path="/components/forms/switch" />
+        <RadzenPanelMenuItem Text="Radio List" Icon="radio_button_checked" Path="/components/forms/radio-list" />
+        <RadzenPanelMenuItem Text="Text Field" Icon="short_text" Path="/components/forms/text-field" />
+        <RadzenPanelMenuItem Text="Numeric Field" Icon="pin" Path="/components/forms/numeric-field" />
+        <RadzenPanelMenuItem Text="Text Area" Icon="notes" Path="/components/forms/text-area" />
+        <RadzenPanelMenuItem Text="Password" Icon="password" Path="/components/forms/password" />
+        <RadzenPanelMenuItem Text="Auto Complete" Icon="manage_search" Path="/components/forms/auto-complete" />
+        <RadzenPanelMenuItem Text="Dropdown" Icon="arrow_drop_down_circle" Path="/components/forms/dropdown" />
+        <RadzenPanelMenuItem Text="Date Picker" Icon="event" Path="/components/forms/date-picker" />
+        <RadzenPanelMenuItem Text="File Upload" Icon="upload_file" Path="/components/forms/file-upload" />
+        <RadzenPanelMenuItem Text="Form Actions" Icon="fact_check" Path="/components/forms/form-actions" />
+
+        <RadzenPanelMenuItem Text="Data" Icon="horizontal_rule" Disabled="true" Class="demo-panel-menu__section" />
+        <RadzenPanelMenuItem Text="Data Grid" Icon="table_rows" Path="/components/data/grid" />
+
+        <RadzenPanelMenuItem Text="Feedback" Icon="horizontal_rule" Disabled="true" Class="demo-panel-menu__section" />
+        <RadzenPanelMenuItem Text="Feedback" Icon="campaign" Path="/components/feedback" />
+        <RadzenPanelMenuItem Text="Badge" Icon="local_offer" Path="/components/feedback/badge" />
+        <RadzenPanelMenuItem Text="Notification Service" Icon="notifications" Path="/components/feedback/notification-service" />
+        <RadzenPanelMenuItem Text="Empty State" Icon="inbox" Path="/components/feedback/empty-state" />
+        <RadzenPanelMenuItem Text="Loading Panel" Icon="hourglass_top" Path="/components/feedback/loading-panel" />
+        <RadzenPanelMenuItem Text="Confirm Dialog" Icon="help" Path="/components/feedback/confirm-dialog" />
+
+        <RadzenPanelMenuItem Text="Layout" Icon="horizontal_rule" Disabled="true" Class="demo-panel-menu__section" />
+        <RadzenPanelMenuItem Text="Layout" Icon="view_sidebar" Path="/components/layout" />
+        <RadzenPanelMenuItem Text="Tabs" Icon="tab" Path="/components/layout/tabs" />
+        <RadzenPanelMenuItem Text="Breadcrumb" Icon="alt_route" Path="/components/layout/breadcrumb" />
+        <RadzenPanelMenuItem Text="Sidebar Layout" Icon="dashboard_customize" Path="/components/layout/sidebar-layout" />
+    </RadzenPanelMenuItem>
+
+    <RadzenPanelMenuItem Text="Radzen catalogus · QA" Icon="auto_awesome_mosaic" Expanded="@CatalogExpanded" Click="OnCatalogGroupClick" Class="demo-panel-menu__group demo-panel-menu__group--catalog">
+        <RadzenPanelMenuItem Text="Theme-QA: alle Radzen-componenten in het actieve theme" Icon="science" Disabled="true" Class="demo-panel-menu__subtitle" />
+        <RadzenPanelMenuItem Text="Index (Radzen)" Icon="list" Path="/catalog" Match="NavLinkMatch.Prefix" />
+        <RadzenPanelMenuItem Text="Buttons (Radzen)" Icon="ads_click" Path="/catalog/buttons" />
+        <RadzenPanelMenuItem Text="Text Inputs (Radzen)" Icon="text_fields" Path="/catalog/text-inputs" />
+        <RadzenPanelMenuItem Text="Selection Inputs (Radzen)" Icon="checklist" Path="/catalog/selection-inputs" />
+        <RadzenPanelMenuItem Text="Pickers (Radzen)" Icon="calendar_month" Path="/catalog/pickers" />
+        <RadzenPanelMenuItem Text="Forms (Radzen)" Icon="dynamic_form" Path="/catalog/forms" />
+        <RadzenPanelMenuItem Text="Forms Advanced (Radzen)" Icon="check_box" Path="/catalog/forms-advanced" />
+        <RadzenPanelMenuItem Text="Validators (Radzen)" Icon="verified" Path="/catalog/validators" />
+        <RadzenPanelMenuItem Text="Data (Radzen)" Icon="dataset" Path="/catalog/data" />
+        <RadzenPanelMenuItem Text="Data Advanced (Radzen)" Icon="storage" Path="/catalog/data-advanced" />
+        <RadzenPanelMenuItem Text="Scheduling (Radzen)" Icon="schedule" Path="/catalog/scheduling" />
+        <RadzenPanelMenuItem Text="Navigation (Radzen)" Icon="alt_route" Path="/catalog/navigation" />
+        <RadzenPanelMenuItem Text="Overlays (Radzen)" Icon="layers" Path="/catalog/overlays" />
+        <RadzenPanelMenuItem Text="Overlays Advanced (Radzen)" Icon="chat" Path="/catalog/overlays-advanced" />
+        <RadzenPanelMenuItem Text="Layout (Radzen)" Icon="grid_view" Path="/catalog/layout" />
+        <RadzenPanelMenuItem Text="Layout Advanced (Radzen)" Icon="splitscreen" Path="/catalog/layout-advanced" />
+        <RadzenPanelMenuItem Text="Feedback (Radzen)" Icon="notification_important" Path="/catalog/feedback" />
+        <RadzenPanelMenuItem Text="Charts (Radzen)" Icon="monitoring" Path="/catalog/charts" />
+        <RadzenPanelMenuItem Text="Charts Advanced (Radzen)" Icon="query_stats" Path="/catalog/charts-advanced" />
+        <RadzenPanelMenuItem Text="Gauges (Radzen)" Icon="speed" Path="/catalog/gauges" />
+        <RadzenPanelMenuItem Text="Display (Radzen)" Icon="slideshow" Path="/catalog/display" />
+        <RadzenPanelMenuItem Text="Embed (Radzen)" Icon="integration_instructions" Path="/catalog/embed" />
+        <RadzenPanelMenuItem Text="All Components (Radzen)" Icon="view_list" Path="/catalog/all-components" />
+    </RadzenPanelMenuItem>
+</RadzenPanelMenu>
+</nav>
+
+@code {
+    private const string CatalogGroupStorageKey = "catalog";
+
+    private bool CatalogExpanded { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        var persistedState = await JS.InvokeAsync<string>("agtTheme.getStoredNavSectionState", CatalogGroupStorageKey, "collapsed");
+        CatalogExpanded = string.Equals(persistedState, "expanded", StringComparison.OrdinalIgnoreCase);
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task OnCatalogGroupClick(MenuItemEventArgs _)
+    {
+        CatalogExpanded = !CatalogExpanded;
+        var state = CatalogExpanded ? "expanded" : "collapsed";
+        await JS.InvokeVoidAsync("agtTheme.setStoredNavSectionState", CatalogGroupStorageKey, state);
+    }
+}

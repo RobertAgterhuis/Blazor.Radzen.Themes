@@ -1,0 +1,25 @@
+.sidebar-layout-demo-frame {
+    border: 1px solid var(--agt-input-border);
+    border-radius: var(--agt-border-radius-lg);
+    height: 34rem;
+    overflow: hidden;
+    position: relative;
+}
+
+.sidebar-demo-nav {
+    display: flex;
+    flex-direction: column;
+    gap: var(--agt-spacing-2);
+}
+
+.sidebar-demo-nav a {
+    border-radius: var(--agt-border-radius-sm);
+    color: var(--agt-color-white);
+    padding: var(--agt-spacing-2) var(--agt-spacing-3);
+    text-decoration: none;
+}
+
+.sidebar-demo-nav a:hover {
+    background: color-mix(in srgb, var(--agt-color-accent-400) 16%, transparent);
+    color: var(--agt-color-accent-400);
+}

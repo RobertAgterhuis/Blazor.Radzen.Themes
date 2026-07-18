@@ -1,0 +1,19 @@
+<nav class="agt-breadcrumb @CssClass" aria-label="@AriaLabel">
+    <RadzenBreadCrumb>
+        @foreach (var item in Items)
+        {
+            <RadzenBreadCrumbItem Text="@item.Text" Path="@item.Href" />
+        }
+    </RadzenBreadCrumb>
+</nav>
+
+@code {
+    [Parameter]
+    public IEnumerable<(string Text, string? Href)> Items { get; set; } = [];
+
+    [Parameter]
+    public string AriaLabel { get; set; } = "Breadcrumb";
+
+    [Parameter]
+    public string? CssClass { get; set; }
+}

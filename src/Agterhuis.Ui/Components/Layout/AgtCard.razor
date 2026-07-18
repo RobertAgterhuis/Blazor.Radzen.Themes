@@ -1,0 +1,13 @@
+<div class="agt-card @CssClass">
+    @if (Header is not null)
+    {
+        <header class="agt-card__header">@Header</header>
+    }
+
+    <div class="agt-card__content">@ChildContent</div>
+
+    @if (Footer is not null)
+    {
+        <footer class="agt-card__footer">@Footer</footer>
+    }
+</div>

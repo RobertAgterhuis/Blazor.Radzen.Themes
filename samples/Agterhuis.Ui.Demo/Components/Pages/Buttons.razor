@@ -1,0 +1,29 @@
+@page "/components/buttons"
+
+<PageTitle>Buttons</PageTitle>
+
+<div class="agt-page agt-stack">
+    <AgtPageHeader Title="Buttons" Description="Primair en secundair knoppen met disabled en busy gedrag." />
+
+    <AgtCard>
+        <ChildContent>
+            <div class="agt-row">
+                <AgtPrimaryButton Text="Opslaan" Click="OnPrimaryClick" />
+                <AgtSecondaryButton Text="Annuleren" />
+                <AgtPrimaryButton Text="Uitgeschakeld" Disabled="true" />
+                <AgtPrimaryButton Text="Bezig" IsBusy="true" BusyText="Bezig..." />
+            </div>
+            <p>Laatst geklikt: @_lastClick</p>
+        </ChildContent>
+    </AgtCard>
+</div>
+
+@code {
+    private string _lastClick = "nog niet";
+
+    private Task OnPrimaryClick(MouseEventArgs _)
+    {
+        _lastClick = DateTimeOffset.Now.ToString("HH:mm:ss");
+        return Task.CompletedTask;
+    }
+}

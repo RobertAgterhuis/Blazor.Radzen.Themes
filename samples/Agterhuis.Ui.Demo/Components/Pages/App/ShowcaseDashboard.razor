@@ -1,0 +1,176 @@
+@page "/app"
+@layout ShowcaseLayout
+
+@inject ShowcaseDataService DataService
+
+<PageTitle>Werkorders - Dashboard</PageTitle>
+
+<AgtPageHeader Kicker="Werkorders" Title="Dashboard" Description="Operationeel overzicht van werkorders, planning en omzet." />
+
+<AgtLoadingPanel IsLoading="@_loading" LoadingText="Dashboard wordt geladen...">
+    @if (PreviewOnly)
+    {
+        <AgtCard>
+            <ChildContent>
+                Dashboard preview
+            </ChildContent>
+        </AgtCard>
+    }
+    else
+    {
+        <div class="showcase-page__metric-grid">
+            @foreach (var metric in Metrics)
+            {
+                <AgtCard CssClass="showcase-page__metric">
+                    <Header>@metric.Label</Header>
+                    <ChildContent>
+                        <div class="showcase-page__metric-value">@FormatMetric(_animatedValues[metric.Index], metric.Currency)</div>
+                        <div class="showcase-page__metric-label">@metric.Caption</div>
+                    </ChildContent>
+                </AgtCard>
+            }
+        </div>
+
+        <div class="showcase-page__chart-grid">
+            <AgtCard CssClass="showcase-page__chart">
+                <Header>Omzet laatste 6 maanden</Header>
+                <ChildContent>
+                    <RadzenChart Style="height: 22rem;">
+                        <RadzenLineSeries Data="@MonthlyPerformance" CategoryProperty="Month" ValueProperty="Revenue" Title="Omzet" />
+                        <RadzenColumnOptions Radius="5" />
+                    </RadzenChart>
+                </ChildContent>
+            </AgtCard>
+
+            <AgtCard CssClass="showcase-page__chart">
+                <Header>Orders per type</Header>
+                <ChildContent>
+                    <RadzenChart Style="height: 22rem;">
+                        <RadzenDonutSeries Data="@OrderTypeBreakdown" CategoryProperty="Label" ValueProperty="Value" Title="Type" />
+                    </RadzenChart>
+                </ChildContent>
+            </AgtCard>
+        </div>
+
+        <div class="showcase-page__today-grid">
+            <AgtCard>
+                <Header>Vandaag gepland</Header>
+                <ChildContent>
+                    <div class="showcase-page__list">
+                        @foreach (var order in TodayOrders)
+                        {
+                            <article class="showcase-page__list-item">
+                                <div>
+                                    <strong>@order.Number</strong>
+                                    <span>@order.CustomerName · @order.Address</span>
+                                </div>
+                                <AgtBadge Text="@order.StatusLabel" Icon="schedule" Intent="@StatusIntent(order.Status)" />
+                            </article>
+                        }
+                    </div>
+                </ChildContent>
+            </AgtCard>
+
+            <AgtCard>
+                <Header>Recente meldingen</Header>
+                <ChildContent>
+                    <div class="showcase-page__list">
+                        @foreach (var notification in DataService.Notifications)
+                        {
+                            <article class="showcase-page__list-item">
+                                <div>
+                                    <strong>@notification.Title</strong>
+                                    <span>@notification.Detail</span>
+                                </div>
+                                <AgtBadge Text="@notification.Intent.ToString()" Icon="notifications" Intent="@ToIntent(notification.Intent)" />
+                            </article>
+                        }
+                    </div>
+                </ChildContent>
+            </AgtCard>
+        </div>
+    }
+</AgtLoadingPanel>
+
+@code {
+    private bool _loading = true;
+    private readonly decimal[] _animatedValues = [0, 0, 0, 0];
+
+    private static readonly IReadOnlyList<DashboardMetric> Metrics = [
+        new(0, "Open werkorders", "Nog actief in de planning", false),
+        new(1, "Vandaag gepland", "Te bezoeken opdrachten", false),
+        new(2, "Afgerond deze week", "Werkorders dichtgezet", false),
+        new(3, "Omzet MTD", "Omzet deze maand", true)
+    ];
+
+    private IReadOnlyList<ShowcaseMonthlyPerformance> MonthlyPerformance => DataService.MonthlyPerformance;
+
+    [Parameter]
+    public bool PreviewOnly { get; set; }
+
+    private IReadOnlyList<DashboardTypeBreakdown> OrderTypeBreakdown => DataService.WorkOrders
+        .GroupBy(order => order.TypeLabel)
+        .Select(group => new DashboardTypeBreakdown(group.Key, group.Count()))
+        .ToList();
+
+    private IEnumerable<ShowcaseWorkOrder> TodayOrders => DataService.TodayOrders;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        await Task.Delay(300);
+        var targetValues = new[]
+        {
+            (decimal)DataService.OpenOrderCount,
+            (decimal)DataService.PlannedTodayCount,
+            (decimal)DataService.CompletedThisWeekCount,
+            DataService.RevenueMonthToDate
+        };
+
+        for (var frame = 1; frame <= 18; frame++)
+        {
+            var progress = frame / 18m;
+            for (var index = 0; index < _animatedValues.Length; index++)
+            {
+                _animatedValues[index] = decimal.Round(targetValues[index] * progress, 0);
+            }
+
+            await InvokeAsync(StateHasChanged);
+            await Task.Delay(18);
+        }
+
+        _animatedValues[3] = DataService.RevenueMonthToDate;
+        _loading = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private static string FormatMetric(decimal value, bool currency)
+    {
+        return currency ? value.ToString("C0", System.Globalization.CultureInfo.GetCultureInfo("nl-NL")) : value.ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("nl-NL"));
+    }
+
+    private static AgtIntent StatusIntent(ShowcaseWorkOrderStatus status) => status switch
+    {
+        ShowcaseWorkOrderStatus.Afgerond => AgtIntent.Success,
+        ShowcaseWorkOrderStatus.Onderweg => AgtIntent.Info,
+        ShowcaseWorkOrderStatus.InUitvoering => AgtIntent.Warning,
+        ShowcaseWorkOrderStatus.Geannuleerd => AgtIntent.Danger,
+        _ => AgtIntent.Secondary
+    };
+
+    private static AgtIntent ToIntent(ShowcaseIntent intent) => intent switch
+    {
+        ShowcaseIntent.Success => AgtIntent.Success,
+        ShowcaseIntent.Warning => AgtIntent.Warning,
+        ShowcaseIntent.Danger => AgtIntent.Danger,
+        _ => AgtIntent.Info
+    };
+
+    private sealed record DashboardMetric(int Index, string Label, string Caption, bool Currency);
+
+    private sealed record DashboardTypeBreakdown(string Label, int Value);
+}

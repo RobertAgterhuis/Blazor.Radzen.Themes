@@ -1,0 +1,84 @@
+name: Bug report
+description: Report a defect in components, theming, or demo behavior
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please provide enough detail to reproduce the issue.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Component wrapper
+        - Theme tokens
+        - Demo app
+        - Build/Test/CI
+        - Documentation
+    validations:
+      required: true
+  - type: dropdown
+    id: themeFamily
+    attributes:
+      label: Theme family
+      options:
+        - plum
+        - ocean
+        - dagobah
+        - dathomir
+        - hoth
+        - tatooine
+        - imperial
+        - autotaalglas
+        - autotaalglas-contrast
+        - autotaalglas-portal
+        - autotaalglas-mono
+    validations:
+      required: true
+  - type: dropdown
+    id: themeVariant
+    attributes:
+      label: Theme variant
+      options:
+        - light
+        - dark
+    validations:
+      required: true
+  - type: input
+    id: route
+    attributes:
+      label: Route or page
+      placeholder: /components/theme or /app/werkorders
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduction steps
+      placeholder: |
+        1. Go to ...
+        2. Click ...
+        3. Observe ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: input
+    id: screenshot
+    attributes:
+      label: Screenshot or recording
+      description: Paste a link to an image/video showing the issue.
+      placeholder: https://...

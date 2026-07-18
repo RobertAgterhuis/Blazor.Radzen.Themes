@@ -1,0 +1,475 @@
+@page "/app/werkorders"
+@layout ShowcaseLayout
+
+@inject ShowcaseDataService DataService
+@inject DialogService DialogService
+@inject IAgtConfirmDialog ConfirmDialog
+@inject IAgtNotificationService Notifications
+@inject NavigationManager Nav
+@inject IJSRuntime JS
+
+<PageTitle>Werkorders - Werkorders</PageTitle>
+
+<AgtBreadcrumb CssClass="showcase-page__breadcrumbs" Items="Breadcrumbs" />
+<AgtPageHeader Kicker="Werkorders" Title="Werkorders" Description="Zoek, filter, open en beheer alle werkorders." />
+
+<div class="showcase-page__toolbar">
+    <AgtTextField Label="Zoekwerk" AriaLabel="Zoekwerk" Placeholder="Zoek op klant, adres of nummer" Value="@_searchText" ValueChanged="OnSearchChanged" ValueExpression="@(() => _searchText)" />
+    <AgtDropdown TValue="ShowcaseWorkOrderStatus?" Label="Status" AriaLabel="Statusfilter" Data="@StatusFilterOptions" Value="@_statusFilter" ValueChanged="OnStatusFilterChanged" ValueExpression="@(() => _statusFilter)" TextProperty="Label" ValueProperty="Value" AllowClear="true" />
+    <AgtDropdown TValue="ShowcaseWorkOrderPriority?" Label="Prioriteit" AriaLabel="Prioriteitsfilter" Data="@PriorityFilterOptions" Value="@_priorityFilter" ValueChanged="OnPriorityFilterChanged" ValueExpression="@(() => _priorityFilter)" TextProperty="Label" ValueProperty="Value" AllowClear="true" />
+    <AgtPrimaryButton Text="Nieuwe werkorder" Click="OnNewWorkOrder" />
+</div>
+
+<AgtCard>
+    <Header>Geavanceerd zoeken</Header>
+    <ChildContent>
+        <RadzenDataFilter TItem="ShowcaseWorkOrder" Data="@FilteredOrders" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+        <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" Wrap="FlexWrap.Wrap" Style="margin-top: 0.75rem;">
+            <AgtSecondaryButton Text="Exporteer CSV" Click="ExportCsv" />
+            <AgtSecondaryButton Text="Exporteer Excel" Click="ExportExcel" />
+            <RadzenToggleButton @bind-Value="_compactDensity" Text="Compacte dichtheid" />
+        </RadzenStack>
+    </ChildContent>
+</AgtCard>
+
+<div class="showcase-page__summary">
+    <AgtCard><Header>Open</Header><ChildContent><div class="showcase-page__metric-value">@FilteredOrders.Count(order => order.Status is ShowcaseWorkOrderStatus.Gepland or ShowcaseWorkOrderStatus.Onderweg or ShowcaseWorkOrderStatus.InUitvoering)</div></ChildContent></AgtCard>
+    <AgtCard><Header>Afgerond</Header><ChildContent><div class="showcase-page__metric-value">@FilteredOrders.Count(order => order.Status == ShowcaseWorkOrderStatus.Afgerond)</div></ChildContent></AgtCard>
+    <AgtCard><Header>Geannuleerd</Header><ChildContent><div class="showcase-page__metric-value">@FilteredOrders.Count(order => order.Status == ShowcaseWorkOrderStatus.Geannuleerd)</div></ChildContent></AgtCard>
+    <AgtCard><Header>Omzet</Header><ChildContent><div class="showcase-page__metric-value">@FilteredOrders.Sum(order => order.Amount).ToString("C0", System.Globalization.CultureInfo.GetCultureInfo("nl-NL"))</div></ChildContent></AgtCard>
+</div>
+
+<AgtLoadingPanel IsLoading="@_loading" LoadingText="Werkorders worden geladen...">
+    @if (FilteredOrders.Count == 0)
+    {
+        <AgtEmptyState CssClass="showcase-page__empty" Icon="inbox" Title="Geen werkorders" Description="Pas de filters aan of voeg een nieuwe werkorder toe.">
+            <Action>
+                <AgtSecondaryButton Text="Nieuwe werkorder" Click="OnNewWorkOrder" />
+            </Action>
+        </AgtEmptyState>
+    }
+    else
+    {
+        <AgtDataGrid TItem="ShowcaseWorkOrder"
+                     Data="@FilteredOrders"
+                     AllowFiltering="true"
+                     FilterMode="FilterMode.Simple"
+                     AllowRowSelectOnRowClick="true"
+                     RowSelect="OnRowSelected"
+                     PageSize="10">
+            <Columns>
+                <RadzenDataGridColumn TItem="ShowcaseWorkOrder" Property="Number" Title="Nummer" />
+                <RadzenDataGridColumn TItem="ShowcaseWorkOrder" Property="CustomerName" Title="Klant" />
+                <RadzenDataGridColumn TItem="ShowcaseWorkOrder" Property="Address" Title="Adres" />
+                <RadzenDataGridColumn TItem="ShowcaseWorkOrder" Title="Type">
+                    <Template Context="order">
+                        <AgtBadge Text="@order.TypeLabel" Icon="handyman" Intent="AgtIntent.Info" />
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="ShowcaseWorkOrder" Title="Status">
+                    <Template Context="order">
+                        <AgtBadge Text="@order.StatusLabel" Icon="schedule" Intent="@StatusIntent(order.Status)" />
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="ShowcaseWorkOrder" Title="Prioriteit">
+                    <Template Context="order">
+                        <AgtBadge Text="@order.PriorityLabel" Icon="priority_high" Intent="@PriorityIntent(order.Priority)" />
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="ShowcaseWorkOrder" Property="TechnicianName" Title="Monteur" />
+                <RadzenDataGridColumn TItem="ShowcaseWorkOrder" Title="Tijdvak">
+                    <Template Context="order">
+                        @order.TimeWindow
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="ShowcaseWorkOrder" Title="Bedrag">
+                    <Template Context="order">
+                        @order.Amount.ToString("C0", System.Globalization.CultureInfo.GetCultureInfo("nl-NL"))
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="ShowcaseWorkOrder" Title="Acties">
+                    <Template Context="order">
+                        <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem">
+                            <AgtSecondaryButton Text="Openen" Click="@(args => OnOpenDetail(order))" />
+                            <AgtSecondaryButton Text="Details" Click="@(args => OnRowSelected(order))" />
+                            <AgtSecondaryButton Text="Verwijderen" Click="@(args => OnDelete(order))" />
+                        </RadzenStack>
+                    </Template>
+                </RadzenDataGridColumn>
+            </Columns>
+        </AgtDataGrid>
+
+        <RadzenDataList Data="@FilteredOrders.Take(6)" TItem="ShowcaseWorkOrder" Style="margin-top: 1rem;">
+            <Template Context="row">
+                <article class="showcase-page__list-item">
+                    <div>
+                        <strong>@row.Number · @row.CustomerName</strong>
+                        <span>@row.StatusLabel · @row.TimeWindow</span>
+                    </div>
+                    <AgtSecondaryButton Text="Open" Click="@(args => OnOpenDetail(row))" />
+                </article>
+            </Template>
+        </RadzenDataList>
+        <RadzenPager Count="@FilteredOrders.Count" PageSize="6" />
+    }
+</AgtLoadingPanel>
+
+@code {
+    private bool _loading = true;
+    private string _searchText = string.Empty;
+    private ShowcaseWorkOrderStatus? _statusFilter;
+    private ShowcaseWorkOrderPriority? _priorityFilter;
+    private bool _compactDensity;
+    private IEnumerable<string> _skillsSelection = [];
+    private IReadOnlyList<ShowcaseWorkOrder> FilteredOrders => ApplyFilters();
+
+    private IReadOnlyList<(string Text, string? Href)> Breadcrumbs =>
+    [
+        ("Werkorders", "/app/werkorders")
+    ];
+
+    private IReadOnlyList<object> StatusFilterOptions => Enum.GetValues<ShowcaseWorkOrderStatus>().Select(value => new FilterOption<ShowcaseWorkOrderStatus>(value, StatusLabel(value))).Cast<object>().ToList();
+
+    private IReadOnlyList<object> PriorityFilterOptions => Enum.GetValues<ShowcaseWorkOrderPriority>().Select(value => new FilterOption<ShowcaseWorkOrderPriority>(value, PriorityLabel(value))).Cast<object>().ToList();
+
+    private IReadOnlyList<string> AddressOptions => DataService.Customers.Select(c => c.Address).Distinct().ToList();
+
+    private IReadOnlyList<string> SkillOptions => ["Installatie", "Inspectie", "Storingsdienst", "Veiligheid", "Rapportage"];
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Delay(300);
+        _loading = false;
+    }
+
+    private Task OnSearchChanged(string? value)
+    {
+        _searchText = value ?? string.Empty;
+        return Task.CompletedTask;
+    }
+
+    private Task OnStatusFilterChanged(ShowcaseWorkOrderStatus? value)
+    {
+        _statusFilter = value;
+        return Task.CompletedTask;
+    }
+
+    private Task OnPriorityFilterChanged(ShowcaseWorkOrderPriority? value)
+    {
+        _priorityFilter = value;
+        return Task.CompletedTask;
+    }
+
+    private async Task OnNewWorkOrder(MouseEventArgs _)
+    {
+        var draft = DataService.CreateDraftWorkOrder();
+        var editContext = new EditContext(draft);
+        var customerOptions = DataService.Customers.Cast<object>().ToList();
+        var technicianOptions = DataService.Technicians.Cast<object>().ToList();
+        var typeOptions = Enum.GetValues<ShowcaseWorkOrderType>().Select(value => new InlineOption<ShowcaseWorkOrderType>(value, value switch
+        {
+            ShowcaseWorkOrderType.Installatie => "Installatie",
+            ShowcaseWorkOrderType.Reparatie => "Reparatie",
+            ShowcaseWorkOrderType.Onderhoud => "Onderhoud",
+            _ => "Inspectie"
+        })).Cast<object>().ToList();
+        var priorityOptions = Enum.GetValues<ShowcaseWorkOrderPriority>().Select(value => new InlineOption<ShowcaseWorkOrderPriority>(value, value switch
+        {
+            ShowcaseWorkOrderPriority.Laag => "Laag",
+            ShowcaseWorkOrderPriority.Normaal => "Normaal",
+            ShowcaseWorkOrderPriority.Hoog => "Hoog",
+            _ => "Kritiek"
+        })).Cast<object>().ToList();
+        var statusOptions = Enum.GetValues<ShowcaseWorkOrderStatus>().Select(value => new InlineOption<ShowcaseWorkOrderStatus>(value, value switch
+        {
+            ShowcaseWorkOrderStatus.Gepland => "Gepland",
+            ShowcaseWorkOrderStatus.Onderweg => "Onderweg",
+            ShowcaseWorkOrderStatus.InUitvoering => "In uitvoering",
+            ShowcaseWorkOrderStatus.Afgerond => "Afgerond",
+            _ => "Geannuleerd"
+        })).Cast<object>().ToList();
+
+        var result = await DialogService.OpenAsync("Nieuwe werkorder", _ => @<EditForm EditContext="@editContext">
+            <DataAnnotationsValidator />
+            <div class="showcase-page__form">
+                <AgtDropdown TValue="int"
+                             Label="Klant"
+                             Data="@customerOptions"
+                             Value="@draft.CustomerId"
+                             ValueChanged="@(async value => await OnInlineCustomerChanged(draft, value))"
+                             ValueExpression="@(() => draft.CustomerId)"
+                             TextProperty="Company"
+                             ValueProperty="Id"
+                             ValidationMessage="@FieldMessage(editContext, () => draft.CustomerId)" />
+                <RadzenDropDownDataGrid TValue="int"
+                                        Name="klant-grid"
+                                        Data="@customerOptions"
+                                        TextProperty="Company"
+                                        ValueProperty="Id"
+                                        Placeholder="Klant uit grid"
+                                        Value="@draft.CustomerId"
+                                        Change="@(value => OnInlineCustomerChanged(draft, Convert.ToInt32(value)))" />
+                <RadzenMask Name="postcode" Mask="9999 AA" @bind-Value="draft.Postcode" />
+                <AgtTextField Label="Adres" Value="@draft.Address" ValueChanged="@(async value => await OnInlineAddressChanged(draft, value))" ValueExpression="@(() => draft.Address)" ValidationMessage="@FieldMessage(editContext, () => draft.Address)" />
+                <RadzenAutoComplete Data="@AddressOptions" @bind-Value="draft.Address" Placeholder="Adres aanvullen" />
+                <AgtDropdown TValue="ShowcaseWorkOrderType"
+                             Label="Type"
+                             Data="@typeOptions"
+                             Value="@draft.Type"
+                             ValueChanged="@(async value => await OnInlineTypeChanged(draft, value))"
+                             ValueExpression="@(() => draft.Type)"
+                             TextProperty="Label"
+                             ValueProperty="Value" />
+                <AgtDropdown TValue="ShowcaseWorkOrderPriority"
+                             Label="Prioriteit"
+                             Data="@priorityOptions"
+                             Value="@draft.Priority"
+                             ValueChanged="@(async value => await OnInlinePriorityChanged(draft, value))"
+                             ValueExpression="@(() => draft.Priority)"
+                             TextProperty="Label"
+                             ValueProperty="Value" />
+                <AgtDropdown TValue="int"
+                             Label="Monteur"
+                             Data="@technicianOptions"
+                             Value="@draft.TechnicianId"
+                             ValueChanged="@(async value => await OnInlineTechnicianChanged(draft, value))"
+                             ValueExpression="@(() => draft.TechnicianId)"
+                             TextProperty="Name"
+                             ValueProperty="Id" />
+                <AgtDropdown TValue="ShowcaseWorkOrderStatus"
+                             Label="Status"
+                             Data="@statusOptions"
+                             Value="@draft.Status"
+                             ValueChanged="@(async value => await OnInlineStatusChanged(draft, value))"
+                             ValueExpression="@(() => draft.Status)"
+                             TextProperty="Label"
+                             ValueProperty="Value" />
+                     <RadzenDropDown TValue="IEnumerable<string>"
+                                          Multiple="true"
+                                          Data="@SkillOptions"
+                                          Placeholder="Vaardigheden"
+                                          @bind-Value="_skillsSelection" />
+                <AgtDatePicker Label="Startdatum" ShowTime="true" Value="@((DateTime?)draft.PlannedStart)" ValueChanged="@(async value => await OnInlineStartChanged(draft, value))" />
+                <AgtDatePicker Label="Einddatum" ShowTime="true" Value="@((DateTime?)draft.PlannedEnd)" ValueChanged="@(async value => await OnInlineEndChanged(draft, value))" />
+                <AgtNumericField Label="Bedrag" Value="@((decimal?)draft.Amount)" ValueChanged="@(async value => await OnInlineAmountChanged(draft, value))" Min="50" Step="25" />
+                <AgtTextField Label="Omschrijving" Value="@draft.Description" ValueChanged="@(async value => await OnInlineDescriptionChanged(draft, value))" ValueExpression="@(() => draft.Description)" />
+
+                <AgtFormActions SaveText="Opslaan" CancelText="Annuleren" Save="@(async _ => await OnInlineSave(editContext, draft))" Cancel="@(async _ => await OnInlineCancel())" />
+            </div>
+        </EditForm>);
+
+        if (result is ShowcaseWorkOrder order)
+        {
+            order.SkillsCsv = string.Join(',', _skillsSelection);
+            DataService.AddWorkOrder(order);
+            Notifications.Success("Werkorder aangemaakt", $"{order.Number} is toegevoegd.");
+        }
+    }
+
+    private Task OnOpenDetail(ShowcaseWorkOrder order)
+    {
+        Nav.NavigateTo($"/app/werkorders/{order.Id}");
+        return Task.CompletedTask;
+    }
+
+    private async Task OnRowSelected(ShowcaseWorkOrder order)
+    {
+        await DialogService.OpenAsync<ShowcaseWorkOrderDetailsDialog>($"Werkorder {order.Number}", new Dictionary<string, object?>
+        {
+            ["WorkOrder"] = order
+        }, new DialogOptions { Width = "720px", Height = "auto", Resizable = true, Draggable = true });
+    }
+
+    private async Task OnDelete(ShowcaseWorkOrder order)
+    {
+        if (!await ConfirmDialog.ConfirmDeleteAsync($"{order.Number} - {order.CustomerName}"))
+        {
+            return;
+        }
+
+        DataService.DeleteWorkOrder(order.Id);
+        Notifications.Warning("Werkorder verwijderd", $"{order.Number} is uit de lijst verwijderd.");
+    }
+
+    private IReadOnlyList<ShowcaseWorkOrder> ApplyFilters()
+    {
+        var query = DataService.WorkOrders.AsEnumerable();
+
+        if (!string.IsNullOrWhiteSpace(_searchText))
+        {
+            var search = _searchText.Trim();
+            query = query.Where(order => order.Number.Contains(search, StringComparison.OrdinalIgnoreCase)
+                || order.CustomerName.Contains(search, StringComparison.OrdinalIgnoreCase)
+                || order.Address.Contains(search, StringComparison.OrdinalIgnoreCase)
+                || order.TechnicianName.Contains(search, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (_statusFilter.HasValue)
+        {
+            query = query.Where(order => order.Status == _statusFilter.Value);
+        }
+
+        if (_priorityFilter.HasValue)
+        {
+            query = query.Where(order => order.Priority == _priorityFilter.Value);
+        }
+
+        return query.ToList();
+    }
+
+    private static AgtIntent StatusIntent(ShowcaseWorkOrderStatus status) => status switch
+    {
+        ShowcaseWorkOrderStatus.Afgerond => AgtIntent.Success,
+        ShowcaseWorkOrderStatus.Onderweg => AgtIntent.Info,
+        ShowcaseWorkOrderStatus.InUitvoering => AgtIntent.Warning,
+        ShowcaseWorkOrderStatus.Geannuleerd => AgtIntent.Danger,
+        _ => AgtIntent.Secondary
+    };
+
+    private static AgtIntent PriorityIntent(ShowcaseWorkOrderPriority priority) => priority switch
+    {
+        ShowcaseWorkOrderPriority.Laag => AgtIntent.Info,
+        ShowcaseWorkOrderPriority.Normaal => AgtIntent.Secondary,
+        ShowcaseWorkOrderPriority.Hoog => AgtIntent.Warning,
+        _ => AgtIntent.Danger
+    };
+
+    private static string StatusLabel(ShowcaseWorkOrderStatus status) => status switch
+    {
+        ShowcaseWorkOrderStatus.Gepland => "Gepland",
+        ShowcaseWorkOrderStatus.Onderweg => "Onderweg",
+        ShowcaseWorkOrderStatus.InUitvoering => "In uitvoering",
+        ShowcaseWorkOrderStatus.Afgerond => "Afgerond",
+        _ => "Geannuleerd"
+    };
+
+    private static string PriorityLabel(ShowcaseWorkOrderPriority priority) => priority switch
+    {
+        ShowcaseWorkOrderPriority.Laag => "Laag",
+        ShowcaseWorkOrderPriority.Normaal => "Normaal",
+        ShowcaseWorkOrderPriority.Hoog => "Hoog",
+        _ => "Kritiek"
+    };
+
+    private sealed record FilterOption<TValue>(TValue Value, string Label);
+
+    private sealed record InlineOption<TValue>(TValue Value, string Label);
+
+    private Task OnInlineCustomerChanged(ShowcaseWorkOrder draft, int value)
+    {
+        draft.CustomerId = value;
+        var customer = DataService.GetCustomer(value);
+        if (customer is not null)
+        {
+            draft.CustomerName = customer.Company;
+            draft.Address = customer.Address;
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private Task OnInlineAddressChanged(ShowcaseWorkOrder draft, string? value)
+    {
+        draft.Address = value ?? string.Empty;
+        return Task.CompletedTask;
+    }
+
+    private Task OnInlineTypeChanged(ShowcaseWorkOrder draft, ShowcaseWorkOrderType value)
+    {
+        draft.Type = value;
+        return Task.CompletedTask;
+    }
+
+    private Task OnInlinePriorityChanged(ShowcaseWorkOrder draft, ShowcaseWorkOrderPriority value)
+    {
+        draft.Priority = value;
+        return Task.CompletedTask;
+    }
+
+    private Task OnInlineTechnicianChanged(ShowcaseWorkOrder draft, int value)
+    {
+        draft.TechnicianId = value;
+        var technician = DataService.GetTechnician(value);
+        if (technician is not null)
+        {
+            draft.TechnicianName = technician.Name;
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private Task OnInlineStatusChanged(ShowcaseWorkOrder draft, ShowcaseWorkOrderStatus value)
+    {
+        draft.Status = value;
+        return Task.CompletedTask;
+    }
+
+    private Task OnInlineStartChanged(ShowcaseWorkOrder draft, DateTime? value)
+    {
+        if (value.HasValue)
+        {
+            draft.PlannedStart = value.Value;
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private Task OnInlineEndChanged(ShowcaseWorkOrder draft, DateTime? value)
+    {
+        if (value.HasValue)
+        {
+            draft.PlannedEnd = value.Value;
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private Task OnInlineAmountChanged(ShowcaseWorkOrder draft, decimal? value)
+    {
+        draft.Amount = value ?? 0m;
+        return Task.CompletedTask;
+    }
+
+    private Task OnInlineDescriptionChanged(ShowcaseWorkOrder draft, string? value)
+    {
+        draft.Description = value ?? string.Empty;
+        return Task.CompletedTask;
+    }
+
+    private Task OnInlineSave(EditContext editContext, ShowcaseWorkOrder draft)
+    {
+        if (!editContext.Validate())
+        {
+            return Task.CompletedTask;
+        }
+
+        DialogService.Close(draft);
+        return Task.CompletedTask;
+    }
+
+    private Task OnInlineCancel()
+    {
+        DialogService.Close(null);
+        return Task.CompletedTask;
+    }
+
+    private async Task ExportCsv(MouseEventArgs _)
+    {
+        var lines = new List<string> { "nummer,klant,status,bedrag" };
+        lines.AddRange(FilteredOrders.Select(item => $"{item.Number},{item.CustomerName},{item.StatusLabel},{item.Amount.ToString(System.Globalization.CultureInfo.InvariantCulture)}"));
+        await JS.InvokeVoidAsync("agtTheme.downloadCsv", "werkorders-export.csv", string.Join("\r\n", lines));
+    }
+
+    private async Task ExportExcel(MouseEventArgs _)
+    {
+        var lines = new List<string> { "nummer\tklant\tstatus\tbedrag" };
+        lines.AddRange(FilteredOrders.Select(item => $"{item.Number}\t{item.CustomerName}\t{item.StatusLabel}\t{item.Amount.ToString(System.Globalization.CultureInfo.InvariantCulture)}"));
+        await JS.InvokeVoidAsync("agtTheme.downloadCsv", "werkorders-export.xls", string.Join("\r\n", lines));
+    }
+
+    private string? FieldMessage(EditContext editContext, Expression<Func<object>> expression)
+    {
+        var fieldIdentifier = FieldIdentifier.Create(expression);
+        return editContext.GetValidationMessages(fieldIdentifier).FirstOrDefault();
+    }
+}

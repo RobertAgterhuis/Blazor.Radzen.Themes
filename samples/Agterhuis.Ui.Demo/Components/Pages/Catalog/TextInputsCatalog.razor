@@ -1,0 +1,22 @@
+@page "/catalog/text-inputs"
+
+<PageTitle>Text Inputs (Radzen)</PageTitle>
+
+<div class="catalog-page">
+    <h1>Text Inputs (Radzen)</h1>
+
+    <RadzenStack Gap="0.75rem">
+        <RadzenTextBox Placeholder="TextBox" Name="txt" />
+        <RadzenTextArea Placeholder="TextArea" Name="txta" />
+        <RadzenPassword Placeholder="Password" Name="pwd" />
+        <RadzenNumeric TValue="decimal?" Placeholder="Numeric" Name="num" />
+        <RadzenMask Mask="00-00-0000" Placeholder="Mask" Name="msk" />
+        <RadzenAutoComplete Data="Names" Placeholder="AutoComplete" Name="ac" />
+        <RadzenSecurityCode Placeholder="Security code" Name="sc" />
+        <RadzenTextBox Placeholder="Disabled" Disabled="true" />
+    </RadzenStack>
+</div>
+
+@code {
+    private static readonly IReadOnlyList<string> Names = ["Anna", "Bram", "Cato", "Daan"];
+}

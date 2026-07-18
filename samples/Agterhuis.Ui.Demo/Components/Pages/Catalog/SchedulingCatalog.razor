@@ -1,0 +1,65 @@
+@page "/catalog/scheduling"
+
+<PageTitle>Scheduling (Radzen)</PageTitle>
+
+<div class="catalog-page">
+    <h1>Scheduling (Radzen)</h1>
+
+    @if (PreviewOnly)
+    {
+        <RadzenCard>Scheduler and Gantt preview (interactive rendering disabled).</RadzenCard>
+    }
+    else
+    {
+        <RadzenScheduler Data="Appointments" TItem="AppointmentItem" StartProperty="Start" EndProperty="End" TextProperty="Text" Style="height: 28rem;" />
+        <RadzenGantt Data="Tasks" TItem="TaskItem" StartProperty="Start" EndProperty="End" TextProperty="Text" ProgressProperty="Progress" Style="height: 24rem;" />
+    }
+</div>
+
+@code {
+    [Parameter]
+    public bool PreviewOnly { get; set; }
+
+    private static readonly IReadOnlyList<AppointmentItem> Appointments =
+    [
+        new(new DateTime(DateTime.Today.Year, DateTime.Today.Month, 4, 9, 0, 0), new DateTime(DateTime.Today.Year, DateTime.Today.Month, 4, 10, 0, 0), "Standup"),
+        new(new DateTime(DateTime.Today.Year, DateTime.Today.Month, 11, 13, 0, 0), new DateTime(DateTime.Today.Year, DateTime.Today.Month, 11, 14, 30, 0), "Review"),
+        new(new DateTime(DateTime.Today.Year, DateTime.Today.Month, 19, 10, 0, 0), new DateTime(DateTime.Today.Year, DateTime.Today.Month, 19, 11, 30, 0), "Planning")
+    ];
+
+    private static readonly IReadOnlyList<TaskItem> Tasks =
+    [
+        new(DateTime.Today, DateTime.Today.AddDays(2), "Design", 30),
+        new(DateTime.Today.AddDays(2), DateTime.Today.AddDays(5), "Build", 60)
+    ];
+
+    private sealed class AppointmentItem
+    {
+        public AppointmentItem(DateTime start, DateTime end, string text)
+        {
+            Start = start;
+            End = end;
+            Text = text;
+        }
+
+        public DateTime Start { get; }
+        public DateTime End { get; }
+        public string Text { get; }
+    }
+
+    private sealed class TaskItem
+    {
+        public TaskItem(DateTime start, DateTime end, string text, int progress)
+        {
+            Start = start;
+            End = end;
+            Text = text;
+            Progress = progress;
+        }
+
+        public DateTime Start { get; }
+        public DateTime End { get; }
+        public string Text { get; }
+        public int Progress { get; }
+    }
+}
