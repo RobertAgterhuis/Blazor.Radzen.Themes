@@ -14,7 +14,7 @@
 
 .sidebar-demo-nav a {
     border-radius: var(--agt-border-radius-sm);
-    color: var(--agt-color-white);
+    color: var(--agt-text-body);
     padding: var(--agt-spacing-2) var(--agt-spacing-3);
     text-decoration: none;
 }

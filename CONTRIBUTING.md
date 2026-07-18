@@ -33,6 +33,7 @@ dotnet run --project samples/Agterhuis.Ui.Demo
 - Colors must be token-driven: no hard-coded colors outside theme token files.
 - Color tokens must be scoped per theme variant on html[data-agt-theme="..."] only.
 - New tokens must be added for every theme family variant (token parity is mandatory).
+- Any fill that can contain text or icons must have a matching `--agt-on-*` foreground token in every theme family before it is used.
 - Guard suites must stay green: token parity, token bleed, and accessibility guard tests.
 - Wrap Radzen components; do not inherit from Radzen components.
 - Form wrappers must receive Label or AriaLabel.

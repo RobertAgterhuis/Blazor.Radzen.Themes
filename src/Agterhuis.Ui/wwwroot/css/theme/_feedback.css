@@ -13,6 +13,13 @@
     box-shadow: var(--agt-shadow-sm);
 }
 
+.rz-alert,
+.rz-progressbar,
+.rz-progressbar-circular,
+.rz-notification {
+    color: var(--agt-text-body);
+}
+
 .rz-alert.rz-alert-warning,
 .rz-badge.rz-badge-warning {
     background: var(--agt-alpha-accent-20);

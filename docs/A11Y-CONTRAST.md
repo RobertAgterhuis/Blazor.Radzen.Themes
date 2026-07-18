@@ -2,6 +2,10 @@
 
 [Docs Index](README.md)
 
+Generated contrast sweep command: `npm run contrast:sweep`
+
+The detailed, DOM-measured sweep output lives in [docs/CONTRAST-SWEEP.md](CONTRAST-SWEEP.md). This file keeps the hand-annotated WCAG matrix and the key guardrail notes that are easier to read inline than in the generated report.
+
 This matrix records the key semantic text/background and UI-boundary pairs used by Agterhuis.Ui in both themes. Ratios are computed using WCAG relative luminance.
 
 ## Text contrast matrix (Plum Ink)

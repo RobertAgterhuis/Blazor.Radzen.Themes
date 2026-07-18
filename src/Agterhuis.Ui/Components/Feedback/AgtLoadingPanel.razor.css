@@ -10,7 +10,7 @@
     align-items: center;
     background: color-mix(in srgb, var(--agt-surface-2) 86%, transparent);
     border-radius: var(--agt-border-radius-md);
-    color: var(--agt-color-white);
+    color: var(--agt-text-body);
     display: flex;
     flex-direction: column;
     gap: var(--agt-spacing-2);

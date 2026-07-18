@@ -195,7 +195,7 @@ html[data-agt-theme="imperial-dark"] {
     --rz-grid-loading-indicator-background-color: var(--agt-color-white);
     --rz-grid-loading-indicator-color: var(--agt-color-gray-900);
     --rz-grid-selected-background-color: var(--agt-color-accent-400);
-    --rz-grid-selected-color: var(--agt-color-accent-400);
+    --rz-grid-selected-color: var(--agt-on-accent);
     --rz-grid-shadow: var(--agt-shadow-sm);
     --rz-grid-simple-filter-icon-active-background-color: var(--agt-color-primary-200);
     --rz-grid-simple-filter-icon-active-color: var(--agt-color-primary-200);
@@ -404,7 +404,7 @@ html[data-agt-theme="imperial-dark"] {
     --rz-pager-numeric-button-hover-background-color: var(--agt-color-primary-100);
     --rz-pager-numeric-button-hover-color: var(--agt-color-primary-100);
     --rz-pager-numeric-button-selected-background-color: var(--agt-color-accent-400);
-    --rz-pager-numeric-button-selected-color: var(--agt-color-accent-400);
+    --rz-pager-numeric-button-selected-color: var(--agt-on-accent);
     --rz-pager-summary-color: var(--agt-color-gray-900);
     --rz-panel-background-color: var(--agt-color-white);
     --rz-panel-hover-color: var(--agt-color-primary-100);
@@ -493,7 +493,7 @@ html[data-agt-theme="imperial-dark"] {
     --rz-scheduler-view-button-background-color: var(--agt-color-white);
     --rz-scheduler-view-button-color: var(--agt-color-gray-900);
     --rz-scheduler-view-selected-background-color: var(--agt-color-accent-400);
-    --rz-scheduler-view-selected-color: var(--agt-color-accent-400);
+    --rz-scheduler-view-selected-color: var(--agt-on-accent);
     --rz-scheduler-weekend-background-color: var(--agt-color-white);
     --rz-scheduler-weekend-color: var(--agt-color-gray-900);
     --rz-scrollbar-background-color: var(--agt-color-white);
@@ -900,7 +900,7 @@ html[data-agt-theme="imperial-dark"] {
     --rz-grid-loading-indicator-background-color: var(--agt-color-primary-900);
     --rz-grid-loading-indicator-color: var(--agt-color-white);
     --rz-grid-selected-background-color: var(--agt-color-accent-400);
-    --rz-grid-selected-color: var(--agt-color-accent-400);
+    --rz-grid-selected-color: var(--agt-on-accent);
     --rz-grid-shadow: var(--agt-shadow-md);
     --rz-grid-simple-filter-icon-active-background-color: var(--agt-color-primary-700);
     --rz-grid-simple-filter-icon-active-color: var(--agt-color-primary-700);
@@ -1109,7 +1109,7 @@ html[data-agt-theme="imperial-dark"] {
     --rz-pager-numeric-button-hover-background-color: var(--agt-color-primary-800);
     --rz-pager-numeric-button-hover-color: var(--agt-color-primary-800);
     --rz-pager-numeric-button-selected-background-color: var(--agt-color-accent-400);
-    --rz-pager-numeric-button-selected-color: var(--agt-color-accent-400);
+    --rz-pager-numeric-button-selected-color: var(--agt-on-accent);
     --rz-pager-summary-color: var(--agt-color-white);
     --rz-panel-background-color: var(--agt-color-primary-900);
     --rz-panel-hover-color: var(--agt-color-primary-800);
@@ -1198,7 +1198,7 @@ html[data-agt-theme="imperial-dark"] {
     --rz-scheduler-view-button-background-color: var(--agt-color-primary-900);
     --rz-scheduler-view-button-color: var(--agt-color-white);
     --rz-scheduler-view-selected-background-color: var(--agt-color-accent-400);
-    --rz-scheduler-view-selected-color: var(--agt-color-accent-400);
+    --rz-scheduler-view-selected-color: var(--agt-on-accent);
     --rz-scheduler-weekend-background-color: var(--agt-color-primary-900);
     --rz-scheduler-weekend-color: var(--agt-color-white);
     --rz-scrollbar-background-color: var(--agt-color-primary-900);

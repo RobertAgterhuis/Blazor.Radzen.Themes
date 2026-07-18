@@ -82,7 +82,7 @@ html[data-agt-theme="autotaalglas-contrast-light"] {
 
     --agt-text-heading: #0d1b3d;
     --agt-text-body: #0d1b3d;
-    --agt-text-muted: #2f3848;
+    --agt-text-muted: var(--agt-nav-item-text);
     --agt-link-color: #002575;
     --agt-link-hover-color: #002575;
     --agt-on-accent: #ffffff;
@@ -92,7 +92,7 @@ html[data-agt-theme="autotaalglas-contrast-light"] {
     --agt-control-disabled-bg: #eef2f7;
     --agt-color-danger-text: #8f0019;
 
-    --agt-nav-group-text: #2f3848;
+    --agt-nav-group-text: var(--agt-nav-item-text);
     --agt-nav-item-text: #0d1b3d;
     --agt-nav-item-icon: #002575;
     --agt-nav-item-hover-bg: #eef3fb;
@@ -199,7 +199,7 @@ html[data-agt-theme="autotaalglas-contrast-dark"] {
 
     --agt-text-heading: #edf3ff;
     --agt-text-body: #edf3ff;
-    --agt-text-muted: #c8d6ef;
+    --agt-text-muted: var(--agt-nav-item-text);
     --agt-link-color: #4d8fe0;
     --agt-link-hover-color: #8cb8ff;
     --agt-color-accent-text: #ffb6c2;
@@ -208,7 +208,7 @@ html[data-agt-theme="autotaalglas-contrast-dark"] {
     --agt-control-disabled-bg: #162037;
     --agt-color-danger-text: #ffb6c2;
 
-    --agt-nav-group-text: #c8d6ef;
+    --agt-nav-group-text: var(--agt-nav-item-text);
     --agt-nav-item-text: #edf3ff;
     --agt-nav-item-icon: #4d8fe0;
     --agt-nav-item-hover-bg: #162037;

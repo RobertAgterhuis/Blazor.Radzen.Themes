@@ -5,6 +5,7 @@
   "scripts": {
     "a11y:install": "playwright install --with-deps chromium",
     "a11y:test": "playwright test tests/a11y/axe.spec.mjs",
+    "contrast:sweep": "node eng/contrast-sweep/contrast-sweep.mjs",
     "screenshots": "node eng/screenshots/capture.mjs"
   },
   "devDependencies": {
