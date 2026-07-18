@@ -20,8 +20,8 @@
     background: var(--agt-surface-1);
     border-color: var(--agt-input-border);
     color: var(--agt-text-body);
-    min-height: 2.75rem;
-    padding-inline: var(--agt-spacing-3);
+    min-height: var(--agt-control-height-lg);
+    padding-inline: var(--agt-control-padding-inline);
 }
 
 .agt-theme-option,

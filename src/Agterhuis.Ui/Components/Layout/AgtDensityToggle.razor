@@ -1,0 +1,27 @@
+<RadzenButton class="agt-density-toggle"
+              Icon="@Icon"
+              Text="@Label"
+              AriaLabel="@AriaLabel"
+              title="@AriaLabel"
+              ButtonStyle="ButtonStyle.Base"
+              Variant="Variant.Flat"
+              Click="@OnToggleClick" />
+
+@code {
+    [CascadingParameter]
+    public AgtDensityState DensityState { get; set; } = default!;
+
+    private string Label => DensityState.IsCompact ? "Compact" : "Comfortabel";
+
+    private string Icon => DensityState.IsCompact ? "density_small" : "density_medium";
+
+    private string AriaLabel => DensityState.IsCompact
+        ? "Wissel naar comfortabele dichtheid"
+        : "Wissel naar compacte dichtheid";
+
+    private Task OnToggleClick(MouseEventArgs _)
+    {
+        DensityState.ToggleDensity();
+        return Task.CompletedTask;
+    }
+}

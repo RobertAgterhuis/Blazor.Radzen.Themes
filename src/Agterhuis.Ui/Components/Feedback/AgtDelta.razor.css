@@ -1,0 +1,30 @@
+.agt-delta {
+    align-items: center;
+    display: inline-flex;
+    font-size: var(--agt-font-size-sm);
+    font-variant-numeric: var(--agt-numeric-variant);
+    font-weight: 600;
+    gap: 0.35rem;
+}
+
+.agt-delta__icon {
+    font-size: 0.9em;
+}
+
+.agt-delta__label {
+    font-size: var(--agt-font-size-xs);
+    letter-spacing: var(--agt-caps-tracking);
+    text-transform: uppercase;
+}
+
+.agt-delta--positive {
+    color: var(--agt-color-success);
+}
+
+.agt-delta--negative {
+    color: var(--agt-color-danger);
+}
+
+.agt-delta--neutral {
+    color: var(--agt-text-muted);
+}

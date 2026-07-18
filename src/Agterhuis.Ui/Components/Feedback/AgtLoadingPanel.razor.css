@@ -34,10 +34,57 @@
     z-index: 1;
 }
 
+.agt-loading-panel__overlay--skeleton {
+    justify-content: flex-start;
+    padding: var(--agt-spacing-3);
+}
+
+.agt-loading-panel__skeleton {
+    display: grid;
+    gap: var(--agt-spacing-2);
+    inline-size: 100%;
+    z-index: 1;
+}
+
+.agt-loading-panel__skeleton-row,
+.agt-loading-panel__skeleton-card,
+.agt-loading-panel__skeleton-form-row {
+    background: linear-gradient(90deg, var(--agt-surface-1) 0%, color-mix(in srgb, var(--agt-color-primary-500) 18%, var(--agt-surface-1)) 45%, var(--agt-surface-1) 100%);
+    background-size: 220% 100%;
+    border: 1px solid var(--agt-input-border);
+    border-radius: var(--agt-border-radius-md);
+}
+
+.agt-loading-panel__skeleton--grid-rows .agt-loading-panel__skeleton-row {
+    block-size: calc(var(--agt-grid-cell-padding-block) * 2 + var(--agt-line-height-base) * 1em);
+}
+
+.agt-loading-panel__skeleton--cards {
+    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+}
+
+.agt-loading-panel__skeleton--cards .agt-loading-panel__skeleton-card {
+    block-size: 6rem;
+}
+
+.agt-loading-panel__skeleton--form .agt-loading-panel__skeleton-form-row {
+    block-size: var(--agt-control-height-md);
+}
+
+.agt-loading-panel__overlay--skeleton .agt-loading-panel__skeleton-row,
+.agt-loading-panel__overlay--skeleton .agt-loading-panel__skeleton-card,
+.agt-loading-panel__overlay--skeleton .agt-loading-panel__skeleton-form-row {
+    animation: agt-loading-skeleton 1200ms linear infinite;
+}
+
 .agt-loading-panel__text {
     font-size: var(--agt-font-size-sm);
     font-weight: 600;
     z-index: 1;
+}
+
+.agt-loading-panel__overlay--skeleton .agt-loading-panel__text {
+    margin-top: var(--agt-spacing-1);
 }
 
 @keyframes agt-loading-shimmer {
@@ -46,9 +93,22 @@
     }
 }
 
+@keyframes agt-loading-skeleton {
+    to {
+        background-position: -120% 0;
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
     .agt-loading-panel__overlay::before {
         animation: none;
         transform: none;
+    }
+
+    .agt-loading-panel__overlay--skeleton .agt-loading-panel__skeleton-row,
+    .agt-loading-panel__overlay--skeleton .agt-loading-panel__skeleton-card,
+    .agt-loading-panel__overlay--skeleton .agt-loading-panel__skeleton-form-row {
+        animation: none;
+        background-position: 0 0;
     }
 }

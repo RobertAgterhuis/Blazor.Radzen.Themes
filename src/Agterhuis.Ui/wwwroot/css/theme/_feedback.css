@@ -20,6 +20,20 @@
     color: var(--agt-text-body);
 }
 
+.rz-alert.rz-alert-primary,
+.rz-badge.rz-badge-primary {
+    background: color-mix(in srgb, var(--agt-color-primary-500) 24%, var(--agt-surface-1));
+    border-inline-start: 4px solid var(--agt-color-primary-500);
+    color: var(--agt-color-gray-900);
+}
+
+.rz-alert.rz-alert-secondary,
+.rz-badge.rz-badge-secondary {
+    background: color-mix(in srgb, var(--agt-color-accent-400) 22%, var(--agt-surface-1));
+    border-inline-start: 4px solid var(--agt-color-accent-400);
+    color: var(--agt-color-gray-900);
+}
+
 .rz-alert.rz-alert-warning,
 .rz-badge.rz-badge-warning {
     background: var(--agt-alpha-accent-20);

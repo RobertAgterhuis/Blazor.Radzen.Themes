@@ -1,0 +1,46 @@
+@using Agterhuis.Ui.Formatting
+
+<span class="@ClassName" title="@ResolvedTitle">@DisplayText</span>
+
+@code {
+    [Parameter]
+    public object? Value { get; set; }
+
+    [Parameter]
+    public string Format { get; set; } = "N0";
+
+    [Parameter]
+    public string Culture { get; set; } = "nl-NL";
+
+    [Parameter]
+    public bool AlignEnd { get; set; }
+
+    [Parameter]
+    public string? Title { get; set; }
+
+    [Parameter]
+    public string? CssClass { get; set; }
+
+    private string DisplayText => AgtNumberFormat.Format(Value, Format, Culture);
+
+    private string ResolvedTitle => Title ?? DisplayText;
+
+    private string ClassName
+    {
+        get
+        {
+            var classes = new List<string> { "agt-numeric" };
+            if (AlignEnd)
+            {
+                classes.Add("agt-numeric--align-end");
+            }
+
+            if (!string.IsNullOrWhiteSpace(CssClass))
+            {
+                classes.Add(CssClass);
+            }
+
+            return string.Join(' ', classes);
+        }
+    }
+}

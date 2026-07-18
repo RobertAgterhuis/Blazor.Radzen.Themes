@@ -19,8 +19,15 @@ table.rz-table {
     background: var(--agt-grid-header-bg);
     border-bottom: 2px solid var(--agt-grid-header-border);
     color: var(--agt-grid-header-text);
-    letter-spacing: 0.04em;
+    letter-spacing: var(--agt-caps-tracking);
     text-transform: uppercase;
+}
+
+.rz-datatable-thead th,
+.rz-grid-table thead th,
+.rz-grid-table td,
+.rz-datatable tbody td {
+    padding: var(--agt-grid-cell-padding-block) var(--agt-grid-cell-padding-inline);
 }
 
 .rz-datatable-even,
@@ -98,8 +105,9 @@ table.rz-table {
 .rz-paginator .rz-paginator-element {
     border-radius: 999px;
     color: var(--agt-text-muted);
-    min-height: 2rem;
-    min-width: 2rem;
+    font-variant-numeric: var(--agt-numeric-variant);
+    min-height: var(--agt-control-height-xs);
+    min-width: var(--agt-control-height-xs);
     transition: box-shadow var(--agt-transition-fast), background-color var(--agt-transition-fast), color var(--agt-transition-fast);
 }
 
@@ -113,4 +121,42 @@ table.rz-table {
     background: var(--agt-color-accent-400);
     box-shadow: var(--agt-glow-accent);
     color: var(--agt-on-accent);
+}
+
+.agt-data-grid--sticky-summary .rz-grid-table tfoot,
+.agt-data-grid--sticky-summary .rz-datatable-tablewrapper tfoot {
+    bottom: 0;
+    position: sticky;
+    z-index: 2;
+}
+
+.agt-data-grid--sticky-summary .rz-grid-table tfoot td,
+.agt-data-grid--sticky-summary .rz-datatable-tablewrapper tfoot td {
+    background: var(--agt-surface-2);
+    border-top: 1px solid var(--agt-grid-header-border);
+    color: var(--agt-text-heading);
+    font-weight: 700;
+}
+
+.agt-data-grid--sticky-first-column .rz-grid-table th:first-child,
+.agt-data-grid--sticky-first-column .rz-grid-table td:first-child {
+    background: inherit;
+    left: 0;
+    position: sticky;
+    z-index: 3;
+}
+
+.agt-data-grid--sticky-first-column .rz-grid-table thead th:first-child {
+    z-index: 5;
+}
+
+.agt-data-grid--sticky-first-column .rz-grid-table th:first-child::after,
+.agt-data-grid--sticky-first-column .rz-grid-table td:first-child::after {
+    background: linear-gradient(90deg, color-mix(in srgb, var(--agt-canvas) 28%, transparent) 0%, transparent 100%);
+    content: "";
+    inset-block: 0;
+    inset-inline-end: -0.7rem;
+    pointer-events: none;
+    position: absolute;
+    width: 0.7rem;
 }

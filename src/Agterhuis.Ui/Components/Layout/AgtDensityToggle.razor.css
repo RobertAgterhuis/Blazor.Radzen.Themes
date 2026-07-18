@@ -1,0 +1,15 @@
+.agt-density-toggle.rz-button {
+    border: var(--agt-glass-border);
+    border-radius: 999px;
+    color: var(--agt-topbar-icon-color);
+    font-size: var(--agt-font-size-sm);
+    min-height: var(--agt-control-height-sm);
+    padding-inline: var(--agt-spacing-3);
+}
+
+.agt-density-toggle.rz-button:hover,
+.agt-density-toggle.rz-button:focus-visible {
+    background: var(--agt-hover-tint);
+    box-shadow: var(--agt-glow-accent);
+    color: var(--agt-topbar-icon-hover-color);
+}

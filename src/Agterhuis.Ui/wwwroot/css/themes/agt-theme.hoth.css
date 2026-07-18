@@ -110,7 +110,7 @@ html[data-agt-theme="hoth-dark"] {
     --agt-input-focus-border: var(--agt-color-accent-400);
     --agt-input-focus-ring: 0 0 0 3px rgb(255 140 66 / 26%);
 
-    --agt-on-primary: #0b1017;
+    --agt-on-primary: #ffffff;
     --agt-on-secondary: var(--agt-on-accent);
     --agt-on-base: #e8eef4;
     --agt-on-light: #16212c;
@@ -262,7 +262,7 @@ html[data-agt-theme="hoth-light"] {
     --agt-input-focus-border: var(--agt-color-primary-500);
     --agt-input-focus-ring: 0 0 0 3px rgb(53 103 143 / 18%);
 
-    --agt-on-primary: #0b1017;
+    --agt-on-primary: #ffffff;
     --agt-on-secondary: var(--agt-on-accent);
     --agt-on-base: #243442;
     --agt-on-light: #1e3a52;

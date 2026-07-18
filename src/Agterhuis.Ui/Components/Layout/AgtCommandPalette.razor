@@ -1,0 +1,389 @@
+@using Agterhuis.Ui.Services
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.JSInterop
+@implements IDisposable
+@inject IAgtCommandRegistry CommandRegistry
+@inject IJSRuntime JS
+
+<RadzenButton class="agt-command-palette-trigger"
+              data-testid="agt-command-palette-trigger"
+              Icon="search"
+              Text="Zoeken"
+              title="Open command palette (Ctrl/Cmd+K)"
+              AriaLabel="Open command palette"
+              ButtonStyle="ButtonStyle.Base"
+              Variant="Variant.Flat"
+              Click="@OnTriggerClicked" />
+
+@if (IsOpen)
+{
+    <div class="agt-command-palette-backdrop" @onclick="OnBackdropClicked">
+        <section class="agt-command-palette"
+                 @onclick:stopPropagation="true"
+                 @onkeydown="OnPaletteKeyDown"
+                 tabindex="-1"
+                 role="dialog"
+                 aria-modal="true"
+                 aria-labelledby="agt-command-palette-title"
+                 @ref="_paletteRef">
+            <header class="agt-command-palette__header">
+                <h2 id="agt-command-palette-title">Command palette</h2>
+                <span class="agt-command-palette__hint">Ctrl/Cmd+K</span>
+            </header>
+
+            <input class="agt-command-palette__search"
+                   data-testid="agt-command-palette-search"
+                   type="search"
+                   placeholder="Zoek pagina of actie"
+                   value="@Query"
+                   @oninput="OnSearchInput"
+                   @onkeydown="OnSearchKeyDown"
+                   role="combobox"
+                   aria-autocomplete="list"
+                   aria-expanded="true"
+                   aria-controls="agt-command-palette-list"
+                   aria-activedescendant="@ActiveOptionId"
+                   @ref="_searchRef" />
+
+            @if (VisibleCommands.Count == 0)
+            {
+                <AgtEmptyState Icon="search_off"
+                               Title="Geen resultaten"
+                               Description="Pas je zoekterm aan of open een recente actie." />
+            }
+            else
+            {
+                <div class="agt-command-palette__results">
+                    <ul id="agt-command-palette-list" class="agt-command-palette__list" role="listbox">
+                        @foreach (var section in VisibleSections)
+                        {
+                            <li class="agt-command-palette__section" role="presentation">@section.Title</li>
+                            @foreach (var option in section.Items)
+                            {
+                                <li id="@OptionId(option.Index)"
+                                    class="@OptionClass(option.Index)"
+                                    data-testid="agt-command-palette-option"
+                                    role="option"
+                                    aria-selected="@(option.Index == ActiveIndex)"
+                                    @onclick="() => ExecuteAsync(option.Command)">
+                                    <div class="agt-command-palette__option-main">
+                                        <strong>@option.Command.Title</strong>
+                                        @if (!string.IsNullOrWhiteSpace(option.Command.Description))
+                                        {
+                                            <span>@option.Command.Description</span>
+                                        }
+                                    </div>
+                                    @if (!string.IsNullOrWhiteSpace(option.Command.ShortcutHint))
+                                    {
+                                        <kbd>@option.Command.ShortcutHint</kbd>
+                                    }
+                                </li>
+                            }
+                        }
+                    </ul>
+                </div>
+            }
+        </section>
+    </div>
+}
+
+@code {
+    private const string RecentSection = "Recent";
+
+    private readonly List<AgtCommandItem> VisibleCommands = [];
+    private readonly List<PaletteSection> VisibleSections = [];
+
+    private DotNetObjectReference<AgtCommandPalette>? _dotNetReference;
+    private ElementReference _paletteRef;
+    private ElementReference _searchRef;
+    private string? _shortcutRegistrationId;
+    private string? _focusTrapRegistrationId;
+
+    private bool IsOpen { get; set; }
+
+    private string Query { get; set; } = string.Empty;
+
+    private int ActiveIndex { get; set; }
+
+    private string ActiveOptionId => VisibleCommands.Count == 0 ? string.Empty : OptionId(ActiveIndex);
+
+    protected override void OnInitialized()
+    {
+        CommandRegistry.Changed += HandleRegistryChanged;
+        RebuildVisibleCommands(resetActiveIndex: true);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _dotNetReference = DotNetObjectReference.Create(this);
+            _shortcutRegistrationId = await JS.InvokeAsync<string>("agtTheme.registerGlobalShortcut", _dotNetReference, nameof(OpenFromJs));
+        }
+
+        if (IsOpen && _focusTrapRegistrationId is null)
+        {
+            _focusTrapRegistrationId = await JS.InvokeAsync<string>("agtTheme.registerFocusTrap", _paletteRef);
+            await _searchRef.FocusAsync();
+        }
+
+        if (!IsOpen && _focusTrapRegistrationId is not null)
+        {
+            await JS.InvokeVoidAsync("agtTheme.unregisterFocusTrap", _focusTrapRegistrationId);
+            _focusTrapRegistrationId = null;
+        }
+    }
+
+    [JSInvokable]
+    public Task OpenFromJs()
+    {
+        Open();
+        return Task.CompletedTask;
+    }
+
+    private Task OnTriggerClicked(MouseEventArgs _)
+    {
+        Open();
+        return Task.CompletedTask;
+    }
+
+    private void Open()
+    {
+        IsOpen = true;
+        Query = string.Empty;
+        RebuildVisibleCommands(resetActiveIndex: true);
+        StateHasChanged();
+    }
+
+    private void Close()
+    {
+        IsOpen = false;
+        Query = string.Empty;
+        RebuildVisibleCommands(resetActiveIndex: true);
+    }
+
+    private void OnBackdropClicked(MouseEventArgs _)
+    {
+        Close();
+    }
+
+    private void OnSearchInput(ChangeEventArgs args)
+    {
+        Query = args.Value?.ToString() ?? string.Empty;
+        RebuildVisibleCommands(resetActiveIndex: true);
+    }
+
+    private Task OnSearchKeyDown(KeyboardEventArgs args)
+    {
+        return HandleKeyboardAsync(args);
+    }
+
+    private Task OnPaletteKeyDown(KeyboardEventArgs args)
+    {
+        return HandleKeyboardAsync(args);
+    }
+
+    private async Task HandleKeyboardAsync(KeyboardEventArgs args)
+    {
+        if (string.Equals(args.Key, "Escape", StringComparison.OrdinalIgnoreCase))
+        {
+            Close();
+            return;
+        }
+
+        if (VisibleCommands.Count == 0)
+        {
+            return;
+        }
+
+        if (string.Equals(args.Key, "ArrowDown", StringComparison.OrdinalIgnoreCase))
+        {
+            ActiveIndex = (ActiveIndex + 1) % VisibleCommands.Count;
+            return;
+        }
+
+        if (string.Equals(args.Key, "ArrowUp", StringComparison.OrdinalIgnoreCase))
+        {
+            ActiveIndex = ActiveIndex == 0 ? VisibleCommands.Count - 1 : ActiveIndex - 1;
+            return;
+        }
+
+        if (string.Equals(args.Key, "Enter", StringComparison.OrdinalIgnoreCase))
+        {
+            await ExecuteAsync(VisibleCommands[ActiveIndex]);
+        }
+    }
+
+    private async Task ExecuteAsync(AgtCommandItem command)
+    {
+        await CommandRegistry.ExecuteAsync(command);
+        Close();
+    }
+
+    private void RebuildVisibleCommands(bool resetActiveIndex)
+    {
+        VisibleCommands.Clear();
+        VisibleSections.Clear();
+
+        var candidates = BuildCandidates();
+
+        if (string.IsNullOrWhiteSpace(Query) && CommandRegistry.RecentCommands.Count > 0)
+        {
+            foreach (var command in CommandRegistry.RecentCommands)
+            {
+                if (candidates.Any(item => string.Equals(item.Id, command.Id, StringComparison.OrdinalIgnoreCase)))
+                {
+                    VisibleCommands.Add(command);
+                }
+            }
+        }
+
+        foreach (var command in candidates)
+        {
+            if (VisibleCommands.Any(item => string.Equals(item.Id, command.Id, StringComparison.OrdinalIgnoreCase)))
+            {
+                continue;
+            }
+
+            VisibleCommands.Add(command);
+        }
+
+        var index = 0;
+        if (string.IsNullOrWhiteSpace(Query) && CommandRegistry.RecentCommands.Count > 0)
+        {
+            var recentCount = VisibleCommands.Count(command => CommandRegistry.RecentCommands.Any(item => string.Equals(item.Id, command.Id, StringComparison.OrdinalIgnoreCase)));
+            if (recentCount > 0)
+            {
+                var recentItems = new List<PaletteOption>(recentCount);
+                for (var itemIndex = 0; itemIndex < recentCount; itemIndex++)
+                {
+                    recentItems.Add(new PaletteOption(VisibleCommands[itemIndex], index++));
+                }
+
+                VisibleSections.Add(new PaletteSection(RecentSection, recentItems));
+            }
+        }
+
+        var grouped = VisibleCommands
+            .Skip(index)
+            .GroupBy(static command => command.Section)
+            .OrderBy(static group => group.Key, StringComparer.OrdinalIgnoreCase);
+
+        foreach (var group in grouped)
+        {
+            var options = new List<PaletteOption>();
+            foreach (var command in group.OrderBy(static item => item.Title, StringComparer.OrdinalIgnoreCase))
+            {
+                options.Add(new PaletteOption(command, index++));
+            }
+
+            VisibleSections.Add(new PaletteSection(group.Key, options));
+        }
+
+        if (resetActiveIndex || ActiveIndex >= VisibleCommands.Count)
+        {
+            ActiveIndex = VisibleCommands.Count == 0 ? 0 : Math.Clamp(ActiveIndex, 0, VisibleCommands.Count - 1);
+        }
+    }
+
+    private IReadOnlyList<AgtCommandItem> BuildCandidates()
+    {
+        if (string.IsNullOrWhiteSpace(Query))
+        {
+            return CommandRegistry.Commands;
+        }
+
+        var query = Query.Trim();
+
+        return CommandRegistry.Commands
+            .Select(command => new
+            {
+                Command = command,
+                Score = ScoreCommand(command, query)
+            })
+            .Where(item => item.Score > 0)
+            .OrderByDescending(item => item.Score)
+            .ThenBy(item => item.Command.Section, StringComparer.OrdinalIgnoreCase)
+            .ThenBy(item => item.Command.Title, StringComparer.OrdinalIgnoreCase)
+            .Select(item => item.Command)
+            .ToList();
+    }
+
+    private static int ScoreCommand(AgtCommandItem command, string query)
+    {
+        var score = 0;
+        var comparison = StringComparison.OrdinalIgnoreCase;
+
+        if (command.Title.StartsWith(query, comparison))
+        {
+            score += 140;
+        }
+
+        if (command.Title.Contains(query, comparison))
+        {
+            score += 110;
+        }
+
+        if (!string.IsNullOrWhiteSpace(command.Description) && command.Description.Contains(query, comparison))
+        {
+            score += 70;
+        }
+
+        if (command.Section.Contains(query, comparison))
+        {
+            score += 40;
+        }
+
+        foreach (var keyword in command.Keywords)
+        {
+            if (keyword.Contains(query, comparison))
+            {
+                score += 60;
+            }
+        }
+
+        return score;
+    }
+
+    private static string OptionId(int index)
+    {
+        return $"agt-command-option-{index}";
+    }
+
+    private string OptionClass(int index)
+    {
+        return index == ActiveIndex
+            ? "agt-command-palette__option agt-command-palette__option--active"
+            : "agt-command-palette__option";
+    }
+
+    private void HandleRegistryChanged()
+    {
+        _ = InvokeAsync(() =>
+        {
+            RebuildVisibleCommands(resetActiveIndex: false);
+            StateHasChanged();
+        });
+    }
+
+    public void Dispose()
+    {
+        CommandRegistry.Changed -= HandleRegistryChanged;
+
+        if (_shortcutRegistrationId is not null)
+        {
+            _ = JS.InvokeVoidAsync("agtTheme.unregisterGlobalShortcut", _shortcutRegistrationId);
+        }
+
+        if (_focusTrapRegistrationId is not null)
+        {
+            _ = JS.InvokeVoidAsync("agtTheme.unregisterFocusTrap", _focusTrapRegistrationId);
+        }
+
+        _dotNetReference?.Dispose();
+    }
+
+    private sealed record PaletteOption(AgtCommandItem Command, int Index);
+
+    private sealed record PaletteSection(string Title, List<PaletteOption> Items);
+}

@@ -122,6 +122,7 @@
     color: var(--agt-text-heading);
     font-family: var(--agt-font-display);
     font-size: clamp(1.5rem, 1.15rem + 1vw, 2.4rem);
+    font-variant-numeric: var(--agt-numeric-variant);
     font-weight: 700;
     line-height: 1;
 }

@@ -1,0 +1,149 @@
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.JSInterop
+@implements IAsyncDisposable
+@inject IJSRuntime JS
+
+@if (IsOpen)
+{
+    <div class="agt-drawer-backdrop" @onclick="OnBackdropClicked">
+        <aside class="@DrawerClass"
+               @onclick:stopPropagation="true"
+               @onkeydown="OnDrawerKeyDown"
+               tabindex="-1"
+               role="dialog"
+               aria-modal="true"
+               aria-labelledby="agt-drawer-title"
+               style="--agt-drawer-width:@Width"
+               @ref="_drawerRef">
+            <header class="agt-drawer__header">
+                <h2 id="agt-drawer-title">@Title</h2>
+                <RadzenButton Icon="close"
+                              ButtonStyle="ButtonStyle.Base"
+                              Variant="Variant.Flat"
+                              AriaLabel="Sluit zijpaneel"
+                              title="Sluiten"
+                              Click="OnCloseClicked" />
+            </header>
+
+            <div class="agt-drawer__content">
+                @ChildContent
+            </div>
+
+            @if (Footer is not null)
+            {
+                <footer class="agt-drawer__footer">
+                    @Footer
+                </footer>
+            }
+        </aside>
+    </div>
+}
+
+@code {
+    private ElementReference _drawerRef;
+    private string? _focusTrapRegistrationId;
+
+    [Parameter]
+    public bool IsOpen { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> IsOpenChanged { get; set; }
+
+    [Parameter]
+    public string Title { get; set; } = "Details";
+
+    [Parameter]
+    public string Width { get; set; } = "30rem";
+
+    [Parameter]
+    public bool IsResizable { get; set; }
+
+    [Parameter]
+    public Func<Task<bool>>? CanCloseAsync { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    [Parameter]
+    public RenderFragment? Footer { get; set; }
+
+    private string DrawerClass => IsResizable
+        ? "agt-drawer agt-drawer--resizable"
+        : "agt-drawer";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        try
+        {
+            if (IsOpen && _focusTrapRegistrationId is null)
+            {
+                _focusTrapRegistrationId = await JS.InvokeAsync<string>("agtTheme.registerFocusTrap", _drawerRef);
+                await _drawerRef.FocusAsync();
+            }
+
+            if (!IsOpen && _focusTrapRegistrationId is not null)
+            {
+                await JS.InvokeVoidAsync("agtTheme.unregisterFocusTrap", _focusTrapRegistrationId);
+                _focusTrapRegistrationId = null;
+            }
+        }
+        catch (JSDisconnectedException)
+        {
+            _focusTrapRegistrationId = null;
+        }
+    }
+
+    private Task OnBackdropClicked(MouseEventArgs _)
+    {
+        return RequestCloseAsync();
+    }
+
+    private Task OnCloseClicked(MouseEventArgs _)
+    {
+        return RequestCloseAsync();
+    }
+
+    private Task OnDrawerKeyDown(KeyboardEventArgs args)
+    {
+        if (string.Equals(args.Key, "Escape", StringComparison.OrdinalIgnoreCase))
+        {
+            return RequestCloseAsync();
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private async Task RequestCloseAsync()
+    {
+        if (CanCloseAsync is not null)
+        {
+            var canClose = await CanCloseAsync();
+            if (!canClose)
+            {
+                return;
+            }
+        }
+
+        if (IsOpenChanged.HasDelegate)
+        {
+            await IsOpenChanged.InvokeAsync(false);
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_focusTrapRegistrationId is not null)
+        {
+            try
+            {
+                await JS.InvokeVoidAsync("agtTheme.unregisterFocusTrap", _focusTrapRegistrationId);
+            }
+            catch (JSDisconnectedException)
+            {
+                // Circuit already disconnected during shutdown.
+            }
+
+            _focusTrapRegistrationId = null;
+        }
+    }
+}

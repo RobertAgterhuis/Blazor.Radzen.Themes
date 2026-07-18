@@ -16,7 +16,7 @@
     display: block;
     font-size: var(--agt-font-size-xs);
     font-weight: 600;
-    letter-spacing: 0.08em;
+    letter-spacing: var(--agt-caps-tracking);
     margin-bottom: var(--agt-spacing-1);
     text-transform: uppercase;
 }

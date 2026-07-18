@@ -72,8 +72,8 @@
     border: var(--agt-glass-border);
     border-radius: 999px;
     color: var(--agt-topbar-icon-color);
-    min-height: 2.25rem;
-    min-width: 2.25rem;
+    min-height: var(--agt-control-height-sm);
+    min-width: var(--agt-control-height-sm);
     padding: 0;
 }
 

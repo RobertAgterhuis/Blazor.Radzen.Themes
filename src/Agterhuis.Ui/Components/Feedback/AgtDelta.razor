@@ -1,0 +1,60 @@
+@using Agterhuis.Ui.Formatting
+
+<span class="@ClassName" title="@ResolvedTitle">
+    <span class="agt-delta__icon" aria-hidden="true">@Indicator</span>
+    <span class="agt-delta__label">@AccessibleLabel</span>
+    <span class="agt-delta__value">@DisplayValue</span>
+</span>
+
+@code {
+    [Parameter]
+    public decimal Value { get; set; }
+
+    [Parameter]
+    public string Format { get; set; } = "N0";
+
+    [Parameter]
+    public string Culture { get; set; } = "nl-NL";
+
+    [Parameter]
+    public string? CssClass { get; set; }
+
+    private string DisplayValue => AgtNumberFormat.Format(Math.Abs(Value), Format, Culture);
+
+    private string Indicator => Value switch
+    {
+        > 0 => "▲",
+        < 0 => "▼",
+        _ => "—"
+    };
+
+    private string AccessibleLabel => Value switch
+    {
+        > 0 => "Stijging",
+        < 0 => "Daling",
+        _ => "Gelijk"
+    };
+
+    private string ResolvedTitle => $"{AccessibleLabel} {DisplayValue}";
+
+    private string ClassName
+    {
+        get
+        {
+            var classes = new List<string> { "agt-delta" };
+            classes.Add(Value switch
+            {
+                > 0 => "agt-delta--positive",
+                < 0 => "agt-delta--negative",
+                _ => "agt-delta--neutral"
+            });
+
+            if (!string.IsNullOrWhiteSpace(CssClass))
+            {
+                classes.Add(CssClass);
+            }
+
+            return string.Join(' ', classes);
+        }
+    }
+}

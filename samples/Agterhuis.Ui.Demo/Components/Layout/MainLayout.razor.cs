@@ -1,4 +1,5 @@
 using Agterhuis.Ui.Options;
+using Agterhuis.Ui.Services;
 using Agterhuis.Ui.Theming;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Routing;
@@ -9,6 +10,8 @@ namespace Agterhuis.Ui.Demo.Components.Layout;
 
 public partial class MainLayout : IDisposable
 {
+    private const string CommandScope = "demo-main-layout";
+
     private static readonly string[] CalmRoutePrefixes = ["components/data/", "catalog/data", "catalog/data-advanced", "catalog/scheduling", "app/"];
 
     private static readonly Dictionary<string, string> WrapperToCatalogRoutes = new(StringComparer.OrdinalIgnoreCase)
@@ -56,6 +59,9 @@ public partial class MainLayout : IDisposable
     };
 
     [Inject]
+    private AgtDensityState DensityState { get; set; } = default!;
+
+    [Inject]
     private AgtThemeState ThemeState { get; set; } = default!;
 
     [Inject]
@@ -67,6 +73,9 @@ public partial class MainLayout : IDisposable
     [Inject]
     private IOptions<AgtUiOptions> UiOptions { get; set; } = default!;
 
+    [Inject]
+    private IAgtCommandRegistry CommandRegistry { get; set; } = default!;
+
     protected bool SidebarExpanded { get; set; } = true;
 
     private bool _prefersReducedMotion;
@@ -75,8 +84,10 @@ public partial class MainLayout : IDisposable
 
     protected override void OnInitialized()
     {
+        DensityState.DensityChanged += HandleDensityChanged;
         ThemeState.ThemeChanged += HandleThemeChanged;
         NavigationManager.LocationChanged += HandleLocationChanged;
+        RegisterCommands();
         UpdateCurrentRoute();
     }
 
@@ -85,7 +96,10 @@ public partial class MainLayout : IDisposable
         if (firstRender)
         {
             var persistedTheme = await JS.InvokeAsync<string>("agtTheme.getStoredTheme", ThemeState.Theme);
+            var persistedDensity = await JS.InvokeAsync<string>("agtTheme.getStoredDensity", DensityState.Density);
             ThemeState.SetTheme(persistedTheme);
+            DensityState.SetDensity(persistedDensity);
+            await ApplyDensityToDocumentAsync();
             _prefersReducedMotion = await JS.InvokeAsync<bool>("agtTheme.prefersReducedMotion");
             StateHasChanged();
         }
@@ -100,9 +114,23 @@ public partial class MainLayout : IDisposable
         });
     }
 
+    private void HandleDensityChanged()
+    {
+        _ = InvokeAsync(async () =>
+        {
+            await ApplyDensityToDocumentAsync();
+            StateHasChanged();
+        });
+    }
+
     private ValueTask ApplyThemeToDocumentAsync()
     {
         return JS.InvokeVoidAsync("agtTheme.setThemeWithTransition", ThemeState.Theme);
+    }
+
+    private ValueTask ApplyDensityToDocumentAsync()
+    {
+        return JS.InvokeVoidAsync("agtTheme.setDensity", DensityState.Density);
     }
 
     private void HandleLocationChanged(object? sender, LocationChangedEventArgs e)
@@ -119,8 +147,10 @@ public partial class MainLayout : IDisposable
 
     public void Dispose()
     {
+        DensityState.DensityChanged -= HandleDensityChanged;
         ThemeState.ThemeChanged -= HandleThemeChanged;
         NavigationManager.LocationChanged -= HandleLocationChanged;
+        CommandRegistry.RemoveScope(CommandScope);
     }
 
     private bool ShowAmbient => UiOptions.Value.EnableAmbientEffects && !_prefersReducedMotion && !IsCalmRoute;
@@ -150,5 +180,60 @@ public partial class MainLayout : IDisposable
     private void UpdateCurrentRoute()
     {
         CurrentRoute = NavigationManager.ToBaseRelativePath(NavigationManager.Uri).ToLowerInvariant();
+    }
+
+    private void RegisterCommands()
+    {
+        CommandRegistry.SetCommands(CommandScope,
+        [
+            new AgtCommandItem("demo-open-components", "Ga naar wrappers", "Navigatie", () => NavigateToAsync("/components/theme"))
+            {
+                Description = "Open de Agt wrappercatalogus.",
+                ShortcutHint = "G W",
+                Keywords = ["wrappers", "componenten", "agt"]
+            },
+            new AgtCommandItem("demo-open-catalog", "Ga naar Radzen catalogus", "Navigatie", () => NavigateToAsync("/catalog"))
+            {
+                Description = "Open de volledige Radzen QA-catalogus.",
+                ShortcutHint = "G C",
+                Keywords = ["catalog", "radzen", "qa"]
+            },
+            new AgtCommandItem("demo-open-workorders", "Ga naar Werkorders showcase", "Navigatie", () => NavigateToAsync("/app"))
+            {
+                Description = "Open de enterprise showcase shell.",
+                ShortcutHint = "G A",
+                Keywords = ["app", "showcase", "werkorders"]
+            },
+            new AgtCommandItem("demo-toggle-theme", "Wissel thema...", "Acties", ToggleThemeAsync)
+            {
+                Description = "Schakel direct tussen licht en donker binnen de actieve familie.",
+                ShortcutHint = "T",
+                Keywords = ["theme", "thema", "licht", "donker"]
+            },
+            new AgtCommandItem("demo-toggle-density", "Wissel dichtheid", "Acties", ToggleDensityAsync)
+            {
+                Description = "Schakel tussen comfortabele en compacte dichtheid.",
+                ShortcutHint = "D",
+                Keywords = ["density", "compact", "comfortable", "dichtheid"]
+            }
+        ]);
+    }
+
+    private Task NavigateToAsync(string href)
+    {
+        NavigationManager.NavigateTo(href);
+        return Task.CompletedTask;
+    }
+
+    private Task ToggleThemeAsync()
+    {
+        ThemeState.ToggleTheme();
+        return Task.CompletedTask;
+    }
+
+    private Task ToggleDensityAsync()
+    {
+        DensityState.ToggleDensity();
+        return Task.CompletedTask;
     }
 }

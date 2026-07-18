@@ -1,0 +1,9 @@
+.agt-numeric {
+    display: inline-block;
+    font-variant-numeric: var(--agt-numeric-variant);
+}
+
+.agt-numeric--align-end {
+    text-align: end;
+    width: 100%;
+}

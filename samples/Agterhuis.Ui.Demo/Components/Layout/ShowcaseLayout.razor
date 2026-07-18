@@ -1,6 +1,7 @@
 @inherits LayoutComponentBase
 
 <CascadingValue Value="ThemeState" IsFixed="true">
+<CascadingValue Value="DensityState" IsFixed="true">
     <div class="showcase-theme-root">
         <RadzenLayout class="showcase-layout">
             <RadzenHeader class="showcase-topbar" role="banner">
@@ -11,6 +12,8 @@
                         <span class="showcase-topbar__tagline">Field service in actieve theme</span>
                     </div>
                     <div class="showcase-topbar__actions" aria-label="Werkorders acties">
+                        <AgtCommandPalette />
+                        <AgtDensityToggle />
                         <AgtThemeSwitcher />
                         <div class="showcase-notifications" @ref="_notificationsBellHostRef">
                             <RadzenButton
@@ -144,4 +147,5 @@
 
         <RadzenComponents />
     </div>
+</CascadingValue>
 </CascadingValue>

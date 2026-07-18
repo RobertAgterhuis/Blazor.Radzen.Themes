@@ -1,0 +1,156 @@
+.agt-command-palette-trigger.rz-button {
+    border: var(--agt-glass-border);
+    border-radius: 999px;
+    color: var(--agt-topbar-icon-color);
+    font-size: var(--agt-font-size-sm);
+    min-height: var(--agt-control-height-sm);
+    padding-inline: var(--agt-spacing-3);
+}
+
+.agt-command-palette-trigger.rz-button:hover,
+.agt-command-palette-trigger.rz-button:focus-visible {
+    background: var(--agt-hover-tint);
+    box-shadow: var(--agt-glow-accent);
+    color: var(--agt-topbar-icon-hover-color);
+}
+
+.agt-command-palette-backdrop {
+    align-items: flex-start;
+    background: color-mix(in srgb, var(--agt-canvas) 64%, transparent);
+    display: flex;
+    inset: 0;
+    justify-content: center;
+    padding: clamp(var(--agt-spacing-4), 5vw, var(--agt-spacing-8));
+    position: fixed;
+    z-index: var(--agt-z-dialog);
+}
+
+.agt-command-palette {
+    background: var(--agt-glass-bg);
+    backdrop-filter: blur(var(--agt-glass-blur));
+    -webkit-backdrop-filter: blur(var(--agt-glass-blur));
+    border: var(--agt-glass-border);
+    border-radius: var(--agt-border-radius-lg);
+    box-shadow: var(--agt-shadow-md), var(--agt-glow-primary);
+    color: var(--agt-text-body);
+    display: grid;
+    gap: var(--agt-spacing-3);
+    inline-size: min(44rem, 100%);
+    max-block-size: min(70vh, 40rem);
+    overflow: hidden;
+    padding: var(--agt-spacing-4);
+}
+
+.agt-command-palette__header {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+}
+
+.agt-command-palette__header h2 {
+    color: var(--agt-text-heading);
+    font-size: var(--agt-font-size-lg);
+    line-height: var(--agt-line-height-tight);
+    margin: 0;
+}
+
+.agt-command-palette__hint {
+    color: var(--agt-text-muted);
+    font-size: var(--agt-font-size-sm);
+}
+
+.agt-command-palette__search {
+    background: var(--agt-input-bg);
+    border: 1px solid var(--agt-input-border);
+    border-radius: var(--agt-border-radius-md);
+    color: var(--agt-text-body);
+    font: inherit;
+    min-height: var(--agt-control-height-md);
+    outline: none;
+    padding: 0 var(--agt-spacing-3);
+}
+
+.agt-command-palette__search:focus-visible {
+    border-color: var(--agt-color-primary-500);
+    box-shadow: 0 0 0 2px var(--agt-focus-ring);
+}
+
+.agt-command-palette__results {
+    overflow: auto;
+}
+
+.agt-command-palette__list {
+    display: grid;
+    gap: var(--agt-spacing-1);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.agt-command-palette__section {
+    color: var(--agt-text-muted);
+    font-size: var(--agt-font-size-xs);
+    letter-spacing: var(--agt-letter-spacing-caps);
+    margin-top: var(--agt-spacing-2);
+    padding: 0 var(--agt-spacing-2);
+    text-transform: uppercase;
+}
+
+.agt-command-palette__option {
+    align-items: center;
+    border: 1px solid transparent;
+    border-radius: var(--agt-border-radius-md);
+    cursor: pointer;
+    display: flex;
+    gap: var(--agt-spacing-3);
+    justify-content: space-between;
+    min-height: calc(var(--agt-control-height-md) + var(--agt-spacing-2));
+    padding: var(--agt-spacing-2) var(--agt-spacing-3);
+}
+
+.agt-command-palette__option:hover,
+.agt-command-palette__option--active {
+    background: var(--agt-hover-tint);
+    border-color: var(--agt-input-border);
+}
+
+.agt-command-palette__option-main {
+    display: grid;
+    gap: 0.15rem;
+}
+
+.agt-command-palette__option-main strong {
+    color: var(--agt-text-heading);
+    font-size: var(--agt-font-size-md);
+}
+
+.agt-command-palette__option-main span {
+    color: var(--agt-text-muted);
+    font-size: var(--agt-font-size-sm);
+}
+
+.agt-command-palette__option kbd {
+    background: var(--agt-surface-2);
+    border: 1px solid var(--agt-input-border);
+    border-radius: var(--agt-border-radius-sm);
+    color: var(--agt-text-body);
+    font-family: var(--agt-font-family-body);
+    font-size: var(--agt-font-size-xs);
+    padding: 0.125rem 0.4rem;
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .agt-command-palette {
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        background: var(--agt-surface-2);
+    }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+    .agt-command-palette {
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        background: var(--agt-surface-2);
+    }
+}

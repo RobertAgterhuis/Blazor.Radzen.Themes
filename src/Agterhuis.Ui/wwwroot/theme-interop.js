@@ -1,5 +1,6 @@
 window.agtTheme = window.agtTheme || (() => {
     const storageKey = "agt-ui-theme";
+    const densityStorageKey = "agt-ui-density";
     const navStoragePrefix = "agt-ui-nav-section-";
 
     function normalizeTheme(theme, fallback = "plum-dark") {
@@ -29,6 +30,15 @@ window.agtTheme = window.agtTheme || (() => {
             && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     }
 
+    function normalizeDensity(density, fallback = "comfortable") {
+        const raw = (density || "").toString().trim().toLowerCase();
+        if (raw === "compact") {
+            return "compact";
+        }
+
+        return fallback === "compact" ? "compact" : "comfortable";
+    }
+
     function applyTheme(theme) {
         const normalized = normalizeTheme(theme);
         document.documentElement.setAttribute("data-agt-theme", normalized);
@@ -42,6 +52,25 @@ window.agtTheme = window.agtTheme || (() => {
         const normalized = applyTheme(theme);
         if (persist) {
             localStorage.setItem(storageKey, normalized);
+        }
+
+        return normalized;
+    }
+
+    function applyDensity(density) {
+        const normalized = normalizeDensity(density);
+        document.documentElement.setAttribute("data-agt-density", normalized);
+        if (document.body) {
+            document.body.setAttribute("data-agt-density", normalized);
+        }
+
+        return normalized;
+    }
+
+    function persistDensity(density, persist) {
+        const normalized = applyDensity(density);
+        if (persist) {
+            localStorage.setItem(densityStorageKey, normalized);
         }
 
         return normalized;
@@ -65,7 +94,11 @@ window.agtTheme = window.agtTheme || (() => {
     ].join(", ");
 
     const dismissHandlers = new Map();
+    const shortcutHandlers = new Map();
+    const focusTrapHandlers = new Map();
     let dismissCounter = 0;
+    let shortcutCounter = 0;
+    let focusTrapCounter = 0;
 
     function hideOpenPopups() {
         document.querySelectorAll(popupSelector).forEach((panel) => {
@@ -134,6 +167,113 @@ window.agtTheme = window.agtTheme || (() => {
         dismissHandlers.delete(key);
     }
 
+    function registerGlobalShortcut(dotNetRef, methodName) {
+        if (!dotNetRef) {
+            return "";
+        }
+
+        const id = `shortcut-${++shortcutCounter}`;
+        const callbackMethod = (methodName || "").toString() || "OpenFromJs";
+
+        const onKeyDown = (event) => {
+            const key = (event.key || "").toLowerCase();
+            if (key !== "k" || !(event.ctrlKey || event.metaKey) || event.altKey) {
+                return;
+            }
+
+            event.preventDefault();
+            dotNetRef.invokeMethodAsync(callbackMethod).catch(() => { });
+        };
+
+        document.addEventListener("keydown", onKeyDown, true);
+        shortcutHandlers.set(id, { onKeyDown });
+        return id;
+    }
+
+    function unregisterGlobalShortcut(id) {
+        const key = (id || "").toString();
+        if (!shortcutHandlers.has(key)) {
+            return;
+        }
+
+        const handler = shortcutHandlers.get(key);
+        document.removeEventListener("keydown", handler.onKeyDown, true);
+        shortcutHandlers.delete(key);
+    }
+
+    function getFocusableElements(panelElement) {
+        if (!panelElement) {
+            return [];
+        }
+
+        const selector = [
+            "a[href]",
+            "button:not([disabled])",
+            "textarea:not([disabled])",
+            "input:not([disabled])",
+            "select:not([disabled])",
+            "[tabindex]:not([tabindex='-1'])"
+        ].join(", ");
+
+        return Array.from(panelElement.querySelectorAll(selector)).filter((element) => {
+            const hiddenByLayout = element.offsetParent === null && element !== document.activeElement;
+            return !element.hasAttribute("disabled") && !hiddenByLayout;
+        });
+    }
+
+    function registerFocusTrap(panelElement) {
+        if (!panelElement) {
+            return "";
+        }
+
+        const id = `focus-trap-${++focusTrapCounter}`;
+
+        const onKeyDown = (event) => {
+            if (event.key !== "Tab") {
+                return;
+            }
+
+            const focusables = getFocusableElements(panelElement);
+            if (focusables.length === 0) {
+                event.preventDefault();
+                return;
+            }
+
+            const first = focusables[0];
+            const last = focusables[focusables.length - 1];
+            const active = document.activeElement;
+
+            if (event.shiftKey) {
+                if (!panelElement.contains(active) || active === first) {
+                    event.preventDefault();
+                    last.focus();
+                }
+
+                return;
+            }
+
+            if (!panelElement.contains(active) || active === last) {
+                event.preventDefault();
+                first.focus();
+            }
+        };
+
+        document.addEventListener("keydown", onKeyDown, true);
+        focusTrapHandlers.set(id, { onKeyDown });
+        return id;
+    }
+
+    function unregisterFocusTrap(id) {
+        const key = (id || "").toString();
+        if (!focusTrapHandlers.has(key)) {
+            return;
+        }
+
+        const handler = focusTrapHandlers.get(key);
+        document.removeEventListener("keydown", handler.onKeyDown, true);
+        focusTrapHandlers.delete(key);
+    }
+
     function focusElement(element) {
         if (!element) {
             return;
@@ -165,6 +305,7 @@ window.agtTheme = window.agtTheme || (() => {
     }
 
     return {
+        normalizeDensity,
         normalizeTheme,
         prefersReducedMotion,
         getStoredTheme(defaultTheme = "plum-dark") {
@@ -175,8 +316,19 @@ window.agtTheme = window.agtTheme || (() => {
 
             return normalizeTheme(stored, defaultTheme);
         },
+        getStoredDensity(defaultDensity = "comfortable") {
+            const stored = localStorage.getItem(densityStorageKey);
+            if (!stored) {
+                return normalizeDensity(defaultDensity, defaultDensity);
+            }
+
+            return normalizeDensity(stored, defaultDensity);
+        },
         setTheme(theme, persist = true) {
             return persistTheme(theme, persist);
+        },
+        setDensity(density, persist = true) {
+            return persistDensity(density, persist);
         },
         setThemeWithTransition(theme, persist = true) {
             if (prefersReducedMotion() || !supportsViewTransitions()) {
@@ -192,6 +344,10 @@ window.agtTheme = window.agtTheme || (() => {
         closeAllPopups,
         registerDismissHandler,
         unregisterDismissHandler,
+        registerGlobalShortcut,
+        unregisterGlobalShortcut,
+        registerFocusTrap,
+        unregisterFocusTrap,
         focusElement,
         getStoredNavSectionState(section, defaultState = "collapsed") {
             const key = getNavStorageKey(section);
@@ -204,6 +360,31 @@ window.agtTheme = window.agtTheme || (() => {
             const normalized = normalizeNavState(state, "collapsed");
             localStorage.setItem(key, normalized);
             return normalized;
+        },
+        getStoredValue(key, fallback = "") {
+            const storageKeyValue = (key || "").toString();
+            if (!storageKeyValue) {
+                return fallback;
+            }
+
+            const value = localStorage.getItem(storageKeyValue);
+            return value ?? fallback;
+        },
+        setStoredValue(key, value) {
+            const storageKeyValue = (key || "").toString();
+            if (!storageKeyValue) {
+                return;
+            }
+
+            localStorage.setItem(storageKeyValue, (value || "").toString());
+        },
+        removeStoredValue(key) {
+            const storageKeyValue = (key || "").toString();
+            if (!storageKeyValue) {
+                return;
+            }
+
+            localStorage.removeItem(storageKeyValue);
         },
         downloadCsv(fileName, csvContent) {
             const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
@@ -220,6 +401,11 @@ window.agtTheme = window.agtTheme || (() => {
         applyInitialTheme(defaultTheme = "plum-dark") {
             const normalized = this.getStoredTheme(defaultTheme);
             applyTheme(normalized);
+            return normalized;
+        },
+        applyInitialDensity(defaultDensity = "comfortable") {
+            const normalized = this.getStoredDensity(defaultDensity);
+            applyDensity(normalized);
             return normalized;
         }
     };

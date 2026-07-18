@@ -225,10 +225,10 @@ body {
 
 .showcase-topbar__bell-badge {
     align-items: center;
-    background: var(--agt-color-danger-500);
+    background: var(--agt-color-danger);
     border: 2px solid var(--agt-surface-1);
     border-radius: 999px;
-    color: var(--agt-on-accent);
+    color: var(--agt-color-gray-900);
     display: inline-flex;
     font-size: 0.65rem;
     font-weight: 700;
@@ -239,6 +239,11 @@ body {
     position: absolute;
     right: -0.25rem;
     top: -0.2rem;
+}
+
+html[data-agt-theme="hoth-light"] .showcase-topbar__bell-badge {
+    background: var(--agt-color-danger-text);
+    color: var(--agt-color-white);
 }
 
 .showcase-topbar .agt-theme-toggle.rz-button:hover,
@@ -331,6 +336,51 @@ body {
     gap: var(--agt-spacing-4);
 }
 
+.showcase-page__viewbar {
+    align-items: end;
+    display: grid;
+    gap: var(--agt-spacing-3);
+    grid-template-columns: minmax(12rem, 1fr) minmax(12rem, 1fr) auto auto auto;
+}
+
+.showcase-page__summary-loading .agt-loading-panel__content--loading {
+    opacity: 0.35;
+}
+
+.showcase-page__filter-chips {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--agt-spacing-2);
+    margin-bottom: var(--agt-spacing-2);
+}
+
+.showcase-page__filter-chip {
+    align-items: center;
+    background: var(--agt-alpha-primary-10);
+    border: 1px solid var(--agt-input-border);
+    border-radius: 999px;
+    color: var(--agt-text-body);
+    cursor: pointer;
+    display: inline-flex;
+    font: inherit;
+    gap: var(--agt-spacing-1);
+    min-height: var(--agt-control-height-xs);
+    padding: 0 var(--agt-spacing-2);
+}
+
+.showcase-page__filter-chip:hover,
+.showcase-page__filter-chip:focus-visible {
+    background: var(--agt-hover-tint);
+    box-shadow: 0 0 0 2px var(--agt-focus-ring);
+    outline: none;
+}
+
+.showcase-page__workorders-grid .rz-grid-table td,
+.showcase-page__workorders-grid .rz-grid-table th {
+    white-space: nowrap;
+}
+
 .showcase-page__toolbar,
 .showcase-page__summary,
 .showcase-page__filters,
@@ -368,6 +418,10 @@ body {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 }
 
+.showcase-page__detail-grid--drawer {
+    grid-template-columns: 1fr;
+}
+
 .showcase-page__settings-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
 }
@@ -384,7 +438,12 @@ body {
 .showcase-page__metric-value {
     color: var(--agt-text-heading);
     font-size: clamp(1.6rem, 1.2rem + 1vw, 2.35rem);
+    font-variant-numeric: var(--agt-numeric-variant);
     font-weight: 800;
+}
+
+.showcase-page__metric-delta {
+    margin-top: var(--agt-spacing-1);
 }
 
 .showcase-page__metric-label,
@@ -464,7 +523,8 @@ body {
     .showcase-page__detail-grid,
     .showcase-page__settings-grid,
     .showcase-page__split,
-    .showcase-page__toolbar {
+    .showcase-page__toolbar,
+    .showcase-page__viewbar {
         grid-template-columns: 1fr;
     }
 }

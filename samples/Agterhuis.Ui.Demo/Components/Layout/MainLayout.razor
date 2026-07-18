@@ -1,7 +1,8 @@
 @inherits LayoutComponentBase
 
 <CascadingValue Value="ThemeState" IsFixed="true">
-    <div class="demo-theme-root" data-agt-theme="@ThemeState.Theme" data-agt-motion="@MotionMode" data-agt-ambient="@AmbientMode">
+<CascadingValue Value="DensityState" IsFixed="true">
+    <div class="demo-theme-root" data-agt-theme="@ThemeState.Theme" data-agt-density="@DensityState.Density" data-agt-motion="@MotionMode" data-agt-ambient="@AmbientMode">
         @if (ShowAmbient)
         {
             <div class="demo-shell-ambient demo-shell-ambient--@ThemeState.ActiveTheme.Name" aria-hidden="true"></div>
@@ -14,7 +15,11 @@
                 <div class="demo-topbar-inner">
                     <RadzenSidebarToggle Icon="menu" Click="@OnSidebarToggle" ToggleAriaLabel="Navigatie in- of uitklappen" />
                     <div class="demo-topbar-brand">ICT365 · Agterhuis.Ui</div>
-                    <AgtThemeSwitcher />
+                    <div class="demo-topbar-actions">
+                        <AgtCommandPalette />
+                        <AgtDensityToggle />
+                        <AgtThemeSwitcher />
+                    </div>
                 </div>
             </RadzenHeader>
 
@@ -66,6 +71,7 @@
 
         <RadzenComponents />
     </div>
+</CascadingValue>
 </CascadingValue>
 
 <div id="blazor-error-ui" data-nosnippet>

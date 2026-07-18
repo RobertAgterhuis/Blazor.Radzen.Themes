@@ -14,7 +14,12 @@ public sealed partial class ShowcaseDataService
 
     public IReadOnlyList<ShowcaseProject> Projects => _projects.OrderByDescending(p => p.Start).ToList();
 
-    public IReadOnlyList<ShowcaseProjectTask> ProjectTasks => _projectTasks.OrderBy(t => t.Start).ToList();
+    public IReadOnlyList<ShowcaseProjectTask> ProjectTasks => _projectTasks
+        .GroupBy(task => task.Id)
+        .Select(group => group.Last())
+        .OrderBy(task => task.Start)
+        .ThenBy(task => task.Id)
+        .ToList();
 
     public IReadOnlyList<ShowcaseAssetNode> Assets => _assets.OrderBy(a => a.Path).ToList();
 

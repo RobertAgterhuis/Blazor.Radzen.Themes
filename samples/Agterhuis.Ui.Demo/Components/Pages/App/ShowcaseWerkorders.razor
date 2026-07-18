@@ -17,7 +17,22 @@
     <AgtTextField Label="Zoekwerk" AriaLabel="Zoekwerk" Placeholder="Zoek op klant, adres of nummer" Value="@_searchText" ValueChanged="OnSearchChanged" ValueExpression="@(() => _searchText)" />
     <AgtDropdown TValue="ShowcaseWorkOrderStatus?" Label="Status" AriaLabel="Statusfilter" Data="@StatusFilterOptions" Value="@_statusFilter" ValueChanged="OnStatusFilterChanged" ValueExpression="@(() => _statusFilter)" TextProperty="Label" ValueProperty="Value" AllowClear="true" />
     <AgtDropdown TValue="ShowcaseWorkOrderPriority?" Label="Prioriteit" AriaLabel="Prioriteitsfilter" Data="@PriorityFilterOptions" Value="@_priorityFilter" ValueChanged="OnPriorityFilterChanged" ValueExpression="@(() => _priorityFilter)" TextProperty="Label" ValueProperty="Value" AllowClear="true" />
-    <AgtPrimaryButton Text="Nieuwe werkorder" Click="OnNewWorkOrder" />
+    <AgtPrimaryButton Text="Nieuwe werkorder" Click="OnNewWorkOrder" CssClass="showcase-workorders__primary-action" />
+</div>
+
+<div class="showcase-page__viewbar">
+    <RadzenDropDown TValue="string"
+                    Name="weergaven"
+                    Data="@SavedViewNames"
+                    Value="@_selectedViewName"
+                    Placeholder="Kies weergave"
+                    AllowClear="true"
+                    Change="OnViewSelected"
+                    style="width: 100%;" />
+    <AgtTextField Label="Naam weergave" AriaLabel="Naam weergave" Placeholder="Bijv. Spoed openstaand" Value="@_viewNameDraft" ValueChanged="OnViewNameChanged" ValueExpression="@(() => _viewNameDraft)" />
+    <AgtSecondaryButton Text="Opslaan als" Icon="save" Click="OnSaveViewAs" />
+    <AgtSecondaryButton Text="Standaard" Icon="star" Click="OnSetDefaultView" Disabled="@string.IsNullOrWhiteSpace(_selectedViewName)" />
+    <AgtSecondaryButton Text="Verwijderen" Icon="delete" Click="OnDeleteView" Disabled="@string.IsNullOrWhiteSpace(_selectedViewName)" />
 </div>
 
 <AgtCard>
@@ -27,19 +42,48 @@
         <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" Wrap="FlexWrap.Wrap" Style="margin-top: 0.75rem;">
             <AgtSecondaryButton Text="Exporteer CSV" Click="ExportCsv" />
             <AgtSecondaryButton Text="Exporteer Excel" Click="ExportExcel" />
-            <RadzenToggleButton @bind-Value="_compactDensity" Text="Compacte dichtheid" />
+            <RadzenToggleButton @bind-Value="_compactDensity" Text="Compacte dichtheid" class="showcase-workorders__compact-toggle" />
         </RadzenStack>
     </ChildContent>
 </AgtCard>
 
-<div class="showcase-page__summary">
-    <AgtCard><Header>Open</Header><ChildContent><div class="showcase-page__metric-value">@FilteredOrders.Count(order => order.Status is ShowcaseWorkOrderStatus.Gepland or ShowcaseWorkOrderStatus.Onderweg or ShowcaseWorkOrderStatus.InUitvoering)</div></ChildContent></AgtCard>
-    <AgtCard><Header>Afgerond</Header><ChildContent><div class="showcase-page__metric-value">@FilteredOrders.Count(order => order.Status == ShowcaseWorkOrderStatus.Afgerond)</div></ChildContent></AgtCard>
-    <AgtCard><Header>Geannuleerd</Header><ChildContent><div class="showcase-page__metric-value">@FilteredOrders.Count(order => order.Status == ShowcaseWorkOrderStatus.Geannuleerd)</div></ChildContent></AgtCard>
-    <AgtCard><Header>Omzet</Header><ChildContent><div class="showcase-page__metric-value">@FilteredOrders.Sum(order => order.Amount).ToString("C0", System.Globalization.CultureInfo.GetCultureInfo("nl-NL"))</div></ChildContent></AgtCard>
-</div>
+<AgtLoadingPanel IsLoading="@_loading"
+                 LoadingText="Kerncijfers worden geladen..."
+                 Variant="AgtLoadingPanelVariant.Skeleton"
+                 SkeletonPreset="AgtLoadingPanelSkeletonPreset.Cards"
+                 SkeletonItems="4"
+                 CssClass="showcase-page__summary-loading">
+    <div class="showcase-page__summary">
+        <AgtCard><Header>Open</Header><ChildContent><div class="showcase-page__metric-value">@FilteredOrders.Count(order => order.Status is ShowcaseWorkOrderStatus.Gepland or ShowcaseWorkOrderStatus.Onderweg or ShowcaseWorkOrderStatus.InUitvoering)</div></ChildContent></AgtCard>
+        <AgtCard><Header>Afgerond</Header><ChildContent><div class="showcase-page__metric-value">@FilteredOrders.Count(order => order.Status == ShowcaseWorkOrderStatus.Afgerond)</div></ChildContent></AgtCard>
+        <AgtCard><Header>Geannuleerd</Header><ChildContent><div class="showcase-page__metric-value">@FilteredOrders.Count(order => order.Status == ShowcaseWorkOrderStatus.Geannuleerd)</div></ChildContent></AgtCard>
+        <AgtCard><Header>Omzet</Header><ChildContent><div class="showcase-page__metric-value">@FilteredOrders.Sum(order => order.Amount).ToString("C0", System.Globalization.CultureInfo.GetCultureInfo("nl-NL"))</div></ChildContent></AgtCard>
+    </div>
+</AgtLoadingPanel>
 
-<AgtLoadingPanel IsLoading="@_loading" LoadingText="Werkorders worden geladen...">
+<AgtLoadingPanel IsLoading="@_loading"
+                 LoadingText="Werkorders worden geladen..."
+                 Variant="AgtLoadingPanelVariant.Skeleton"
+                 SkeletonPreset="AgtLoadingPanelSkeletonPreset.GridRows"
+                 SkeletonItems="8">
+    @if (ActiveFilterChips.Count > 0)
+    {
+        <div class="showcase-page__filter-chips" aria-label="Actieve filters">
+            @foreach (var chip in ActiveFilterChips)
+            {
+                <button type="button"
+                        class="showcase-page__filter-chip"
+                        title="Verwijder filter: @chip.Label"
+                        @onclick="() => RemoveFilter(chip.Key)">
+                    <span>@chip.Label</span>
+                    <RadzenIcon Icon="close" aria-hidden="true" />
+                </button>
+            }
+
+            <AgtSecondaryButton Text="Wis alles" Icon="filter_alt_off" Click="OnClearFilters" />
+        </div>
+    }
+
     @if (FilteredOrders.Count == 0)
     {
         <AgtEmptyState CssClass="showcase-page__empty" Icon="inbox" Title="Geen werkorders" Description="Pas de filters aan of voeg een nieuwe werkorder toe.">
@@ -56,6 +100,11 @@
                      FilterMode="FilterMode.Simple"
                      AllowRowSelectOnRowClick="true"
                      RowSelect="OnRowSelected"
+                     Settings="@_gridSettings"
+                     SettingsChanged="OnGridSettingsChanged"
+                     StickySummaryFooter="true"
+                     StickyFirstColumn="true"
+                     CssClass="showcase-page__workorders-grid"
                      PageSize="10">
             <Columns>
                 <RadzenDataGridColumn TItem="ShowcaseWorkOrder" Property="Number" Title="Nummer" />
@@ -86,6 +135,11 @@
                     <Template Context="order">
                         @order.Amount.ToString("C0", System.Globalization.CultureInfo.GetCultureInfo("nl-NL"))
                     </Template>
+                    <FooterTemplate>
+                        <span title="Totaal van de gefilterde werkorders">
+                            @FilteredOrders.Sum(order => order.Amount).ToString("C0", System.Globalization.CultureInfo.GetCultureInfo("nl-NL"))
+                        </span>
+                    </FooterTemplate>
                 </RadzenDataGridColumn>
                 <RadzenDataGridColumn TItem="ShowcaseWorkOrder" Title="Acties">
                     <Template Context="order">
@@ -114,14 +168,77 @@
     }
 </AgtLoadingPanel>
 
+<AgtDrawer @bind-IsOpen="_drawerOpen"
+           Title="@DrawerTitle"
+           Width="30rem"
+           IsResizable="true"
+           CanCloseAsync="CanCloseDrawerAsync">
+    @if (_selectedWorkOrder is null)
+    {
+        <AgtEmptyState Icon="description"
+                       Title="Geen werkorder geselecteerd"
+                       Description="Kies een werkorder in de lijst om details te tonen." />
+    }
+    else
+    {
+        <RadzenStack Gap="0.75rem">
+            <div>
+                <h3 class="showcase-page__section-title">@_selectedWorkOrder.Number</h3>
+                <p class="showcase-page__muted">@_selectedWorkOrder.CustomerName · @_selectedWorkOrder.Address</p>
+            </div>
+
+            <div class="showcase-page__badge-row">
+                <AgtBadge Text="@_selectedWorkOrder.TypeLabel" Icon="handyman" Intent="AgtIntent.Primary" />
+                <AgtBadge Text="@_selectedWorkOrder.StatusLabel" Icon="schedule" Intent="@StatusIntent(_selectedWorkOrder.Status)" />
+                <AgtBadge Text="@_selectedWorkOrder.PriorityLabel" Icon="priority_high" Intent="@PriorityIntent(_selectedWorkOrder.Priority)" />
+            </div>
+
+            <div class="showcase-page__detail-grid showcase-page__detail-grid--drawer">
+                <AgtCard>
+                    <Header>Planning</Header>
+                    <ChildContent>
+                        <p><strong>Monteur:</strong> @_selectedWorkOrder.TechnicianName</p>
+                        <p><strong>Tijdvak:</strong> @_selectedWorkOrder.TimeWindow</p>
+                        <p><strong>Bedrag:</strong> @_selectedWorkOrder.Amount.ToString("C0", System.Globalization.CultureInfo.GetCultureInfo("nl-NL"))</p>
+                    </ChildContent>
+                </AgtCard>
+                <AgtCard>
+                    <Header>Omschrijving</Header>
+                    <ChildContent>
+                        <p>@_selectedWorkOrder.Description</p>
+                    </ChildContent>
+                </AgtCard>
+            </div>
+
+            <AgtPrimaryButton Text="Sluiten" Click="CloseDrawer" CssClass="showcase-workorders__drawer-close" />
+        </RadzenStack>
+    }
+</AgtDrawer>
+
 @code {
+    private const string ViewsStorageKey = "agt-ui-werkorders-views";
+    private const string DefaultViewStorageKey = "agt-ui-werkorders-view-default";
+
     private bool _loading = true;
     private string _searchText = string.Empty;
     private ShowcaseWorkOrderStatus? _statusFilter;
     private ShowcaseWorkOrderPriority? _priorityFilter;
     private bool _compactDensity;
+    private string _selectedViewName = string.Empty;
+    private string _viewNameDraft = string.Empty;
+    private List<WorkOrderGridView> _savedViews = [];
+    private DataGridSettings? _gridSettings;
+    private bool _drawerOpen;
+    private bool _drawerHasPendingChanges;
+    private ShowcaseWorkOrder? _selectedWorkOrder;
     private IEnumerable<string> _skillsSelection = [];
     private IReadOnlyList<ShowcaseWorkOrder> FilteredOrders => ApplyFilters();
+    private IReadOnlyList<string> SavedViewNames => _savedViews.Select(static view => view.Name).OrderBy(static name => name, StringComparer.OrdinalIgnoreCase).ToList();
+    private IReadOnlyList<FilterChip> ActiveFilterChips => BuildActiveFilterChips();
+
+    private string DrawerTitle => _selectedWorkOrder is null
+        ? "Werkorder details"
+        : $"Werkorder {_selectedWorkOrder.Number}";
 
     private IReadOnlyList<(string Text, string? Href)> Breadcrumbs =>
     [
@@ -136,28 +253,181 @@
 
     private IReadOnlyList<string> SkillOptions => ["Installatie", "Inspectie", "Storingsdienst", "Veiligheid", "Rapportage"];
 
-    protected override async Task OnInitializedAsync()
+    protected override Task OnInitializedAsync() => Task.CompletedTask;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        await LoadViewsAsync();
+        await ApplyDefaultViewAsync();
         await Task.Delay(300);
         _loading = false;
+        await InvokeAsync(StateHasChanged);
     }
 
     private Task OnSearchChanged(string? value)
     {
         _searchText = value ?? string.Empty;
+        _selectedViewName = string.Empty;
         return Task.CompletedTask;
     }
 
     private Task OnStatusFilterChanged(ShowcaseWorkOrderStatus? value)
     {
         _statusFilter = value;
+        _selectedViewName = string.Empty;
         return Task.CompletedTask;
     }
 
     private Task OnPriorityFilterChanged(ShowcaseWorkOrderPriority? value)
     {
         _priorityFilter = value;
+        _selectedViewName = string.Empty;
         return Task.CompletedTask;
+    }
+
+    private Task OnViewNameChanged(string? value)
+    {
+        _viewNameDraft = value ?? string.Empty;
+        return Task.CompletedTask;
+    }
+
+    private async Task OnViewSelected(object? value)
+    {
+        var name = value?.ToString() ?? string.Empty;
+        _selectedViewName = name;
+        _viewNameDraft = name;
+
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return;
+        }
+
+        var selected = _savedViews.FirstOrDefault(view => string.Equals(view.Name, name, StringComparison.OrdinalIgnoreCase));
+        if (selected is null)
+        {
+            return;
+        }
+
+        ApplyView(selected);
+        await JS.InvokeVoidAsync("agtTheme.setStoredValue", DefaultViewStorageKey, selected.Name);
+    }
+
+    private async Task OnSaveViewAs(MouseEventArgs _)
+    {
+        var name = string.IsNullOrWhiteSpace(_viewNameDraft) ? _selectedViewName : _viewNameDraft;
+        name = name.Trim();
+
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            Notifications.Warning("Weergave opslaan", "Geef eerst een naam op voor de weergave.");
+            return;
+        }
+
+        var view = new WorkOrderGridView(name, _searchText, _statusFilter, _priorityFilter);
+        view = view with
+        {
+            GridSettingsJson = SerializeGridSettings(_gridSettings)
+        };
+
+        _savedViews.RemoveAll(existing => string.Equals(existing.Name, name, StringComparison.OrdinalIgnoreCase));
+        _savedViews.Add(view);
+        _selectedViewName = name;
+        _viewNameDraft = name;
+
+        await PersistViewsAsync();
+        Notifications.Success("Weergave opgeslagen", $"'{name}' is opgeslagen.");
+    }
+
+    private async Task OnSetDefaultView(MouseEventArgs _)
+    {
+        if (string.IsNullOrWhiteSpace(_selectedViewName))
+        {
+            Notifications.Warning("Standaardweergave", "Kies eerst een weergave.");
+            return;
+        }
+
+        await JS.InvokeVoidAsync("agtTheme.setStoredValue", DefaultViewStorageKey, _selectedViewName);
+        Notifications.Info("Standaardweergave", $"'{_selectedViewName}' is nu de standaardweergave.");
+    }
+
+    private async Task OnDeleteView(MouseEventArgs _)
+    {
+        if (string.IsNullOrWhiteSpace(_selectedViewName))
+        {
+            return;
+        }
+
+        var deletedName = _selectedViewName;
+        _savedViews.RemoveAll(view => string.Equals(view.Name, deletedName, StringComparison.OrdinalIgnoreCase));
+        _selectedViewName = string.Empty;
+        _viewNameDraft = string.Empty;
+
+        await PersistViewsAsync();
+
+        var defaultView = await JS.InvokeAsync<string>("agtTheme.getStoredValue", DefaultViewStorageKey, string.Empty);
+        if (string.Equals(defaultView, deletedName, StringComparison.OrdinalIgnoreCase))
+        {
+            await JS.InvokeVoidAsync("agtTheme.removeStoredValue", DefaultViewStorageKey);
+        }
+
+        Notifications.Info("Weergave verwijderd", $"'{deletedName}' is verwijderd.");
+    }
+
+    private Task OnClearFilters(MouseEventArgs _)
+    {
+        _searchText = string.Empty;
+        _statusFilter = null;
+        _priorityFilter = null;
+        _selectedViewName = string.Empty;
+        _gridSettings = null;
+        return Task.CompletedTask;
+    }
+
+    private Task RemoveFilter(string key)
+    {
+        switch (key)
+        {
+            case "search":
+                _searchText = string.Empty;
+                break;
+            case "status":
+                _statusFilter = null;
+                break;
+            case "priority":
+                _priorityFilter = null;
+                break;
+            default:
+                break;
+        }
+
+        _selectedViewName = string.Empty;
+        return Task.CompletedTask;
+    }
+
+    private async Task OnGridSettingsChanged(DataGridSettings settings)
+    {
+        _gridSettings = settings;
+
+        if (string.IsNullOrWhiteSpace(_selectedViewName))
+        {
+            return;
+        }
+
+        var selected = _savedViews.FirstOrDefault(view => string.Equals(view.Name, _selectedViewName, StringComparison.OrdinalIgnoreCase));
+        if (selected is null)
+        {
+            return;
+        }
+
+        var updated = selected with { GridSettingsJson = SerializeGridSettings(settings) };
+        _savedViews.RemoveAll(view => string.Equals(view.Name, _selectedViewName, StringComparison.OrdinalIgnoreCase));
+        _savedViews.Add(updated);
+        await PersistViewsAsync();
     }
 
     private async Task OnNewWorkOrder(MouseEventArgs _)
@@ -274,10 +544,34 @@
 
     private async Task OnRowSelected(ShowcaseWorkOrder order)
     {
-        await DialogService.OpenAsync<ShowcaseWorkOrderDetailsDialog>($"Werkorder {order.Number}", new Dictionary<string, object?>
+        _selectedWorkOrder = order;
+        _drawerHasPendingChanges = false;
+        _drawerOpen = true;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private Task CloseDrawer(MouseEventArgs _)
+    {
+        _drawerOpen = false;
+        return Task.CompletedTask;
+    }
+
+    private async Task<bool> CanCloseDrawerAsync()
+    {
+        if (!_drawerHasPendingChanges)
         {
-            ["WorkOrder"] = order
-        }, new DialogOptions { Width = "720px", Height = "auto", Resizable = true, Draggable = true });
+            return true;
+        }
+
+        return await ConfirmDialog.ConfirmAsync(
+            "Er zijn niet-opgeslagen wijzigingen in dit paneel.",
+            "Wijzigingen verwerpen?",
+            new AgtConfirmOptions
+            {
+                Intent = AgtIntent.Warning,
+                OkText = "Sluiten",
+                CancelText = "Annuleren"
+            });
     }
 
     private async Task OnDelete(ShowcaseWorkOrder order)
@@ -471,5 +765,120 @@
     {
         var fieldIdentifier = FieldIdentifier.Create(expression);
         return editContext.GetValidationMessages(fieldIdentifier).FirstOrDefault();
+    }
+
+    private IReadOnlyList<FilterChip> BuildActiveFilterChips()
+    {
+        var chips = new List<FilterChip>();
+
+        if (!string.IsNullOrWhiteSpace(_searchText))
+        {
+            chips.Add(new FilterChip("search", $"Zoek: {_searchText.Trim()}"));
+        }
+
+        if (_statusFilter.HasValue)
+        {
+            chips.Add(new FilterChip("status", $"Status: {StatusLabel(_statusFilter.Value)}"));
+        }
+
+        if (_priorityFilter.HasValue)
+        {
+            chips.Add(new FilterChip("priority", $"Prioriteit: {PriorityLabel(_priorityFilter.Value)}"));
+        }
+
+        return chips;
+    }
+
+    private async Task LoadViewsAsync()
+    {
+        var savedJson = await JS.InvokeAsync<string>("agtTheme.getStoredValue", ViewsStorageKey, string.Empty);
+        if (string.IsNullOrWhiteSpace(savedJson))
+        {
+            _savedViews = [];
+            return;
+        }
+
+        try
+        {
+            _savedViews = System.Text.Json.JsonSerializer.Deserialize<List<WorkOrderGridView>>(savedJson) ?? [];
+        }
+        catch
+        {
+            _savedViews = [];
+        }
+    }
+
+    private async Task PersistViewsAsync()
+    {
+        var serialized = System.Text.Json.JsonSerializer.Serialize(_savedViews);
+        await JS.InvokeVoidAsync("agtTheme.setStoredValue", ViewsStorageKey, serialized);
+    }
+
+    private async Task ApplyDefaultViewAsync()
+    {
+        var defaultViewName = await JS.InvokeAsync<string>("agtTheme.getStoredValue", DefaultViewStorageKey, string.Empty);
+        if (string.IsNullOrWhiteSpace(defaultViewName))
+        {
+            return;
+        }
+
+        var view = _savedViews.FirstOrDefault(item => string.Equals(item.Name, defaultViewName, StringComparison.OrdinalIgnoreCase));
+        if (view is null)
+        {
+            return;
+        }
+
+        _selectedViewName = view.Name;
+        _viewNameDraft = view.Name;
+        ApplyView(view);
+    }
+
+    private void ApplyView(WorkOrderGridView view)
+    {
+        _searchText = view.SearchText;
+        _statusFilter = view.Status;
+        _priorityFilter = view.Priority;
+        _gridSettings = DeserializeGridSettings(view.GridSettingsJson);
+    }
+
+    private static string SerializeGridSettings(DataGridSettings? settings)
+    {
+        if (settings is null)
+        {
+            return string.Empty;
+        }
+
+        try
+        {
+            return System.Text.Json.JsonSerializer.Serialize(settings);
+        }
+        catch
+        {
+            return string.Empty;
+        }
+    }
+
+    private static DataGridSettings? DeserializeGridSettings(string? settingsJson)
+    {
+        if (string.IsNullOrWhiteSpace(settingsJson))
+        {
+            return null;
+        }
+
+        try
+        {
+            return System.Text.Json.JsonSerializer.Deserialize<DataGridSettings>(settingsJson);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private sealed record FilterChip(string Key, string Label);
+
+    private sealed record WorkOrderGridView(string Name, string SearchText, ShowcaseWorkOrderStatus? Status, ShowcaseWorkOrderPriority? Priority)
+    {
+        public string GridSettingsJson { get; init; } = string.Empty;
     }
 }

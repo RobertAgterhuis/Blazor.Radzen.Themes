@@ -1,5 +1,7 @@
 using Agterhuis.Ui.Theming;
+using Agterhuis.Ui.Services;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Routing;
 using Radzen;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
@@ -9,6 +11,7 @@ namespace Agterhuis.Ui.Demo.Components.Layout;
 
 public partial class ShowcaseLayout : IDisposable
 {
+    private const string CommandScope = "demo-showcase-layout";
     private const int NotificationPreviewCount = 6;
     private readonly HashSet<int> _readNotificationIds = [];
     private ElementReference _notificationsBellHostRef;
@@ -30,6 +33,9 @@ public partial class ShowcaseLayout : IDisposable
         : "Meldingen, geen ongelezen berichten";
 
     [Inject]
+    private AgtDensityState DensityState { get; set; } = default!;
+
+    [Inject]
     private AgtThemeState ThemeState { get; set; } = default!;
 
     [Inject]
@@ -44,10 +50,28 @@ public partial class ShowcaseLayout : IDisposable
     [Inject]
     private DialogService DialogService { get; set; } = default!;
 
+    [Inject]
+    private NavigationManager NavigationManager { get; set; } = default!;
+
+    [Inject]
+    private IAgtCommandRegistry CommandRegistry { get; set; } = default!;
+
     protected override void OnInitialized()
     {
+        DensityState.DensityChanged += HandleDensityChanged;
         ThemeState.ThemeChanged += HandleThemeChanged;
         DataService.Changed += HandleDataChanged;
+        NavigationManager.LocationChanged += HandleLocationChanged;
+        RegisterCommands();
+    }
+
+    private void HandleDensityChanged()
+    {
+        _ = InvokeAsync(async () =>
+        {
+            await JS.InvokeVoidAsync("agtTheme.setDensity", DensityState.Density);
+            StateHasChanged();
+        });
     }
 
     protected void OnSidebarToggle()
@@ -173,7 +197,10 @@ public partial class ShowcaseLayout : IDisposable
         if (firstRender)
         {
             var persistedTheme = await JS.InvokeAsync<string>("agtTheme.getStoredTheme", ThemeState.Theme);
+            var persistedDensity = await JS.InvokeAsync<string>("agtTheme.getStoredDensity", DensityState.Density);
             ThemeState.SetTheme(persistedTheme);
+            DensityState.SetDensity(persistedDensity);
+            await JS.InvokeVoidAsync("agtTheme.setDensity", DensityState.Density);
         }
 
         if (NotificationsOpen && _dismissRegistrationId is null)
@@ -244,8 +271,77 @@ public partial class ShowcaseLayout : IDisposable
 
     public void Dispose()
     {
+        DensityState.DensityChanged -= HandleDensityChanged;
         ThemeState.ThemeChanged -= HandleThemeChanged;
         DataService.Changed -= HandleDataChanged;
+        NavigationManager.LocationChanged -= HandleLocationChanged;
+        CommandRegistry.RemoveScope(CommandScope);
         _dismissReference?.Dispose();
+    }
+
+    private void HandleLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        _ = InvokeAsync(StateHasChanged);
+    }
+
+    private void RegisterCommands()
+    {
+        CommandRegistry.SetCommands(CommandScope,
+        [
+            new AgtCommandItem("showcase-dashboard", "Ga naar dashboard", "Navigatie", () => NavigateToAsync("/app"))
+            {
+                Description = "Open het werkorders dashboard.",
+                ShortcutHint = "G D",
+                Keywords = ["dashboard", "home", "werkorders"]
+            },
+            new AgtCommandItem("showcase-planning", "Ga naar planning", "Navigatie", () => NavigateToAsync("/app/planning"))
+            {
+                Description = "Open de planningsweergave.",
+                ShortcutHint = "G P",
+                Keywords = ["planning", "kalender", "rooster"]
+            },
+            new AgtCommandItem("showcase-werkorders", "Ga naar werkorders", "Navigatie", () => NavigateToAsync("/app/werkorders"))
+            {
+                Description = "Open de werkorderlijst.",
+                ShortcutHint = "G W",
+                Keywords = ["werkorders", "grid", "tickets"]
+            },
+            new AgtCommandItem("showcase-nieuwe-werkorder", "Nieuwe werkorder", "Acties", () => NavigateToAsync("/app/werkorders"))
+            {
+                Description = "Ga naar werkorders en start een nieuw item.",
+                ShortcutHint = "N",
+                Keywords = ["nieuw", "aanmaken", "werkorder"]
+            },
+            new AgtCommandItem("showcase-toggle-theme", "Wissel thema...", "Acties", ToggleThemeAsync)
+            {
+                Description = "Schakel direct tussen licht en donker.",
+                ShortcutHint = "T",
+                Keywords = ["theme", "thema", "licht", "donker"]
+            },
+            new AgtCommandItem("showcase-toggle-density", "Wissel dichtheid", "Acties", ToggleDensityAsync)
+            {
+                Description = "Schakel tussen compacte en comfortabele dichtheid.",
+                ShortcutHint = "D",
+                Keywords = ["density", "compact", "comfortable", "dichtheid"]
+            }
+        ]);
+    }
+
+    private Task NavigateToAsync(string href)
+    {
+        NavigationManager.NavigateTo(href);
+        return Task.CompletedTask;
+    }
+
+    private Task ToggleThemeAsync()
+    {
+        ThemeState.ToggleTheme();
+        return Task.CompletedTask;
+    }
+
+    private Task ToggleDensityAsync()
+    {
+        DensityState.ToggleDensity();
+        return Task.CompletedTask;
     }
 }

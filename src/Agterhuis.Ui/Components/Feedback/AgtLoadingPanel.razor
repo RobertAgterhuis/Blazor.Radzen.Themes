@@ -5,10 +5,46 @@
 
     @if (IsLoading)
     {
-        <div class="agt-loading-panel__overlay" role="status" aria-live="polite" aria-label="@LoadingText">
-            <RadzenProgressBarCircular Mode="ProgressBarMode.Indeterminate" class="agt-loading-panel__spinner" />
-            <span class="agt-loading-panel__text">@LoadingText</span>
-        </div>
+        @if (Variant == AgtLoadingPanelVariant.Skeleton)
+        {
+            <div class="agt-loading-panel__overlay agt-loading-panel__overlay--skeleton" role="status" aria-live="polite" aria-label="@LoadingText">
+                @switch (SkeletonPreset)
+                {
+                    case AgtLoadingPanelSkeletonPreset.Cards:
+                        <div class="agt-loading-panel__skeleton agt-loading-panel__skeleton--cards">
+                            @for (var i = 0; i < SkeletonItems; i++)
+                            {
+                                <span class="agt-loading-panel__skeleton-card"></span>
+                            }
+                        </div>
+                        break;
+                    case AgtLoadingPanelSkeletonPreset.Form:
+                        <div class="agt-loading-panel__skeleton agt-loading-panel__skeleton--form">
+                            @for (var i = 0; i < SkeletonItems; i++)
+                            {
+                                <span class="agt-loading-panel__skeleton-form-row"></span>
+                            }
+                        </div>
+                        break;
+                    default:
+                        <div class="agt-loading-panel__skeleton agt-loading-panel__skeleton--grid-rows">
+                            @for (var i = 0; i < SkeletonItems; i++)
+                            {
+                                <span class="agt-loading-panel__skeleton-row"></span>
+                            }
+                        </div>
+                        break;
+                }
+                <span class="agt-loading-panel__text">@LoadingText</span>
+            </div>
+        }
+        else
+        {
+            <div class="agt-loading-panel__overlay" role="status" aria-live="polite" aria-label="@LoadingText">
+                <RadzenProgressBarCircular Mode="ProgressBarMode.Indeterminate" class="agt-loading-panel__spinner" />
+                <span class="agt-loading-panel__text">@LoadingText</span>
+            </div>
+        }
     }
 </div>
 
@@ -18,6 +54,15 @@
 
     [Parameter]
     public string LoadingText { get; set; } = "Laden...";
+
+    [Parameter]
+    public AgtLoadingPanelVariant Variant { get; set; } = AgtLoadingPanelVariant.Overlay;
+
+    [Parameter]
+    public AgtLoadingPanelSkeletonPreset SkeletonPreset { get; set; } = AgtLoadingPanelSkeletonPreset.GridRows;
+
+    [Parameter]
+    public int SkeletonItems { get; set; } = 8;
 
     [Parameter]
     public RenderFragment? ChildContent { get; set; }

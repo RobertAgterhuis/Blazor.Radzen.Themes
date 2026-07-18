@@ -17,7 +17,8 @@
         <AgtCard>
             <Header>@metric.Title</Header>
             <ChildContent>
-                <div class="showcase-page__metric-value">@metric.Value</div>
+                <div class="showcase-page__metric-value"><AgtNumeric Value="@metric.Value" Format="@metric.Format" /></div>
+                <AgtDelta Value="@metric.Delta" Format="P0" CssClass="showcase-page__metric-delta" />
                 @if (PreviewOnly)
                 {
                     <small class="showcase-page__muted">Trendpreview</small>
@@ -165,10 +166,10 @@ else
 
     private IReadOnlyList<ReportMetric> MiniMetrics =>
     [
-        new("Open volume", DataService.OpenOrderCount.ToString(), [12, 15, 14, 17, 19, DataService.OpenOrderCount]),
-        new("Gem. herstel", "3,4u", [4, 3.7, 3.2, 3.6, 3.4, 3.4]),
-        new("First-time-fix", "86%", [79, 81, 84, 83, 85, 86]),
-        new("Escalaties", "4", [8, 7, 6, 5, 5, 4])
+        new("Open volume", DataService.OpenOrderCount, "N0", 0.05m, [12, 15, 14, 17, 19, DataService.OpenOrderCount]),
+        new("Gem. herstel", 3.4m, "N1", -0.03m, [4, 3.7, 3.2, 3.6, 3.4, 3.4]),
+        new("First-time-fix", 0.86m, "P0", 0.02m, [79, 81, 84, 83, 85, 86]),
+        new("Escalaties", 4, "N0", -0.11m, [8, 7, 6, 5, 5, 4])
     ];
 
     private IReadOnlyList<FlowItem> SankeyFlow =>
@@ -204,7 +205,7 @@ else
         await JS.InvokeVoidAsync("agtTheme.downloadCsv", "werkorders-rapportage.csv", string.Join("\r\n", lines));
     }
 
-    private sealed record ReportMetric(string Title, string Value, IReadOnlyList<double> Trend);
+    private sealed record ReportMetric(string Title, object Value, string Format, decimal Delta, IReadOnlyList<double> Trend);
 
     private sealed record FlowItem(string Source, string Target, double Value);
 }

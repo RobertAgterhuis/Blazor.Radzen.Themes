@@ -24,8 +24,9 @@
                 <AgtCard CssClass="showcase-page__metric">
                     <Header>@metric.Label</Header>
                     <ChildContent>
-                        <div class="showcase-page__metric-value">@FormatMetric(_animatedValues[metric.Index], metric.Currency)</div>
+                        <div class="showcase-page__metric-value"><AgtNumeric Value="@_animatedValues[metric.Index]" Format="@(metric.Currency ? "C0" : "N0")" /></div>
                         <div class="showcase-page__metric-label">@metric.Caption</div>
+                        <AgtDelta Value="@metric.Delta" Format="P0" CssClass="showcase-page__metric-delta" />
                     </ChildContent>
                 </AgtCard>
             }
@@ -97,10 +98,10 @@
     private readonly decimal[] _animatedValues = [0, 0, 0, 0];
 
     private static readonly IReadOnlyList<DashboardMetric> Metrics = [
-        new(0, "Open werkorders", "Nog actief in de planning", false),
-        new(1, "Vandaag gepland", "Te bezoeken opdrachten", false),
-        new(2, "Afgerond deze week", "Werkorders dichtgezet", false),
-        new(3, "Omzet MTD", "Omzet deze maand", true)
+        new(0, "Open werkorders", "Nog actief in de planning", false, -0.04m),
+        new(1, "Vandaag gepland", "Te bezoeken opdrachten", false, 0.08m),
+        new(2, "Afgerond deze week", "Werkorders dichtgezet", false, 0.12m),
+        new(3, "Omzet MTD", "Omzet deze maand", true, 0.06m)
     ];
 
     private IReadOnlyList<ShowcaseMonthlyPerformance> MonthlyPerformance => DataService.MonthlyPerformance;
@@ -148,11 +149,6 @@
         await InvokeAsync(StateHasChanged);
     }
 
-    private static string FormatMetric(decimal value, bool currency)
-    {
-        return currency ? value.ToString("C0", System.Globalization.CultureInfo.GetCultureInfo("nl-NL")) : value.ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("nl-NL"));
-    }
-
     private static AgtIntent StatusIntent(ShowcaseWorkOrderStatus status) => status switch
     {
         ShowcaseWorkOrderStatus.Afgerond => AgtIntent.Success,
@@ -170,7 +166,7 @@
         _ => AgtIntent.Info
     };
 
-    private sealed record DashboardMetric(int Index, string Label, string Caption, bool Currency);
+    private sealed record DashboardMetric(int Index, string Label, string Caption, bool Currency, decimal Delta);
 
     private sealed record DashboardTypeBreakdown(string Label, int Value);
 }

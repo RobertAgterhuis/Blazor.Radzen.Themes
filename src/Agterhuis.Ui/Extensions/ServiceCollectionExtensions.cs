@@ -11,7 +11,9 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddAgterhuisUi(this IServiceCollection services, Action<AgtUiOptions>? configure = null)
     {
         services.AddRadzenComponents();
+        services.AddScoped<AgtDensityState>();
         services.AddScoped<AgtThemeState>();
+        services.AddScoped<IAgtCommandRegistry, AgtCommandRegistry>();
         services.AddScoped<IAgtConfirmDialog, AgtConfirmDialog>();
         services.AddScoped<IAgtNotificationService, AgtNotificationService>();
 

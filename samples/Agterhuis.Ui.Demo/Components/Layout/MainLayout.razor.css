@@ -131,6 +131,12 @@
     padding: 0 var(--agt-spacing-4);
 }
 
+.demo-topbar-actions {
+    align-items: center;
+    display: inline-flex;
+    gap: var(--agt-spacing-2);
+}
+
 .demo-topbar-brand {
     color: var(--agt-topbar-brand-color);
     font-size: clamp(0.95rem, 0.8rem + 0.45vw, 1.2rem);

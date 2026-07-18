@@ -34,6 +34,7 @@
 .rz-chart-legend text {
     color: inherit;
     fill: currentcolor;
+    font-variant-numeric: var(--agt-numeric-variant);
 }
 
 .rz-chart-tooltip {
