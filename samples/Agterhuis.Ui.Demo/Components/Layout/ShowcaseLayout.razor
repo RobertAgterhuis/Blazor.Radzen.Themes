@@ -6,7 +6,14 @@
         <RadzenLayout class="showcase-layout">
             <RadzenHeader class="showcase-topbar" role="banner">
                 <div class="showcase-topbar__inner">
-                    <RadzenSidebarToggle Icon="menu" Click="@OnSidebarToggle" ToggleAriaLabel="Navigatie in- of uitklappen" />
+                    <div class="showcase-topbar__menu-toggle-host" @ref="_sidebarToggleRef">
+                        <RadzenSidebarToggle class="showcase-topbar__menu-toggle"
+                                             Icon="menu"
+                                             aria-controls="showcase-shell-sidebar"
+                                             aria-expanded="@SidebarExpanded.ToString().ToLowerInvariant()"
+                                             ToggleAriaLabel="Menu verbergen/tonen"
+                                             Click="OnSidebarToggleClicked" />
+                    </div>
                     <div class="showcase-topbar__brand-wrap">
                         <span class="showcase-topbar__brand">Werkorders</span>
                         <span class="showcase-topbar__tagline">Field service in actieve theme</span>
@@ -96,16 +103,30 @@
                 </div>
             </RadzenHeader>
 
-            <RadzenSidebar class="showcase-sidebar"
+            @if (IsMobileDrawerOpen)
+            {
+                <button type="button"
+                        class="showcase-sidebar-backdrop"
+                        aria-label="Menu sluiten"
+                        @onclick="OnSidebarBackdropClick"></button>
+            }
+
+            <RadzenSidebar id="showcase-shell-sidebar"
+                           class="@SidebarCssClass"
+                           Style="@SidebarInlineStyle"
                            @bind-Expanded="SidebarExpanded"
-                           Responsive="true"
+                           Responsive="false"
                            FullHeight="true"
                            Position="SidebarPosition.Left"
-                           ResponsiveMaxWidth="1024px"
                            role="navigation"
                            aria-label="Werkorders navigatie">
-                <div class="showcase-sidebar__inner">
-                    <div>
+                <div class="showcase-sidebar__inner"
+                     @ref="_sidebarSurfaceRef"
+                     tabindex="-1"
+                     role="@(IsMobileDrawerOpen ? "dialog" : null)"
+                     aria-modal="@(IsMobileDrawerOpen ? "true" : null)"
+                     aria-label="@(IsMobileDrawerOpen ? "Werkorders navigatie" : null)">
+                    <div class="showcase-sidebar__header-copy">
                         <div class="showcase-sidebar__title">Navigatie</div>
                         <div class="showcase-sidebar__subtitle">Compacte werkorder-shell</div>
                     </div>
@@ -131,7 +152,7 @@
                 </div>
             </RadzenSidebar>
 
-            <RadzenBody Expanded="@SidebarExpanded" class="showcase-body">
+            <RadzenBody Expanded="false" class="@BodyCssClass">
                 <main id="showcase-main" class="showcase-main" tabindex="-1">
                     <div class="showcase-page">
                         @Body

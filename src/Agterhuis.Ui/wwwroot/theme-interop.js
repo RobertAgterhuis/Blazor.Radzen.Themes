@@ -30,6 +30,15 @@ window.agtTheme = window.agtTheme || (() => {
             && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     }
 
+    function isViewportAtMost(maxWidth) {
+        const normalized = Number(maxWidth);
+        if (typeof window === "undefined" || Number.isNaN(normalized)) {
+            return false;
+        }
+
+        return window.innerWidth <= normalized;
+    }
+
     function normalizeDensity(density, fallback = "comfortable") {
         const raw = (density || "").toString().trim().toLowerCase();
         if (raw === "compact") {
@@ -304,10 +313,56 @@ window.agtTheme = window.agtTheme || (() => {
         return `${navStoragePrefix}${normalizedSection}`;
     }
 
+    function placeContextLink(mainSelector = "#main") {
+        const selector = (mainSelector || "").toString().trim() || "#main";
+        const main = document.querySelector(selector);
+        if (!main) {
+            return false;
+        }
+
+        const contextLink = main.querySelector("[data-role='page-context-link']");
+        if (!contextLink) {
+            return false;
+        }
+
+        const header = main.querySelector(".agt-page-header");
+        if (header) {
+            const content = header.querySelector(".agt-page-header__content") || header;
+            const description = content.querySelector(".agt-page-header__description");
+            if (description) {
+                description.insertAdjacentElement("afterend", contextLink);
+            } else {
+                content.appendChild(contextLink);
+            }
+
+            return true;
+        }
+
+        const catalogPage = main.querySelector(".catalog-page");
+        if (catalogPage) {
+            const intro = catalogPage.querySelector("p");
+            if (intro) {
+                intro.insertAdjacentElement("afterend", contextLink);
+            } else {
+                const title = catalogPage.querySelector("h1, h2");
+                if (title) {
+                    title.insertAdjacentElement("afterend", contextLink);
+                } else {
+                    catalogPage.prepend(contextLink);
+                }
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
     return {
         normalizeDensity,
         normalizeTheme,
         prefersReducedMotion,
+        isViewportAtMost,
         getStoredTheme(defaultTheme = "plum-dark") {
             const stored = localStorage.getItem(storageKey);
             if (!stored) {
@@ -349,6 +404,7 @@ window.agtTheme = window.agtTheme || (() => {
         registerFocusTrap,
         unregisterFocusTrap,
         focusElement,
+        placeContextLink,
         getStoredNavSectionState(section, defaultState = "collapsed") {
             const key = getNavStorageKey(section);
             const fallback = normalizeNavState(defaultState, "collapsed");

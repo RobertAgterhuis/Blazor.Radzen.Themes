@@ -9,12 +9,14 @@
     </RadzenPanelMenuItem>
 
     <RadzenPanelMenuItem Text="Agt componenten" Icon="widgets" Expanded="true" Class="demo-panel-menu__group demo-panel-menu__group--agt">
-        <RadzenPanelMenuItem Text="De wrapper-API voor consumers" Icon="notes" Disabled="true" Class="demo-panel-menu__subtitle" />
+        <div class="demo-panel-menu__group-copy">
+            <div class="demo-panel-menu__subtitle">De wrapper-API voor consumers</div>
+        </div>
 
-        <RadzenPanelMenuItem Text="Knoppen" Icon="horizontal_rule" Disabled="true" Class="demo-panel-menu__section" />
+        <div class="demo-panel-menu__section-title">Knoppen</div>
         <RadzenPanelMenuItem Text="Buttons" Icon="smart_button" Path="/components/buttons" />
 
-        <RadzenPanelMenuItem Text="Formulieren" Icon="horizontal_rule" Disabled="true" Class="demo-panel-menu__section" />
+        <div class="demo-panel-menu__section-title">Formulieren</div>
         <RadzenPanelMenuItem Text="Checkbox" Icon="check_box" Path="/components/forms/checkbox" />
         <RadzenPanelMenuItem Text="Switch" Icon="toggle_on" Path="/components/forms/switch" />
         <RadzenPanelMenuItem Text="Radio List" Icon="radio_button_checked" Path="/components/forms/radio-list" />
@@ -28,10 +30,10 @@
         <RadzenPanelMenuItem Text="File Upload" Icon="upload_file" Path="/components/forms/file-upload" />
         <RadzenPanelMenuItem Text="Form Actions" Icon="fact_check" Path="/components/forms/form-actions" />
 
-        <RadzenPanelMenuItem Text="Data" Icon="horizontal_rule" Disabled="true" Class="demo-panel-menu__section" />
+        <div class="demo-panel-menu__section-title">Data</div>
         <RadzenPanelMenuItem Text="Data Grid" Icon="table_rows" Path="/components/data/grid" />
 
-        <RadzenPanelMenuItem Text="Feedback" Icon="horizontal_rule" Disabled="true" Class="demo-panel-menu__section" />
+        <div class="demo-panel-menu__section-title">Feedback</div>
         <RadzenPanelMenuItem Text="Feedback" Icon="campaign" Path="/components/feedback" />
         <RadzenPanelMenuItem Text="Badge" Icon="local_offer" Path="/components/feedback/badge" />
         <RadzenPanelMenuItem Text="Notification Service" Icon="notifications" Path="/components/feedback/notification-service" />
@@ -39,7 +41,7 @@
         <RadzenPanelMenuItem Text="Loading Panel" Icon="hourglass_top" Path="/components/feedback/loading-panel" />
         <RadzenPanelMenuItem Text="Confirm Dialog" Icon="help" Path="/components/feedback/confirm-dialog" />
 
-        <RadzenPanelMenuItem Text="Layout" Icon="horizontal_rule" Disabled="true" Class="demo-panel-menu__section" />
+        <div class="demo-panel-menu__section-title">Layout</div>
         <RadzenPanelMenuItem Text="Layout" Icon="view_sidebar" Path="/components/layout" />
         <RadzenPanelMenuItem Text="Tabs" Icon="tab" Path="/components/layout/tabs" />
         <RadzenPanelMenuItem Text="Breadcrumb" Icon="alt_route" Path="/components/layout/breadcrumb" />
@@ -47,7 +49,9 @@
     </RadzenPanelMenuItem>
 
     <RadzenPanelMenuItem Text="Radzen catalogus · QA" Icon="auto_awesome_mosaic" Expanded="@CatalogExpanded" Click="OnCatalogGroupClick" Class="demo-panel-menu__group demo-panel-menu__group--catalog">
-        <RadzenPanelMenuItem Text="Theme-QA: alle Radzen-componenten in het actieve theme" Icon="science" Disabled="true" Class="demo-panel-menu__subtitle" />
+        <div class="demo-panel-menu__group-copy">
+            <div class="demo-panel-menu__subtitle">Theme-QA: alle Radzen-componenten in het actieve theme</div>
+        </div>
         <RadzenPanelMenuItem Text="Index (Radzen)" Icon="list" Path="/catalog" Match="NavLinkMatch.Prefix" />
         <RadzenPanelMenuItem Text="Buttons (Radzen)" Icon="ads_click" Path="/catalog/buttons" />
         <RadzenPanelMenuItem Text="Text Inputs (Radzen)" Icon="text_fields" Path="/catalog/text-inputs" />

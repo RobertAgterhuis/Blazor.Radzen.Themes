@@ -13,7 +13,14 @@
         <RadzenLayout class="demo-layout">
             <RadzenHeader class="demo-topbar" role="banner">
                 <div class="demo-topbar-inner">
-                    <RadzenSidebarToggle Icon="menu" Click="@OnSidebarToggle" ToggleAriaLabel="Navigatie in- of uitklappen" />
+                    <div class="demo-topbar__menu-toggle-host" @ref="_sidebarToggleRef">
+                        <RadzenSidebarToggle class="demo-topbar__menu-toggle"
+                                             Icon="menu"
+                                             aria-controls="demo-shell-sidebar"
+                                             aria-expanded="@SidebarExpanded.ToString().ToLowerInvariant()"
+                                             ToggleAriaLabel="Menu verbergen/tonen"
+                                             Click="OnSidebarToggleClicked" />
+                    </div>
                     <div class="demo-topbar-brand">ICT365 · Agterhuis.Ui</div>
                     <div class="demo-topbar-actions">
                         <AgtCommandPalette />
@@ -23,49 +30,67 @@
                 </div>
             </RadzenHeader>
 
-            <RadzenSidebar class="demo-sidebar"
+            @if (IsMobileDrawerOpen)
+            {
+                <button type="button"
+                        class="demo-sidebar-backdrop"
+                        aria-label="Menu sluiten"
+                        @onclick="OnSidebarBackdropClick"></button>
+            }
+
+            <RadzenSidebar id="demo-shell-sidebar"
+                           class="@SidebarCssClass"
+                           Style="@SidebarInlineStyle"
                            @bind-Expanded="SidebarExpanded"
-                           Responsive="true"
+                           Responsive="false"
                            FullHeight="true"
                            Position="SidebarPosition.Left"
-                           ResponsiveMaxWidth="900px"
                            role="navigation"
                            aria-label="Hoofdnavigatie">
-                <nav aria-label="Hoofdnavigatie">
-                    <NavMenu />
-                </nav>
+                <div class="demo-sidebar__surface"
+                     @ref="_sidebarSurfaceRef"
+                     tabindex="-1"
+                     role="@(IsMobileDrawerOpen ? "dialog" : null)"
+                     aria-modal="@(IsMobileDrawerOpen ? "true" : null)"
+                     aria-label="@(IsMobileDrawerOpen ? "Hoofdnavigatie" : null)">
+                    <nav aria-label="Hoofdnavigatie">
+                        <NavMenu />
+                    </nav>
+                </div>
             </RadzenSidebar>
 
-            <RadzenBody Expanded="@SidebarExpanded" class="demo-body">
-                <main id="main" class="demo-main" tabindex="-1">
-                    @if (ShowWrapperToCatalogLink)
-                    {
-                        <p class="demo-link-banner demo-link-banner--wrapper">
-                            Bekijk de rauwe Radzen-variant in het theme
-                            <a href="@WrapperToCatalogLink">-&gt;</a>
-                        </p>
-                    }
+            <RadzenBody Expanded="false" class="@BodyCssClass">
+                <div class="@BodyContentCssClass">
+                    <main id="main" class="demo-main" tabindex="-1">
+                        @if (ShowWrapperToCatalogLink)
+                        {
+                            <p class="demo-page-context-link demo-page-context-link--wrapper" data-role="page-context-link">
+                                Bekijk de rauwe Radzen-variant in het theme
+                                <a href="@WrapperToCatalogLink" aria-label="Bekijk de rauwe Radzen-variant in het theme">→</a>
+                            </p>
+                        }
 
-                    @if (IsCatalogRoute)
-                    {
-                        <p class="demo-link-banner demo-link-banner--catalog">
-                            Dit is de theme-QA-weergave. Voor gebruik in applicaties: zie de Agt-wrappers
-                            @if (CatalogHasWrapperLink)
-                            {
-                                <a href="@CatalogToWrapperLink">-&gt;</a>
-                            }
-                            else
-                            {
-                                <span class="demo-link-banner__note">(voor deze cataloguspagina is nog geen specifieke wrapperpagina beschikbaar)</span>
-                            }
-                        </p>
-                    }
+                        @if (IsCatalogRoute)
+                        {
+                            <p class="demo-page-context-link demo-page-context-link--catalog" data-role="page-context-link">
+                                Voor gebruik in applicaties: zie de Agt-wrappers
+                                @if (CatalogHasWrapperLink)
+                                {
+                                    <a href="@CatalogToWrapperLink" aria-label="Ga naar de Agt-wrappers">→</a>
+                                }
+                                else
+                                {
+                                    <span class="demo-page-context-link__note">(voor deze cataloguspagina is nog geen specifieke wrapperpagina beschikbaar)</span>
+                                }
+                            </p>
+                        }
 
-                    @Body
-                </main>
-                <footer class="demo-footer" role="contentinfo">
-                    <span>Agterhuis.Ui demo</span>
-                </footer>
+                        @Body
+                    </main>
+                    <footer class="demo-footer" role="contentinfo">
+                        <span>Agterhuis.Ui demo</span>
+                    </footer>
+                </div>
             </RadzenBody>
         </RadzenLayout>
 

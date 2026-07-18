@@ -13,16 +13,34 @@ public partial class ShowcaseLayout : IDisposable
 {
     private const string CommandScope = "demo-showcase-layout";
     private const int NotificationPreviewCount = 6;
+    private const string SidebarStateStorageKey = "showcase-shell-sidebar";
     private readonly HashSet<int> _readNotificationIds = [];
     private ElementReference _notificationsBellHostRef;
     private ElementReference _notificationsPanelRef;
+    private ElementReference _sidebarSurfaceRef;
+    private ElementReference _sidebarToggleRef;
     private DotNetObjectReference<ShowcaseLayout>? _dismissReference;
+    private DotNetObjectReference<ShowcaseLayout>? _sidebarDismissReference;
     private string? _dismissRegistrationId;
+    private string? _sidebarDismissRegistrationId;
+    private string? _sidebarFocusTrapRegistrationId;
+    private bool _isCompactViewport;
     private bool _focusFlyoutOnRender;
     private bool _restoreBellFocus;
+    private bool _restoreSidebarToggleFocus;
 
-    protected bool SidebarExpanded { get; set; } = true;
+    protected bool SidebarExpanded { get; set; }
     protected bool NotificationsOpen { get; set; }
+
+    private bool IsMobileDrawerOpen => SidebarExpanded && _isCompactViewport;
+
+    private string SidebarCssClass => "showcase-sidebar showcase-sidebar--overlay";
+
+    private string BodyCssClass => SidebarExpanded && !_isCompactViewport ? "showcase-body showcase-body--with-sidebar" : "showcase-body";
+
+    private string SidebarInlineStyle => SidebarExpanded
+        ? "position:fixed;left:0;top:3.75rem;height:calc(100vh - 3.75rem);width:min(22rem,calc(100vw - 1.5rem));max-width:min(22rem,calc(100vw - 1.5rem));z-index:1100;transform:translateX(0);visibility:visible;pointer-events:auto;"
+        : "position:fixed;left:0;top:3.75rem;height:calc(100vh - 3.75rem);width:min(22rem,calc(100vw - 1.5rem));max-width:min(22rem,calc(100vw - 1.5rem));z-index:1100;transform:translateX(-100%);visibility:hidden;pointer-events:none;";
 
     protected IReadOnlyList<ShowcaseNotification> NotificationItems => DataService.Notifications.Take(NotificationPreviewCount).ToList();
 
@@ -74,9 +92,11 @@ public partial class ShowcaseLayout : IDisposable
         });
     }
 
-    protected void OnSidebarToggle()
+    private async Task OnSidebarToggleClicked()
     {
+        _isCompactViewport = await JS.InvokeAsync<bool>("agtTheme.isViewportAtMost", 1100);
         SidebarExpanded = !SidebarExpanded;
+        await PersistSidebarStateAsync();
     }
 
     protected Task OnNotificationsToggle(MouseEventArgs _)
@@ -196,12 +216,11 @@ public partial class ShowcaseLayout : IDisposable
     {
         if (firstRender)
         {
-            var persistedTheme = await JS.InvokeAsync<string>("agtTheme.getStoredTheme", ThemeState.Theme);
-            var persistedDensity = await JS.InvokeAsync<string>("agtTheme.getStoredDensity", DensityState.Density);
-            ThemeState.SetTheme(persistedTheme);
-            DensityState.SetDensity(persistedDensity);
-            await JS.InvokeVoidAsync("agtTheme.setDensity", DensityState.Density);
+            await RestorePersistedShellStateAsync();
+            StateHasChanged();
         }
+
+        await SyncSidebarOverlayAsync();
 
         if (NotificationsOpen && _dismissRegistrationId is null)
         {
@@ -231,6 +250,25 @@ public partial class ShowcaseLayout : IDisposable
             _restoreBellFocus = false;
             await JS.InvokeVoidAsync("agtTheme.focusElement", _notificationsBellHostRef);
         }
+
+        if (_restoreSidebarToggleFocus)
+        {
+            _restoreSidebarToggleFocus = false;
+            await JS.InvokeVoidAsync("agtTheme.focusElement", _sidebarToggleRef);
+        }
+    }
+
+    private async Task RestorePersistedShellStateAsync()
+    {
+        var persistedTheme = await JS.InvokeAsync<string>("agtTheme.getStoredTheme", ThemeState.Theme);
+        var persistedDensity = await JS.InvokeAsync<string>("agtTheme.getStoredDensity", DensityState.Density);
+        var persistedSidebarState = await JS.InvokeAsync<string>("agtTheme.getStoredNavSectionState", SidebarStateStorageKey, "expanded");
+        ThemeState.SetTheme(persistedTheme);
+        DensityState.SetDensity(persistedDensity);
+        await JS.InvokeVoidAsync("agtTheme.setThemeWithTransition", ThemeState.Theme);
+        await JS.InvokeVoidAsync("agtTheme.setDensity", DensityState.Density);
+        _isCompactViewport = await JS.InvokeAsync<bool>("agtTheme.isViewportAtMost", 1100);
+        SidebarExpanded = string.Equals(persistedSidebarState, "expanded", StringComparison.OrdinalIgnoreCase);
     }
 
     [JSInvokable]
@@ -277,11 +315,96 @@ public partial class ShowcaseLayout : IDisposable
         NavigationManager.LocationChanged -= HandleLocationChanged;
         CommandRegistry.RemoveScope(CommandScope);
         _dismissReference?.Dispose();
+        _sidebarDismissReference?.Dispose();
     }
 
     private void HandleLocationChanged(object? sender, LocationChangedEventArgs e)
     {
-        _ = InvokeAsync(StateHasChanged);
+        _ = InvokeAsync(() =>
+        {
+            StateHasChanged();
+            return Task.CompletedTask;
+        });
+    }
+
+    private async Task OnSidebarBackdropClick()
+    {
+        await CloseSidebarAsync(restoreFocus: true);
+    }
+
+    [JSInvokable]
+    public Task CloseSidebarFromJs()
+    {
+        return CloseSidebarAsync(restoreFocus: true);
+    }
+
+    private async Task CloseSidebarAsync(bool restoreFocus)
+    {
+        if (!SidebarExpanded)
+        {
+            if (restoreFocus)
+            {
+                _restoreSidebarToggleFocus = true;
+            }
+
+            return;
+        }
+
+        SidebarExpanded = false;
+        _restoreSidebarToggleFocus = restoreFocus;
+        await PersistSidebarStateAsync();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private ValueTask PersistSidebarStateAsync()
+    {
+        var state = SidebarExpanded ? "expanded" : "collapsed";
+        return JS.InvokeVoidAsync("agtTheme.setStoredNavSectionState", SidebarStateStorageKey, state);
+    }
+
+    private async Task SyncSidebarOverlayAsync()
+    {
+        if (!_isCompactViewport)
+        {
+            if (_sidebarDismissRegistrationId is not null)
+            {
+                await JS.InvokeVoidAsync("agtTheme.unregisterDismissHandler", _sidebarDismissRegistrationId);
+                _sidebarDismissRegistrationId = null;
+            }
+
+            if (_sidebarFocusTrapRegistrationId is not null)
+            {
+                await JS.InvokeVoidAsync("agtTheme.unregisterFocusTrap", _sidebarFocusTrapRegistrationId);
+                _sidebarFocusTrapRegistrationId = null;
+            }
+
+            return;
+        }
+
+        if (IsMobileDrawerOpen && _sidebarDismissRegistrationId is null)
+        {
+            _sidebarDismissReference ??= DotNetObjectReference.Create(this);
+            _sidebarDismissRegistrationId = await JS.InvokeAsync<string>(
+                "agtTheme.registerDismissHandler",
+                _sidebarSurfaceRef,
+                _sidebarToggleRef,
+                _sidebarDismissReference,
+                nameof(CloseSidebarFromJs));
+            _sidebarFocusTrapRegistrationId = await JS.InvokeAsync<string>("agtTheme.registerFocusTrap", _sidebarSurfaceRef);
+            await JS.InvokeVoidAsync("agtTheme.focusElement", _sidebarSurfaceRef);
+        }
+
+        if (!IsMobileDrawerOpen && _sidebarDismissRegistrationId is not null)
+        {
+            await JS.InvokeVoidAsync("agtTheme.unregisterDismissHandler", _sidebarDismissRegistrationId);
+            _sidebarDismissRegistrationId = null;
+        }
+
+        if (!IsMobileDrawerOpen && _sidebarFocusTrapRegistrationId is not null)
+        {
+            await JS.InvokeVoidAsync("agtTheme.unregisterFocusTrap", _sidebarFocusTrapRegistrationId);
+            _sidebarFocusTrapRegistrationId = null;
+        }
     }
 
     private void RegisterCommands()

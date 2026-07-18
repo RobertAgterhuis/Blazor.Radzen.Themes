@@ -128,6 +128,35 @@ public sealed class AgtThemeSwitcherTests
         Assert.Equal("tatooine-light", themeState.Theme);
     }
 
+    [Fact]
+    public void SwitcherUpdatesDisplayedTheme_WhenThemeStateChangesExternally()
+    {
+        using var ctx = new BunitContext();
+        ctx.Services.AddRadzenComponents();
+        ctx.JSInterop.Mode = JSRuntimeMode.Loose;
+
+        var themeState = CreateThemeState("plum-dark");
+
+        var cut = ctx.Render(builder =>
+        {
+            builder.OpenComponent<CascadingValue<AgtThemeState>>(0);
+            builder.AddAttribute(1, "Value", themeState);
+            builder.AddAttribute(2, "IsFixed", true);
+            builder.AddAttribute(3, "ChildContent", (RenderFragment)(child =>
+            {
+                child.OpenComponent<AgtThemeSwitcher>(0);
+                child.CloseComponent();
+            }));
+            builder.CloseComponent();
+        });
+
+        cut.WaitForAssertion(() => Assert.Contains("Plum Ink", cut.Markup));
+
+        cut.InvokeAsync(() => themeState.SetTheme("ocean-dark"));
+
+        cut.WaitForAssertion(() => Assert.Contains("Ocean", cut.Markup));
+    }
+
     private static AgtThemeState CreateThemeState(string defaultTheme)
     {
         var options = Microsoft.Extensions.Options.Options.Create(new AgtUiOptions

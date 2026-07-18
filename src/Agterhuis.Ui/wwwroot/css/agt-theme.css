@@ -115,6 +115,15 @@ h1::after,
     outline-offset: 2px;
 }
 
+:where(h1, h2, h3, h4, h5, h6)[tabindex="-1"]:focus,
+:where(h1, h2, h3, h4, h5, h6)[tabindex="-1"]:focus-visible {
+    outline: none;
+    text-decoration-color: var(--agt-nav-focus-outline);
+    text-decoration-line: underline;
+    text-decoration-thickness: 0.18em;
+    text-underline-offset: 0.22em;
+}
+
 .rz-button,
 .rz-panel-menu .rz-navigation-item-link,
 .rz-dropdown,

@@ -547,8 +547,8 @@ html[data-agt-theme="imperial-dark"] {
     --rz-shadow-7: var(--agt-shadow-sm);
     --rz-shadow-8: var(--agt-shadow-sm);
     --rz-shadow-9: var(--agt-shadow-sm);
-    --rz-sidebar-background-color: var(--agt-color-white);
-    --rz-sidebar-color: var(--agt-color-gray-900);
+    --rz-sidebar-background-color: var(--agt-surface-1);
+    --rz-sidebar-color: var(--agt-text-body);
     --rz-sidebar-toggle-background-color: var(--agt-color-white);
     --rz-sidebar-toggle-color: var(--agt-color-gray-900);
     --rz-sidebar-toggle-focus-outline: var(--agt-color-primary-500);
@@ -1252,8 +1252,8 @@ html[data-agt-theme="imperial-dark"] {
     --rz-shadow-7: var(--agt-shadow-md);
     --rz-shadow-8: var(--agt-shadow-md);
     --rz-shadow-9: var(--agt-shadow-md);
-    --rz-sidebar-background-color: var(--agt-color-primary-900);
-    --rz-sidebar-color: var(--agt-color-white);
+    --rz-sidebar-background-color: var(--agt-surface-1);
+    --rz-sidebar-color: var(--agt-text-body);
     --rz-sidebar-toggle-background-color: var(--agt-color-primary-900);
     --rz-sidebar-toggle-color: var(--agt-color-white);
     --rz-sidebar-toggle-focus-outline: var(--agt-color-primary-300);
