@@ -27,7 +27,7 @@ jobs:
       - name: Restore (locked)
         run: |
           dotnet restore src/Agterhuis.Ui/Agterhuis.Ui.csproj --locked-mode
-          dotnet restore samples/Agterhuis.Ui.Demo/Agterhuis.Ui.Demo.csproj --locked-mode
+          dotnet restore samples/Agterhuis.Ui.Demo/Agterhuis.Ui.Demo.csproj -p:RestoreLockedMode=false
           dotnet restore tests/Agterhuis.Ui.Tests/Agterhuis.Ui.Tests.csproj --locked-mode
           dotnet restore eng/token-audit/TokenAudit.csproj --locked-mode
 
