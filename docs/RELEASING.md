@@ -33,3 +33,11 @@ Two paths are supported:
 
 azure-pipelines.yml remains available for internal Azure DevOps package publishing.
 GitHub Actions is the public CI and release path for open-source distribution.
+
+## Wiki Sync Caveat
+
+The optional wiki sync workflow (`.github/workflows/wiki.yml`) pushes markdown pages from `eng/wiki` to the GitHub wiki repository.
+
+- The wiki must be initialized once in the GitHub UI by clicking "Create the first page".
+- Repository Actions permissions must allow `GITHUB_TOKEN` write access to repository contents.
+- If the wiki repo does not exist yet (`*.wiki.git` clone fails), initialize in UI first and rerun publish.

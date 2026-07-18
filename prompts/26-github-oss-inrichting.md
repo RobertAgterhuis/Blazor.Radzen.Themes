@@ -4,11 +4,11 @@ The solution is now on a public GitHub repository. Turn it into a professional o
 
 ---
 
-Copy below into Claude Code in the repo root (vervang OWNER/REPO door de echte GitHub-waarden):
+Copy below into Claude Code in the repo root (use the real GitHub repo values):
 
 ---
 
-Prepare this repository for public GitHub consumption. Repo: `https://github.com/OWNER/REPO`. All public-facing docs in English (code comments/UI blijven zoals ze zijn); keep everything accurate to the actual codebase — verify claims against the code before writing them.
+Prepare this repository for public GitHub consumption. Repo: `https://github.com/RobertAgterhuis/Blazor.Radzen.Themes`. All public-facing docs in English (code comments/UI blijven zoals ze zijn); keep everything accurate to the actual codebase — verify claims against the code before writing them.
 
 ## 1. README.md (the shop window)
 

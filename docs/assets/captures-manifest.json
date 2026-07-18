@@ -1,0 +1,146 @@
+{
+  "generatedAtUtc": "2026-07-18T08:12:52.682Z",
+  "viewport": {
+    "width": 1600,
+    "height": 900
+  },
+  "total": 17,
+  "captures": [
+    {
+      "key": "home-plum-dark",
+      "route": "/",
+      "theme": "plum-dark",
+      "selector": "h2",
+      "bytes": 96124,
+      "output": "docs/assets/home-plum-dark.png"
+    },
+    {
+      "key": "home-hoth-light",
+      "route": "/",
+      "theme": "hoth-light",
+      "selector": "h2",
+      "bytes": 103829,
+      "output": "docs/assets/home-hoth-light.png"
+    },
+    {
+      "key": "catalog-buttons-imperial-dark",
+      "route": "/catalog/buttons",
+      "theme": "imperial-dark",
+      "selector": "h1",
+      "bytes": 116716,
+      "output": "docs/assets/catalog-buttons-imperial-dark.png"
+    },
+    {
+      "key": "werkorders-dashboard-autotaalglas-light",
+      "route": "/app/werkorders",
+      "theme": "autotaalglas-light",
+      "selector": "h1",
+      "bytes": 56815,
+      "output": "docs/assets/werkorders-dashboard-autotaalglas-light.png"
+    },
+    {
+      "key": "werkorders-grid-detail-dialog",
+      "route": "/app/werkorders",
+      "theme": "autotaalglas-light",
+      "selector": "table, .rz-datatable-tablewrapper, .rz-grid-table",
+      "bytes": 58817,
+      "output": "docs/assets/werkorders-grid-detail-dialog.png"
+    },
+    {
+      "key": "planning-scheduler-plum-dark",
+      "route": "/app/planning",
+      "theme": "plum-dark",
+      "selector": ".rz-scheduler, text=Planbord",
+      "bytes": 52769,
+      "output": "docs/assets/planning-scheduler-plum-dark.png"
+    },
+    {
+      "key": "family-plum",
+      "route": "/",
+      "theme": "plum-dark",
+      "selector": "h2",
+      "bytes": 96126,
+      "output": "docs/assets/family-plum.png"
+    },
+    {
+      "key": "family-ocean",
+      "route": "/",
+      "theme": "ocean-dark",
+      "selector": "h2",
+      "bytes": 102151,
+      "output": "docs/assets/family-ocean.png"
+    },
+    {
+      "key": "family-dagobah",
+      "route": "/",
+      "theme": "dagobah-dark",
+      "selector": "h2",
+      "bytes": 142327,
+      "output": "docs/assets/family-dagobah.png"
+    },
+    {
+      "key": "family-dathomir",
+      "route": "/",
+      "theme": "dathomir-dark",
+      "selector": "h2",
+      "bytes": 106415,
+      "output": "docs/assets/family-dathomir.png"
+    },
+    {
+      "key": "family-hoth",
+      "route": "/",
+      "theme": "hoth-dark",
+      "selector": "h2",
+      "bytes": 101358,
+      "output": "docs/assets/family-hoth.png"
+    },
+    {
+      "key": "family-tatooine",
+      "route": "/",
+      "theme": "tatooine-dark",
+      "selector": "h2",
+      "bytes": 114868,
+      "output": "docs/assets/family-tatooine.png"
+    },
+    {
+      "key": "family-imperial",
+      "route": "/",
+      "theme": "imperial-dark",
+      "selector": "h2",
+      "bytes": 143032,
+      "output": "docs/assets/family-imperial.png"
+    },
+    {
+      "key": "family-autotaalglas",
+      "route": "/",
+      "theme": "autotaalglas-light",
+      "selector": "h2",
+      "bytes": 114463,
+      "output": "docs/assets/family-autotaalglas.png"
+    },
+    {
+      "key": "family-autotaalglas-contrast",
+      "route": "/",
+      "theme": "autotaalglas-contrast-light",
+      "selector": "h2",
+      "bytes": 105925,
+      "output": "docs/assets/family-autotaalglas-contrast.png"
+    },
+    {
+      "key": "family-autotaalglas-portal",
+      "route": "/",
+      "theme": "autotaalglas-portal-light",
+      "selector": "h2",
+      "bytes": 126644,
+      "output": "docs/assets/family-autotaalglas-portal.png"
+    },
+    {
+      "key": "family-autotaalglas-mono",
+      "route": "/",
+      "theme": "autotaalglas-mono-light",
+      "selector": "h2",
+      "bytes": 102978,
+      "output": "docs/assets/family-autotaalglas-mono.png"
+    }
+  ]
+}

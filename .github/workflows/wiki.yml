@@ -1,0 +1,45 @@
+name: Wiki Sync
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "eng/wiki/**"
+
+permissions:
+  contents: write
+
+jobs:
+  sync-wiki:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Clone wiki
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git clone "https://x-access-token:${GH_TOKEN}@github.com/RobertAgterhuis/Blazor.Radzen.Themes.wiki.git" wiki
+
+      - name: Sync pages
+        run: |
+          find wiki -maxdepth 1 -name '*.md' -type f -delete
+          cp eng/wiki/*.md wiki/
+
+      - name: Commit and push
+        run: |
+          cd wiki
+          if [[ -z "$(git status --porcelain)" ]]; then
+            echo "No wiki changes."
+            exit 0
+          fi
+          git add *.md
+          git commit -m "docs(wiki): sync from eng/wiki"
+          git push origin master

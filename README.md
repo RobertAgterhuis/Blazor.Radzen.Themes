@@ -1,23 +1,29 @@
 # Agterhuis.Ui
 
-Multi-theme Blazor design system built on Radzen: 11 theme families (including Star Wars-inspired themes), WCAG 2.2 AA guardrails, 145+ themed standalone surfaces, and full themed coverage across 420 installed Radzen components.
+Multi-theme Blazor design system built on Radzen: 11 theme families (including Star Wars-inspired themes), WCAG 2.2 AA guardrails, 161 themed standalone surfaces, and full themed coverage across 420 installed Radzen components.
 
-[![CI](https://github.com/OWNER/REPO/actions/workflows/ci.yml/badge.svg)](https://github.com/OWNER/REPO/actions/workflows/ci.yml)
+[![CI](https://github.com/RobertAgterhuis/Blazor.Radzen.Themes/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/RobertAgterhuis/Blazor.Radzen.Themes/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![.NET](https://img.shields.io/badge/.NET-10-512BD4)](https://dotnet.microsoft.com/)
 [![Radzen](https://img.shields.io/badge/Radzen-11.1.5-0F6CBD)](https://www.nuget.org/packages/Radzen.Blazor)
 
-Replace OWNER/REPO in badge links with your repository path.
+If the CI badge is gray on a new fork, it turns green after the first successful main-branch run.
 
 ## Screenshot Strip
 
-| Home (Plum Dark) | Home (Hoth Light) |
-| --- | --- |
-| ![Home Plum Dark](docs/assets/home-plum-dark.png) | ![Home Hoth Light](docs/assets/home-hoth-light.png) |
+![Home Plum Dark](docs/assets/home-plum-dark.png)
+_Home showcase in plum-dark. Hero and metrics are rendered after deterministic settle waits._
 
-| Showcase App | Werkorders Showcase |
-| --- | --- |
-| ![Showcase Ocean Light](docs/assets/showcase-ocean-light.png) | ![Werkorders Tatooine Dark](docs/assets/werkorders-tatooine-dark.png) |
+![Home Hoth Light](docs/assets/home-hoth-light.png)
+_Home showcase in hoth-light with the same captured viewport for visual comparison._
+
+![Werkorders Dashboard](docs/assets/werkorders-dashboard-autotaalglas-light.png)
+_Werkorders dashboard in autotaalglas-light with real data grid content visible._
+
+![Planning Scheduler](docs/assets/planning-scheduler-plum-dark.png)
+_Planning scheduler in plum-dark with active weekly board and appointments._
+
+See [docs/GALLERY.md](docs/GALLERY.md) for the full screenshot set, including per-family captures and workflow pages.
 
 ## Quickstart
 

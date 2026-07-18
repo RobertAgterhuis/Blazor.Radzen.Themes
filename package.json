@@ -4,10 +4,12 @@
   "type": "module",
   "scripts": {
     "a11y:install": "playwright install --with-deps chromium",
-    "a11y:test": "playwright test tests/a11y/axe.spec.mjs"
+    "a11y:test": "playwright test tests/a11y/axe.spec.mjs",
+    "screenshots": "node eng/screenshots/capture.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.11.0",
-    "@playwright/test": "^1.54.2"
+    "@playwright/test": "^1.54.2",
+    "sharp": "^0.34.4"
   }
 }

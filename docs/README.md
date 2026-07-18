@@ -7,6 +7,7 @@ Back to project root: [README](../README.md)
 | [THEMING.md](THEMING.md) | Theme architecture, token scopes, and how to add theme families. |
 | [CONSUMING.md](CONSUMING.md) | Consumer integration guide for services, CSS/JS order, and anti-FOUC setup. |
 | [RELEASING.md](RELEASING.md) | Tag-based release process for GitHub Releases and optional NuGet publish. |
+| [GALLERY.md](GALLERY.md) | Deterministic screenshot gallery for README and theme families. |
 | [ACCESSIBILITY.md](ACCESSIBILITY.md) | Accessibility conformance statement and testing approach. |
 | [A11Y-CONTRAST.md](A11Y-CONTRAST.md) | WCAG 2.2 AA contrast matrices and non-text contrast checks. |
 | [THEME-COVERAGE.md](THEME-COVERAGE.md) | Component family theming coverage across Radzen surfaces. |

@@ -16,7 +16,7 @@
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/OWNER/REPO</RepositoryUrl>
+    <RepositoryUrl>https://github.com/RobertAgterhuis/Blazor.Radzen.Themes</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
