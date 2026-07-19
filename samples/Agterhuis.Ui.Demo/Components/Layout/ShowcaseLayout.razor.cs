@@ -11,12 +11,30 @@ namespace Agterhuis.Ui.Demo.Components.Layout;
 
 public partial class ShowcaseLayout : IDisposable
 {
+    private sealed record NavEntry(string Text, string Icon, string Path, NavLinkMatch Match = NavLinkMatch.Prefix);
+
     private const string CommandScope = "demo-showcase-layout";
     private const int NotificationPreviewCount = 6;
     private const string SidebarStateStorageKey = "showcase-shell-sidebar";
+    private static readonly IReadOnlyList<NavEntry> ShowcaseNavItems =
+    [
+        new("Dashboard", "space_dashboard", "/app", NavLinkMatch.All),
+        new("Werkorders", "assignment", "/app/werkorders"),
+        new("Planning", "event", "/app/planning"),
+        new("Klanten", "groups", "/app/klanten"),
+        new("Projecten", "account_tree", "/app/projecten"),
+        new("Assets", "hub", "/app/assets"),
+        new("Servicedesk", "support_agent", "/app/servicedesk"),
+        new("Rapportage", "query_stats", "/app/rapportage"),
+        new("Instellingen", "settings", "/app/instellingen"),
+        new("Help", "help", "/app/help")
+    ];
+
     private readonly HashSet<int> _readNotificationIds = [];
     private ElementReference _notificationsBellHostRef;
     private ElementReference _notificationsPanelRef;
+    private ElementReference _navFilterRef;
+    private ElementReference _showcaseNavRootRef;
     private ElementReference _sidebarSurfaceRef;
     private ElementReference _sidebarToggleRef;
     private DotNetObjectReference<ShowcaseLayout>? _dismissReference;
@@ -31,16 +49,38 @@ public partial class ShowcaseLayout : IDisposable
 
     protected bool SidebarExpanded { get; set; }
     protected bool NotificationsOpen { get; set; }
+    protected string NavFilterText { get; set; } = string.Empty;
 
     private bool IsMobileDrawerOpen => SidebarExpanded && _isCompactViewport;
 
-    private string SidebarCssClass => "showcase-sidebar showcase-sidebar--overlay";
+    private bool IsDesktopRail => !_isCompactViewport && !SidebarExpanded;
 
-    private string BodyCssClass => SidebarExpanded && !_isCompactViewport ? "showcase-body showcase-body--with-sidebar" : "showcase-body";
+    private string SidebarCssClass => IsDesktopRail
+        ? "showcase-sidebar showcase-sidebar--overlay showcase-sidebar--desktop-collapsed"
+        : "showcase-sidebar showcase-sidebar--overlay";
 
-    private string SidebarInlineStyle => SidebarExpanded
-        ? "position:fixed;left:0;top:3.75rem;height:calc(100vh - 3.75rem);width:min(22rem,calc(100vw - 1.5rem));max-width:min(22rem,calc(100vw - 1.5rem));z-index:1100;transform:translateX(0);visibility:visible;pointer-events:auto;"
-        : "position:fixed;left:0;top:3.75rem;height:calc(100vh - 3.75rem);width:min(22rem,calc(100vw - 1.5rem));max-width:min(22rem,calc(100vw - 1.5rem));z-index:1100;transform:translateX(-100%);visibility:hidden;pointer-events:none;";
+    private string BodyCssClass => !_isCompactViewport
+        ? (SidebarExpanded ? "showcase-body showcase-body--with-sidebar" : "showcase-body showcase-body--with-rail")
+        : "showcase-body";
+
+    private string SidebarInlineStyle => _isCompactViewport
+        ? (SidebarExpanded
+            ? "position:fixed;left:0;top:3.75rem;height:calc(100vh - 3.75rem);width:min(22rem,calc(100vw - 1.5rem));max-width:min(22rem,calc(100vw - 1.5rem));z-index:1100;transform:translateX(0);visibility:visible;pointer-events:auto;"
+            : "position:fixed;left:0;top:3.75rem;height:calc(100vh - 3.75rem);width:min(22rem,calc(100vw - 1.5rem));max-width:min(22rem,calc(100vw - 1.5rem));z-index:1100;transform:translateX(-100%);visibility:hidden;pointer-events:none;")
+        : (SidebarExpanded
+            ? "position:fixed;left:0;top:3.75rem;height:calc(100vh - 3.75rem);width:min(22rem,calc(100vw - 1.5rem));max-width:min(22rem,calc(100vw - 1.5rem));z-index:1100;transform:translateX(0);visibility:visible;pointer-events:auto;"
+            : "position:fixed;left:0;top:3.75rem;height:calc(100vh - 3.75rem);width:4.5rem;max-width:4.5rem;z-index:1100;transform:translateX(0);visibility:visible;pointer-events:auto;");
+
+    private static string PackageVersion => typeof(AgtThemeState).Assembly.GetName().Version?.ToString(3) ?? "dev";
+
+    private bool HasNavFilter => !string.IsNullOrWhiteSpace(NavFilterText);
+
+    private List<NavEntry> FilteredShowcaseNavItems =>
+        HasNavFilter
+            ? [.. ShowcaseNavItems.Where(item => item.Text.Contains(NavFilterText, StringComparison.OrdinalIgnoreCase))]
+            : [.. ShowcaseNavItems];
+
+    private bool HasVisibleShowcaseNavItems => FilteredShowcaseNavItems.Count > 0;
 
     protected IReadOnlyList<ShowcaseNotification> NotificationItems => DataService.Notifications.Take(NotificationPreviewCount).ToList();
 
@@ -221,6 +261,7 @@ public partial class ShowcaseLayout : IDisposable
         }
 
         await SyncSidebarOverlayAsync();
+        await JS.InvokeVoidAsync("agtTheme.applyNavItemTitles", _showcaseNavRootRef);
 
         if (NotificationsOpen && _dismissRegistrationId is null)
         {
@@ -269,6 +310,75 @@ public partial class ShowcaseLayout : IDisposable
         await JS.InvokeVoidAsync("agtTheme.setDensity", DensityState.Density);
         _isCompactViewport = await JS.InvokeAsync<bool>("agtTheme.isViewportAtMost", 1100);
         SidebarExpanded = string.Equals(persistedSidebarState, "expanded", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private void OnNavFilterInput(ChangeEventArgs args)
+    {
+        NavFilterText = args.Value?.ToString() ?? string.Empty;
+    }
+
+    private async Task OnNavFilterKeyDown(KeyboardEventArgs args)
+    {
+        if (string.Equals(args.Key, "Escape", StringComparison.OrdinalIgnoreCase))
+        {
+            if (!HasNavFilter)
+            {
+                return;
+            }
+
+            NavFilterText = string.Empty;
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
+        if (string.Equals(args.Key, "ArrowDown", StringComparison.OrdinalIgnoreCase))
+        {
+            await JS.InvokeVoidAsync("agtTheme.focusFirstNavItem", _showcaseNavRootRef);
+        }
+    }
+
+    private async Task OnShowcaseMenuKeyDown(KeyboardEventArgs args)
+    {
+        if (string.Equals(args.Key, "ArrowDown", StringComparison.OrdinalIgnoreCase))
+        {
+            await JS.InvokeVoidAsync("agtTheme.focusNavItem", _showcaseNavRootRef, "next");
+            return;
+        }
+
+        if (string.Equals(args.Key, "ArrowUp", StringComparison.OrdinalIgnoreCase))
+        {
+            await JS.InvokeVoidAsync("agtTheme.focusNavItem", _showcaseNavRootRef, "prev");
+            return;
+        }
+
+        if (string.Equals(args.Key, "Home", StringComparison.OrdinalIgnoreCase))
+        {
+            await JS.InvokeVoidAsync("agtTheme.focusNavItem", _showcaseNavRootRef, "first");
+            return;
+        }
+
+        if (string.Equals(args.Key, "End", StringComparison.OrdinalIgnoreCase))
+        {
+            await JS.InvokeVoidAsync("agtTheme.focusNavItem", _showcaseNavRootRef, "last");
+            return;
+        }
+
+        if (string.Equals(args.Key, "Enter", StringComparison.OrdinalIgnoreCase))
+        {
+            await JS.InvokeVoidAsync("agtTheme.activateFocusedNavItem", _showcaseNavRootRef);
+        }
+    }
+
+    private async Task ClearNavFilter()
+    {
+        if (!HasNavFilter)
+        {
+            return;
+        }
+
+        NavFilterText = string.Empty;
+        await InvokeAsync(StateHasChanged);
+        await JS.InvokeVoidAsync("agtTheme.focusElement", _navFilterRef);
     }
 
     [JSInvokable]

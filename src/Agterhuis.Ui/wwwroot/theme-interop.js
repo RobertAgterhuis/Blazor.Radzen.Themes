@@ -299,6 +299,83 @@ window.agtTheme = window.agtTheme || (() => {
         }
     }
 
+    function getVisibleNavLinks(containerElement) {
+        if (!containerElement) {
+            return [];
+        }
+
+        return Array.from(containerElement.querySelectorAll(".rz-navigation-item-link"))
+            .filter((link) => !link.closest(".demo-panel-menu__section-title, .demo-panel-menu__subtitle"))
+            .filter((link) => !link.hasAttribute("disabled") && (link.offsetParent !== null || link === document.activeElement));
+    }
+
+    function focusFirstNavItem(containerElement) {
+        const links = getVisibleNavLinks(containerElement);
+        if (links.length === 0) {
+            return false;
+        }
+
+        focusElement(links[0]);
+        return true;
+    }
+
+    function focusNavItem(containerElement, direction) {
+        const links = getVisibleNavLinks(containerElement);
+        if (links.length === 0) {
+            return false;
+        }
+
+        const active = document.activeElement;
+        const currentIndex = links.findIndex((link) => link === active);
+        const normalizedDirection = (direction || "").toString().trim().toLowerCase();
+
+        let nextIndex = 0;
+        if (normalizedDirection === "last") {
+            nextIndex = links.length - 1;
+        } else if (normalizedDirection === "next") {
+            nextIndex = currentIndex >= 0 ? Math.min(currentIndex + 1, links.length - 1) : 0;
+        } else if (normalizedDirection === "prev" || normalizedDirection === "previous") {
+            nextIndex = currentIndex >= 0 ? Math.max(currentIndex - 1, 0) : links.length - 1;
+        } else {
+            nextIndex = 0;
+        }
+
+        focusElement(links[nextIndex]);
+        return true;
+    }
+
+    function activateFocusedNavItem(containerElement) {
+        if (!containerElement) {
+            return false;
+        }
+
+        const active = document.activeElement;
+        if (!active || !containerElement.contains(active) || !active.classList?.contains("rz-navigation-item-link")) {
+            return false;
+        }
+
+        active.click();
+        return true;
+    }
+
+    function applyNavItemTitles(containerElement) {
+        if (!containerElement) {
+            return;
+        }
+
+        const links = containerElement.querySelectorAll(".rz-navigation-item-link");
+        links.forEach((link) => {
+            const textNode = link.querySelector(".rz-navigation-item-text");
+            const label = (textNode?.textContent || "").trim();
+            if (!label) {
+                link.removeAttribute("title");
+                return;
+            }
+
+            link.setAttribute("title", label);
+        });
+    }
+
     function normalizeNavState(value, fallback = "collapsed") {
         const raw = (value || "").toString().trim().toLowerCase();
         if (raw === "expanded" || raw === "collapsed") {
@@ -404,6 +481,10 @@ window.agtTheme = window.agtTheme || (() => {
         registerFocusTrap,
         unregisterFocusTrap,
         focusElement,
+        focusFirstNavItem,
+        focusNavItem,
+        activateFocusedNavItem,
+        applyNavItemTitles,
         placeContextLink,
         getStoredNavSectionState(section, defaultState = "collapsed") {
             const key = getNavStorageKey(section);

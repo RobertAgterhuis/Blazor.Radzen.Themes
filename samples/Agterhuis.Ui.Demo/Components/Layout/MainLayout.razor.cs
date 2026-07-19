@@ -92,15 +92,27 @@ public partial class MainLayout : IDisposable
 
     private bool IsMobileDrawerOpen => SidebarExpanded && _isCompactViewport;
 
-    private string SidebarCssClass => "demo-sidebar demo-sidebar--overlay";
+    private bool IsDesktopRail => !_isCompactViewport && !SidebarExpanded;
 
-    private string BodyCssClass => SidebarExpanded && !_isCompactViewport ? "demo-body demo-body--with-sidebar" : "demo-body";
+    private string SidebarCssClass => IsDesktopRail
+        ? "demo-sidebar demo-sidebar--overlay demo-sidebar--desktop-collapsed"
+        : "demo-sidebar demo-sidebar--overlay";
 
-    private string BodyContentCssClass => SidebarExpanded && !_isCompactViewport ? "demo-body-content demo-body-content--with-sidebar" : "demo-body-content";
+    private string BodyCssClass => !_isCompactViewport
+        ? (SidebarExpanded ? "demo-body demo-body--with-sidebar" : "demo-body demo-body--with-rail")
+        : "demo-body";
 
-    private string SidebarInlineStyle => SidebarExpanded
-        ? "position:fixed;left:0;top:3.75rem;height:calc(100vh - 3.75rem);width:min(22rem,calc(100vw - 1.5rem));max-width:min(22rem,calc(100vw - 1.5rem));z-index:1100;transform:translateX(0);visibility:visible;pointer-events:auto;"
-        : "position:fixed;left:0;top:3.75rem;height:calc(100vh - 3.75rem);width:min(22rem,calc(100vw - 1.5rem));max-width:min(22rem,calc(100vw - 1.5rem));z-index:1100;transform:translateX(-100%);visibility:hidden;pointer-events:none;";
+    private string BodyContentCssClass => !_isCompactViewport
+        ? (SidebarExpanded ? "demo-body-content demo-body-content--with-sidebar" : "demo-body-content demo-body-content--with-rail")
+        : "demo-body-content";
+
+    private string SidebarInlineStyle => _isCompactViewport
+        ? (SidebarExpanded
+            ? "position:fixed;left:0;top:3.75rem;height:calc(100vh - 3.75rem);width:min(22rem,calc(100vw - 1.5rem));max-width:min(22rem,calc(100vw - 1.5rem));z-index:1100;transform:translateX(0);visibility:visible;pointer-events:auto;"
+            : "position:fixed;left:0;top:3.75rem;height:calc(100vh - 3.75rem);width:min(22rem,calc(100vw - 1.5rem));max-width:min(22rem,calc(100vw - 1.5rem));z-index:1100;transform:translateX(-100%);visibility:hidden;pointer-events:none;")
+        : (SidebarExpanded
+            ? "position:fixed;left:0;top:3.75rem;height:calc(100vh - 3.75rem);width:min(22rem,calc(100vw - 1.5rem));max-width:min(22rem,calc(100vw - 1.5rem));z-index:1100;transform:translateX(0);visibility:visible;pointer-events:auto;"
+            : "position:fixed;left:0;top:3.75rem;height:calc(100vh - 3.75rem);width:4.5rem;max-width:4.5rem;z-index:1100;transform:translateX(0);visibility:visible;pointer-events:auto;");
 
     private bool HasContextLink => ShowWrapperToCatalogLink || IsCatalogRoute;
 

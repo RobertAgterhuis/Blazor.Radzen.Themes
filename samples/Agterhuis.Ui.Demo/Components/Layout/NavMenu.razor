@@ -1,99 +1,195 @@
 @inject IJSRuntime JS
 
 <nav aria-label="Hoofdnavigatie">
-<RadzenPanelMenu class="demo-panel-menu" Multiple="true" DisplayStyle="MenuItemDisplayStyle.Text">
-    <RadzenPanelMenuItem Text="Getting started" Icon="rocket_launch" Expanded="true">
-        <RadzenPanelMenuItem Text="Home" Icon="home" Path="/" Match="NavLinkMatch.All" />
-        <RadzenPanelMenuItem Text="Voorbeeldapplicatie" Icon="rocket_launch" Path="/app" Match="NavLinkMatch.Prefix" />
-        <RadzenPanelMenuItem Text="Theme" Icon="palette" Path="/components/theme" />
-    </RadzenPanelMenuItem>
-
-    <RadzenPanelMenuItem Text="Agt componenten" Icon="widgets" Expanded="true" Class="demo-panel-menu__group demo-panel-menu__group--agt">
-        <div class="demo-panel-menu__group-copy">
-            <div class="demo-panel-menu__subtitle">De wrapper-API voor consumers</div>
+    <div class="demo-panel-nav">
+        <div class="demo-panel-nav__filter-wrap">
+            <label class="demo-panel-nav__filter-label" for="demo-nav-filter">Filter navigatie</label>
+            <div class="demo-panel-nav__filter-field">
+                <RadzenIcon Icon="search" class="demo-panel-nav__filter-icon" />
+                <input id="demo-nav-filter"
+                       @ref="_filterInputRef"
+                       class="demo-panel-nav__filter-input"
+                       type="text"
+                       placeholder="Filter navigatie..."
+                       value="@FilterText"
+                       @oninput="OnFilterInput"
+                       @onkeydown="OnFilterKeyDown" />
+                @if (HasFilter)
+                {
+                    <button type="button" class="demo-panel-nav__filter-clear" @onclick="ClearFilter" aria-label="Filter wissen">
+                        <RadzenIcon Icon="close" />
+                    </button>
+                }
+            </div>
         </div>
 
-        <div class="demo-panel-menu__section-title">Knoppen</div>
-        <RadzenPanelMenuItem Text="Buttons" Icon="smart_button" Path="/components/buttons" />
+        <div class="demo-panel-nav__scroll" @ref="_menuRootRef" @onkeydown="OnMenuKeyDown">
+            <RadzenPanelMenu class="demo-panel-menu" Multiple="true" DisplayStyle="MenuItemDisplayStyle.Text">
+                @if (FilteredGettingStarted.Count > 0)
+                {
+                    <RadzenPanelMenuItem Text="Getting started" Icon="rocket_launch" Expanded="true" Class="demo-panel-menu__group demo-panel-menu__group--main">
+                        @foreach (var item in FilteredGettingStarted)
+                        {
+                            <RadzenPanelMenuItem Text="@item.Text" Icon="@item.Icon" Path="@item.Path" Match="@item.Match" />
+                        }
+                    </RadzenPanelMenuItem>
+                }
 
-        <div class="demo-panel-menu__section-title">Formulieren</div>
-        <RadzenPanelMenuItem Text="Checkbox" Icon="check_box" Path="/components/forms/checkbox" />
-        <RadzenPanelMenuItem Text="Switch" Icon="toggle_on" Path="/components/forms/switch" />
-        <RadzenPanelMenuItem Text="Radio List" Icon="radio_button_checked" Path="/components/forms/radio-list" />
-        <RadzenPanelMenuItem Text="Text Field" Icon="short_text" Path="/components/forms/text-field" />
-        <RadzenPanelMenuItem Text="Numeric Field" Icon="pin" Path="/components/forms/numeric-field" />
-        <RadzenPanelMenuItem Text="Text Area" Icon="notes" Path="/components/forms/text-area" />
-        <RadzenPanelMenuItem Text="Password" Icon="password" Path="/components/forms/password" />
-        <RadzenPanelMenuItem Text="Auto Complete" Icon="manage_search" Path="/components/forms/auto-complete" />
-        <RadzenPanelMenuItem Text="Dropdown" Icon="arrow_drop_down_circle" Path="/components/forms/dropdown" />
-        <RadzenPanelMenuItem Text="Date Picker" Icon="event" Path="/components/forms/date-picker" />
-        <RadzenPanelMenuItem Text="File Upload" Icon="upload_file" Path="/components/forms/file-upload" />
-        <RadzenPanelMenuItem Text="Form Actions" Icon="fact_check" Path="/components/forms/form-actions" />
+                @if (HasAgtItems)
+                {
+                    <RadzenPanelMenuItem Text="Agt componenten" Icon="widgets" Expanded="true" Class="demo-panel-menu__group demo-panel-menu__group--agt demo-panel-menu__group--main">
+                        <div class="demo-panel-menu__group-copy">
+                            <div class="demo-panel-menu__subtitle">De wrapper-API voor consumers</div>
+                        </div>
 
-        <div class="demo-panel-menu__section-title">Data</div>
-        <RadzenPanelMenuItem Text="Data Grid" Icon="table_rows" Path="/components/data/grid" />
+                        @foreach (var section in FilteredAgtSections)
+                        {
+                            <div class="demo-panel-menu__section-title">@section.Title</div>
+                            @foreach (var item in section.Items)
+                            {
+                                <RadzenPanelMenuItem Text="@item.Text" Icon="@item.Icon" Path="@item.Path" Match="@item.Match" />
+                            }
+                        }
+                    </RadzenPanelMenuItem>
+                }
 
-        <div class="demo-panel-menu__section-title">Feedback</div>
-        <RadzenPanelMenuItem Text="Feedback" Icon="campaign" Path="/components/feedback" />
-        <RadzenPanelMenuItem Text="Badge" Icon="local_offer" Path="/components/feedback/badge" />
-        <RadzenPanelMenuItem Text="Notification Service" Icon="notifications" Path="/components/feedback/notification-service" />
-        <RadzenPanelMenuItem Text="Empty State" Icon="inbox" Path="/components/feedback/empty-state" />
-        <RadzenPanelMenuItem Text="Loading Panel" Icon="hourglass_top" Path="/components/feedback/loading-panel" />
-        <RadzenPanelMenuItem Text="Confirm Dialog" Icon="help" Path="/components/feedback/confirm-dialog" />
+                @if (FilteredCatalogItems.Count > 0)
+                {
+                    <RadzenPanelMenuItem Text="Radzen catalogus · QA" Icon="auto_awesome_mosaic" Expanded="@CatalogExpanded" Click="OnCatalogGroupClick" Class="demo-panel-menu__group demo-panel-menu__group--catalog demo-panel-menu__group--main">
+                        <div class="demo-panel-menu__group-copy">
+                            <div class="demo-panel-menu__subtitle">Theme-QA: alle Radzen-componenten in het actieve theme</div>
+                        </div>
+                        @foreach (var item in FilteredCatalogItems)
+                        {
+                            <RadzenPanelMenuItem Text="@item.Text" Icon="@item.Icon" Path="@item.Path" Match="@item.Match" />
+                        }
+                    </RadzenPanelMenuItem>
+                }
+            </RadzenPanelMenu>
 
-        <div class="demo-panel-menu__section-title">Layout</div>
-        <RadzenPanelMenuItem Text="Layout" Icon="view_sidebar" Path="/components/layout" />
-        <RadzenPanelMenuItem Text="Tabs" Icon="tab" Path="/components/layout/tabs" />
-        <RadzenPanelMenuItem Text="Breadcrumb" Icon="alt_route" Path="/components/layout/breadcrumb" />
-        <RadzenPanelMenuItem Text="Sidebar Layout" Icon="dashboard_customize" Path="/components/layout/sidebar-layout" />
-    </RadzenPanelMenuItem>
-
-    <RadzenPanelMenuItem Text="Radzen catalogus · QA" Icon="auto_awesome_mosaic" Expanded="@CatalogExpanded" Click="OnCatalogGroupClick" Class="demo-panel-menu__group demo-panel-menu__group--catalog">
-        <div class="demo-panel-menu__group-copy">
-            <div class="demo-panel-menu__subtitle">Theme-QA: alle Radzen-componenten in het actieve theme</div>
+            @if (!HasAnyVisibleItems)
+            {
+                <p class="demo-panel-nav__empty">Geen items</p>
+            }
         </div>
-        <RadzenPanelMenuItem Text="Index (Radzen)" Icon="list" Path="/catalog" Match="NavLinkMatch.Prefix" />
-        <RadzenPanelMenuItem Text="Buttons (Radzen)" Icon="ads_click" Path="/catalog/buttons" />
-        <RadzenPanelMenuItem Text="Text Inputs (Radzen)" Icon="text_fields" Path="/catalog/text-inputs" />
-        <RadzenPanelMenuItem Text="Selection Inputs (Radzen)" Icon="checklist" Path="/catalog/selection-inputs" />
-        <RadzenPanelMenuItem Text="Pickers (Radzen)" Icon="calendar_month" Path="/catalog/pickers" />
-        <RadzenPanelMenuItem Text="Forms (Radzen)" Icon="dynamic_form" Path="/catalog/forms" />
-        <RadzenPanelMenuItem Text="Forms Advanced (Radzen)" Icon="check_box" Path="/catalog/forms-advanced" />
-        <RadzenPanelMenuItem Text="Validators (Radzen)" Icon="verified" Path="/catalog/validators" />
-        <RadzenPanelMenuItem Text="Data (Radzen)" Icon="dataset" Path="/catalog/data" />
-        <RadzenPanelMenuItem Text="Data Advanced (Radzen)" Icon="storage" Path="/catalog/data-advanced" />
-        <RadzenPanelMenuItem Text="Scheduling (Radzen)" Icon="schedule" Path="/catalog/scheduling" />
-        <RadzenPanelMenuItem Text="Navigation (Radzen)" Icon="alt_route" Path="/catalog/navigation" />
-        <RadzenPanelMenuItem Text="Overlays (Radzen)" Icon="layers" Path="/catalog/overlays" />
-        <RadzenPanelMenuItem Text="Overlays Advanced (Radzen)" Icon="chat" Path="/catalog/overlays-advanced" />
-        <RadzenPanelMenuItem Text="Layout (Radzen)" Icon="grid_view" Path="/catalog/layout" />
-        <RadzenPanelMenuItem Text="Layout Advanced (Radzen)" Icon="splitscreen" Path="/catalog/layout-advanced" />
-        <RadzenPanelMenuItem Text="Feedback (Radzen)" Icon="notification_important" Path="/catalog/feedback" />
-        <RadzenPanelMenuItem Text="Charts (Radzen)" Icon="monitoring" Path="/catalog/charts" />
-        <RadzenPanelMenuItem Text="Charts Advanced (Radzen)" Icon="query_stats" Path="/catalog/charts-advanced" />
-        <RadzenPanelMenuItem Text="Gauges (Radzen)" Icon="speed" Path="/catalog/gauges" />
-        <RadzenPanelMenuItem Text="Display (Radzen)" Icon="slideshow" Path="/catalog/display" />
-        <RadzenPanelMenuItem Text="Embed (Radzen)" Icon="integration_instructions" Path="/catalog/embed" />
-        <RadzenPanelMenuItem Text="All Components (Radzen)" Icon="view_list" Path="/catalog/all-components" />
-    </RadzenPanelMenuItem>
-</RadzenPanelMenu>
+
+        <footer class="demo-panel-nav__footer" aria-label="Navigatie footer">
+            <div class="demo-panel-nav__version">Agterhuis.Ui v@PackageVersion</div>
+            <a href="https://github.com/RobertAgterhuis/Blazor.Radzen.Themes" target="_blank" rel="noreferrer">GitHub repository</a>
+        </footer>
+    </div>
 </nav>
 
 @code {
+    private sealed record NavEntry(string Text, string Icon, string Path, NavLinkMatch Match = NavLinkMatch.Prefix);
+
+    private sealed record NavSection(string Title, IReadOnlyList<NavEntry> Items);
+
     private const string CatalogGroupStorageKey = "catalog";
 
+    private static readonly IReadOnlyList<NavEntry> GettingStartedItems =
+    [
+        new("Home", "home", "/", NavLinkMatch.All),
+        new("Voorbeeldapplicatie", "rocket_launch", "/app"),
+        new("Theme", "palette", "/components/theme")
+    ];
+
+    private static readonly IReadOnlyList<NavSection> AgtSections =
+    [
+        new("Knoppen", [new NavEntry("Buttons", "smart_button", "/components/buttons")]),
+        new("Formulieren",
+        [
+            new("Checkbox", "check_box", "/components/forms/checkbox"),
+            new("Switch", "toggle_on", "/components/forms/switch"),
+            new("Radio List", "radio_button_checked", "/components/forms/radio-list"),
+            new("Text Field", "short_text", "/components/forms/text-field"),
+            new("Numeric Field", "pin", "/components/forms/numeric-field"),
+            new("Text Area", "notes", "/components/forms/text-area"),
+            new("Password", "password", "/components/forms/password"),
+            new("Auto Complete", "manage_search", "/components/forms/auto-complete"),
+            new("Dropdown", "arrow_drop_down_circle", "/components/forms/dropdown"),
+            new("Date Picker", "event", "/components/forms/date-picker"),
+            new("File Upload", "upload_file", "/components/forms/file-upload"),
+            new("Form Actions", "fact_check", "/components/forms/form-actions")
+        ]),
+        new("Data", [new NavEntry("Data Grid", "table_rows", "/components/data/grid")]),
+        new("Feedback",
+        [
+            new("Feedback", "campaign", "/components/feedback"),
+            new("Badge", "local_offer", "/components/feedback/badge"),
+            new("Notification Service", "notifications", "/components/feedback/notification-service"),
+            new("Empty State", "inbox", "/components/feedback/empty-state"),
+            new("Loading Panel", "hourglass_top", "/components/feedback/loading-panel"),
+            new("Confirm Dialog", "help", "/components/feedback/confirm-dialog")
+        ]),
+        new("Layout",
+        [
+            new("Layout", "view_sidebar", "/components/layout"),
+            new("Tabs", "tab", "/components/layout/tabs"),
+            new("Breadcrumb", "alt_route", "/components/layout/breadcrumb"),
+            new("Sidebar Layout", "dashboard_customize", "/components/layout/sidebar-layout")
+        ])
+    ];
+
+    private static readonly IReadOnlyList<NavEntry> CatalogItems =
+    [
+        new("Index (Radzen)", "list", "/catalog", NavLinkMatch.Prefix),
+        new("Buttons (Radzen)", "ads_click", "/catalog/buttons"),
+        new("Text Inputs (Radzen)", "text_fields", "/catalog/text-inputs"),
+        new("Selection Inputs (Radzen)", "checklist", "/catalog/selection-inputs"),
+        new("Pickers (Radzen)", "calendar_month", "/catalog/pickers"),
+        new("Forms (Radzen)", "dynamic_form", "/catalog/forms"),
+        new("Forms Advanced (Radzen)", "check_box", "/catalog/forms-advanced"),
+        new("Validators (Radzen)", "verified", "/catalog/validators"),
+        new("Data (Radzen)", "dataset", "/catalog/data"),
+        new("Data Advanced (Radzen)", "storage", "/catalog/data-advanced"),
+        new("Scheduling (Radzen)", "schedule", "/catalog/scheduling"),
+        new("Navigation (Radzen)", "alt_route", "/catalog/navigation"),
+        new("Overlays (Radzen)", "layers", "/catalog/overlays"),
+        new("Overlays Advanced (Radzen)", "chat", "/catalog/overlays-advanced"),
+        new("Layout (Radzen)", "grid_view", "/catalog/layout"),
+        new("Layout Advanced (Radzen)", "splitscreen", "/catalog/layout-advanced"),
+        new("Feedback (Radzen)", "notification_important", "/catalog/feedback"),
+        new("Charts (Radzen)", "monitoring", "/catalog/charts"),
+        new("Charts Advanced (Radzen)", "query_stats", "/catalog/charts-advanced"),
+        new("Gauges (Radzen)", "speed", "/catalog/gauges"),
+        new("Display (Radzen)", "slideshow", "/catalog/display"),
+        new("Embed (Radzen)", "integration_instructions", "/catalog/embed"),
+        new("All Components (Radzen)", "view_list", "/catalog/all-components")
+    ];
+
     private bool CatalogExpanded { get; set; }
+    private string FilterText { get; set; } = string.Empty;
+    private ElementReference _filterInputRef;
+    private ElementReference _menuRootRef;
+
+    private static string PackageVersion => typeof(Agterhuis.Ui.Theming.AgtThemeState).Assembly.GetName().Version?.ToString(3) ?? "dev";
+
+    private bool HasFilter => !string.IsNullOrWhiteSpace(FilterText);
+
+    private List<NavEntry> FilteredGettingStarted => FilterEntries(GettingStartedItems);
+
+    private List<NavSection> FilteredAgtSections =>
+        [.. AgtSections
+            .Select(section => new NavSection(section.Title, FilterEntries(section.Items)))
+            .Where(section => section.Items.Count > 0)];
+
+    private List<NavEntry> FilteredCatalogItems => FilterEntries(CatalogItems);
+
+    private bool HasAgtItems => FilteredAgtSections.Count > 0;
+
+    private bool HasAnyVisibleItems => FilteredGettingStarted.Count > 0 || HasAgtItems || FilteredCatalogItems.Count > 0;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (!firstRender)
+        if (firstRender)
         {
-            return;
+            var persistedState = await JS.InvokeAsync<string>("agtTheme.getStoredNavSectionState", CatalogGroupStorageKey, "collapsed");
+            CatalogExpanded = string.Equals(persistedState, "expanded", StringComparison.OrdinalIgnoreCase);
+            await InvokeAsync(StateHasChanged);
         }
 
-        var persistedState = await JS.InvokeAsync<string>("agtTheme.getStoredNavSectionState", CatalogGroupStorageKey, "collapsed");
-        CatalogExpanded = string.Equals(persistedState, "expanded", StringComparison.OrdinalIgnoreCase);
-        await InvokeAsync(StateHasChanged);
+        await JS.InvokeVoidAsync("agtTheme.applyNavItemTitles", _menuRootRef);
     }
 
     private async Task OnCatalogGroupClick(MenuItemEventArgs _)
@@ -101,5 +197,84 @@
         CatalogExpanded = !CatalogExpanded;
         var state = CatalogExpanded ? "expanded" : "collapsed";
         await JS.InvokeVoidAsync("agtTheme.setStoredNavSectionState", CatalogGroupStorageKey, state);
+    }
+
+    private void OnFilterInput(ChangeEventArgs args)
+    {
+        FilterText = args.Value?.ToString() ?? string.Empty;
+    }
+
+    private async Task OnFilterKeyDown(KeyboardEventArgs args)
+    {
+        if (string.Equals(args.Key, "Escape", StringComparison.OrdinalIgnoreCase))
+        {
+            if (!HasFilter)
+            {
+                return;
+            }
+
+            FilterText = string.Empty;
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
+        if (string.Equals(args.Key, "ArrowDown", StringComparison.OrdinalIgnoreCase))
+        {
+            await JS.InvokeVoidAsync("agtTheme.focusFirstNavItem", _menuRootRef);
+        }
+    }
+
+    private async Task OnMenuKeyDown(KeyboardEventArgs args)
+    {
+        if (string.Equals(args.Key, "ArrowDown", StringComparison.OrdinalIgnoreCase))
+        {
+            await JS.InvokeVoidAsync("agtTheme.focusNavItem", _menuRootRef, "next");
+            return;
+        }
+
+        if (string.Equals(args.Key, "ArrowUp", StringComparison.OrdinalIgnoreCase))
+        {
+            await JS.InvokeVoidAsync("agtTheme.focusNavItem", _menuRootRef, "prev");
+            return;
+        }
+
+        if (string.Equals(args.Key, "Home", StringComparison.OrdinalIgnoreCase))
+        {
+            await JS.InvokeVoidAsync("agtTheme.focusNavItem", _menuRootRef, "first");
+            return;
+        }
+
+        if (string.Equals(args.Key, "End", StringComparison.OrdinalIgnoreCase))
+        {
+            await JS.InvokeVoidAsync("agtTheme.focusNavItem", _menuRootRef, "last");
+            return;
+        }
+
+        if (string.Equals(args.Key, "Enter", StringComparison.OrdinalIgnoreCase))
+        {
+            await JS.InvokeVoidAsync("agtTheme.activateFocusedNavItem", _menuRootRef);
+        }
+    }
+
+    private async Task ClearFilter()
+    {
+        if (!HasFilter)
+        {
+            return;
+        }
+
+        FilterText = string.Empty;
+        await InvokeAsync(StateHasChanged);
+        await JS.InvokeVoidAsync("agtTheme.focusElement", _filterInputRef);
+    }
+
+    private List<NavEntry> FilterEntries(IEnumerable<NavEntry> entries)
+    {
+        if (!HasFilter)
+        {
+            return [.. entries];
+        }
+
+        return [.. entries.Where(entry => entry.Text.Contains(FilterText, StringComparison.OrdinalIgnoreCase))];
     }
 }

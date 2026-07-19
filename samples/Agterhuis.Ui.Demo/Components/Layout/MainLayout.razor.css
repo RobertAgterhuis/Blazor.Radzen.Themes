@@ -266,6 +266,14 @@
     padding-inline-start: min(22rem, calc(100vw - 1.5rem));
 }
 
+.demo-body-content--with-rail {
+    padding-inline-start: 4.5rem;
+}
+
+:deep(.demo-sidebar.demo-sidebar--desktop-collapsed) {
+    width: 4.5rem !important;
+}
+
 .demo-footer {
     border-top: 1px solid var(--agt-input-border);
     color: var(--agt-text-muted);
@@ -347,6 +355,10 @@
 
 @media (max-width: 900px) {
     .demo-body-content--with-sidebar {
+        padding-inline-start: 0;
+    }
+
+    .demo-body-content--with-rail {
         padding-inline-start: 0;
     }
 

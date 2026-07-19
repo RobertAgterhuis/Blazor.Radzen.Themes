@@ -31,11 +31,23 @@
 .rz-accordion-header a,
 .rz-steps-item {
     border-radius: var(--agt-border-radius-md);
-    min-height: 2.5rem;
+    min-height: var(--agt-control-height-md);
     min-width: 2.5rem;
-    padding: var(--agt-spacing-2) var(--agt-spacing-3);
+    padding: var(--agt-spacing-2) var(--agt-spacing-4);
     position: relative;
     transition: transform var(--agt-indicator-transition), opacity 150ms ease;
+}
+
+html[data-agt-density="compact"] .rz-panel-menu .rz-navigation-item-link,
+html[data-agt-density="compact"] .rz-panel-menu .rz-navigation-item-wrapper,
+html[data-agt-density="compact"] .rz-panel-menu .rz-menuitem-link {
+    min-height: 1.875rem;
+}
+
+html[data-agt-density="comfortable"] .rz-panel-menu .rz-navigation-item-link,
+html[data-agt-density="comfortable"] .rz-panel-menu .rz-navigation-item-wrapper,
+html[data-agt-density="comfortable"] .rz-panel-menu .rz-menuitem-link {
+    min-height: 2.25rem;
 }
 
 .rz-tabview-panels,
@@ -52,14 +64,14 @@
     background: var(--agt-color-accent-400);
     border-radius: 999px;
     content: "";
-    inset-block: 20%;
-    inset-inline-start: 0.2rem;
+    inset-block: 0.3rem;
+    inset-inline-start: 0.6rem;
     opacity: 0;
     position: absolute;
     transform: scaleY(0.2);
     transform-origin: center;
     transition: transform var(--agt-indicator-transition), opacity var(--agt-indicator-transition);
-    width: 0.2rem;
+    width: 0.1875rem;
 }
 
 .rz-menuitem-link:hover,
@@ -67,8 +79,13 @@
 .rz-panel-menu .rz-navigation-item-link:hover,
 .rz-tabview-nav li:hover,
 .rz-steps-item:hover {
-    background: var(--agt-hover-tint);
+    background: color-mix(in srgb, var(--agt-nav-item-hover-bg) 75%, transparent);
     color: var(--agt-nav-item-hover-text);
+}
+
+.rz-panel-menu .rz-navigation-item-link:active,
+.rz-panel-menu .rz-navigation-item-wrapper:active {
+    background: color-mix(in srgb, var(--agt-nav-item-hover-bg) 92%, transparent);
 }
 
 .rz-menuitem-link.rz-state-active,
@@ -76,7 +93,7 @@
 .rz-panel-menu .rz-navigation-item-link.rz-state-active,
 .rz-tabview-nav li.rz-tabview-selected,
 .rz-steps-item.rz-state-highlight {
-    background: var(--agt-selection-tint);
+    background: color-mix(in srgb, var(--agt-nav-item-active-bg) 80%, transparent);
     color: var(--agt-nav-item-active-text);
 }
 
@@ -123,6 +140,31 @@
     outline-offset: 2px;
 }
 
+.rz-panel-menu .rz-navigation-item-link,
+.rz-panel-menu .rz-navigation-item-wrapper {
+    border-left: 3px solid transparent;
+    margin-inline: var(--agt-spacing-2);
+}
+
+.rz-panel-menu .rz-navigation-item.rz-state-active > .rz-navigation-item-wrapper,
+.rz-panel-menu .rz-navigation-item-link.rz-state-active,
+.rz-panel-menu .rz-navigation-item-wrapper.rz-state-active {
+    border-left-color: var(--agt-color-accent-400);
+}
+
+.rz-panel-menu .rz-navigation-item .rz-navigation-item-icon,
+.rz-panel-menu .rz-navigation-item-link .rz-navigation-item-icon {
+    align-items: center;
+    display: inline-flex;
+    justify-content: center;
+    min-width: 1.5rem;
+}
+
+.rz-panel-menu .rz-navigation-item .rzi,
+.rz-panel-menu .rz-navigation-item-link .rzi {
+    font-size: 1.125rem;
+}
+
 .rz-tabview-nav,
 .rz-steps {
     background: transparent;
@@ -163,9 +205,9 @@
 
 .rz-panel-menu > .rz-navigation-item > .rz-navigation-item-wrapper > .rz-navigation-item-link {
     color: var(--agt-nav-group-text);
-    font-size: 0.6875rem;
+    font-size: 0.65625rem;
     font-weight: 700;
-    letter-spacing: 0.08em;
+    letter-spacing: var(--agt-caps-tracking);
     text-transform: uppercase;
 }
 
@@ -195,7 +237,8 @@
 
 .rz-sidebar.rz-sidebar-collapsed .rz-panel-menu .rz-navigation-item-link {
     justify-content: center;
-    padding-inline: var(--agt-spacing-2);
+    margin-inline: var(--agt-spacing-1);
+    padding-inline: var(--agt-spacing-1);
 }
 
 .rz-sidebar.rz-sidebar-collapsed .rz-panel-menu .rzi {

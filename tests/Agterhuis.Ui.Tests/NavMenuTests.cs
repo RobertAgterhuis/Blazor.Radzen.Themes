@@ -29,4 +29,39 @@ public sealed class NavMenuTests
             Assert.False(element.HasAttribute("tabindex"));
         });
     }
+
+    [Fact]
+    public void FilterInput_FiltersVisibleNavigationItems()
+    {
+        using var ctx = new BunitContext();
+        ctx.Services.AddRadzenComponents();
+        ctx.JSInterop.Mode = JSRuntimeMode.Loose;
+        ctx.JSInterop.Setup<string>("agtTheme.getStoredNavSectionState", _ => true).SetResult("collapsed");
+        ctx.JSInterop.SetupVoid("agtTheme.applyNavItemTitles", _ => true).SetVoidResult();
+
+        var cut = ctx.Render<NavMenu>();
+
+        cut.Find("#demo-nav-filter").Input("Buttons");
+
+        cut.WaitForAssertion(() =>
+        {
+            Assert.Contains("Buttons", cut.Markup);
+            Assert.DoesNotContain("Voorbeeldapplicatie", cut.Markup);
+        });
+    }
+
+    [Fact]
+    public void Footer_RendersPackageVersion()
+    {
+        using var ctx = new BunitContext();
+        ctx.Services.AddRadzenComponents();
+        ctx.JSInterop.Mode = JSRuntimeMode.Loose;
+        ctx.JSInterop.Setup<string>("agtTheme.getStoredNavSectionState", _ => true).SetResult("collapsed");
+        ctx.JSInterop.SetupVoid("agtTheme.applyNavItemTitles", _ => true).SetVoidResult();
+
+        var cut = ctx.Render<NavMenu>();
+
+        var versionText = cut.Find(".demo-panel-nav__version").TextContent;
+        Assert.StartsWith("Agterhuis.Ui v", versionText, StringComparison.Ordinal);
+    }
 }

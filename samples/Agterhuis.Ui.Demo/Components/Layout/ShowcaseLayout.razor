@@ -92,13 +92,6 @@
                                       Title="Snelle preview"
                                       Click="OnQuickPreview"
                                       MouseEnter="OnActionTooltip" />
-                        <span class="showcase-topbar__avatar" aria-hidden="true">PT</span>
-                        <RadzenButton Text="Planner Team"
-                                      Icon="person"
-                                      ButtonStyle="ButtonStyle.Base"
-                                      Variant="Variant.Flat"
-                                      Size="ButtonSize.Small"
-                                      MouseEnter="OnActionTooltip" />
                     </div>
                 </div>
             </RadzenHeader>
@@ -131,23 +124,54 @@
                         <div class="showcase-sidebar__subtitle">Compacte werkorder-shell</div>
                     </div>
 
-                    <nav class="showcase-panel-menu" aria-label="Werkorders navigatie">
-                        <RadzenPanelMenu Multiple="false" DisplayStyle="MenuItemDisplayStyle.Text">
-                            <RadzenPanelMenuItem Text="Dashboard" Icon="space_dashboard" Path="/app" Match="NavLinkMatch.All" />
-                            <RadzenPanelMenuItem Text="Werkorders" Icon="assignment" Path="/app/werkorders" />
-                            <RadzenPanelMenuItem Text="Planning" Icon="event" Path="/app/planning" />
-                            <RadzenPanelMenuItem Text="Klanten" Icon="groups" Path="/app/klanten" />
-                            <RadzenPanelMenuItem Text="Projecten" Icon="account_tree" Path="/app/projecten" />
-                            <RadzenPanelMenuItem Text="Assets" Icon="hub" Path="/app/assets" />
-                            <RadzenPanelMenuItem Text="Servicedesk" Icon="support_agent" Path="/app/servicedesk" />
-                            <RadzenPanelMenuItem Text="Rapportage" Icon="query_stats" Path="/app/rapportage" />
-                            <RadzenPanelMenuItem Text="Instellingen" Icon="settings" Path="/app/instellingen" />
-                            <RadzenPanelMenuItem Text="Help" Icon="help" Path="/app/help" />
-                        </RadzenPanelMenu>
-                    </nav>
+                    <div class="showcase-panel-nav">
+                        <div class="showcase-panel-nav__filter-wrap">
+                            <label class="showcase-panel-nav__filter-label" for="showcase-nav-filter">Filter navigatie</label>
+                            <div class="showcase-panel-nav__filter-field">
+                                <RadzenIcon Icon="search" class="showcase-panel-nav__filter-icon" />
+                                <input id="showcase-nav-filter"
+                                       @ref="_navFilterRef"
+                                       class="showcase-panel-nav__filter-input"
+                                       type="text"
+                                       placeholder="Filter navigatie..."
+                                       value="@NavFilterText"
+                                       @oninput="OnNavFilterInput"
+                                       @onkeydown="OnNavFilterKeyDown" />
+                                @if (HasNavFilter)
+                                {
+                                    <button type="button" class="showcase-panel-nav__filter-clear" @onclick="ClearNavFilter" aria-label="Filter wissen">
+                                        <RadzenIcon Icon="close" />
+                                    </button>
+                                }
+                            </div>
+                        </div>
+
+                        <nav class="showcase-panel-menu" aria-label="Werkorders navigatie" @ref="_showcaseNavRootRef" @onkeydown="OnShowcaseMenuKeyDown">
+                            <RadzenPanelMenu Multiple="false" DisplayStyle="MenuItemDisplayStyle.Text">
+                                @foreach (var item in FilteredShowcaseNavItems)
+                                {
+                                    <RadzenPanelMenuItem Text="@item.Text" Icon="@item.Icon" Path="@item.Path" Match="@item.Match" />
+                                }
+                            </RadzenPanelMenu>
+
+                            @if (!HasVisibleShowcaseNavItems)
+                            {
+                                <p class="showcase-panel-nav__empty">Geen items</p>
+                            }
+                        </nav>
+                    </div>
 
                     <div class="showcase-sidebar__footer">
-                        <a href="/">← Terug naar componentbibliotheek</a>
+                        <div class="showcase-sidebar__profile">
+                            <span class="showcase-topbar__avatar" aria-hidden="true">PT</span>
+                            <div class="showcase-sidebar__profile-copy">
+                                <strong>Planner Team</strong>
+                                <span>Planning desk</span>
+                            </div>
+                        </div>
+                        <div class="showcase-sidebar__footer-version">Agterhuis.Ui v@PackageVersion</div>
+                        <a href="https://github.com/RobertAgterhuis/Blazor.Radzen.Themes" target="_blank" rel="noreferrer">GitHub repository</a>
+                        <a href="/">Terug naar componentbibliotheek</a>
                     </div>
                 </div>
             </RadzenSidebar>

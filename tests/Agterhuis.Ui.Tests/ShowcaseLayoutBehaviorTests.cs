@@ -69,6 +69,20 @@ public sealed class ShowcaseLayoutBehaviorTests
         Assert.Equal("ocean-dark", themeState.Theme);
     }
 
+    [Fact]
+    public void SidebarFooter_RendersPackageVersion()
+    {
+        using var ctx = CreateContext(
+            new TestNavigationManager("https://localhost/", "https://localhost/app"),
+            isMobileViewport: false,
+            initialSidebarState: "expanded");
+
+        var cut = ctx.Render<ShowcaseLayout>(p =>
+            p.Add(x => x.Body, body => body.AddMarkupContent(0, "<p>Body</p>")));
+
+        cut.WaitForAssertion(() => Assert.Contains("Agterhuis.Ui v", cut.Find(".showcase-sidebar__footer-version").TextContent));
+    }
+
     private static BunitContext CreateContext(
         TestNavigationManager navigationManager,
         bool isMobileViewport,
@@ -88,6 +102,7 @@ public sealed class ShowcaseLayoutBehaviorTests
         ctx.JSInterop.Setup<string>("agtTheme.getStoredNavSectionState", _ => true).SetResult(initialSidebarState);
         ctx.JSInterop.SetupVoid("agtTheme.setStoredNavSectionState", _ => true).SetVoidResult();
         ctx.JSInterop.Setup<bool>("agtTheme.isViewportAtMost", _ => true).SetResult(isMobileViewport);
+        ctx.JSInterop.SetupVoid("agtTheme.applyNavItemTitles", _ => true).SetVoidResult();
 
         return ctx;
     }
