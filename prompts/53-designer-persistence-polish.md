@@ -8,10 +8,12 @@ Agent mode met terminal-toegang, repo-root `D:\repositories\Blazor.Radzen.Themes
 
 ---
 
-## 1. Project-persistentie
+## 1. Project-persistentie (volledig client-side — de host is WASM/SWA)
 
-- Designdocumenten opslaan/openen als bestand: download/upload van het `.agtdesign`-JSON (met schema-versie + migratie vanaf de 48-versie), naast de bestaande localStorage-autosave (die wordt "herstel niet-opgeslagen werk" met een herstel-banner na een crash/refresh).
-- Projectbeheer-startscherm op `/designer`: recente ontwerpen (localStorage-index), nieuw leeg ontwerp, nieuw-vanuit-sjabloon (zie §2), importeren. Verwijderen met AgtConfirmDialog.
+- Alle persistentie loopt via een `IDesignStore`-abstractie met in v1 één implementatie (lokaal). Dit is bewust: een latere centrale opslag (SWA managed Azure Functions + Blob/Cosmos, voor delen/synchroniseren tussen apparaten) wordt dan een tweede implementatie zonder designer-wijzigingen — zet dit als roadmap-kandidaat in docs/designer/README.md.
+- Designdocumenten opslaan/openen als bestand: `.agtdesign`-JSON (met schema-versie + migratie vanaf de 48-versie). Openen via upload (InputFile) werkt overal; opslaan via de File System Access API waar beschikbaar (Chromium: echt "Opslaan/Opslaan als" met bestandshandle, zodat herhaald opslaan naar hetzelfde bestand gaat) met blob-download als fallback voor overige browsers — feature-detect, beide paden testen.
+- localStorage-autosave wordt "herstel niet-opgeslagen werk" met een herstel-banner na crash/refresh; wees expliciet over de grens (apparaat- en browser-gebonden, kan door de gebruiker gewist worden — de banner en docs zeggen dat het bestand de echte opslag is).
+- Projectbeheer-startscherm op `/designer`: recente ontwerpen (localStorage-index + bestandshandles waar de browser dat toestaat), nieuw leeg ontwerp, nieuw-vanuit-sjabloon (zie §2), importeren. Verwijderen met AgtConfirmDialog.
 - Het geëxporteerde project bevat het document al (`design/document.json` uit 51) — "openen vanuit export-zip" hoeft niet; documenteer dat de JSON het uitwisselformaat is.
 
 ## 2. Patronen als startpunten

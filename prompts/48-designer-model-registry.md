@@ -21,7 +21,7 @@ Eigen assembly zodat de designer NIET in het `Agterhuis.Ui`-consumerpackage meel
 ## 3. Componentregistry (designer-metadata, gegenereerd — niet met de hand)
 
 - `DesignerComponentRegistry`: per toelaatbaar component — displaynaam, categorie, icoon, welke slots, welke parameters (naam, type, default, beschrijving) en of het in het palet mag.
-- Bron: HERGEBRUIK de bestaande reflectie uit het ComponentPage-parametertabel-werk (prompt 43) + `docs/RADZEN-COMPONENT-INVENTORY.md` voor de categorie-indeling. Genereren bij build of first-run; een xunit-test verifieert dat elk Agt-wrappercomponent in de registry zit en dat parametermetadata klopt met de werkelijke API (reflectie-vergelijking).
+- Bron: HERGEBRUIK de bestaande reflectie uit het ComponentPage-parametertabel-werk (prompt 43) + `docs/RADZEN-COMPONENT-INVENTORY.md` voor de categorie-indeling. **Genereren gebeurt BUILD-TIME** (source generator of MSBuild-stap die een statische registry-klasse emit) — NIET first-run: de host is WASM (prompt 54) en runtime-reflectie + trimming veroorzaakt stille gaten; de gegenereerde registry is bovendien de trimmer-root voor de component-types. Een xunit-test verifieert dat elk Agt-wrappercomponent in de registry zit en dat parametermetadata klopt met de werkelijke API (reflectie-vergelijking in de TEST, waar trimming geen rol speelt).
 - V1-scope: alle Agt-wrappers + een gecureerde set rauwe Radzen-componenten (Row/Column/Stack/Card/Tabs/Accordion/DataGrid); de rest krijgt `AllowedInPalette=false` maar bestaat in de registry.
 
 ## 4. Model-renderer

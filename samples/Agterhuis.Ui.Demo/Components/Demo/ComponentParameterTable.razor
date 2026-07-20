@@ -1,5 +1,5 @@
-@using System.Reflection
-@using System.Xml.Linq
+@using Agterhuis.Ui.Designer.Introspection
+@using Agterhuis.Ui.Designer.Registry
 
 <section class="demo-api" aria-labelledby="@_headingId">
     <h3 id="@_headingId">API</h3>
@@ -40,151 +40,22 @@
     [Parameter, EditorRequired]
     public Type ComponentType { get; set; } = typeof(object);
 
-    private static readonly Dictionary<string, string> XmlSummaryCache = BuildXmlSummaryCache();
-    private IReadOnlyList<Row> _rows = Array.Empty<Row>();
+    private IReadOnlyList<Agterhuis.Ui.Designer.Registry.ComponentParameterDescriptor> _rows = Array.Empty<Agterhuis.Ui.Designer.Registry.ComponentParameterDescriptor>();
     private readonly string _headingId = $"demo-api-{Guid.NewGuid():N}";
 
     protected override void OnParametersSet()
     {
-        _rows = BuildRows(ComponentType);
+        _rows = ComponentParameterIntrospector.Describe(ComponentType)
+            .Select(parameter => new Agterhuis.Ui.Designer.Registry.ComponentParameterDescriptor(
+                parameter.Name,
+                parameter.TypeName,
+                parameter.ParameterType,
+                parameter.DefaultValue,
+                parameter.Description,
+                parameter.IsEditorRequired,
+                parameter.IsEventCallback,
+                parameter.IsRenderFragment,
+                parameter.IsTemplatedRenderFragment))
+            .ToArray();
     }
-
-    private static IReadOnlyList<Row> BuildRows(Type componentType)
-    {
-        var rows = new List<Row>();
-
-        object? instance = null;
-        if (componentType.GetConstructor(Type.EmptyTypes) is not null)
-        {
-            instance = Activator.CreateInstance(componentType);
-        }
-
-        foreach (var property in componentType.GetProperties(BindingFlags.Instance | BindingFlags.Public)
-                     .Where(static prop => prop.GetCustomAttribute<ParameterAttribute>() is not null)
-                     .OrderBy(static prop => prop.Name, StringComparer.Ordinal))
-        {
-            rows.Add(new Row(
-                property.Name,
-                ToFriendlyTypeName(property.PropertyType),
-                GetDefaultValue(property, instance),
-                GetSummary(componentType, property.Name)));
-        }
-
-        return rows;
-    }
-
-    private static string ToFriendlyTypeName(Type type)
-    {
-        if (type == typeof(string))
-        {
-            return "string";
-        }
-
-        if (type == typeof(int))
-        {
-            return "int";
-        }
-
-        if (type == typeof(bool))
-        {
-            return "bool";
-        }
-
-        if (type == typeof(decimal))
-        {
-            return "decimal";
-        }
-
-        if (type == typeof(double))
-        {
-            return "double";
-        }
-
-        if (type == typeof(float))
-        {
-            return "float";
-        }
-
-        if (Nullable.GetUnderlyingType(type) is { } nullableType)
-        {
-            return $"{ToFriendlyTypeName(nullableType)}?";
-        }
-
-        if (type.IsGenericType)
-        {
-            var genericName = type.Name.Split('`')[0];
-            var arguments = string.Join(", ", type.GetGenericArguments().Select(ToFriendlyTypeName));
-            return $"{genericName}<{arguments}>";
-        }
-
-        return type.Name;
-    }
-
-    private static string GetDefaultValue(PropertyInfo property, object? instance)
-    {
-        if (instance is null)
-        {
-            return "-";
-        }
-
-        var value = property.GetValue(instance);
-        if (value is null)
-        {
-            return "null";
-        }
-
-        return value switch
-        {
-            string text when string.IsNullOrEmpty(text) => "\"\"",
-            string text => text,
-            bool boolean => boolean ? "true" : "false",
-            _ => Convert.ToString(value, System.Globalization.CultureInfo.InvariantCulture) ?? "-"
-        };
-    }
-
-    private static Dictionary<string, string> BuildXmlSummaryCache()
-    {
-        var result = new Dictionary<string, string>(StringComparer.Ordinal);
-        var xmlPath = Path.Combine(AppContext.BaseDirectory, "Agterhuis.Ui.xml");
-
-        if (!File.Exists(xmlPath))
-        {
-            return result;
-        }
-
-        try
-        {
-            var document = XDocument.Load(xmlPath);
-            var members = document.Root?.Element("members")?.Elements("member") ?? [];
-
-            foreach (var member in members)
-            {
-                var name = member.Attribute("name")?.Value;
-                var summary = member.Element("summary")?.Value?.Trim();
-
-                if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(summary))
-                {
-                    continue;
-                }
-
-                result[name] = string.Join(' ', summary.Split('\n', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries));
-            }
-        }
-        catch
-        {
-            return new Dictionary<string, string>(StringComparer.Ordinal);
-        }
-
-        return result;
-    }
-
-    private static string GetSummary(Type componentType, string propertyName)
-    {
-        var memberName = $"P:{componentType.FullName}.{propertyName}";
-        return XmlSummaryCache.TryGetValue(memberName, out var summary)
-            ? summary
-            : "-";
-    }
-
-    private sealed record Row(string Name, string TypeName, string DefaultValue, string Description);
 }

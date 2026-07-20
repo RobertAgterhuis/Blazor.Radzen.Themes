@@ -391,7 +391,22 @@
       "agterhuis.ui.demo": {
         "type": "Project",
         "dependencies": {
-          "Agterhuis.Ui": "[1.0.0, )"
+          "Agterhuis.Ui": "[1.0.0, )",
+          "Agterhuis.Ui.Designer": "[1.0.0, )",
+          "Agterhuis.Ui.Designer.Introspection": "[1.0.0, )"
+        }
+      },
+      "agterhuis.ui.designer": {
+        "type": "Project",
+        "dependencies": {
+          "Agterhuis.Ui": "[1.0.0, )",
+          "Radzen.Blazor": "[11.1.5, )"
+        }
+      },
+      "agterhuis.ui.designer.introspection": {
+        "type": "Project",
+        "dependencies": {
+          "Microsoft.AspNetCore.Components": "[10.0.10, )"
         }
       },
       "exampleaudit": {

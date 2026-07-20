@@ -23,8 +23,8 @@ Agent mode met terminal-toegang, repo-root `D:\repositories\Blazor.Radzen.Themes
 
 ## 3. Projectexport
 
-- "Exporteren"-dialoog: projectnaam, themafamilie + standaardvariant, welke pagina's. Export = instantieer het starter-template (`Agterhuis.Ui.Templates` uit prompt 44) in een tijdelijke map, injecteer de gegenereerde pagina's + nav-items in de template-MainLayout, voeg het designdocument-JSON toe als `design/document.json` (her-importeerbaar in de designer — het MODEL is round-trip, de code niet), en lever een zip via browser-download.
-- CI-smoke: export van een voorbeelddocument → `dotnet build` van het uitgepakte project slaagt (zelfde patroon als de template-smoke uit 44).
+- "Exporteren"-dialoog: projectnaam, themafamilie + standaardvariant, welke pagina's. **Export draait volledig client-side** (de host is WASM, prompt 54 — er is geen server om `dotnet new` uit te voeren): de bestanden van het starter-template (`Agterhuis.Ui.Templates` uit prompt 44) worden als embedded resources in de Designer-assembly meegebakken (build-stap die de template-inhoud embed — één bron, geen kopie die kan verlopen: een test vergelijkt de embedded set met de echte template-map), de naam/theme-substituties gebeuren in-browser, de gegenereerde pagina's + nav-items worden geïnjecteerd, het designdocument-JSON gaat mee als `design/document.json` (her-importeerbaar — het MODEL is round-trip, de code niet), en het geheel wordt in-browser gezipt (System.IO.Compression in WASM) en als download geleverd.
+- CI-smoke: export van een voorbeelddocument (de exportlogica is host-onafhankelijk aanroepbaar vanuit een test) → `dotnet build` van het uitgepakte project slaagt (zelfde patroon als de template-smoke uit 44).
 - `docs/designer/EXPORT.md`: wat de export bevat, hoe je hem in een bestaande solution opneemt, en de eenrichtings-beperking.
 
 ## Verificatie

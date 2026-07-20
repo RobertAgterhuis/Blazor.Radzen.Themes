@@ -1,0 +1,142 @@
+@using System.Reflection
+@using Agterhuis.Ui.Designer.Model
+@using Agterhuis.Ui.Designer.Registry
+@using Agterhuis.Ui.Designer.Rendering
+@using Microsoft.AspNetCore.Components.Rendering
+@using Microsoft.AspNetCore.Components.Web
+
+@if (_errorMessage is not null)
+{
+    <div class="agt-design-node-error"
+         data-agt-design-node-id="@Node.Id"
+         data-agt-design-component="@Node.ComponentType">
+        <strong>@Node.ComponentType</strong>
+        <p>@_errorMessage</p>
+    </div>
+}
+else if (_descriptor is not null)
+{
+    <ErrorBoundary>
+        <ChildContent>
+            <div class="agt-design-node"
+                 data-agt-design-node-id="@Node.Id"
+                 data-agt-design-component="@Node.ComponentType"
+                 data-agt-design-row="@Node.LayoutSlot?.Row"
+                 data-agt-design-column="@Node.LayoutSlot?.Column"
+                 data-agt-design-row-span="@Node.LayoutSlot?.RowSpan"
+                 data-agt-design-column-span="@Node.LayoutSlot?.ColumnSpan">
+                <DynamicComponent Type="@_descriptor.ClrType" Parameters="@_parameters" />
+            </div>
+        </ChildContent>
+        <ErrorContent Context="exception">
+            <div class="agt-design-node-error"
+                 data-agt-design-node-id="@Node.Id"
+                 data-agt-design-component="@Node.ComponentType">
+                <strong>@Node.ComponentType</strong>
+                <p>@exception.Message</p>
+            </div>
+        </ErrorContent>
+    </ErrorBoundary>
+}
+
+@code {
+    private static readonly MethodInfo TemplatedSlotMethod = typeof(DesignerNodeHost)
+        .GetMethod(nameof(CreateTemplatedSlotCore), BindingFlags.Instance | BindingFlags.NonPublic)
+        ?? throw new InvalidOperationException("Templated slot factory not found.");
+
+    [Parameter, EditorRequired]
+    public DesignNode Node { get; set; } = default!;
+
+    [Parameter, EditorRequired]
+    public string Path { get; set; } = string.Empty;
+
+    [Parameter, EditorRequired]
+    public DesignerComponentRegistry Registry { get; set; } = default!;
+
+    private DesignerComponentDescriptor? _descriptor;
+    private Dictionary<string, object?> _parameters = [];
+    private string? _errorMessage;
+
+    protected override void OnParametersSet()
+    {
+        _parameters = [];
+        _descriptor = null;
+        _errorMessage = null;
+
+        if (!Registry.TryGetDescriptor(Node.ComponentType, out var descriptor))
+        {
+            _errorMessage = $"Onbekend componenttype '{Node.ComponentType}'.";
+            return;
+        }
+
+        _descriptor = descriptor;
+
+        try
+        {
+            _parameters = BuildParameterDictionary(descriptor);
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = ex.Message;
+        }
+    }
+
+    private Dictionary<string, object?> BuildParameterDictionary(DesignerComponentDescriptor descriptor)
+    {
+        var parameters = new Dictionary<string, object?>(StringComparer.Ordinal);
+
+        foreach (var parameter in descriptor.Parameters)
+        {
+            if (parameter.IsRenderFragment && Node.Children.TryGetValue(parameter.Name, out var children))
+            {
+                parameters[parameter.Name] = CreateSlotValue(parameter.ParameterType, children, $"{Path}/Children[{parameter.Name}]");
+                continue;
+            }
+
+            if (Node.Parameters.TryGetValue(parameter.Name, out var value))
+            {
+                parameters[parameter.Name] = DesignParameterBinder.Bind(value, parameter.ParameterType, this);
+            }
+        }
+
+        return parameters;
+    }
+
+    private object CreateSlotValue(Type slotType, IReadOnlyList<DesignNode> children, string slotPath)
+    {
+        if (slotType == typeof(RenderFragment))
+        {
+            return CreateSlot(children, slotPath);
+        }
+
+        if (slotType.IsGenericType && slotType.GetGenericTypeDefinition() == typeof(RenderFragment<>))
+        {
+            return TemplatedSlotMethod.MakeGenericMethod(slotType.GetGenericArguments()[0]).Invoke(this, [children, slotPath])
+                ?? throw new InvalidOperationException($"Unable to create templated slot '{slotPath}'.");
+        }
+
+        throw new InvalidOperationException($"Unsupported slot type '{slotType.Name}' for '{Node.ComponentType}'.");
+    }
+
+    private RenderFragment CreateSlot(IReadOnlyList<DesignNode> children, string slotPath)
+    {
+        return builder => RenderChildren(builder, children, slotPath);
+    }
+
+    private RenderFragment<TContext> CreateTemplatedSlotCore<TContext>(IReadOnlyList<DesignNode> children, string slotPath)
+    {
+        return _ => builder => RenderChildren(builder, children, slotPath);
+    }
+
+    private void RenderChildren(RenderTreeBuilder builder, IReadOnlyList<DesignNode> children, string slotPath)
+    {
+        for (var index = 0; index < children.Count; index++)
+        {
+            builder.OpenComponent<DesignerNodeHost>(index);
+            builder.AddAttribute(index + 1, nameof(Node), children[index]);
+            builder.AddAttribute(index + 2, nameof(Path), $"{slotPath}[{index}]");
+            builder.AddAttribute(index + 3, nameof(Registry), Registry);
+            builder.CloseComponent();
+        }
+    }
+}

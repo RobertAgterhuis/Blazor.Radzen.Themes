@@ -7,6 +7,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Agterhuis.Ui\Agterhuis.Ui.csproj" />
+    <ProjectReference Include="..\..\src\Agterhuis.Ui.Designer\Agterhuis.Ui.Designer.csproj" />
+    <ProjectReference Include="..\..\eng\designer-introspection\Agterhuis.Ui.Designer.Introspection.csproj" />
   </ItemGroup>
 
   <ItemGroup>

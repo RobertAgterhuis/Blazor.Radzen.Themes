@@ -1,0 +1,28 @@
+@using Agterhuis.Ui.Designer.Model
+@using Agterhuis.Ui.Designer.Registry
+
+@if (Page is null)
+{
+    <div class="agt-design-renderer agt-design-renderer--empty">Geen pagina geselecteerd.</div>
+}
+else
+{
+    <div class="agt-design-renderer" data-agt-design-route="@Page.Route">
+        @for (var index = 0; index < Page.Nodes.Count; index++)
+        {
+            <DesignerNodeHost Node="Page.Nodes[index]"
+                              Path="@($"Pages[0]/Nodes[{index}]")"
+                              Registry="ResolvedRegistry" />
+        }
+    </div>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public DesignPage? Page { get; set; }
+
+    [Parameter]
+    public DesignerComponentRegistry? Registry { get; set; }
+
+    private DesignerComponentRegistry ResolvedRegistry => Registry ?? DesignerComponentRegistry.Instance;
+}

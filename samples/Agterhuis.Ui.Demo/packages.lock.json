@@ -14,6 +14,16 @@
           "Radzen.Blazor": "[11.1.5, )"
         }
       },
+      "agterhuis.ui.designer": {
+        "type": "Project",
+        "dependencies": {
+          "Agterhuis.Ui": "[1.0.0, )",
+          "Radzen.Blazor": "[11.1.5, )"
+        }
+      },
+      "agterhuis.ui.designer.introspection": {
+        "type": "Project"
+      },
       "Radzen.Blazor": {
         "type": "CentralTransitive",
         "requested": "[11.1.5, )",
