@@ -2,6 +2,8 @@ using Bunit;
 using Radzen;
 using Microsoft.Extensions.DependencyInjection;
 using Agterhuis.Ui.Services;
+using Agterhuis.Ui.Demo.Services;
+using Microsoft.JSInterop;
 
 namespace Agterhuis.Ui.Tests;
 
@@ -13,10 +15,9 @@ public sealed class DesignerPageTests
         using var ctx = new BunitContext();
         ctx.Services.AddRadzenComponents();
         ctx.Services.AddSingleton<IAgtCommandRegistry>(_ => new AgtCommandRegistry());
-        ctx.JSInterop.Mode = JSRuntimeMode.Loose;
-        ctx.JSInterop.SetupVoid("designerInterop.registerKeyScope", _ => true).SetVoidResult();
-        ctx.JSInterop.Setup<List<string>>("designerInterop.getJson", _ => true).SetResult([]);
-        ctx.JSInterop.SetupVoid("designerInterop.setJson", _ => true).SetVoidResult();
+        var jsRuntime = new DesignerJsRuntimeStub();
+        ctx.Services.AddSingleton<IJSRuntime>(jsRuntime);
+        ctx.Services.AddSingleton(new LocalDesignStore(jsRuntime));
 
         var cut = ctx.Render<Agterhuis.Ui.Demo.Components.Pages.Designer>();
         cut.Find(".designer-filter").Input("Accordion");
@@ -34,10 +35,9 @@ public sealed class DesignerPageTests
         using var ctx = new BunitContext();
         ctx.Services.AddRadzenComponents();
         ctx.Services.AddSingleton<IAgtCommandRegistry>(_ => new AgtCommandRegistry());
-        ctx.JSInterop.Mode = JSRuntimeMode.Loose;
-        ctx.JSInterop.SetupVoid("designerInterop.registerKeyScope", _ => true).SetVoidResult();
-        ctx.JSInterop.Setup<List<string>>("designerInterop.getJson", _ => true).SetResult([]);
-        ctx.JSInterop.SetupVoid("designerInterop.setJson", _ => true).SetVoidResult();
+        var jsRuntime = new DesignerJsRuntimeStub();
+        ctx.Services.AddSingleton<IJSRuntime>(jsRuntime);
+        ctx.Services.AddSingleton(new LocalDesignStore(jsRuntime));
 
         var cut = ctx.Render<Agterhuis.Ui.Demo.Components.Pages.Designer>();
         cut.Find(".designer-canvas-node__select").Click();
@@ -51,13 +51,10 @@ public sealed class DesignerPageTests
         using var ctx = new BunitContext();
         ctx.Services.AddRadzenComponents();
         ctx.Services.AddSingleton<IAgtCommandRegistry>(_ => new AgtCommandRegistry());
-        ctx.JSInterop.Mode = JSRuntimeMode.Loose;
-        ctx.JSInterop.SetupVoid("designerInterop.registerKeyScope", _ => true).SetVoidResult();
-        ctx.JSInterop.Setup<List<string>>("designerInterop.getJson", _ => true).SetResult([]);
-        ctx.JSInterop.Setup<string>("designerInterop.getText", _ => true).SetResult("draft-json");
-        ctx.JSInterop.SetupVoid("designerInterop.setJson", _ => true).SetVoidResult();
-        ctx.JSInterop.SetupVoid("designerInterop.removeItem", _ => true).SetVoidResult();
-        ctx.JSInterop.SetupVoid("designerInterop.saveBytesFile", _ => true).SetVoidResult();
+        var jsRuntime = new DesignerJsRuntimeStub();
+        jsRuntime.SetResult("designerInterop.getText", "draft-json");
+        ctx.Services.AddSingleton<IJSRuntime>(jsRuntime);
+        ctx.Services.AddSingleton(new LocalDesignStore(jsRuntime));
 
         var cut = ctx.Render<Agterhuis.Ui.Demo.Components.Pages.Designer>();
 

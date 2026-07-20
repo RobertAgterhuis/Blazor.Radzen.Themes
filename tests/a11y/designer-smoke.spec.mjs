@@ -1,17 +1,16 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("designer smoke", () => {
-  test("drag palette item to canvas renders node", async ({ page }) => {
+  test("start screen links into editor and renders template", async ({ page }) => {
     await page.goto("/designer", { waitUntil: "networkidle" });
 
-    const paletteItem = page.locator(".designer-palette-item").first();
-    const targetDropZone = page.locator(".designer-dropzone--root").first();
+    const templateButton = page.locator(".designer-startscreen__patterns button").first();
 
-    await expect(paletteItem).toBeVisible();
-    await expect(targetDropZone).toBeVisible();
+    await expect(templateButton).toBeVisible();
+    await templateButton.click();
 
-    await paletteItem.dragTo(targetDropZone);
-
-    await expect(page.locator(".designer-canvas-node").nth(1)).toBeVisible();
+    await expect(page).toHaveURL(/\/designer\/edit\?template=/);
+    await expect(page.locator(".designer-toolbar")).toBeVisible();
+    await expect(page.locator(".designer-canvas-node").first()).toBeVisible();
   });
 });
