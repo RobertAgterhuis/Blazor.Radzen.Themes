@@ -14,4 +14,8 @@
     <PackageReference Include="Radzen.Blazor" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Include="Export\Templates\**\*.*" />
+  </ItemGroup>
+
 </Project>

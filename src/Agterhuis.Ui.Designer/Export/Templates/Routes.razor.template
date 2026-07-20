@@ -1,0 +1,8 @@
+@using Agterhuis.Ui.Demo.Components.Layout
+@using Agterhuis.Ui.Demo.Components.Pages
+
+<Router AppAssembly="typeof(App).Assembly">
+    <Found Context="routeData">
+        <RouteView RouteData="routeData" DefaultLayout="typeof(MainLayout)" />
+    </Found>
+</Router>

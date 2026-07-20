@@ -1,6 +1,7 @@
 using System.IO.Compression;
 using System.Text;
 using System.Text.Json;
+using System.Reflection;
 using Agterhuis.Ui.Designer.CodeGen;
 using Agterhuis.Ui.Designer.Model;
 using Agterhuis.Ui.Designer.Serialization;
@@ -35,6 +36,7 @@ public sealed class ProjectExporter
     private static readonly string[] SupportedThemeFamilies = ["plum", "ocean", "dagobah", "dathomir", "hoth", "tatooine"];
 
     private readonly RazorCodeGenerator _codeGenerator;
+    private static readonly string TemplateNamespace = "Agterhuis.Ui.Designer.Export.Templates";
 
     public ProjectExporter(RazorCodeGenerator? codeGenerator = null)
     {
@@ -119,35 +121,26 @@ public sealed class ProjectExporter
     {
         return new Dictionary<string, string>(StringComparer.Ordinal)
         {
-            [$"{projectName}/README.md"] = $$"""
-# {{projectName}}
-
-Generated from Agterhuis.Ui.Designer.
-
-Theme family: {{themeFamily}}
-
-The design model is stored at `design/document.json`.
-""".Replace("{{projectName}}", projectName, StringComparison.Ordinal).Replace("{{themeFamily}}", themeFamily, StringComparison.Ordinal),
-            [$"{projectName}/Program.cs"] = $$"""
-using Agterhuis.Ui.Extensions;
-
-var builder = WebApplication.CreateBuilder(args);
-builder.WebHost.UseStaticWebAssets();
-builder.Services.AddRazorComponents().AddInteractiveServerComponents();
-
-var app = builder.Build();
-app.UseHttpsRedirection();
-app.UseStaticFiles();
-app.UseAntiforgery();
-app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
-app.Run();
-""",
-            [$"{projectName}/Components/_Imports.razor"] = "@using Microsoft.AspNetCore.Components\n@using Microsoft.AspNetCore.Components.Web\n",
-            [$"{projectName}/Components/Routes.razor"] = "<Router AppAssembly=\"typeof(Program).Assembly\">\n    <Found Context=\"routeData\">\n        <RouteView RouteData=\"routeData\" DefaultLayout=\"typeof(MainLayout)\" />\n    </Found>\n</Router>\n",
-            [$"{projectName}/Components/App.razor"] = "<Routes />\n",
-            [$"{projectName}/Components/Layout/MainLayout.razor"] = "@inherits LayoutComponentBase\n\n<div class=\"page\">\n    @Body\n</div>\n",
-            [$"{projectName}/wwwroot/app.css"] = $"body {{ font-family: system-ui, sans-serif; }}\n:root {{ --theme-family: '{themeFamily}'; }}\n"
+            [$"{projectName}/{projectName}.csproj"] = LoadTemplateText("Agterhuis.Ui.Demo.export.csproj.template", projectName, themeFamily),
+            [$"{projectName}/README.md"] = LoadTemplateText("README.template", projectName, themeFamily),
+            [$"{projectName}/Program.cs"] = LoadTemplateText("Program.template", projectName, themeFamily),
+            [$"{projectName}/Components/_Imports.razor"] = LoadTemplateText("_Imports.razor.template", projectName, themeFamily),
+            [$"{projectName}/Components/Routes.razor"] = LoadTemplateText("Routes.razor.template", projectName, themeFamily),
+            [$"{projectName}/Components/App.razor"] = LoadTemplateText("App.razor.template", projectName, themeFamily),
+            [$"{projectName}/Components/Layout/MainLayout.razor"] = LoadTemplateText("Components.Layout.MainLayout.template", projectName, themeFamily),
+            [$"{projectName}/wwwroot/app.css"] = LoadTemplateText("wwwroot.app.css.template", projectName, themeFamily)
         };
+    }
+
+    private static string LoadTemplateText(string resourceSuffix, string projectName, string themeFamily)
+    {
+        var resourceName = TemplateNamespace + "." + resourceSuffix.Replace('/', '.');
+        using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName)
+            ?? throw new InvalidOperationException($"Missing export template resource '{resourceName}'. Available resources: {string.Join(", ", Assembly.GetExecutingAssembly().GetManifestResourceNames().Where(name => name.StartsWith(TemplateNamespace, StringComparison.Ordinal)).OrderBy(name => name, StringComparer.Ordinal))}");
+        using var reader = new StreamReader(stream, Encoding.UTF8, detectEncodingFromByteOrderMarks: false);
+        return reader.ReadToEnd()
+            .Replace("__PROJECT_NAME__", projectName, StringComparison.Ordinal)
+            .Replace("__THEME_FAMILY__", themeFamily, StringComparison.Ordinal);
     }
 
     private static void AddDataServiceFiles(Dictionary<string, string> projectFiles, string projectName, DesignDocument document)

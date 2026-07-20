@@ -1,0 +1,11 @@
+@page "/designer"
+@layout DesignerLayout
+
+<PageTitle>Designer</PageTitle>
+
+<div class="designer-startscreen">
+    <section class="designer-startscreen__hero">
+        <h1>Designer</h1>
+        <p>Kies een recent ontwerp of start vanuit een patroon.</p>
+    </section>
+</div>

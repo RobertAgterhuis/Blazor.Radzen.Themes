@@ -1,0 +1,8 @@
+@page "/designer/edit"
+@layout DesignerLayout
+
+<PageTitle>Designer</PageTitle>
+
+<div class="designer-page">
+    <p>Generated designer page placeholder.</p>
+</div>

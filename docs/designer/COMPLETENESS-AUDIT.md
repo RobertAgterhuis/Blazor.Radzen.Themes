@@ -66,7 +66,7 @@ Nulmeting op basis van inspectie van prompts 48 t/m 55 en de huidige designer-im
 | Model JSON-tab (bewerkbaar met schema-validatie + Apply) | ⚠️ Gedeeltelijk | JSON-bewerking bestaat, maar de huidige flow toont geen volledige schema-validatie. |
 | Projectexport: volledig client-side (WASM), embedded template-resources | ⚠️ Gedeeltelijk | Export werkt client-side, maar templates zijn nu hardcoded strings in plaats van aantoonbaar embedded resources. |
 | Export zip via System.IO.Compression in browser | ✅ Compleet | Export gebruikt `ZipArchive` en levert een zip-bytearray. |
-| CI-smoke: export → `dotnet build` van uitgepakt project slaagt | ❌ Ontbreekt | Er is geen zichtbare CI-smoke test die het uitgepakte exportproject bouwt. |
+| CI-smoke: export → `dotnet build` van uitgepakt project slaagt | ⚠️ Gedeeltelijk | Een structurele export-smoke bestaat; een volledige standalone build-smoke vergt packaged dependencies buiten deze workspace. |
 | `docs/designer/EXPORT.md` bestaat | ❌ Ontbreekt | Er is geen `EXPORT.md` in `docs/designer`. |
 
 ## Prompt 52 — Demo-datamodel + databinding (autoruitschade)
