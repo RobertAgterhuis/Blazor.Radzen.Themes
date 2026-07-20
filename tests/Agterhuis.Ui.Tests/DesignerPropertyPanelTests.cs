@@ -171,6 +171,56 @@ public sealed class DesignerPropertyPanelTests
         Assert.Contains("Bindbaar", dataField.TextContent, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void PropertyPanel_ShowsColumnsEditor_ForGridNodeWithColumnsSlot()
+    {
+        using var ctx = new BunitContext();
+        ctx.Services.AddRadzenComponents();
+        ctx.JSInterop.Mode = JSRuntimeMode.Loose;
+
+        var descriptor = new DesignerComponentDescriptor(
+            "AgtDataGrid",
+            typeof(Agterhuis.Ui.Components.Data.AgtDataGrid<object>),
+            "Data Grid",
+            "Data & Scheduling",
+            "extension",
+            true,
+            true,
+            ["Columns"],
+            []);
+
+        var node = new DesignNode
+        {
+            Id = "grid-1",
+            ComponentType = "AgtDataGrid",
+            Children = new Dictionary<string, List<DesignNode>>(StringComparer.Ordinal)
+            {
+                ["Columns"] =
+                [
+                    new DesignNode
+                    {
+                        Id = "column-1",
+                        ComponentType = "RadzenDataGridColumn",
+                        Parameters = new Dictionary<string, DesignParameterValue>(StringComparer.Ordinal)
+                        {
+                            ["Title"] = DesignParameterValue.FromValue("Dossiernummer")
+                        }
+                    }
+                ]
+            }
+        };
+
+        var cut = ctx.Render<PropertyPanel>(parameters => parameters
+            .Add(component => component.Page, new DesignPage { Route = "/", Title = "Page" })
+            .Add(component => component.CanvasTheme, "plum-dark")
+            .Add(component => component.ThemeOptions, new[] { "plum-dark" })
+            .Add(component => component.SelectedNode, node)
+            .Add(component => component.SelectedDescriptor, descriptor));
+
+        Assert.NotNull(cut.Find("[data-agt-designer-columns-editor='true']"));
+        Assert.Contains("Dossiernummer", cut.Markup, StringComparison.Ordinal);
+    }
+
     private static DesignerComponentDescriptor CreateDescriptor(IReadOnlyList<ComponentParameterDescriptor> parameters)
         => new(
             "AgtTest",

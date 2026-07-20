@@ -127,7 +127,9 @@
                            SetPageTitle="OnPageTitleChanged"
                            SetCanvasTheme="OnCanvasThemeChanged"
                            SetNodeParameter="OnNodeParameterChanged"
-                           SetNodeLayoutSlot="OnNodeLayoutSlotChanged" />
+                           SetNodeLayoutSlot="OnNodeLayoutSlotChanged"
+                           AddColumnNode="OnAddColumnNode"
+                           RemoveColumnNode="OnRemoveColumnNode" />
         </aside>
 
         <aside class="designer-panel designer-panel--data" aria-label="Data panel">
@@ -544,6 +546,46 @@
         StateHasChanged();
     }
 
+    private async Task OnAddColumnNode()
+    {
+        if (SelectedNode is null || _selectedNodeId is null || SelectedDescriptor?.Slots.Contains("Columns", StringComparer.Ordinal) != true)
+        {
+            return;
+        }
+
+        var descriptor = _registry.TryGetDescriptor("RadzenDataGridColumn", out var gridColumnDescriptor)
+            ? gridColumnDescriptor
+            : _registry.GetDescriptor("RadzenDataGridColumn");
+        var node = CreateNodeForDescriptor(descriptor);
+        node.Parameters["Title"] = DesignParameterValue.FromValue($"Kolom {GetColumnsInsertIndex(_selectedNodeId) + 1}");
+        node.Parameters["Property"] = DesignParameterValue.FromValue("Dossiernummer");
+
+        if (_commands.Execute(new AddNodeCommand(0, new DesignNodeLocation(_selectedNodeId, "Columns", GetColumnsInsertIndex(_selectedNodeId)), node)))
+        {
+            await AutoSaveAsync();
+            StateHasChanged();
+        }
+    }
+
+    private async Task OnRemoveColumnNode(string nodeId)
+    {
+        if (string.IsNullOrWhiteSpace(nodeId))
+        {
+            return;
+        }
+
+        if (_commands.Execute(new RemoveNodeCommand(0, nodeId)))
+        {
+            if (string.Equals(_selectedNodeId, nodeId, StringComparison.Ordinal))
+            {
+                _selectedNodeId = null;
+            }
+
+            await AutoSaveAsync();
+            StateHasChanged();
+        }
+    }
+
     private void SetViewport(string viewport)
     {
         _viewport = _viewportWidths.ContainsKey(viewport) ? viewport : "desktop";
@@ -789,6 +831,17 @@
         }
 
         return 0;
+    }
+
+    private int GetColumnsInsertIndex(string parentNodeId)
+    {
+        if (!TryFindNode(_commands.Document.Pages[0].Nodes, parentNodeId, out _, out var container, out var index))
+        {
+            return 0;
+        }
+
+        var parent = container[index];
+        return parent.Children.TryGetValue("Columns", out var columns) ? columns.Count : 0;
     }
 
     private DesignNode CreateNodeForDescriptor(DesignerComponentDescriptor descriptor)

@@ -80,6 +80,41 @@ else
             </div>
         </section>
 
+        @if (ColumnNodes.Count > 0 || SupportsColumnsSlot)
+        {
+            <section class="designer-properties__group" data-agt-designer-columns-editor="true">
+                <div class="designer-properties__field-head">
+                    <h3>Kolommen</h3>
+                    <RadzenButton Text="Kolom toevoegen"
+                                  ButtonStyle="ButtonStyle.Base"
+                                  Variant="Variant.Text"
+                                  Click="OnAddColumnRequested" />
+                </div>
+
+                @if (ColumnNodes.Count == 0)
+                {
+                    <div class="designer-properties__readonly">Nog geen kolommen gedefinieerd.</div>
+                }
+                else
+                {
+                    <div class="designer-properties__layout-grid">
+                        @foreach (var columnNode in ColumnNodes)
+                        {
+                            <div class="designer-properties__field" data-agt-designer-column-node="@columnNode.Id">
+                                <div class="designer-properties__field-head">
+                                    <span class="designer-properties__field-label">@GetColumnLabel(columnNode)</span>
+                                    <RadzenButton Text="Verwijderen"
+                                                  ButtonStyle="ButtonStyle.Base"
+                                                  Variant="Variant.Text"
+                                                  Click="@(() => OnRemoveColumnRequested(columnNode.Id))" />
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </section>
+        }
+
         @foreach (var group in GroupedParameters)
         {
             <section class="designer-properties__group">
@@ -217,6 +252,12 @@ else
     [Parameter]
     public EventCallback<DesignLayoutSlot> SetNodeLayoutSlot { get; set; }
 
+    [Parameter]
+    public EventCallback AddColumnNode { get; set; }
+
+    [Parameter]
+    public EventCallback<string> RemoveColumnNode { get; set; }
+
     private const string CategoryGeneral = "Algemeen";
     private const string CategoryLayout = "Layout";
     private const string CategoryData = "Data";
@@ -277,6 +318,12 @@ else
 
     private int LayoutColumnSpan => SelectedNode?.LayoutSlot?.ColumnSpan ?? 1;
 
+    private bool SupportsColumnsSlot => SelectedDescriptor?.Slots.Contains("Columns", StringComparer.Ordinal) == true;
+
+    private IReadOnlyList<DesignNode> ColumnNodes => SelectedNode?.Children.TryGetValue("Columns", out var columns) == true
+        ? columns
+        : [];
+
     private IReadOnlyList<OptionItem> ColorTokenOptions => new[]
     {
         new OptionItem("Primair 500", "var(--agt-color-primary-500)"),
@@ -336,6 +383,12 @@ else
 
     private Task OnCanvasThemeChanged(string theme)
         => SetCanvasTheme.InvokeAsync(theme);
+
+    private Task OnAddColumnRequested()
+        => AddColumnNode.InvokeAsync();
+
+    private Task OnRemoveColumnRequested(string nodeId)
+        => RemoveColumnNode.InvokeAsync(nodeId);
 
     private async Task OnStringChanged(ComponentParameterDescriptor parameter, string? value)
     {
@@ -523,6 +576,21 @@ else
 
     private static bool ContainsAny(string value, params string[] candidates)
         => candidates.Any(candidate => value.Contains(candidate, StringComparison.OrdinalIgnoreCase));
+
+    private static string GetColumnLabel(DesignNode node)
+    {
+        if (node.Parameters.TryGetValue("Title", out var title) && title.Literal is not null)
+        {
+            return title.Literal.GetValue<string?>() ?? node.ComponentType;
+        }
+
+        if (node.Parameters.TryGetValue("Property", out var property) && property.Literal is not null)
+        {
+            return property.Literal.GetValue<string?>() ?? node.ComponentType;
+        }
+
+        return node.ComponentType;
+    }
 
     private string? GetCurrentTextValue(string parameterName)
     {
