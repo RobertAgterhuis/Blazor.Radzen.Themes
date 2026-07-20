@@ -1,7 +1,15 @@
 .designer-page {
-    display: grid;
-    gap: var(--agt-spacing-3);
-    min-height: calc(100vh - (var(--agt-spacing-3) * 2));
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    min-height: 100vh;
+    --designer-palette-width: 220px;
+    --designer-property-width: 320px;
+    --designer-code-height: 250px;
+}
+
+.designer-toolbar {
+    margin-bottom: var(--agt-spacing-3);
 }
 
 .designer-startscreen {
@@ -81,14 +89,11 @@
 }
 
 .designer-grid {
-    display: grid;
-    gap: var(--agt-spacing-3);
-    grid-template-areas:
-        "palette canvas props"
-        "tree canvas data"
-        "code code code";
-    grid-template-columns: minmax(16rem, 20rem) minmax(0, 1fr) minmax(12rem, 16rem);
-    grid-template-rows: minmax(0, 1fr) minmax(12rem, auto) minmax(16rem, auto);
+    display: flex;
+    flex: 1;
+    gap: 0;
+    min-height: 0;
+    overflow: hidden;
 }
 
 .designer-panel {
@@ -98,30 +103,39 @@
     min-height: 0;
     overflow: auto;
     padding: var(--agt-spacing-2);
+    display: flex;
+    flex-direction: column;
 }
 
 .designer-panel--palette {
-    grid-area: palette;
+    width: var(--designer-palette-width);
+    flex: 0 0 auto;
 }
 
 .designer-panel--canvas {
-    grid-area: canvas;
+    flex: 1;
+    min-width: 0;
 }
 
 .designer-panel--properties {
-    grid-area: props;
+    width: var(--designer-property-width);
+    flex: 0 0 auto;
 }
 
 .designer-panel--data {
-    grid-area: data;
+    width: var(--designer-property-width);
+    flex: 0 0 auto;
 }
 
 .designer-panel--tree {
-    grid-area: tree;
+    width: var(--designer-palette-width);
+    flex: 0 0 auto;
 }
 
 .designer-panel--code {
-    grid-area: code;
+    height: var(--designer-code-height);
+    flex: 0 0 auto;
+    border-radius: 0;
 }
 
 .designer-panel h2 {
@@ -484,6 +498,43 @@
 /* Phase 10: Overall Layout Polish - Density and Refinement */
 .designer-grid {
     transition: all 160ms ease;
+}
+
+/* Phase 8-9: Resizable Dividers */
+.designer-divider {
+    background: var(--agt-input-border);
+    transition: all 160ms ease;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 100;
+}
+
+.designer-divider--vertical {
+    width: 5px;
+    cursor: col-resize;
+    min-height: 0;
+    flex: 0 0 5px;
+    background: var(--agt-input-border);
+}
+
+.designer-divider--vertical:hover {
+    background: var(--agt-color-primary-500);
+    width: 5px;
+    flex: 0 0 5px;
+}
+
+.designer-divider--horizontal {
+    height: 5px;
+    cursor: row-resize;
+    width: 100%;
+    flex: 0 0 5px;
+    background: var(--agt-input-border);
+}
+
+.designer-divider--horizontal:hover {
+    background: var(--agt-color-primary-500);
+    height: 5px;
+    flex: 0 0 5px;
 }
 
 .designer-panel {

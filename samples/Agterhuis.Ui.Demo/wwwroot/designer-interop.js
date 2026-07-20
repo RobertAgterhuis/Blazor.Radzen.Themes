@@ -242,6 +242,113 @@ window.designerInterop = (() => {
         console.log(`✨ Drag & drop setup complete: ${paletteItems.length} palette items, ${dropzones.length} dropzones`);
     };
 
+    let codeEditor = null;
+    let jsonEditor = null;
+    let codeEditorChangeTimeout = null;
+
+    const setupCodeEditors = async (dotnetRef, codeContainer, jsonContainer) => {
+        const monaco = await ensureMonaco();
+        
+        // Create Razor code editor
+        if (codeContainer) {
+            codeEditor = monaco.editor.create(codeContainer, {
+                value: `<!-- Razor code will load here -->`,
+                language: 'html', // Use HTML for Razor syntax highlighting
+                theme: 'vs',
+                minimap: { enabled: false },
+                scrollBeyondLastLine: false,
+                automaticLayout: true,
+                tabSize: 2,
+                wordWrap: 'on',
+                readOnly: false
+            });
+
+            // Debounced code change handler
+            codeEditor.onDidChangeModelContent(() => {
+                clearTimeout(codeEditorChangeTimeout);
+                codeEditorChangeTimeout = setTimeout(() => {
+                    const code = codeEditor.getValue();
+                    dotnetRef.invokeMethodAsync('OnCodeEditorChanged', code)
+                        .catch(err => console.error('❌ Code editor sync error:', err));
+                }, 500);
+            });
+        }
+
+        // Create JSON model editor
+        if (jsonContainer) {
+            jsonEditor = monaco.editor.create(jsonContainer, {
+                value: `{}`,
+                language: 'json',
+                theme: 'vs',
+                minimap: { enabled: false },
+                scrollBeyondLastLine: false,
+                automaticLayout: true,
+                tabSize: 2,
+                wordWrap: 'on',
+                readOnly: false
+            });
+
+            // JSON change handler
+            jsonEditor.onDidChangeModelContent(() => {
+                clearTimeout(codeEditorChangeTimeout);
+                codeEditorChangeTimeout = setTimeout(() => {
+                    const json = jsonEditor.getValue();
+                    dotnetRef.invokeMethodAsync('OnJsonEditorChanged', json)
+                        .catch(err => console.error('❌ JSON editor sync error:', err));
+                }, 500);
+            });
+        }
+    };
+
+    const updateCodeEditor = (code) => {
+        if (codeEditor) {
+            const current = codeEditor.getValue();
+            if (current !== code) {
+                codeEditor.setValue(code);
+            }
+        }
+    };
+
+    const updateJsonEditor = (json) => {
+        if (jsonEditor) {
+            const current = jsonEditor.getValue();
+            if (current !== json) {
+                jsonEditor.setValue(json);
+            }
+        }
+    };
+
+    const switchCodeTab = (tabName) => {
+        const codePanel = document.querySelector('.designer-code-panel');
+        const tabs = codePanel?.querySelectorAll('[role="tab"]');
+        const panels = codePanel?.querySelectorAll('[role="tabpanel"]');
+
+        if (tabs && panels) {
+            tabs.forEach(tab => {
+                tab.setAttribute('aria-selected', tab.getAttribute('data-tab') === tabName ? 'true' : 'false');
+            });
+            panels.forEach(panel => {
+                panel.style.display = panel.getAttribute('data-panel') === tabName ? 'flex' : 'none';
+            });
+
+            // Trigger layout recalculation for Monaco editors
+            if (codeEditor) codeEditor.layout();
+            if (jsonEditor) jsonEditor.layout();
+        }
+    };
+
+    const setupResizablePanels = async () => {
+        // Dynamic import of resize interop
+        const { setupResizablePanels: setupResize } = await import('./designer-resize-interop.js');
+        return setupResize();
+    };
+
+    const setEditorTheme = async (isDark) => {
+        const monaco = await ensureMonaco();
+        const themeName = isDark ? 'vs-dark' : 'vs';
+        monaco.editor.setTheme(themeName);
+    };
+
     return {
         createMonacoEditor,
         getJson,
@@ -251,8 +358,14 @@ window.designerInterop = (() => {
         pickDesignDocument,
         saveBytesFile,
         saveDesignDocument,
+        setEditorTheme,
         setMonacoTheme,
         setJson,
-        setupDragAndDrop
+        setupDragAndDrop,
+        setupCodeEditors,
+        updateCodeEditor,
+        updateJsonEditor,
+        switchCodeTab,
+        setupResizablePanels
     };
 })();

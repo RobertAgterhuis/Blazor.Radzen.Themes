@@ -88,6 +88,9 @@
             }
         </aside>
 
+        <!-- Resizable divider between palette and canvas -->
+        <div class="designer-divider designer-divider--vertical" data-divider="palette-canvas" aria-label="Resize palette"></div>
+
         <section class="designer-panel designer-panel--canvas" aria-label="Canvas">
             <div class="designer-breadcrumb" aria-live="polite">@SelectionBreadcrumb</div>
 
@@ -131,6 +134,9 @@
             </div>
         </section>
 
+        <!-- Resizable divider between canvas and property panel -->
+        <div class="designer-divider designer-divider--vertical" data-divider="canvas-property" aria-label="Resize properties"></div>
+
         <aside class="designer-panel designer-panel--properties" aria-label="Properties panel">
             <PropertyPanel Page="@_commands.Document.Pages[0]"
                            CanvasTheme="@_canvasTheme"
@@ -157,14 +163,18 @@
             <h2>Structuur</h2>
             <RadzenTree Data="TreeRoots" TextProperty="Text" ChildrenProperty="Children" Change="OnTreeChange" />
         </aside>
-
-        <section class="designer-panel designer-panel--code" aria-label="Code en model">
-            <DesignerCodePanel CurrentPage="@_commands.Document.Pages[0]"
-                               Document="@_commands.Document"
-                               SelectedNodeId="@_selectedNodeId"
-                               OnDocumentChanged="OnDocumentChanged" />
-        </section>
     </div>
+
+    <!-- Resizable divider between canvas area and code panel -->
+    <div class="designer-divider designer-divider--horizontal" data-divider="canvas-code" aria-label="Resize code panel"></div>
+
+    <!-- Code panel with Monaco editors -->
+    <section class="designer-panel designer-panel--code" aria-label="Code en model">
+        <DesignerCodePanel CurrentPage="@_commands.Document.Pages[0]"
+                           Document="@_commands.Document"
+                           SelectedNodeId="@_selectedNodeId"
+                           OnDocumentChanged="OnDocumentChanged" />
+    </section>
 </div>
 
 @code {
@@ -258,6 +268,10 @@
         _dragDropRef = DotNetObjectReference.Create(this);
         await JS.InvokeVoidAsync("designerInterop.registerKeyScope", _keyScopeRef, _canvasRef);
         await JS.InvokeVoidAsync("designerInterop.setupDragAndDrop", _dragDropRef);
+        
+        // Initialize resizable panels with localStorage persistence
+        await JS.InvokeVoidAsync("designerInterop.setupResizablePanels");
+        
         StateHasChanged();
     }
 

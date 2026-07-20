@@ -99,7 +99,7 @@ public sealed class DesignerPageTests
 
         var cut = ctx.Render<Agterhuis.Ui.Demo.Components.Pages.Designer>();
 
-        Assert.Contains("Code (Read-Only)", cut.Markup, StringComparison.Ordinal);
+        Assert.Contains("Code (Editable)", cut.Markup, StringComparison.Ordinal);
         Assert.Contains("Model (JSON)", cut.Markup, StringComparison.Ordinal);
     }
 

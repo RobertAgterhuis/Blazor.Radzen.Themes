@@ -29,8 +29,26 @@
             <RadzenPanelMenu class="demo-panel-menu" Multiple="true" DisplayStyle="MenuItemDisplayStyle.IconAndText" Click="OnPanelMenuClick">
                 @if (FilteredGettingStarted.Count > 0)
                 {
-                    <RadzenPanelMenuItem Text="Getting started" Icon="rocket_launch" Expanded="true" Class="demo-panel-menu__group demo-panel-menu__group--main">
+                    <RadzenPanelMenuItem Text="Getting Started"
+                                         Icon="rocket_launch"
+                                         Expanded="@IsTopLevelGroupExpanded(NavGroupGettingStarted)"
+                                         Value="@TopLevelGroupValue(NavGroupGettingStarted)"
+                                         Class="demo-panel-menu__group demo-panel-menu__group--main">
                         @foreach (var item in FilteredGettingStarted)
+                        {
+                            <RadzenPanelMenuItem Text="@item.Text" Icon="@item.Icon" Path="@item.Path" Match="@item.Match" />
+                        }
+                    </RadzenPanelMenuItem>
+                }
+
+                @if (FilteredDesignSystemItems.Count > 0)
+                {
+                    <RadzenPanelMenuItem Text="Design System"
+                                         Icon="architecture"
+                                         Expanded="@IsTopLevelGroupExpanded(NavGroupDesignSystem)"
+                                         Value="@TopLevelGroupValue(NavGroupDesignSystem)"
+                                         Class="demo-panel-menu__group demo-panel-menu__group--main">
+                        @foreach (var item in FilteredDesignSystemItems)
                         {
                             <RadzenPanelMenuItem Text="@item.Text" Icon="@item.Icon" Path="@item.Path" Match="@item.Match" />
                         }
@@ -39,7 +57,11 @@
 
                 @if (HasAgtItems)
                 {
-                    <RadzenPanelMenuItem Text="Agt componenten" Icon="widgets" Expanded="true" Class="demo-panel-menu__group demo-panel-menu__group--agt demo-panel-menu__group--main">
+                    <RadzenPanelMenuItem Text="Agt componenten"
+                                         Icon="widgets"
+                                         Expanded="@IsTopLevelGroupExpanded(NavGroupAgtComponents)"
+                                         Value="@TopLevelGroupValue(NavGroupAgtComponents)"
+                                         Class="demo-panel-menu__group demo-panel-menu__group--agt demo-panel-menu__group--main">
                         <div class="demo-panel-menu__group-copy">
                             <div class="demo-panel-menu__subtitle">De wrapper-API voor consumers</div>
                         </div>
@@ -57,7 +79,11 @@
 
                 @if (FilteredCatalogCategories.Count > 0)
                 {
-                    <RadzenPanelMenuItem Text="Radzen catalogus · QA" Icon="auto_awesome_mosaic" Expanded="true" Class="demo-panel-menu__group demo-panel-menu__group--catalog demo-panel-menu__group--main">
+                    <RadzenPanelMenuItem Text="Radzen catalogus · QA"
+                                         Icon="auto_awesome_mosaic"
+                                         Expanded="@IsTopLevelGroupExpanded(NavGroupRadzenCatalog)"
+                                         Value="@TopLevelGroupValue(NavGroupRadzenCatalog)"
+                                         Class="demo-panel-menu__group demo-panel-menu__group--catalog demo-panel-menu__group--main">
                         <div class="demo-panel-menu__group-copy">
                             <div class="demo-panel-menu__subtitle">Theme-QA: alle Radzen-componenten in het actieve theme</div>
                         </div>
@@ -106,8 +132,18 @@
         new("Home", "home", "/", NavLinkMatch.All),
         new("Voorbeeldapplicatie", "rocket_launch", "/app"),
         new("Blog-showcase", "newsmode", "/blog"),
-        new("Designer", "design_services", "/designer"),
         new("Theme", "palette", "/components/theme")
+    ];
+
+    private static readonly IReadOnlyList<NavEntry> DesignSystemItems =
+    [
+        new("Overzicht", "dashboard_customize", "/guidance/ontwerpstelsel", NavLinkMatch.All),
+        new("Designer", "auto_fix_high", "/designer", NavLinkMatch.All),
+        new("Patronen", "schema", "/guidance/patterns"),
+        new("Schrijfwijzer", "edit_note", "/guidance/schrijfwijzer"),
+        new("Starter template", "rocket_launch", "/guidance/starter-template"),
+        new("Token-export", "data_object", "/guidance/token-export"),
+        new("Visuele regressie", "photo_library", "/guidance/ontwerpstelsel#visual-regression", NavLinkMatch.All)
     ];
 
     private static readonly IReadOnlyList<NavSection> AgtSections =
@@ -144,15 +180,6 @@
             new("Tabs", "tab", "/components/layout/tabs"),
             new("Breadcrumb", "alt_route", "/components/layout/breadcrumb"),
             new("Sidebar Layout", "dashboard_customize", "/components/layout/sidebar-layout")
-        ]),
-        new("Ontwerpstelsel",
-        [
-            new("Overzicht", "dashboard_customize", "/guidance/ontwerpstelsel"),
-            new("Patronen", "schema", "/guidance/patterns"),
-            new("Schrijfwijzer", "edit_note", "/guidance/schrijfwijzer"),
-            new("Starter template", "rocket_launch", "/guidance/starter-template"),
-            new("Token-export", "data_object", "/guidance/token-export"),
-            new("Visuele regressie", "photo_library", "/guidance/ontwerpstelsel#visual-regression")
         ])
     ];
 
@@ -325,17 +352,35 @@
 
     private const string CatalogCategoryStoragePrefix = "agt-ui-catalog-category-";
     private const string CatalogCategoryValuePrefix = "catalog-category:";
+    private const string TopLevelGroupStoragePrefix = "agt-ui-nav-group-";
+    private const string TopLevelGroupValuePrefix = "top-level-group:";
+    private const string NavGroupGettingStarted = "getting-started";
+    private const string NavGroupDesignSystem = "design-system";
+    private const string NavGroupAgtComponents = "agt-components";
+    private const string NavGroupRadzenCatalog = "radzen-catalog";
+
+    private static readonly IReadOnlyDictionary<string, bool> TopLevelGroupDefaultState = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase)
+    {
+        [NavGroupGettingStarted] = true,
+        [NavGroupDesignSystem] = true,
+        [NavGroupAgtComponents] = false,
+        [NavGroupRadzenCatalog] = false
+    };
 
     private string FilterText { get; set; } = string.Empty;
     private string CurrentRoute { get; set; } = string.Empty;
     private ElementReference _filterInputRef;
     private ElementReference _menuRootRef;
     private bool _catalogStateLoaded;
+    private bool _topLevelGroupStateLoaded;
     private readonly Dictionary<string, bool> _catalogExpandedState = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, bool> _topLevelGroupExpandedState = new(StringComparer.OrdinalIgnoreCase);
 
     private bool HasFilter => !string.IsNullOrWhiteSpace(FilterText);
 
     private List<NavEntry> FilteredGettingStarted => FilterEntries(GettingStartedItems);
+
+    private List<NavEntry> FilteredDesignSystemItems => FilterEntries(DesignSystemItems);
 
     private List<NavSection> FilteredAgtSections =>
         [.. AgtSections
@@ -346,7 +391,11 @@
 
     private bool HasAgtItems => FilteredAgtSections.Count > 0;
 
-    private bool HasAnyVisibleItems => FilteredGettingStarted.Count > 0 || HasAgtItems || FilteredCatalogCategories.Count > 0;
+    private bool HasAnyVisibleItems =>
+        FilteredGettingStarted.Count > 0 ||
+        FilteredDesignSystemItems.Count > 0 ||
+        HasAgtItems ||
+        FilteredCatalogCategories.Count > 0;
 
     protected override void OnInitialized()
     {
@@ -358,6 +407,7 @@
     {
         if (firstRender)
         {
+            await RestoreTopLevelGroupStateAsync();
             await RestoreCatalogCategoryStateAsync();
             await InvokeAsync(StateHasChanged);
         }
@@ -443,14 +493,28 @@
     private async Task OnPanelMenuClick(MenuItemEventArgs args)
     {
         var rawValue = args.Value?.ToString();
-        if (string.IsNullOrWhiteSpace(rawValue) || !rawValue.StartsWith(CatalogCategoryValuePrefix, StringComparison.OrdinalIgnoreCase))
+        if (string.IsNullOrWhiteSpace(rawValue))
         {
             return;
         }
 
-        var key = rawValue[CatalogCategoryValuePrefix.Length..];
-        var nextState = !_catalogExpandedState.TryGetValue(key, out var expanded) || !expanded;
-        await PersistCatalogCategoryStateAsync(key, nextState);
+        if (rawValue.StartsWith(TopLevelGroupValuePrefix, StringComparison.OrdinalIgnoreCase))
+        {
+            var groupKey = rawValue[TopLevelGroupValuePrefix.Length..];
+            var nextGroupState = !_topLevelGroupExpandedState.TryGetValue(groupKey, out var groupExpanded) || !groupExpanded;
+            await PersistTopLevelGroupStateAsync(groupKey, nextGroupState);
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
+        if (!rawValue.StartsWith(CatalogCategoryValuePrefix, StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        var categoryKey = rawValue[CatalogCategoryValuePrefix.Length..];
+        var nextCategoryState = !_catalogExpandedState.TryGetValue(categoryKey, out var categoryExpanded) || !categoryExpanded;
+        await PersistCatalogCategoryStateAsync(categoryKey, nextCategoryState);
         await InvokeAsync(StateHasChanged);
     }
 
@@ -503,6 +567,26 @@
         return _catalogExpandedState.TryGetValue(category.Key, out var expanded) && expanded;
     }
 
+    private bool IsTopLevelGroupExpanded(string key)
+    {
+        if (HasFilter)
+        {
+            return true;
+        }
+
+        if (_topLevelGroupExpandedState.TryGetValue(key, out var expanded))
+        {
+            return expanded;
+        }
+
+        if (TopLevelGroupDefaultState.TryGetValue(key, out var defaultExpanded))
+        {
+            return defaultExpanded;
+        }
+
+        return false;
+    }
+
     private bool IsCurrentRoute(string path)
     {
         var target = path.TrimStart('/');
@@ -510,6 +594,25 @@
     }
 
     private string CatalogCategoryValue(string key) => $"{CatalogCategoryValuePrefix}{key}";
+
+    private string TopLevelGroupValue(string key) => $"{TopLevelGroupValuePrefix}{key}";
+
+    private async Task RestoreTopLevelGroupStateAsync()
+    {
+        if (_topLevelGroupStateLoaded)
+        {
+            return;
+        }
+
+        foreach (var group in TopLevelGroupDefaultState)
+        {
+            var fallbackState = group.Value ? "expanded" : "collapsed";
+            var value = await JS.InvokeAsync<string>("agtTheme.getStoredValue", BuildTopLevelGroupStorageKey(group.Key), fallbackState);
+            _topLevelGroupExpandedState[group.Key] = string.Equals(value, "expanded", StringComparison.OrdinalIgnoreCase);
+        }
+
+        _topLevelGroupStateLoaded = true;
+    }
 
     private async Task RestoreCatalogCategoryStateAsync()
     {
@@ -535,7 +638,16 @@
         return JS.InvokeVoidAsync("agtTheme.setStoredValue", BuildCatalogStorageKey(key), value);
     }
 
+    private ValueTask PersistTopLevelGroupStateAsync(string key, bool expanded)
+    {
+        _topLevelGroupExpandedState[key] = expanded;
+        var value = expanded ? "expanded" : "collapsed";
+        return JS.InvokeVoidAsync("agtTheme.setStoredValue", BuildTopLevelGroupStorageKey(key), value);
+    }
+
     private static string BuildCatalogStorageKey(string key) => $"{CatalogCategoryStoragePrefix}{key}";
+
+    private static string BuildTopLevelGroupStorageKey(string key) => $"{TopLevelGroupStoragePrefix}{key}";
 
     private void UpdateCurrentRoute()
     {

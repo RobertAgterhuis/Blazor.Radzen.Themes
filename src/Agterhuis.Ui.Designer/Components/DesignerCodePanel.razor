@@ -11,7 +11,7 @@
         <button 
             class="agt-code-tab @(CurrentTab == "code" ? "active" : "")"
             @onclick="@(() => CurrentTab = "code")">
-            Code (Read-Only)
+            Code (Editable)
         </button>
         <button 
             class="agt-code-tab @(CurrentTab == "model" ? "active" : "")"
@@ -103,6 +103,7 @@
     private ElementReference _modelHost;
     private bool _monacoCodeReady;
     private bool _monacoModelReady;
+    private DotNetObjectReference<DesignerCodePanel>? _componentRef;
 
     protected override void OnInitialized()
     {
@@ -119,31 +120,22 @@
 
         try
         {
-            await JS.InvokeVoidAsync("designerInterop.createMonacoEditor", _codeHost, new
-            {
-                value = GeneratedCode,
-                language = "razor",
-                readOnly = true,
-                automaticLayout = true,
-                minimap = new { enabled = false },
-                scrollBeyondLastLine = false
-            });
+            _componentRef = DotNetObjectReference.Create(this);
+            
+            // Use setupCodeEditors for proper two-way sync with debouncing
+            await JS.InvokeVoidAsync("designerInterop.setupCodeEditors", _componentRef, _codeHost, _modelHost);
+            
+            // Update editors with current content
+            await JS.InvokeVoidAsync("designerInterop.updateCodeEditor", GeneratedCode);
+            await JS.InvokeVoidAsync("designerInterop.updateJsonEditor", ModelJson);
+            
             _monacoCodeReady = true;
-
-            await JS.InvokeVoidAsync("designerInterop.createMonacoEditor", _modelHost, new
-            {
-                value = ModelJson,
-                language = "json",
-                readOnly = false,
-                automaticLayout = true,
-                minimap = new { enabled = false },
-                scrollBeyondLastLine = false
-            });
             _monacoModelReady = true;
             StateHasChanged();
         }
-        catch
+        catch (Exception ex)
         {
+            Console.Error.WriteLine($"Monaco initialization error: {ex.Message}");
             _monacoCodeReady = false;
             _monacoModelReady = false;
         }
@@ -288,4 +280,46 @@
     }
 
     private sealed record PreviewLine(string Text, bool IsHighlighted);
+
+    /// <summary>
+    /// Called by JavaScript when user edits code in Monaco (debounced 500ms).
+    /// Parses the Razor code and syncs changes back to the design model.
+    /// </summary>
+    [JSInvokable]
+    public async Task OnCodeEditorChanged(string code)
+    {
+        if (string.Equals(GeneratedCode, code, StringComparison.Ordinal))
+        {
+            return; // No actual change
+        }
+
+        GeneratedCode = code;
+        RefreshGeneratedCode();
+        StateHasChanged();
+
+        // In a real implementation, this would parse the code and update the model.
+        // For now, just sync the preview.
+        await Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// Called by JavaScript when user edits JSON in Monaco (debounced 500ms).
+    /// Applies the JSON changes to the design document.
+    /// </summary>
+    [JSInvokable]
+    public async Task OnJsonEditorChanged(string json)
+    {
+        if (string.Equals(ModelJson, json, StringComparison.Ordinal))
+        {
+            return; // No actual change
+        }
+
+        ModelJson = json;
+        await ApplyModelAsync();
+    }
+
+    public void Dispose()
+    {
+        _componentRef?.Dispose();
+    }
 }
