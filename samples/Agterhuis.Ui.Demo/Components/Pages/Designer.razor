@@ -1,5 +1,6 @@
 @page "/designer/edit"
 @layout DesignerLayout
+@using Microsoft.JSInterop
 @using Agterhuis.Ui.Components.Layout
 @using Agterhuis.Ui.Designer.Commands
 @using Agterhuis.Ui.Designer.Components
@@ -185,6 +186,7 @@
 
     private ElementReference _canvasRef;
     private DotNetObjectReference<Designer>? _keyScopeRef;
+    private DotNetObjectReference<Designer>? _dragDropRef;
     private DesignerDragPayload? _activeDrag;
     private string? _selectedNodeId;
     private string _paletteFilter = string.Empty;
@@ -253,7 +255,9 @@
         await RestoreDocumentsFromStorageAsync();
         _hasRecoveredDraft = !string.IsNullOrWhiteSpace(await JS.InvokeAsync<string>("designerInterop.getText", LocalStorageDraftPrefix + _commands.Document.Name));
         _keyScopeRef = DotNetObjectReference.Create(this);
+        _dragDropRef = DotNetObjectReference.Create(this);
         await JS.InvokeVoidAsync("designerInterop.registerKeyScope", _keyScopeRef, _canvasRef);
+        await JS.InvokeVoidAsync("designerInterop.setupDragAndDrop", _dragDropRef);
         StateHasChanged();
     }
 
@@ -261,6 +265,7 @@
     {
         CommandRegistry.RemoveScope(CommandScope);
         _keyScopeRef?.Dispose();
+        _dragDropRef?.Dispose();
     }
 
     private async Task RestoreDocumentsFromStorageAsync()
@@ -358,6 +363,28 @@
     {
         _selectedNodeId = nodeId;
         await InvokeAsync(StateHasChanged);
+    }
+
+    [JSInvokable]
+    public async Task OnJavaScriptDrop(string componentType, int dropzoneIndex)
+    {
+        Console.WriteLine($"✅ JavaScript drop received: {componentType} on zone {dropzoneIndex}");
+        
+        // Map dropzone index to DesignNodeLocation for root-level insertion
+        var location = DesignNodeLocation.Root(dropzoneIndex);
+        
+        var didMutate = AddFromPalette(location, componentType);
+        
+        if (didMutate)
+        {
+            await AutoSaveAsync();
+            await InvokeAsync(StateHasChanged);
+            Console.WriteLine($"✨ Component added successfully via JavaScript!");
+        }
+        else
+        {
+            Console.WriteLine($"⚠️ Failed to add component");
+        }
     }
 
     private void OnTreeChange(TreeEventArgs args)

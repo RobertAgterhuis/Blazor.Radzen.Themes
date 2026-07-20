@@ -174,6 +174,74 @@ window.designerInterop = (() => {
         });
     };
 
+    let blazorRef = null;
+
+    const setupDragAndDrop = (dotnetHelper) => {
+        blazorRef = dotnetHelper;
+        
+        // Track active drag
+        let activeDrag = null;
+
+        // Setup palette items for dragging
+        const paletteItems = document.querySelectorAll('.designer-palette-item');
+        paletteItems.forEach(item => {
+            item.addEventListener('dragstart', (e) => {
+                const componentType = item.title; // title attribute holds component type
+                activeDrag = { type: 'palette', value: componentType };
+                e.dataTransfer.effectAllowed = 'copy';
+                e.dataTransfer.setData('text/plain', componentType);
+                
+                // Visual feedback
+                item.style.opacity = '0.6';
+                console.log(`🎯 Drag started: ${componentType}`);
+            }, false);
+
+            item.addEventListener('dragend', (e) => {
+                item.style.opacity = '1';
+                activeDrag = null;
+                console.log(`❌ Drag ended`);
+            }, false);
+        });
+
+        // Setup dropzones for dropping
+        const dropzones = document.querySelectorAll('.designer-dropzone');
+        dropzones.forEach((dropzone, index) => {
+            dropzone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'copy';
+                
+                // Visual feedback
+                dropzone.classList.add('designer-dropzone--drag-over');
+                console.log(`📍 Dragover detected on zone ${index}`);
+            }, false);
+
+            dropzone.addEventListener('dragleave', (e) => {
+                // Only remove if actually leaving the element
+                if (e.target === dropzone) {
+                    dropzone.classList.remove('designer-dropzone--drag-over');
+                }
+            }, false);
+
+            dropzone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dropzone.classList.remove('designer-dropzone--drag-over');
+                
+                const componentType = e.dataTransfer.getData('text/plain');
+                console.log(`✅ Drop received on zone ${index}: ${componentType}`);
+                
+                if (activeDrag && blazorRef) {
+                    // Call Blazor method to handle the drop
+                    dotnetHelper.invokeMethodAsync('OnJavaScriptDrop', componentType, index)
+                        .then(() => console.log(`✨ Blazor handler completed`))
+                        .catch(err => console.error(`❌ Blazor handler error:`, err));
+                }
+            }, false);
+        });
+
+        console.log(`✨ Drag & drop setup complete: ${paletteItems.length} palette items, ${dropzones.length} dropzones`);
+    };
+
     return {
         createMonacoEditor,
         getJson,
@@ -184,6 +252,7 @@ window.designerInterop = (() => {
         saveBytesFile,
         saveDesignDocument,
         setMonacoTheme,
-        setJson
+        setJson,
+        setupDragAndDrop
     };
 })();
