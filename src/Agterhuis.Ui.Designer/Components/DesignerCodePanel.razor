@@ -2,6 +2,7 @@
 @using Agterhuis.Ui.Designer.Model
 @using Agterhuis.Ui.Designer.CodeGen
 @using Agterhuis.Ui.Designer.Serialization
+@using Agterhuis.Ui.Designer.Validation
 @namespace Agterhuis.Ui.Designer.Components
 
 <div class="agt-designer-code-panel">
@@ -30,8 +31,8 @@
             <div class="agt-model-editor">
                 <textarea 
                     class="agt-model-textarea"
-                    @bind="ModelJson"
-                    @onchange="@(() => ValidateAndApplyModel())"
+                    value="@ModelJson"
+                    @oninput="OnModelJsonInput"
                     rows="20">
                 </textarea>
                 @if (!string.IsNullOrEmpty(ModelValidationError))
@@ -42,7 +43,7 @@
                 }
                 <button 
                     class="agt-model-apply-btn"
-                    @onclick="@(() => ValidateAndApplyModel())">
+                    @onclick="ApplyModelAsync">
                     Apply
                 </button>
             </div>
@@ -60,11 +61,19 @@
     [Parameter]
     public EventCallback<DesignDocument> OnDocumentChanged { get; set; }
 
+    [Parameter]
+    public string InitialTab { get; set; } = "code";
+
+    [Parameter]
+    public string? InitialModelJson { get; set; }
+
     private string CurrentTab { get; set; } = "code";
     private string GeneratedCode { get; set; } = string.Empty;
     private string ModelJson { get; set; } = string.Empty;
     private string? ModelValidationError { get; set; }
+    private DesignDocument? _lastValidDocument;
     private RazorCodeGenerator? _codeGenerator;
+    private bool _tabInitialized;
 
     protected override void OnInitialized()
     {
@@ -74,6 +83,12 @@
 
     protected override void OnParametersSet()
     {
+        if (!_tabInitialized)
+        {
+            CurrentTab = string.Equals(InitialTab, "model", StringComparison.OrdinalIgnoreCase) ? "model" : "code";
+            _tabInitialized = true;
+        }
+
         RefreshGeneratedCode();
     }
 
@@ -90,11 +105,12 @@
             {
                 WriteIndented = true
             };
-            ModelJson = JsonSerializer.Serialize(Document, options);
+            ModelJson = InitialModelJson ?? JsonSerializer.Serialize(Document, options);
+            _lastValidDocument = Document;
         }
     }
 
-    private void ValidateAndApplyModel()
+    public Task ApplyModelAsync()
     {
         ModelValidationError = null;
 
@@ -110,19 +126,48 @@
             if (newDocument is null)
             {
                 ModelValidationError = "Failed to deserialize model.";
-                return;
+                StateHasChanged();
+                return Task.CompletedTask;
             }
 
+            var validationErrors = DesignDocumentValidator.Validate(newDocument);
+            if (validationErrors.Count > 0)
+            {
+                ModelValidationError = string.Join("; ", validationErrors.Select(error => $"{error.Path}: {error.Message}"));
+                if (_lastValidDocument is not null)
+                {
+                    ModelJson = JsonSerializer.Serialize(_lastValidDocument, new System.Text.Json.JsonSerializerOptions(DesignJsonOptions.Default)
+                    {
+                        WriteIndented = true
+                    });
+                }
+
+                StateHasChanged();
+                return Task.CompletedTask;
+            }
+
+            _lastValidDocument = newDocument;
+
             // Apply the changes
-            _ = OnDocumentChanged.InvokeAsync(newDocument);
+            StateHasChanged();
+            return OnDocumentChanged.InvokeAsync(newDocument);
         }
         catch (JsonException ex)
         {
             ModelValidationError = $"JSON Error: {ex.Message}";
+            StateHasChanged();
+            return Task.CompletedTask;
         }
         catch (Exception ex)
         {
             ModelValidationError = $"Error: {ex.Message}";
+            StateHasChanged();
+            return Task.CompletedTask;
         }
+    }
+
+    private void OnModelJsonInput(ChangeEventArgs args)
+    {
+        ModelJson = args.Value?.ToString() ?? string.Empty;
     }
 }
