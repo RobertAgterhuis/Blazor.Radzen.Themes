@@ -33,7 +33,7 @@
     gap: var(--agt-spacing-3);
     grid-template-areas:
         "palette canvas props"
-        "tree canvas props";
+        "tree canvas data";
     grid-template-columns: minmax(16rem, 20rem) minmax(0, 1fr) minmax(12rem, 16rem);
     grid-template-rows: minmax(0, 1fr) minmax(12rem, auto);
 }
@@ -57,6 +57,10 @@
 
 .designer-panel--properties {
     grid-area: props;
+}
+
+.designer-panel--data {
+    grid-area: data;
 }
 
 .designer-panel--tree {
@@ -123,6 +127,52 @@
     padding: var(--agt-spacing-3);
 }
 
+.designer-data-panel {
+    display: grid;
+    gap: var(--agt-spacing-2);
+}
+
+.designer-data-panel__controls {
+    display: grid;
+    gap: var(--agt-spacing-2);
+}
+
+.designer-data-panel__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--agt-spacing-2);
+    justify-content: space-between;
+    color: var(--agt-text-muted);
+    font-size: var(--agt-font-size-xs);
+}
+
+.designer-data-panel__table-wrap {
+    overflow: auto;
+}
+
+.designer-data-panel__table {
+    border-collapse: collapse;
+    min-width: 100%;
+    width: max-content;
+}
+
+.designer-data-panel__table th,
+.designer-data-panel__table td {
+    border-bottom: 1px solid var(--agt-input-border);
+    padding: var(--agt-spacing-1) var(--agt-spacing-2);
+    text-align: left;
+    white-space: nowrap;
+}
+
+.designer-data-panel__table th {
+    color: var(--agt-text-muted);
+    font-size: var(--agt-font-size-xs);
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+    background: var(--agt-surface-1);
+}
+
 .designer-breadcrumb {
     color: var(--agt-text-muted);
     font-size: var(--agt-font-size-xs);
@@ -148,7 +198,8 @@
             "palette"
             "canvas"
             "tree"
-            "props";
+            "props"
+            "data";
         grid-template-columns: 1fr;
         grid-template-rows: auto;
     }

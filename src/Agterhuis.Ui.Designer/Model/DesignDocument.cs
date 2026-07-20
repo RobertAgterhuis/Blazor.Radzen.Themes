@@ -2,7 +2,7 @@ namespace Agterhuis.Ui.Designer.Model;
 
 public sealed class DesignDocument
 {
-    public const int CurrentSchemaVersion = 1;
+    public const int CurrentSchemaVersion = 2;
 
     public string Name { get; set; } = string.Empty;
 
@@ -11,4 +11,6 @@ public sealed class DesignDocument
     public int SchemaVersion { get; set; } = CurrentSchemaVersion;
 
     public List<DesignPage> Pages { get; set; } = [];
+
+    public DesignDataModel DataModel { get; set; } = DesignDataModelSeeder.CreateDefault();
 }

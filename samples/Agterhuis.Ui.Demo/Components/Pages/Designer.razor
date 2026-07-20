@@ -1,20 +1,43 @@
 @page "/designer"
 @layout DesignerLayout
+@using Agterhuis.Ui.Components.Layout
 @using Agterhuis.Ui.Designer.Commands
+@using Agterhuis.Ui.Designer.Export
 @using Agterhuis.Ui.Designer.Model
 @using Agterhuis.Ui.Designer.Registry
 @using Agterhuis.Ui.Designer.Serialization
 @using Agterhuis.Ui.Demo.Components.Designer
+@using Microsoft.AspNetCore.Components.Forms
+@inject IAgtCommandRegistry CommandRegistry
 @inject IJSRuntime JS
 
 <PageTitle>Designer</PageTitle>
 
 <div class="designer-page" @onkeydown="OnPageKeyDown" tabindex="0">
+    @if (_hasRecoveredDraft)
+    {
+        <div class="designer-recovery-banner" role="status" aria-live="polite">
+            Hersteld werk uit localStorage gevonden. Sla het bestand op om het definitief te bewaren.
+        </div>
+    }
+
     <header class="designer-toolbar" aria-label="Designer toolbar">
         <div class="designer-toolbar__group">
+            <RadzenDropDown TValue="DesignDocumentTemplateKind"
+                            Data="TemplateOptions"
+                            Value="@_selectedTemplateKind"
+                            Change="OnTemplateChanged"
+                            TextProperty="DisplayName"
+                            ValueProperty="Kind" />
             <RadzenButton Text="Nieuw" Icon="add_box" ButtonStyle="ButtonStyle.Base" Variant="Variant.Flat" Click="OnNewDocument" />
+            <RadzenButton Text="Openen" Icon="folder_open" ButtonStyle="ButtonStyle.Base" Variant="Variant.Flat" Click="OnOpenDocument" />
+            <InputFile class="designer-file-input"
+                       accept=".agtdesign,.json,application/json"
+                       OnChange="OnDesignFileChanged" />
             <RadzenDropDown TValue="string" Data="SavedDocumentNames" Value="@_selectedSavedName" Placeholder="Open uit localStorage" Change="OnSavedSelectionChanged" />
             <RadzenButton Text="Opslaan" Icon="save" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Flat" Click="OnSaveDocument" />
+            <RadzenButton Text="Exporteren" Icon="download" ButtonStyle="ButtonStyle.Base" Variant="Variant.Flat" Click="OnExportDocument" />
+            <AgtCommandPalette />
         </div>
 
         <div class="designer-toolbar__group">
@@ -104,6 +127,12 @@
                            SetNodeLayoutSlot="OnNodeLayoutSlotChanged" />
         </aside>
 
+        <aside class="designer-panel designer-panel--data" aria-label="Data panel">
+            <DesignerDataPanel DataModel="@_commands.Document.DataModel"
+                               SelectedEntityName="@_selectedEntityName"
+                               SelectedEntityNameChanged="OnSelectedEntityChanged" />
+        </aside>
+
         <aside class="designer-panel designer-panel--tree" aria-label="Structuurboom">
             <h2>Structuur</h2>
             <RadzenTree Data="TreeRoots" TextProperty="Text" ChildrenProperty="Children" Change="OnTreeChange" />
@@ -114,9 +143,12 @@
 @code {
     private const string LocalStorageIndexKey = "agt-designer-documents";
     private const string LocalStoragePrefix = "agt-designer-document-";
+    private const string LocalStorageDraftPrefix = "agt-designer-draft-";
+    private const string CommandScope = "designer";
 
+    private readonly ProjectExporter _projectExporter = new();
     private readonly DesignerComponentRegistry _registry = DesignerComponentRegistry.Instance;
-    private readonly DesignDocumentCommandStack _commands = new(CreateNewDocument("Untitled"));
+    private readonly DesignDocumentCommandStack _commands = new(CreateNewDocument("Untitled", DesignDocumentTemplateKind.Blank));
 
     private readonly IReadOnlyDictionary<string, int> _viewportWidths = new Dictionary<string, int>(StringComparer.Ordinal)
     {
@@ -133,7 +165,10 @@
     private string _canvasTheme = "plum-dark";
     private string _viewport = "desktop";
     private string? _selectedSavedName;
+    private string? _selectedEntityName;
+    private DesignDocumentTemplateKind _selectedTemplateKind = DesignDocumentTemplateKind.FormPage;
     private List<string> _savedDocumentNames = [];
+    private bool _hasRecoveredDraft;
 
     private IReadOnlyList<string> SavedDocumentNames => _savedDocumentNames;
 
@@ -141,6 +176,8 @@
         .SelectMany(static theme => new[] { theme.LightVariantId, theme.DarkVariantId })
         .OrderBy(static id => id, StringComparer.Ordinal)
         .ToArray();
+
+    private IReadOnlyList<DesignDocumentTemplates.TemplateDefinition> TemplateOptions => DesignDocumentTemplates.DefinitionsList;
 
     private IReadOnlyDictionary<string, IReadOnlyList<DesignerComponentDescriptor>> PaletteByCategory => _registry.Components
         .Where(static descriptor => descriptor.AllowedInPalette)
@@ -180,7 +217,9 @@
             return;
         }
 
+        RegisterCommands();
         await RestoreDocumentsFromStorageAsync();
+        _hasRecoveredDraft = !string.IsNullOrWhiteSpace(await JS.InvokeAsync<string>("designerInterop.getText", LocalStorageDraftPrefix + _commands.Document.Name));
         _keyScopeRef = DotNetObjectReference.Create(this);
         await JS.InvokeVoidAsync("designerInterop.registerKeyScope", _keyScopeRef, _canvasRef);
         StateHasChanged();
@@ -188,6 +227,7 @@
 
     public void Dispose()
     {
+        CommandRegistry.RemoveScope(CommandScope);
         _keyScopeRef?.Dispose();
     }
 
@@ -306,7 +346,10 @@
     private async Task OnSaveDocument()
     {
         var name = _commands.Document.Name;
-        await JS.InvokeVoidAsync("designerInterop.setJson", LocalStoragePrefix + name, DesignDocumentSerializer.Serialize(_commands.Document));
+        var json = DesignDocumentSerializer.Serialize(_commands.Document);
+        await JS.InvokeVoidAsync("designerInterop.saveDesignDocument", $"{name}.agtdesign", json);
+        await JS.InvokeVoidAsync("designerInterop.setJson", LocalStoragePrefix + name, json);
+        await JS.InvokeVoidAsync("designerInterop.removeItem", LocalStorageDraftPrefix + name);
 
         if (!_savedDocumentNames.Contains(name, StringComparer.Ordinal))
         {
@@ -316,7 +359,37 @@
         }
 
         _commands.MarkSaved();
+        _hasRecoveredDraft = false;
         StateHasChanged();
+    }
+
+    private async Task OnExportDocument()
+    {
+        var result = _projectExporter.ExportProject(_commands.Document, _commands.Document.Name, _canvasTheme.Split('-')[0]);
+        await JS.InvokeVoidAsync("designerInterop.saveBytesFile", $"{_commands.Document.Name}.zip", "application/zip", result.ZipData);
+    }
+
+    private async Task OnOpenDocument()
+    {
+        var json = await JS.InvokeAsync<string?>("designerInterop.pickDesignDocument");
+        if (!string.IsNullOrWhiteSpace(json))
+        {
+            ApplyLoadedDocument(json, markSaved: true);
+        }
+    }
+
+    private async Task OnDesignFileChanged(InputFileChangeEventArgs args)
+    {
+        if (args.FileCount == 0)
+        {
+            return;
+        }
+
+        var file = args.File;
+        using var stream = file.OpenReadStream(maxAllowedSize: 2_000_000);
+        using var reader = new StreamReader(stream, System.Text.Encoding.UTF8);
+        var json = await reader.ReadToEndAsync();
+        ApplyLoadedDocument(json, markSaved: true);
     }
 
     private async Task OnSavedSelectionChanged(object value)
@@ -334,19 +407,44 @@
             return;
         }
 
-        var document = DesignDocumentSerializer.Deserialize(json);
-        _commands.ReplaceDocument(document, markSaved: true);
-        _selectedNodeId = null;
-        StateHasChanged();
+        ApplyLoadedDocument(json, markSaved: true);
+    }
+
+    private Task OnSelectedEntityChanged(string value)
+    {
+        _selectedEntityName = value;
+        return Task.CompletedTask;
     }
 
     private async Task OnNewDocument()
     {
         var name = $"Document-{DateTime.UtcNow:yyyyMMdd-HHmmss}";
-        _commands.ReplaceDocument(CreateNewDocument(name), markSaved: true);
+        _commands.ReplaceDocument(CreateNewDocument(name, _selectedTemplateKind), markSaved: true);
+        _selectedEntityName = _commands.Document.DataModel.Entities.FirstOrDefault()?.Name;
         _selectedNodeId = null;
+        _hasRecoveredDraft = false;
         await AutoSaveAsync();
         StateHasChanged();
+    }
+
+    private void ApplyLoadedDocument(string json, bool markSaved)
+    {
+        var document = DesignDocumentSerializer.Deserialize(json);
+        _commands.ReplaceDocument(document, markSaved);
+        _selectedEntityName = document.DataModel.Entities.FirstOrDefault()?.Name;
+        _selectedNodeId = null;
+        _hasRecoveredDraft = false;
+        StateHasChanged();
+    }
+
+    private Task OnTemplateChanged(object value)
+    {
+        if (value is DesignDocumentTemplateKind kind)
+        {
+            _selectedTemplateKind = kind;
+        }
+
+        return Task.CompletedTask;
     }
 
     private Task OnCanvasThemeChanged(string value)
@@ -528,6 +626,7 @@
     private async Task AutoSaveAsync()
     {
         await JS.InvokeVoidAsync("designerInterop.setJson", LocalStoragePrefix + _commands.Document.Name, DesignDocumentSerializer.Serialize(_commands.Document));
+        await JS.InvokeVoidAsync("designerInterop.setJson", LocalStorageDraftPrefix + _commands.Document.Name, DesignDocumentSerializer.Serialize(_commands.Document));
     }
 
     private bool DescriptorMatchesFilter(DesignerComponentDescriptor descriptor)
@@ -542,8 +641,15 @@
             || descriptor.Category.Contains(_paletteFilter, StringComparison.OrdinalIgnoreCase);
     }
 
-    private static DesignDocument CreateNewDocument(string name)
+    private static DesignDocument CreateNewDocument(string name, DesignDocumentTemplateKind templateKind)
     {
+        var template = DesignDocumentTemplates.Create(templateKind, name);
+
+        if (template.Pages.Count > 0)
+        {
+            return template;
+        }
+
         var root = new DesignNode
         {
             ComponentType = "RadzenRow",
@@ -587,6 +693,71 @@
         };
 
         return DesignDocumentMigrator.Migrate(document);
+    }
+
+    private void RegisterCommands()
+    {
+        CommandRegistry.SetCommands(CommandScope, new[]
+        {
+            new AgtCommandItem("designer-add-page", "Pagina toevoegen", "Designer", OnAddPageAsync)
+            {
+                Description = "Voeg een nieuwe pagina toe vanuit het gekozen patroon.",
+                ShortcutHint = "Ctrl+Shift+P"
+            },
+            new AgtCommandItem("designer-insert-text", "Tekstveld invoegen", "Designer", OnInsertTextFieldAsync)
+            {
+                Description = "Voeg een tekstveld toe aan de geselecteerde container of de root.",
+                ShortcutHint = "Ctrl+K"
+            },
+            new AgtCommandItem("designer-export", "Exporteren", "Designer", OnExportDocument)
+            {
+                Description = "Download een geexporteerd projectpakket.",
+                ShortcutHint = "Ctrl+E"
+            },
+            new AgtCommandItem("designer-undo", "Ongedaan maken", "Designer", OnUndo)
+            {
+                Description = "Maak de laatste ontwerpwijziging ongedaan.",
+                ShortcutHint = "Ctrl+Z"
+            }
+        });
+    }
+
+    private Task OnAddPageAsync()
+    {
+        var newPage = DesignDocumentTemplates.Create(_selectedTemplateKind, $"Page-{_commands.Document.Pages.Count + 1}").Pages[0];
+        _commands.Execute(new AddPageCommand(newPage));
+        _hasRecoveredDraft = true;
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
+
+    private Task OnInsertTextFieldAsync()
+    {
+        var targetLocation = _selectedNodeId is null
+            ? DesignNodeLocation.Root(_commands.Document.Pages[0].Nodes.Count)
+            : new DesignNodeLocation(_selectedNodeId, "ChildContent", GetChildInsertIndex(_selectedNodeId));
+
+        var descriptor = _registry.GetDescriptor("AgtTextField");
+        var node = CreateNodeForDescriptor(descriptor);
+
+        if (_commands.Execute(new AddNodeCommand(0, targetLocation, node)))
+        {
+            _selectedNodeId = node.Id;
+            _hasRecoveredDraft = true;
+            StateHasChanged();
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private int GetChildInsertIndex(string parentNodeId)
+    {
+        if (TryFindNode(_commands.Document.Pages[0].Nodes, parentNodeId, out _, out var container, out _))
+        {
+            return container.Count;
+        }
+
+        return 0;
     }
 
     private DesignNode CreateNodeForDescriptor(DesignerComponentDescriptor descriptor)

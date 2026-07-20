@@ -1,3 +1,5 @@
+using System.IO.Compression;
+using System.Text;
 using System.Text.Json;
 using Agterhuis.Ui.Designer.Export;
 using Agterhuis.Ui.Designer.Model;
@@ -113,10 +115,34 @@ public class ProjectExporterTests
         var result = _exporter.ExportProject(document, "TestProject", "ocean");
 
         // Assert
-        // The design document should be included for round-trip/re-import
-        // (actual verification would require inspecting the zip contents)
         Assert.NotNull(result);
         Assert.NotEmpty(result.ZipData);
+
+        using var archive = new ZipArchive(new MemoryStream(result.ZipData), ZipArchiveMode.Read);
+        Assert.Contains(archive.Entries, entry => entry.FullName == "TestProject/design/document.json");
+        Assert.Contains(archive.Entries, entry => entry.FullName == "TestProject/README.md");
+        Assert.Contains(archive.Entries, entry => entry.FullName == "TestProject/Program.cs");
+
+        using var documentEntryStream = archive.GetEntry("TestProject/design/document.json")!.Open();
+        using var reader = new StreamReader(documentEntryStream, Encoding.UTF8);
+        var json = reader.ReadToEnd();
+        var roundTripped = DesignDocumentSerializer.Deserialize(json);
+
+        Assert.Equal(document.Name, roundTripped.Name);
+        Assert.Equal(document.Version, roundTripped.Version);
+        Assert.Equal(document.Pages[0].Route, roundTripped.Pages[0].Route);
+    }
+
+    [Fact]
+    public void ExportProject_IncludesGeneratedDataServiceContracts()
+    {
+        var document = DesignDocumentTemplates.Create(DesignDocumentTemplateKind.FormPage, "Data demo");
+
+        var result = _exporter.ExportProject(document, "DataProject", "plum");
+
+        using var archive = new ZipArchive(new MemoryStream(result.ZipData), ZipArchiveMode.Read);
+        Assert.Contains(archive.Entries, entry => entry.FullName == "DataProject/Services/DesignDataContracts.cs");
+        Assert.Contains(archive.Entries, entry => entry.FullName == "DataProject/Services/DesignDataService.cs");
     }
 
     [Fact]

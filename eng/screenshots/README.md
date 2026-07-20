@@ -29,3 +29,8 @@ npm run a11y:install
 ```
 
 The `a11y:install` command installs Playwright browsers and is reused for screenshots.
+
+## Current captures
+
+- Home, catalog, workorders, planning, and family gallery snapshots
+- Designer start screen and designer canvas snapshots

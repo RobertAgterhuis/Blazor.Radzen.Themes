@@ -105,6 +105,12 @@ dotnet new agterhuis-app -n MijnApp --theme plum --variant dark
 
 The template package lives under [templates/Agterhuis.Ui.Templates](templates/Agterhuis.Ui.Templates) and is designed to be packed with the library release. See [docs/CONSUMING.md](docs/CONSUMING.md) for the host integration order.
 
+## Designer
+
+The LowCode designer lives in the demo app at `/designer`. It supports template-based starting points, browser file open/save for `.agtdesign` documents, local draft recovery, export, and a command palette.
+
+Designer notes and phase summaries live under [docs/designer](docs/designer), with the model and export history in [docs/designer/MODEL.md](docs/designer/MODEL.md) and [docs/designer/PHASE_4_CODEGEN_EXPORT.md](docs/designer/PHASE_4_CODEGEN_EXPORT.md).
+
 ## Build and Test
 
 ```bash

@@ -14,6 +14,7 @@ Back to project root: [README](../README.md)
 | [TOKEN-AUDIT.md](TOKEN-AUDIT.md) | Token audit outcomes for scope, literal, and parity guardrails. |
 | [CONTENT-GUIDELINES.md](CONTENT-GUIDELINES.md) | Writing rules, tone, and good/bad examples for demo and showcase copy. |
 | [DESIGN-KIT.md](DESIGN-KIT.md) | Designer handoff guide for token export and Figma import. |
+| [designer/](designer) | LowCode designer notes, model docs, phase summaries, and audit trail. |
 | [patterns/](patterns) | Living pattern library with usage guidance and reference anatomy. |
 | [RADZEN-COMPONENT-INVENTORY.md](RADZEN-COMPONENT-INVENTORY.md) | Inventory of installed Radzen components and demo mapping. |
 | [SHOWCASE-COVERAGE.md](SHOWCASE-COVERAGE.md) | Coverage notes for the workflow-style showcase app routes. |

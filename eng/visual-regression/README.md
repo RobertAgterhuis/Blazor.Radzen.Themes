@@ -15,5 +15,6 @@ npm run vr:approve
 
 - Home, buttons, data grid, and form routes
 - One showcase route and one blog route
+- Designer start screen and canvas
 - Desktop and tablet viewports
 - Themes: plum-dark, hoth-light, imperial-dark, autotaalglas-light, volt-dark

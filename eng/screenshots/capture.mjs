@@ -60,6 +60,20 @@ const requiredCaptures = [
     theme: "plum-dark",
     selector: ".rz-scheduler, text=Planbord",
     description: "Planning scheduler"
+  },
+  {
+    key: "designer-start-plum-dark",
+    route: "/designer",
+    theme: "plum-dark",
+    selector: ".designer-page",
+    description: "Designer start screen"
+  },
+  {
+    key: "designer-canvas-plum-dark",
+    route: "/designer",
+    theme: "plum-dark",
+    selector: ".designer-canvas",
+    description: "Designer canvas"
   }
 ];
 

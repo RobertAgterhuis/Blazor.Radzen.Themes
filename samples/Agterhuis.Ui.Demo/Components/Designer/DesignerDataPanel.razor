@@ -1,0 +1,129 @@
+@using System.Globalization
+@using Agterhuis.Ui.Designer.Model
+
+<section class="designer-data-panel">
+    <h2>Data</h2>
+
+    <div class="designer-data-panel__controls">
+        <AgtDropdown TValue="string"
+                     Label="Entiteit"
+                     AriaLabel="Entiteit"
+                     Data="EntityOptions"
+                     Value="@SelectedEntityName"
+                     ValueChanged="OnEntityChanged"
+                     TextProperty="Label"
+                     ValueProperty="Value" />
+
+        <AgtNumericField Label="Rijen"
+                         AriaLabel="Seed rijen"
+                         Value="@(Convert.ToDecimal(CurrentEntity?.Seed.RowCount ?? DataModel.RowCount))"
+                         ValueChanged="OnRowCountChanged"
+                         Min="1"
+                         Step="1" />
+
+        <AgtNumericField Label="Seed"
+                         AriaLabel="Seed waarde"
+                         Value="@(Convert.ToDecimal(CurrentEntity?.Seed.Seed ?? DataModel.Seed))"
+                         ValueChanged="OnSeedChanged"
+                         Min="1"
+                         Step="1" />
+    </div>
+
+    @if (CurrentEntity is not null)
+    {
+        <div class="designer-data-panel__meta">
+            <strong>@CurrentEntity.PluralName</strong>
+            <span>@CurrentEntity.Fields.Count velden</span>
+        </div>
+
+        <div class="designer-data-panel__table-wrap">
+            <table class="designer-data-panel__table">
+                <thead>
+                    <tr>
+                        @foreach (var field in CurrentEntity.Fields)
+                        {
+                            <th>@field.Name</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in PreviewRows)
+                    {
+                        <tr>
+                            @foreach (var field in CurrentEntity.Fields)
+                            {
+                                <td>@FormatValue(row.Values.TryGetValue(field.Name, out var value) ? value : null)</td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>
+
+@code {
+    [Parameter, EditorRequired]
+    public DesignDataModel DataModel { get; set; } = default!;
+
+    [Parameter]
+    public string? SelectedEntityName { get; set; }
+
+    [Parameter]
+    public EventCallback<string> SelectedEntityNameChanged { get; set; }
+
+    private DesignEntity? CurrentEntity => DataModel.Entities.FirstOrDefault(entity => string.Equals(entity.Name, SelectedEntityName, StringComparison.OrdinalIgnoreCase))
+        ?? DataModel.Entities.FirstOrDefault();
+
+    private IReadOnlyList<DesignSeedRow> PreviewRows => CurrentEntity is null
+        ? []
+        : DesignDataModelSeeder.GeneratePreview(DataModel, CurrentEntity.Name);
+
+    private sealed record EntityOption(string Label, string Value);
+
+    private IReadOnlyList<EntityOption> EntityOptions => DataModel.Entities
+        .OrderBy(static entity => entity.Name, StringComparer.Ordinal)
+        .Select(static entity => new EntityOption(entity.PluralName, entity.Name))
+        .ToArray();
+
+    protected override void OnParametersSet()
+    {
+        SelectedEntityName ??= DataModel.Entities.FirstOrDefault()?.Name;
+    }
+
+    private async Task OnEntityChanged(string value)
+    {
+        SelectedEntityName = value;
+        await SelectedEntityNameChanged.InvokeAsync(value);
+    }
+
+    private Task OnRowCountChanged(decimal? value)
+    {
+        if (CurrentEntity is not null && value.HasValue)
+        {
+            CurrentEntity.Seed.RowCount = Math.Max(1, Convert.ToInt32(value.Value));
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private Task OnSeedChanged(decimal? value)
+    {
+        if (CurrentEntity is not null && value.HasValue)
+        {
+            CurrentEntity.Seed.Seed = Math.Max(1, Convert.ToInt32(value.Value));
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private static string FormatValue(object? value)
+        => value switch
+        {
+            null => string.Empty,
+            DateTime dateTime => dateTime.ToString("yyyy-MM-dd HH:mm", CultureInfo.GetCultureInfo("nl-NL")),
+            decimal decimalValue => decimalValue.ToString("0.00", CultureInfo.GetCultureInfo("nl-NL")),
+            bool boolValue => boolValue ? "Ja" : "Nee",
+            _ => value.ToString() ?? string.Empty
+        };
+}

@@ -127,3 +127,11 @@ dotnet new agterhuis-app -n MijnApp --theme plum --variant dark
 ```
 
 The template package is [templates/Agterhuis.Ui.Templates](../templates/Agterhuis.Ui.Templates) and includes the expected CSS/JS order, `AddAgterhuisUi()`, a themed `App.razor`, a sidebar shell, and starter pages for forms and lists.
+
+## Designer output
+
+The demo app also contains the LowCode designer at `/designer`.
+
+The designer stores its working state as `.agtdesign` JSON and can recover unsaved work from localStorage after a refresh or crash. Save uses the browser File System Access API when available and falls back to a normal download for other browsers.
+
+The exported project zip includes `design/document.json` as the exchange format, plus generated pages and a starter shell.

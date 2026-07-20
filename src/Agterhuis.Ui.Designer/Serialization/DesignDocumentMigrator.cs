@@ -19,6 +19,9 @@ public static class DesignDocumentMigrator
         }
 
         document.Pages ??= [];
+        document.DataModel = document.DataModel is null
+            ? DesignDataModelSeeder.CreateDefault()
+            : Migrate(document.DataModel);
 
         for (var pageIndex = 0; pageIndex < document.Pages.Count; pageIndex++)
         {
@@ -33,6 +36,44 @@ public static class DesignDocumentMigrator
         }
 
         return document;
+    }
+
+    private static DesignDataModel Migrate(DesignDataModel dataModel)
+    {
+        dataModel.Entities ??= [];
+
+        if (dataModel.Seed <= 0)
+        {
+            dataModel.Seed = 42;
+        }
+
+        if (dataModel.RowCount <= 0)
+        {
+            dataModel.RowCount = 25;
+        }
+
+        foreach (var entity in dataModel.Entities)
+        {
+            entity.Fields ??= [];
+            entity.Seed ??= new DesignSeedSettings();
+
+            if (string.IsNullOrWhiteSpace(entity.PluralName))
+            {
+                entity.PluralName = $"{entity.Name}s";
+            }
+
+            if (entity.Seed.Seed <= 0)
+            {
+                entity.Seed.Seed = dataModel.Seed;
+            }
+
+            if (entity.Seed.RowCount <= 0)
+            {
+                entity.Seed.RowCount = dataModel.RowCount;
+            }
+        }
+
+        return dataModel;
     }
 
     private static void NormalizeNode(string route, DesignNode? node, string ancestry)

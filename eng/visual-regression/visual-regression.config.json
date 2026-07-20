@@ -11,6 +11,8 @@
     { "key": "data-grid", "route": "/components/data/grid", "selector": "h1", "description": "Data grid" },
     { "key": "forms", "route": "/components/forms/text-field", "selector": "h1", "description": "Forms" },
     { "key": "werkorders", "route": "/app/werkorders", "selector": "h1", "description": "Showcase workorders" },
-    { "key": "blog", "route": "/blog", "selector": "h1", "description": "Blog" }
+    { "key": "blog", "route": "/blog", "selector": "h1", "description": "Blog" },
+    { "key": "designer-start", "route": "/designer", "selector": ".designer-page", "description": "Designer start screen" },
+    { "key": "designer-canvas", "route": "/designer", "selector": ".designer-canvas", "description": "Designer canvas" }
   ]
 }
