@@ -5,6 +5,8 @@ using Agterhuis.Ui.Services;
 using Agterhuis.Ui.Demo.Services;
 using Microsoft.JSInterop;
 using Agterhuis.Ui.Designer.Model;
+using Microsoft.AspNetCore.Components.Web;
+using Microsoft.AspNetCore.Components;
 
 namespace Agterhuis.Ui.Tests;
 
@@ -99,5 +101,77 @@ public sealed class DesignerPageTests
 
         Assert.Contains("Code (Read-Only)", cut.Markup, StringComparison.Ordinal);
         Assert.Contains("Model (JSON)", cut.Markup, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void DesignerPage_EscapeClearsSelection()
+    {
+        using var ctx = new BunitContext();
+        ctx.Services.AddRadzenComponents();
+        ctx.Services.AddSingleton<IAgtCommandRegistry>(_ => new AgtCommandRegistry());
+        var jsRuntime = new DesignerJsRuntimeStub();
+        ctx.Services.AddSingleton<IJSRuntime>(jsRuntime);
+        ctx.Services.AddSingleton(new LocalDesignStore(jsRuntime));
+
+        var cut = ctx.Render<Agterhuis.Ui.Demo.Components.Pages.Designer>();
+        cut.Find(".designer-canvas-node__select").Click();
+
+        cut.Find(".designer-page").KeyDown(new KeyboardEventArgs { Key = "Escape" });
+
+        cut.WaitForAssertion(() => Assert.Contains("Selecteer een node", cut.Find(".designer-breadcrumb").TextContent, StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void DesignerPage_DeleteRemovesSelectedNode()
+    {
+        using var ctx = new BunitContext();
+        ctx.Services.AddRadzenComponents();
+        ctx.Services.AddSingleton<IAgtCommandRegistry>(_ => new AgtCommandRegistry());
+        var jsRuntime = new DesignerJsRuntimeStub();
+        ctx.Services.AddSingleton<IJSRuntime>(jsRuntime);
+        ctx.Services.AddSingleton(new LocalDesignStore(jsRuntime));
+
+        var cut = ctx.Render<Agterhuis.Ui.Demo.Components.Pages.Designer>();
+        cut.Find(".designer-canvas-node__select").Click();
+
+        var nodesBefore = cut.FindAll(".designer-canvas-node").Count;
+        cut.Find(".designer-page").KeyDown(new KeyboardEventArgs { Key = "Delete" });
+
+        cut.WaitForAssertion(() => Assert.True(cut.FindAll(".designer-canvas-node").Count < nodesBefore));
+    }
+
+    [Fact]
+    public void DesignerPage_ArrowDownSelectsNextSibling()
+    {
+        using var ctx = new BunitContext();
+        ctx.Services.AddRadzenComponents();
+        ctx.Services.AddSingleton<IAgtCommandRegistry>(_ => new AgtCommandRegistry());
+        var jsRuntime = new DesignerJsRuntimeStub();
+        ctx.Services.AddSingleton<IJSRuntime>(jsRuntime);
+        ctx.Services.AddSingleton(new LocalDesignStore(jsRuntime));
+
+        var document = DesignDocumentTemplates.Create(DesignDocumentTemplateKind.FormPage, "Demo");
+        document.Pages[0].Nodes.Add(new DesignNode
+        {
+            ComponentType = "AgtEmptyState",
+            Parameters = new Dictionary<string, DesignParameterValue>(StringComparer.Ordinal)
+            {
+                ["Title"] = DesignParameterValue.FromValue("Tweede root"),
+                ["Description"] = DesignParameterValue.FromValue("Tweede sibling")
+            }
+        });
+        var json = System.Text.Json.JsonSerializer.Serialize(document, Agterhuis.Ui.Designer.Serialization.DesignJsonOptions.Default);
+        jsRuntime.SetResult("designerInterop.getText", json);
+
+        var navigation = ctx.Services.GetRequiredService<NavigationManager>();
+        navigation.NavigateTo(navigation.GetUriWithQueryParameter("name", document.Name));
+
+        var cut = ctx.Render<Agterhuis.Ui.Demo.Components.Pages.Designer>();
+        cut.FindAll(".designer-canvas-node__select")[0].Click();
+        var firstBreadcrumb = cut.Find(".designer-breadcrumb").TextContent;
+
+        cut.Find(".designer-page").KeyDown(new KeyboardEventArgs { Key = "ArrowDown" });
+
+        cut.WaitForAssertion(() => Assert.NotEqual(firstBreadcrumb, cut.Find(".designer-breadcrumb").TextContent));
     }
 }

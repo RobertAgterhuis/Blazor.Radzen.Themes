@@ -34,7 +34,7 @@ Nulmeting op basis van inspectie van prompts 48 t/m 55 en de huidige designer-im
 | Canvas midden: slot-gebaseerd grid, dropzones, invoeglijnen | ✅ Compleet | Canvas toont root-dropzones en slot-rendering voor kinderen. |
 | Drag & drop: palet → canvas, verplaatsen binnen canvas, droppen in containers | ✅ Compleet | Designerpagina heeft drag-start/drag-end/dropflow en command stack voor verplaatsen. |
 | HTML5 DnD met JS-interop (`designer-interop.js`), geen zware library | ✅ Compleet | `designer-interop.js` bestaat en wordt gebruikt voor interop, localStorage en bestandspickers. |
-| Selectie: klik, Escape, Delete, pijltjes, broodkruimel | ⚠️ Gedeeltelijk | Selectie en breadcrumb zijn aanwezig; de volledige key-navigatie/actie-set is niet volledig onderbouwd door de huidige inspectie. |
+| Selectie: klik, Escape, Delete, pijltjes, broodkruimel | ✅ Compleet | Selectie, breadcrumb en de keyboard-acties Escape, Delete en sibling-navigatie zijn nu expliciet afgedekt. |
 | Structuurboom (RadzenTree) synchroon met selectie | ✅ Compleet | De boom wordt vanuit het model opgebouwd en is gekoppeld aan selectiehandelingen. |
 | Command-laag: Add/Move/Remove/Duplicate als commands, undo/redo stack | ✅ Compleet | Command stack en de gevraagde mutatie-commando's bestaan. |
 | Toolbar: nieuw/openen/opslaan, undo/redo, canvas-theme-keuze, viewport-schakelaar | ✅ Compleet | Toolbar bevat deze acties en schakelaars. |
