@@ -135,7 +135,8 @@
         <aside class="designer-panel designer-panel--data" aria-label="Data panel">
             <DesignerDataPanel DataModel="@_commands.Document.DataModel"
                                SelectedEntityName="@_selectedEntityName"
-                               SelectedEntityNameChanged="OnSelectedEntityChanged" />
+                               SelectedEntityNameChanged="OnSelectedEntityChanged"
+                               GenerateFormRequested="OnGenerateFormRequested" />
         </aside>
 
         <aside class="designer-panel designer-panel--tree" aria-label="Structuurboom">
@@ -425,6 +426,29 @@
     {
         _selectedEntityName = value;
         return Task.CompletedTask;
+    }
+
+    private async Task OnGenerateFormRequested(string entityName)
+    {
+        var entity = _commands.Document.DataModel.Entities.FirstOrDefault(candidate => string.Equals(candidate.Name, entityName, StringComparison.Ordinal));
+        if (entity is null)
+        {
+            return;
+        }
+
+        var containerLocation = ResolveFormInsertLocation();
+        var insertIndex = containerLocation.Index;
+        foreach (var node in BuildFormNodes(entity))
+        {
+            if (!_commands.Execute(new AddNodeCommand(0, containerLocation with { Index = insertIndex++ }, node)))
+            {
+                return;
+            }
+        }
+
+        _hasRecoveredDraft = true;
+        await AutoSaveAsync();
+        StateHasChanged();
     }
 
     private async Task OnNewDocument()
@@ -842,6 +866,57 @@
 
         var parent = container[index];
         return parent.Children.TryGetValue("Columns", out var columns) ? columns.Count : 0;
+    }
+
+    private DesignNodeLocation ResolveFormInsertLocation()
+    {
+        if (_selectedNodeId is not null && SelectedDescriptor?.Slots.Contains("ChildContent", StringComparer.Ordinal) == true)
+        {
+            var insertIndex = GetChildInsertIndex(_selectedNodeId);
+            return new DesignNodeLocation(_selectedNodeId, "ChildContent", insertIndex);
+        }
+
+        return DesignNodeLocation.Root(_commands.Document.Pages[0].Nodes.Count);
+    }
+
+    private IReadOnlyList<DesignNode> BuildFormNodes(DesignEntity entity)
+    {
+        var card = CreateNodeForDescriptor(_registry.GetDescriptor("AgtCard"));
+        card.Children["ChildContent"] = entity.Fields.Select(BuildNodeForField).ToList();
+        card.Children["ChildContent"].Add(CreateFormActionsNode());
+        return [card];
+    }
+
+    private DesignNode BuildNodeForField(DesignField field)
+    {
+        var componentType = field.Type switch
+        {
+            DesignFieldType.Int or DesignFieldType.Decimal => "AgtNumericField",
+            DesignFieldType.Bool => "AgtSwitch",
+            DesignFieldType.DateTime => "AgtDatePicker",
+            DesignFieldType.Enum => "AgtDropdown",
+            _ => "AgtTextField"
+        };
+
+        var descriptor = _registry.GetDescriptor(componentType);
+        var node = CreateNodeForDescriptor(descriptor);
+        node.Parameters["Label"] = DesignParameterValue.FromValue(field.Name);
+        node.Parameters["AriaLabel"] = DesignParameterValue.FromValue(field.Name);
+
+        if (field.Type == DesignFieldType.Enum)
+        {
+            node.Parameters["Placeholder"] = DesignParameterValue.FromValue($"Kies {field.Name.ToLowerInvariant()}");
+        }
+
+        return node;
+    }
+
+    private DesignNode CreateFormActionsNode()
+    {
+        var node = CreateNodeForDescriptor(_registry.GetDescriptor("AgtFormActions"));
+        node.Parameters["SaveText"] = DesignParameterValue.FromValue("Opslaan");
+        node.Parameters["CancelText"] = DesignParameterValue.FromValue("Annuleren");
+        return node;
     }
 
     private DesignNode CreateNodeForDescriptor(DesignerComponentDescriptor descriptor)

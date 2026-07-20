@@ -27,6 +27,11 @@
                          ValueChanged="OnSeedChanged"
                          Min="1"
                          Step="1" />
+
+        <RadzenButton Text="Formulier genereren"
+                  ButtonStyle="ButtonStyle.Base"
+                  Variant="Variant.Flat"
+                  Click="OnGenerateFormRequested" />
     </div>
 
     @if (CurrentEntity is not null)
@@ -72,6 +77,9 @@
     [Parameter]
     public EventCallback<string> SelectedEntityNameChanged { get; set; }
 
+    [Parameter]
+    public EventCallback<string> GenerateFormRequested { get; set; }
+
     private DesignEntity? CurrentEntity => DataModel.Entities.FirstOrDefault(entity => string.Equals(entity.Name, SelectedEntityName, StringComparison.OrdinalIgnoreCase))
         ?? DataModel.Entities.FirstOrDefault();
 
@@ -116,6 +124,11 @@
 
         return Task.CompletedTask;
     }
+
+    private Task OnGenerateFormRequested()
+        => CurrentEntity is null
+            ? Task.CompletedTask
+            : GenerateFormRequested.InvokeAsync(CurrentEntity.Name);
 
     private static string FormatValue(object? value)
         => value switch

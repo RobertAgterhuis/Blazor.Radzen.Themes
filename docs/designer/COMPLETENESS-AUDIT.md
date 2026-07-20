@@ -79,7 +79,7 @@ Nulmeting op basis van inspectie van prompts 48 t/m 55 en de huidige designer-im
 | Seed-generator: deterministische Nederlandstalige data, min. 25 dossiers | ✅ Compleet | Seeder is deterministisch en de default data heeft de gevraagde Nederlandse domeinset en aantallen. |
 | Bindbare parameters in registry gemarkeerd | ✅ Compleet | Bindbaarheid is expliciete metadata in introspection, generator, registry en property panel. |
 | DataGrid kolommen-editor in property panel | ✅ Compleet | Het property panel toont nu een aparte kolommen-editor voor grid-nodes met `Columns`-slot. |
-| Formulier genereren uit entiteit | ❌ Ontbreekt | Er is geen entiteitsgedreven form builder zichtbaar in de huidige surface. |
+| Formulier genereren uit entiteit | ✅ Compleet | Het data-paneel kan nu voor de geselecteerde entiteit een veldset en formulieracties in de designerpagina invoegen. |
 | Export: per entiteit record + DataService, DI-registratie | ⚠️ Gedeeltelijk | Export genereert service/recordbestanden, maar een volledige DI-registratiesurface is niet aangetoond. |
 | `docs/designer/DATA.md` bestaat | ✅ Compleet | Document beschrijft model, seed en exportcontract. |
 
