@@ -63,6 +63,32 @@ public sealed class DesignCommandStackTests
         Assert.Equal("RadzenColumn", reorderStack.Document.Pages[0].Nodes[0].ComponentType);
     }
 
+    [Fact]
+    public void SetParameterLayoutAndPageProperty_AreUndoable()
+    {
+        var stack = new DesignDocumentCommandStack(CreateDocument());
+        var nodeId = stack.Document.Pages[0].Nodes[0].Id;
+
+        Assert.True(stack.Execute(new SetNodeParameterCommand(0, nodeId, "Label", DesignParameterValue.FromValue("Naam"))));
+        Assert.Equal("Naam", stack.Document.Pages[0].Nodes[0].Parameters["Label"].Literal!.GetValue<string>());
+
+        Assert.True(stack.Execute(new SetNodeLayoutSlotCommand(0, nodeId, new DesignLayoutSlot(Row: 2, Column: 3, RowSpan: 1, ColumnSpan: 2))));
+        Assert.NotNull(stack.Document.Pages[0].Nodes[0].LayoutSlot);
+        Assert.Equal(2, stack.Document.Pages[0].Nodes[0].LayoutSlot!.Row);
+
+        Assert.True(stack.Execute(new SetPagePropertyCommand(0, nameof(DesignPage.Title), "Gewijzigde pagina")));
+        Assert.Equal("Gewijzigde pagina", stack.Document.Pages[0].Title);
+
+        Assert.True(stack.Undo());
+        Assert.Equal("Test", stack.Document.Pages[0].Title);
+
+        Assert.True(stack.Undo());
+        Assert.Null(stack.Document.Pages[0].Nodes[0].LayoutSlot);
+
+        Assert.True(stack.Undo());
+        Assert.False(stack.Document.Pages[0].Nodes[0].Parameters.ContainsKey("Label"));
+    }
+
     private static DesignDocument CreateReorderDocument()
     {
         return DesignDocumentMigrator.Migrate(new DesignDocument

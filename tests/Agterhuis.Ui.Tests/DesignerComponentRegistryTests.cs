@@ -46,6 +46,26 @@ public sealed class DesignerComponentRegistryTests
         }
     }
 
+    [Fact]
+    public void RegistryParameters_HaveEditorMappingOrExplicitReadOnly()
+    {
+        var registry = DesignerComponentRegistry.Instance;
+        var unsupported = new List<string>();
+
+        foreach (var component in registry.Components)
+        {
+            foreach (var parameter in component.Parameters.Where(static item => !item.IsRenderFragment))
+            {
+                if (!HasEditorMapping(parameter) && !IsReadOnlyByDesign(parameter))
+                {
+                    unsupported.Add($"{component.ComponentType}.{parameter.Name} ({parameter.TypeName})");
+                }
+            }
+        }
+
+        Assert.True(unsupported.Count == 0, $"Found unmapped parameters: {string.Join(", ", unsupported)}");
+    }
+
     private static void AssertDescriptorEquivalent(DesignerComponentDescriptor expected, DesignerComponentDescriptor actual)
     {
         Assert.Equal(expected.ComponentType, actual.ComponentType);
@@ -96,6 +116,34 @@ public sealed class DesignerComponentRegistryTests
 
         return new DesignerComponentRegistry(descriptors);
     }
+
+    private static bool HasEditorMapping(Agterhuis.Ui.Designer.Registry.ComponentParameterDescriptor parameter)
+    {
+        if (parameter.IsEventCallback)
+        {
+            return true;
+        }
+
+        var type = parameter.ParameterType;
+        return type == typeof(string)
+            || type == typeof(int)
+            || type == typeof(int?)
+            || type == typeof(decimal)
+            || type == typeof(decimal?)
+            || type == typeof(double)
+            || type == typeof(double?)
+            || type == typeof(bool)
+            || type == typeof(bool?)
+            || type == typeof(DateTime)
+            || type == typeof(DateTime?)
+            || type.IsEnum;
+    }
+
+    private static bool IsReadOnlyByDesign(Agterhuis.Ui.Designer.Registry.ComponentParameterDescriptor parameter)
+        => parameter.IsRenderFragment
+           || parameter.IsTemplatedRenderFragment
+           || parameter.IsEventCallback
+           || (!HasEditorMapping(parameter) && !parameter.IsRenderFragment);
 
     private static IEnumerable<DesignerComponentDescriptor> DiscoverComponents(
         Assembly assembly,

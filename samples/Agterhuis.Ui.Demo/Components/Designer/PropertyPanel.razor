@@ -1,0 +1,659 @@
+@using System.Globalization
+@using System.Text.Json
+@using Agterhuis.Ui.Designer.Model
+@using Agterhuis.Ui.Designer.Registry
+
+@if (SelectedNode is null)
+{
+    <section class="designer-properties">
+        <h2>Pagina-eigenschappen</h2>
+
+        <AgtTextField Label="Route"
+                      AriaLabel="Pagina route"
+                      Value="@Page.Route"
+                      ValueChanged="OnRouteChanged"
+                      ValidationMessage="@_pageRouteValidation" />
+
+        <AgtTextField Label="Titel"
+                      AriaLabel="Pagina titel"
+                      Value="@Page.Title"
+                      ValueChanged="OnTitleChanged"
+                      ValidationMessage="@_pageTitleValidation" />
+
+        <AgtDropdown TValue="string"
+                     Label="Canvas-thema"
+                     AriaLabel="Canvas thema"
+                     Data="ThemeOptionItems"
+                     Value="CanvasTheme"
+                     ValueChanged="OnCanvasThemeChanged"
+                     TextProperty="Label"
+                     ValueProperty="Value" />
+    </section>
+}
+else if (SelectedDescriptor is null)
+{
+    <section class="designer-properties">
+        <h2>Eigenschappen</h2>
+        <div class="designer-properties__readonly">Onbekend componenttype voor selectie.</div>
+    </section>
+}
+else
+{
+    <section class="designer-properties">
+        <h2>@SelectedDescriptor.DisplayName eigenschappen</h2>
+
+        @if (_missingAccessibilityParameters.Count > 0)
+        {
+            <div class="designer-properties__a11y-warning" role="status" aria-live="polite">
+                <strong>Toegankelijkheidswaarschuwing:</strong>
+                <span>vul @string.Join(" en ", _missingAccessibilityParameters) in.</span>
+            </div>
+        }
+
+        <section class="designer-properties__group">
+            <h3>Layout</h3>
+            <div class="designer-properties__layout-grid">
+                <AgtNumericField Label="Rij"
+                                 AriaLabel="Layout rij"
+                                 Value="@ConvertToDecimal(LayoutRow)"
+                                 ValueChanged="@(value => OnLayoutValueChanged(LayoutKey.Row, value))"
+                                 Min="1"
+                                 Step="1" />
+                <AgtNumericField Label="Kolom"
+                                 AriaLabel="Layout kolom"
+                                 Value="@ConvertToDecimal(LayoutColumn)"
+                                 ValueChanged="@(value => OnLayoutValueChanged(LayoutKey.Column, value))"
+                                 Min="1"
+                                 Step="1" />
+                <AgtNumericField Label="Rijspan"
+                                 AriaLabel="Layout rijspan"
+                                 Value="@ConvertToDecimal(LayoutRowSpan)"
+                                 ValueChanged="@(value => OnLayoutValueChanged(LayoutKey.RowSpan, value))"
+                                 Min="1"
+                                 Step="1" />
+                <AgtNumericField Label="Kolomspan"
+                                 AriaLabel="Layout kolomspan"
+                                 Value="@ConvertToDecimal(LayoutColumnSpan)"
+                                 ValueChanged="@(value => OnLayoutValueChanged(LayoutKey.ColumnSpan, value))"
+                                 Min="1"
+                                 Step="1" />
+            </div>
+        </section>
+
+        @foreach (var group in GroupedParameters)
+        {
+            <section class="designer-properties__group">
+                <h3>@group.Key</h3>
+
+                @foreach (var parameter in group.Value)
+                {
+                    var editorKind = GetEditorKind(parameter);
+                    var uiState = GetUiState(parameter);
+                    var hasCustomValue = HasCustomValue(parameter);
+
+                    <div class="designer-properties__field" data-agt-designer-editor-kind="@editorKind" data-agt-designer-param="@parameter.Name">
+                        <div class="designer-properties__field-head">
+                            <span class="designer-properties__field-label">@parameter.Name</span>
+                            @if (hasCustomValue)
+                            {
+                                <span class="designer-properties__modified" title="Afwijkend van default">Gewijzigd</span>
+                            }
+                            <RadzenButton Text="Reset"
+                                          Disabled="@(!hasCustomValue)"
+                                          ButtonStyle="ButtonStyle.Base"
+                                          Variant="Variant.Text"
+                                          Click="@(() => OnResetParameter(parameter))" />
+                        </div>
+
+                        @if (!string.IsNullOrWhiteSpace(uiState.ValidationMessage))
+                        {
+                            <div class="designer-properties__validation">@uiState.ValidationMessage</div>
+                        }
+
+                        @switch (editorKind)
+                        {
+                            case EditorKind.String:
+                                <AgtTextField Label="@parameter.Name"
+                                              AriaLabel="@parameter.Name"
+                                              Value="@uiState.TextValue"
+                                              ValueChanged="@(value => OnStringChanged(parameter, value))"
+                                              ValidationMessage="@uiState.ValidationMessage" />
+                                break;
+                            case EditorKind.Numeric:
+                                <AgtNumericField Label="@parameter.Name"
+                                                 AriaLabel="@parameter.Name"
+                                                 Value="@uiState.NumericValue"
+                                                 ValueChanged="@(value => OnNumericChanged(parameter, value))"
+                                                 ValidationMessage="@uiState.ValidationMessage" />
+                                break;
+                            case EditorKind.Boolean:
+                                <AgtSwitch Label="@parameter.Name"
+                                           AriaLabel="@parameter.Name"
+                                           Value="@uiState.BoolValue"
+                                           ValueChanged="@(value => OnBoolChanged(parameter, value))" />
+                                break;
+                            case EditorKind.Enum:
+                                <AgtDropdown TValue="string"
+                                             Label="@parameter.Name"
+                                             AriaLabel="@parameter.Name"
+                                             Data="GetEnumOptions(parameter)"
+                                             Value="@uiState.TextValue"
+                                             ValueChanged="@(value => OnEnumChanged(parameter, value))"
+                                             TextProperty="Label"
+                                             ValueProperty="Value"
+                                             ValidationMessage="@uiState.ValidationMessage" />
+                                break;
+                            case EditorKind.DateTime:
+                                <AgtDatePicker Label="@parameter.Name"
+                                               AriaLabel="@parameter.Name"
+                                               Value="@uiState.DateValue"
+                                               ValueChanged="@(value => OnDateChanged(parameter, value))"
+                                               ValidationMessage="@uiState.ValidationMessage" />
+                                break;
+                            case EditorKind.ColorToken:
+                                <div class="designer-properties__color-grid">
+                                    <AgtDropdown TValue="string"
+                                                 Label="@($"{parameter.Name} token")"
+                                                 AriaLabel="@($"{parameter.Name} token")"
+                                                 Data="ColorTokenOptions"
+                                                 Value="@uiState.TextValue"
+                                                 ValueChanged="@(value => OnStringChanged(parameter, value))"
+                                                 TextProperty="Label"
+                                                 ValueProperty="Value" />
+                                    <AgtTextField Label="@($"{parameter.Name} vrije waarde")"
+                                                  AriaLabel="@($"{parameter.Name} vrije waarde")"
+                                                  Value="@uiState.TextValue"
+                                                  ValueChanged="@(value => OnStringChanged(parameter, value))"
+                                                  ValidationMessage="@uiState.ValidationMessage" />
+                                </div>
+                                <div class="designer-properties__hint">Vrije hex-waarden kunnen token-bleed veroorzaken bij export.</div>
+                                break;
+                            case EditorKind.EventCallback:
+                                <div class="designer-properties__readonly">Logica in geexporteerde code (v1-scope).</div>
+                                break;
+                            case EditorKind.ReadOnly:
+                                <div class="designer-properties__readonly">@uiState.JsonValue</div>
+                                break;
+                        }
+                    </div>
+                }
+            </section>
+        }
+    </section>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public DesignPage Page { get; set; } = default!;
+
+    [Parameter, EditorRequired]
+    public string CanvasTheme { get; set; } = "plum-dark";
+
+    [Parameter, EditorRequired]
+    public IReadOnlyList<string> ThemeOptions { get; set; } = [];
+
+    [Parameter]
+    public DesignNode? SelectedNode { get; set; }
+
+    [Parameter]
+    public DesignerComponentDescriptor? SelectedDescriptor { get; set; }
+
+    [Parameter]
+    public EventCallback<string?> SetPageRoute { get; set; }
+
+    [Parameter]
+    public EventCallback<string?> SetPageTitle { get; set; }
+
+    [Parameter]
+    public EventCallback<string> SetCanvasTheme { get; set; }
+
+    [Parameter]
+    public EventCallback<(ComponentParameterDescriptor Parameter, DesignParameterValue? Value)> SetNodeParameter { get; set; }
+
+    [Parameter]
+    public EventCallback<DesignLayoutSlot> SetNodeLayoutSlot { get; set; }
+
+    private const string CategoryGeneral = "Algemeen";
+    private const string CategoryLayout = "Layout";
+    private const string CategoryData = "Data";
+    private const string CategoryAccessibility = "Toegankelijkheid";
+    private const string CategoryOther = "Overig";
+
+    private string? _pageRouteValidation;
+    private string? _pageTitleValidation;
+
+    private IReadOnlyList<string> _missingAccessibilityParameters = [];
+
+    private IReadOnlyDictionary<string, IReadOnlyList<ComponentParameterDescriptor>> GroupedParameters
+    {
+        get
+        {
+            if (SelectedDescriptor is null)
+            {
+                return new Dictionary<string, IReadOnlyList<ComponentParameterDescriptor>>(StringComparer.Ordinal);
+            }
+
+            var ordered = SelectedDescriptor.Parameters
+                .Where(static parameter => !parameter.IsRenderFragment)
+                .OrderBy(static parameter => parameter.Name, StringComparer.Ordinal)
+                .ToArray();
+
+            var buckets = new Dictionary<string, List<ComponentParameterDescriptor>>(StringComparer.Ordinal)
+            {
+                [CategoryGeneral] = [],
+                [CategoryLayout] = [],
+                [CategoryData] = [],
+                [CategoryAccessibility] = [],
+                [CategoryOther] = []
+            };
+
+            foreach (var parameter in ordered)
+            {
+                buckets[ResolveCategory(parameter)].Add(parameter);
+            }
+
+            var result = new Dictionary<string, IReadOnlyList<ComponentParameterDescriptor>>(StringComparer.Ordinal);
+            foreach (var category in new[] { CategoryAccessibility, CategoryGeneral, CategoryLayout, CategoryData, CategoryOther })
+            {
+                if (buckets[category].Count > 0)
+                {
+                    result[category] = buckets[category];
+                }
+            }
+
+            return result;
+        }
+    }
+
+    private int LayoutRow => SelectedNode?.LayoutSlot?.Row ?? 1;
+
+    private int LayoutColumn => SelectedNode?.LayoutSlot?.Column ?? 1;
+
+    private int LayoutRowSpan => SelectedNode?.LayoutSlot?.RowSpan ?? 1;
+
+    private int LayoutColumnSpan => SelectedNode?.LayoutSlot?.ColumnSpan ?? 1;
+
+    private IReadOnlyList<OptionItem> ColorTokenOptions => new[]
+    {
+        new OptionItem("Primair 500", "var(--agt-color-primary-500)"),
+        new OptionItem("Accent", "var(--agt-color-accent)"),
+        new OptionItem("Text body", "var(--agt-text-body)"),
+        new OptionItem("Text heading", "var(--agt-text-heading)"),
+        new OptionItem("Surface 0", "var(--agt-surface-0)"),
+        new OptionItem("Surface 1", "var(--agt-surface-1)"),
+        new OptionItem("Border", "var(--agt-input-border)"),
+        new OptionItem("Danger", "var(--agt-color-danger-500)")
+    };
+
+    private IReadOnlyList<OptionItem> ThemeOptionItems => ThemeOptions
+        .OrderBy(static item => item, StringComparer.Ordinal)
+        .Select(static item => new OptionItem(item, item))
+        .ToArray();
+
+    protected override void OnParametersSet()
+    {
+        _pageRouteValidation = null;
+        _pageTitleValidation = null;
+
+        _missingAccessibilityParameters = SelectedNode is null || SelectedDescriptor is null
+            ? []
+            : SelectedDescriptor.Parameters
+                .Where(IsAccessibilityParameter)
+                .Select(static parameter => parameter.Name)
+                .Where(name => string.IsNullOrWhiteSpace(GetCurrentTextValue(name)))
+                .ToArray();
+    }
+
+    private async Task OnRouteChanged(string? route)
+    {
+        var normalized = (route ?? string.Empty).Trim();
+        if (string.IsNullOrWhiteSpace(normalized))
+        {
+            _pageRouteValidation = "Route is verplicht.";
+            return;
+        }
+
+        _pageRouteValidation = null;
+        await SetPageRoute.InvokeAsync(normalized);
+    }
+
+    private async Task OnTitleChanged(string? title)
+    {
+        var normalized = title?.Trim();
+        if (string.IsNullOrWhiteSpace(normalized))
+        {
+            _pageTitleValidation = "Titel is verplicht.";
+            return;
+        }
+
+        _pageTitleValidation = null;
+        await SetPageTitle.InvokeAsync(normalized);
+    }
+
+    private Task OnCanvasThemeChanged(string theme)
+        => SetCanvasTheme.InvokeAsync(theme);
+
+    private async Task OnStringChanged(ComponentParameterDescriptor parameter, string? value)
+    {
+        var validation = ValidateString(parameter, value);
+        if (validation is not null)
+        {
+            return;
+        }
+
+        await SetNodeParameter.InvokeAsync((parameter, DesignParameterValue.FromValue(value)));
+    }
+
+    private async Task OnNumericChanged(ComponentParameterDescriptor parameter, decimal? value)
+    {
+        if (value is null)
+        {
+            await SetNodeParameter.InvokeAsync((parameter, null));
+            return;
+        }
+
+        object typedValue = parameter.ParameterType == typeof(int) || parameter.ParameterType == typeof(int?)
+            ? Convert.ToInt32(decimal.Truncate(value.Value), CultureInfo.InvariantCulture)
+            : parameter.ParameterType == typeof(double) || parameter.ParameterType == typeof(double?)
+                ? Convert.ToDouble(value.Value, CultureInfo.InvariantCulture)
+                : value.Value;
+
+        await SetNodeParameter.InvokeAsync((parameter, DesignParameterValue.FromValue(typedValue)));
+    }
+
+    private Task OnBoolChanged(ComponentParameterDescriptor parameter, bool value)
+        => SetNodeParameter.InvokeAsync((parameter, DesignParameterValue.FromValue(value)));
+
+    private async Task OnEnumChanged(ComponentParameterDescriptor parameter, string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return;
+        }
+
+        if (!Enum.TryParse(parameter.ParameterType, value, ignoreCase: true, out var parsed))
+        {
+            return;
+        }
+
+        await SetNodeParameter.InvokeAsync((parameter, DesignParameterValue.FromValue(parsed?.ToString())));
+    }
+
+    private Task OnDateChanged(ComponentParameterDescriptor parameter, DateTime? value)
+        => SetNodeParameter.InvokeAsync((parameter, value is null ? null : DesignParameterValue.FromValue(value)));
+
+    private Task OnResetParameter(ComponentParameterDescriptor parameter)
+        => SetNodeParameter.InvokeAsync((parameter, null));
+
+    private async Task OnLayoutValueChanged(LayoutKey key, decimal? value)
+    {
+        if (SelectedNode is null || value is null)
+        {
+            return;
+        }
+
+        var normalized = Math.Max(1, Convert.ToInt32(decimal.Truncate(value.Value), CultureInfo.InvariantCulture));
+        var current = SelectedNode.LayoutSlot ?? new DesignLayoutSlot();
+
+        var next = key switch
+        {
+            LayoutKey.Row => current with { Row = normalized },
+            LayoutKey.Column => current with { Column = normalized },
+            LayoutKey.RowSpan => current with { RowSpan = normalized },
+            LayoutKey.ColumnSpan => current with { ColumnSpan = normalized },
+            _ => current
+        };
+
+        await SetNodeLayoutSlot.InvokeAsync(next);
+    }
+
+    private UiState GetUiState(ComponentParameterDescriptor parameter)
+    {
+        if (SelectedNode is null)
+        {
+            return UiState.Empty;
+        }
+
+        SelectedNode.Parameters.TryGetValue(parameter.Name, out var parameterValue);
+        var literal = parameterValue?.Literal;
+
+        if (literal is null)
+        {
+            return UiState.FromDefault(parameter.DefaultValue);
+        }
+
+        try
+        {
+            if (parameter.ParameterType == typeof(bool) || parameter.ParameterType == typeof(bool?))
+            {
+                return new UiState(BoolValue: literal.GetValue<bool>());
+            }
+
+            if (parameter.ParameterType == typeof(int) || parameter.ParameterType == typeof(int?)
+                || parameter.ParameterType == typeof(decimal) || parameter.ParameterType == typeof(decimal?)
+                || parameter.ParameterType == typeof(double) || parameter.ParameterType == typeof(double?))
+            {
+                return new UiState(NumericValue: literal.GetValue<decimal?>());
+            }
+
+            if (parameter.ParameterType == typeof(DateTime) || parameter.ParameterType == typeof(DateTime?))
+            {
+                return new UiState(DateValue: literal.GetValue<DateTime?>());
+            }
+
+            if (parameter.ParameterType.IsEnum)
+            {
+                var enumValue = literal.GetValue<string>();
+                return new UiState(TextValue: enumValue, ValidationMessage: Enum.TryParse(parameter.ParameterType, enumValue, true, out _) ? null : "Ongeldige enum-waarde.");
+            }
+
+            if (parameter.ParameterType == typeof(string))
+            {
+                var text = literal.GetValue<string?>();
+                return new UiState(TextValue: text, ValidationMessage: ValidateString(parameter, text));
+            }
+
+            return new UiState(JsonValue: literal.ToJsonString());
+        }
+        catch
+        {
+            return new UiState(JsonValue: literal.ToJsonString(), ValidationMessage: "Ongeldige waarde voor dit veldtype.");
+        }
+    }
+
+    private bool HasCustomValue(ComponentParameterDescriptor parameter)
+    {
+        if (SelectedNode is null)
+        {
+            return false;
+        }
+
+        return SelectedNode.Parameters.ContainsKey(parameter.Name);
+    }
+
+    private IReadOnlyList<OptionItem> GetEnumOptions(ComponentParameterDescriptor parameter)
+    {
+        if (!parameter.ParameterType.IsEnum)
+        {
+            return [];
+        }
+
+        return Enum.GetNames(parameter.ParameterType)
+            .OrderBy(static name => name, StringComparer.Ordinal)
+            .Select(static name => new OptionItem(name, name))
+            .ToArray();
+    }
+
+    private static string ResolveCategory(ComponentParameterDescriptor parameter)
+    {
+        if (IsAccessibilityParameter(parameter))
+        {
+            return CategoryAccessibility;
+        }
+
+        var name = parameter.Name;
+        if (ContainsAny(name, "Row", "Column", "Gap", "Span", "Width", "Height", "Size", "Offset", "Style", "CssClass", "Class"))
+        {
+            return CategoryLayout;
+        }
+
+        if (ContainsAny(name, "Data", "Items", "Value", "Text", "Filter", "Source", "Count", "Page", "Query", "Model"))
+        {
+            return CategoryData;
+        }
+
+        if (ContainsAny(name, "Title", "Description", "Placeholder", "Visible", "Disabled", "ReadOnly"))
+        {
+            return CategoryGeneral;
+        }
+
+        return CategoryOther;
+    }
+
+    private static bool IsAccessibilityParameter(ComponentParameterDescriptor parameter)
+        => string.Equals(parameter.Name, "Label", StringComparison.Ordinal)
+           || string.Equals(parameter.Name, "AriaLabel", StringComparison.Ordinal)
+           || string.Equals(parameter.Name, "ValidationMessage", StringComparison.Ordinal)
+           || string.Equals(parameter.Name, "Placeholder", StringComparison.Ordinal)
+           || string.Equals(parameter.Name, "Name", StringComparison.Ordinal);
+
+    private static bool ContainsAny(string value, params string[] candidates)
+        => candidates.Any(candidate => value.Contains(candidate, StringComparison.OrdinalIgnoreCase));
+
+    private string? GetCurrentTextValue(string parameterName)
+    {
+        if (SelectedNode is null)
+        {
+            return null;
+        }
+
+        if (!SelectedNode.Parameters.TryGetValue(parameterName, out var value) || value.Literal is null)
+        {
+            return null;
+        }
+
+        try
+        {
+            return value.Literal.GetValue<string?>();
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private static string? ValidateString(ComponentParameterDescriptor parameter, string? value)
+    {
+        if (IsAccessibilityParameter(parameter) && string.IsNullOrWhiteSpace(value))
+        {
+            return "Verplichte toegankelijkheidswaarde ontbreekt.";
+        }
+
+        if (LooksLikeColorParameter(parameter.Name) && !string.IsNullOrWhiteSpace(value)
+            && value.StartsWith("#", StringComparison.Ordinal)
+            && !IsHexColor(value))
+        {
+            return "Ongeldige hex-kleurwaarde.";
+        }
+
+        return null;
+    }
+
+    private static bool LooksLikeColorParameter(string parameterName)
+        => parameterName.Contains("Color", StringComparison.OrdinalIgnoreCase)
+           || parameterName.Contains("Colour", StringComparison.OrdinalIgnoreCase)
+           || parameterName.Contains("Background", StringComparison.OrdinalIgnoreCase)
+           || parameterName.Contains("Border", StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsHexColor(string value)
+    {
+        var candidate = value.Trim();
+        if (!(candidate.Length == 4 || candidate.Length == 7 || candidate.Length == 9))
+        {
+            return false;
+        }
+
+        if (!candidate.StartsWith('#'))
+        {
+            return false;
+        }
+
+        return candidate[1..].All(static c => Uri.IsHexDigit(c));
+    }
+
+    private static decimal? ConvertToDecimal(int value)
+        => Convert.ToDecimal(value, CultureInfo.InvariantCulture);
+
+    private static EditorKind GetEditorKind(ComponentParameterDescriptor parameter)
+    {
+        if (parameter.IsEventCallback)
+        {
+            return EditorKind.EventCallback;
+        }
+
+        if (parameter.ParameterType == typeof(string))
+        {
+            return LooksLikeColorParameter(parameter.Name) ? EditorKind.ColorToken : EditorKind.String;
+        }
+
+        if (parameter.ParameterType == typeof(int) || parameter.ParameterType == typeof(int?)
+            || parameter.ParameterType == typeof(decimal) || parameter.ParameterType == typeof(decimal?)
+            || parameter.ParameterType == typeof(double) || parameter.ParameterType == typeof(double?))
+        {
+            return EditorKind.Numeric;
+        }
+
+        if (parameter.ParameterType == typeof(bool) || parameter.ParameterType == typeof(bool?))
+        {
+            return EditorKind.Boolean;
+        }
+
+        if (parameter.ParameterType.IsEnum)
+        {
+            return EditorKind.Enum;
+        }
+
+        if (parameter.ParameterType == typeof(DateTime) || parameter.ParameterType == typeof(DateTime?))
+        {
+            return EditorKind.DateTime;
+        }
+
+        return EditorKind.ReadOnly;
+    }
+
+    private enum EditorKind
+    {
+        String,
+        Numeric,
+        Boolean,
+        Enum,
+        DateTime,
+        ColorToken,
+        EventCallback,
+        ReadOnly
+    }
+
+    private enum LayoutKey
+    {
+        Row,
+        Column,
+        RowSpan,
+        ColumnSpan
+    }
+
+    private sealed record OptionItem(string Label, string Value);
+
+    private sealed record UiState(
+        string? TextValue = null,
+        decimal? NumericValue = null,
+        bool BoolValue = false,
+        DateTime? DateValue = null,
+        string? JsonValue = null,
+        string? ValidationMessage = null)
+    {
+        public static UiState Empty { get; } = new();
+
+        public static UiState FromDefault(string defaultValue)
+            => new(TextValue: string.Equals(defaultValue, "null", StringComparison.OrdinalIgnoreCase) ? null : defaultValue);
+    }
+}

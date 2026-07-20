@@ -92,8 +92,16 @@
         </section>
 
         <aside class="designer-panel designer-panel--properties" aria-label="Properties panel">
-            <h2>Properties</h2>
-            <p>Fase 3: property panel.</p>
+            <PropertyPanel Page="@_commands.Document.Pages[0]"
+                           CanvasTheme="@_canvasTheme"
+                           ThemeOptions="CanvasThemeOptions"
+                           SelectedNode="SelectedNode"
+                           SelectedDescriptor="SelectedDescriptor"
+                           SetPageRoute="OnPageRouteChanged"
+                           SetPageTitle="OnPageTitleChanged"
+                           SetCanvasTheme="OnCanvasThemeChanged"
+                           SetNodeParameter="OnNodeParameterChanged"
+                           SetNodeLayoutSlot="OnNodeLayoutSlotChanged" />
         </aside>
 
         <aside class="designer-panel designer-panel--tree" aria-label="Structuurboom">
@@ -145,6 +153,19 @@
             StringComparer.Ordinal);
 
     private IReadOnlyList<DesignerTreeNode> TreeRoots => BuildTree(_commands.Document.Pages[0].Nodes);
+
+    private DesignNode? SelectedNode => _selectedNodeId is null
+        ? null
+        : TryFindNode(_commands.Document.Pages[0].Nodes, _selectedNodeId, out _, out var container, out var index)
+            ? container[index]
+            : null;
+
+    private DesignerComponentDescriptor? SelectedDescriptor
+        => SelectedNode is null
+            ? null
+            : _registry.TryGetDescriptor(SelectedNode.ComponentType, out var descriptor)
+                ? descriptor
+                : null;
 
     private string SelectionBreadcrumb => BuildBreadcrumb(_selectedNodeId) ?? "Selecteer een node";
 
@@ -328,10 +349,70 @@
         StateHasChanged();
     }
 
+    private Task OnCanvasThemeChanged(string value)
+    {
+        _canvasTheme = string.IsNullOrWhiteSpace(value) ? "plum-dark" : value;
+        return Task.CompletedTask;
+    }
+
     private Task OnCanvasThemeChanged(object value)
     {
         _canvasTheme = value?.ToString() ?? "plum-dark";
         return Task.CompletedTask;
+    }
+
+    private async Task OnPageRouteChanged(string? value)
+    {
+        if (!_commands.Execute(new SetPagePropertyCommand(0, nameof(DesignPage.Route), value)))
+        {
+            return;
+        }
+
+        await AutoSaveAsync();
+        StateHasChanged();
+    }
+
+    private async Task OnPageTitleChanged(string? value)
+    {
+        if (!_commands.Execute(new SetPagePropertyCommand(0, nameof(DesignPage.Title), value)))
+        {
+            return;
+        }
+
+        await AutoSaveAsync();
+        StateHasChanged();
+    }
+
+    private async Task OnNodeParameterChanged((ComponentParameterDescriptor Parameter, DesignParameterValue? Value) args)
+    {
+        if (_selectedNodeId is null)
+        {
+            return;
+        }
+
+        if (!_commands.Execute(new SetNodeParameterCommand(0, _selectedNodeId, args.Parameter.Name, args.Value)))
+        {
+            return;
+        }
+
+        await AutoSaveAsync();
+        StateHasChanged();
+    }
+
+    private async Task OnNodeLayoutSlotChanged(DesignLayoutSlot layoutSlot)
+    {
+        if (_selectedNodeId is null)
+        {
+            return;
+        }
+
+        if (!_commands.Execute(new SetNodeLayoutSlotCommand(0, _selectedNodeId, layoutSlot)))
+        {
+            return;
+        }
+
+        await AutoSaveAsync();
+        StateHasChanged();
     }
 
     private void SetViewport(string viewport)
