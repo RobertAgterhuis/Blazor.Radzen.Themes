@@ -38,6 +38,7 @@ Internal Blazor design system: a Razor Class Library (`src/Agterhuis.Ui`) packag
 - Intent via own enums (`AgtIntent`); low-level passthrough may expose Radzen types.
 - Every component: demo page in samples + ≥2 bUnit tests. The catalog must cover EVERY component of the installed Radzen.Blazor version — `docs/RADZEN-COMPONENT-INVENTORY.md` may have zero rows without a demo link; regenerate it after a Radzen upgrade.
 - Demo examples are capability-driven: provide as many examples as materially distinct capabilities, minimum 1. Never duplicate equivalent examples just to hit a numeric quota.
+- Demo and showcase copy must follow docs/CONTENT-GUIDELINES.md: professional-direct tone, sentence case, verb-first actions, nl-NL as the default language, and no exclamation marks in system text.
 - All 8 ButtonStyles × 4 Variants have explicit foregrounds per theme; the Buttons catalog page shows the full matrix.
 
 ## Accessibility (WCAG 2.2 AA — hard gate)

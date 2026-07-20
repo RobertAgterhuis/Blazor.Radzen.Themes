@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <PackageId>Agterhuis.Ui.Templates</PackageId>
+    <PackageType>Template</PackageType>
+    <Description>Starter template for the Agterhuis.Ui Blazor design system.</Description>
+    <Authors>Agterhuis</Authors>
+    <PackageVersion>0.1.0</PackageVersion>
+    <IncludeContentInPack>true</IncludeContentInPack>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="TemplatePackage.cs" />
+    <Content Include=".template.config\template.json" Pack="true" PackagePath="content\.template.config\" />
+    <Content Include="content\**\*" Pack="true" PackagePath="content\" />
+  </ItemGroup>
+
+</Project>

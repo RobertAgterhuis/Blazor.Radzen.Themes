@@ -1,0 +1,46 @@
+@page "/guidance/dashboard-demo"
+
+<div class="agt-page agt-stack">
+    <AgtPageHeader Title="Dashboard referentie"
+                   Description="Compacte metric cards met een rustige dichtheid en een kleine signal strip." />
+
+    <div class="guidance-dashboard-grid">
+        <AgtCard>
+            <Header>Open</Header>
+            <ChildContent>
+                <div class="showcase-page__metric-value">18</div>
+                <p>Werkorders die vandaag nog aandacht vragen.</p>
+            </ChildContent>
+        </AgtCard>
+
+        <AgtCard>
+            <Header>Afgerond</Header>
+            <ChildContent>
+                <div class="showcase-page__metric-value">42</div>
+                <p>Rond de follow-up af en laat de gebruiker doorgaan.</p>
+            </ChildContent>
+        </AgtCard>
+
+        <AgtCard>
+            <Header>Omzet</Header>
+            <ChildContent>
+                <div class="showcase-page__metric-value">€ 128k</div>
+                <p>Een samenvatting die besluitvorming ondersteunt.</p>
+            </ChildContent>
+        </AgtCard>
+    </div>
+
+    <AgtCard>
+        <Header>Signal strip</Header>
+        <ChildContent>
+            <svg viewBox="0 0 320 120" role="img" aria-label="Dashboard signal strip" style="width: 100%; height: auto;">
+                <path d="M0 84 L32 78 L64 90 L96 66 L128 72 L160 58 L192 62 L224 46 L256 54 L288 38 L320 44"
+                      fill="none"
+                      stroke="var(--agt-color-primary-500)"
+                      stroke-width="6"
+                      stroke-linecap="round"
+                      stroke-linejoin="round" />
+            </svg>
+        </ChildContent>
+    </AgtCard>
+</div>

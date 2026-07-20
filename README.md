@@ -89,6 +89,16 @@ Theme colors live only inside `html[data-agt-theme="..."]` scopes, while `:root`
 dotnet run --project samples/Agterhuis.Ui.Demo
 ```
 
+## Starter Template
+
+Create a new app scaffold with the packaged template:
+
+```bash
+dotnet new agterhuis-app -n MijnApp --theme plum --variant dark
+```
+
+The template package lives under [templates/Agterhuis.Ui.Templates](templates/Agterhuis.Ui.Templates) and is designed to be packed with the library release. See [docs/CONSUMING.md](docs/CONSUMING.md) for the host integration order.
+
 ## Build and Test
 
 ```bash
@@ -125,3 +135,14 @@ npm run contrast:sweep:loop -- --chunk-size=10 --themes=plum,ocean --routes=/,/c
 ```
 
 Checkpoint file: `eng/contrast-sweep/contrast-sweep.checkpoint.json`
+
+## Visual Regression
+
+Run the baseline comparison against the Playwright-backed capture harness:
+
+```bash
+npm run vr:test
+npm run vr:approve
+```
+
+The baselines and reports live under [eng/visual-regression](eng/visual-regression).

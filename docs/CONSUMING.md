@@ -115,3 +115,13 @@ Intentionally raw (still fully themed): Charts, Scheduler, Gantt, PivotDataGrid,
 - [Theming](THEMING.md)
 - [Theme coverage](THEME-COVERAGE.md)
 - [Accessibility](ACCESSIBILITY.md)
+
+## 8. Starter template
+
+Use the packaged starter to create a Blazor Web App with the theme shell and core patterns already wired:
+
+```bash
+dotnet new agterhuis-app -n MijnApp --theme plum --variant dark
+```
+
+The template package is [templates/Agterhuis.Ui.Templates](../templates/Agterhuis.Ui.Templates) and includes the expected CSS/JS order, `AddAgterhuisUi()`, a themed `App.razor`, a sidebar shell, and starter pages for forms and lists.

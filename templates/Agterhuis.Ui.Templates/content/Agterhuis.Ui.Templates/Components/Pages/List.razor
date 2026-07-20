@@ -1,0 +1,44 @@
+@page "/list"
+
+<PageTitle>Lijst</PageTitle>
+
+<div class="agt-page agt-stack">
+    <AgtPageHeader Kicker="Patroon" Title="Lijstpagina" Description="Filteren, sorteren en scannen van een compacte itemlijst." />
+
+    <AgtCard>
+        <Header>Open items</Header>
+        <ChildContent>
+            <AgtTextField Label="Filter" AriaLabel="Filter" Placeholder="Zoek op naam of status" Value="@_filter" ValueChanged="OnFilterChanged" ValueExpression="@(() => _filter)" />
+
+            <AgtDataGrid TItem="StarterItem" Data="@FilteredItems" PageSize="5">
+                <Columns>
+                    <RadzenDataGridColumn TItem="StarterItem" Property="Name" Title="Naam" />
+                    <RadzenDataGridColumn TItem="StarterItem" Property="Status" Title="Status" />
+                </Columns>
+            </AgtDataGrid>
+        </ChildContent>
+    </AgtCard>
+</div>
+
+@code {
+    private static readonly IReadOnlyList<StarterItem> Items =
+    [
+        new("Werkorder 1001", "Open"),
+        new("Werkorder 1002", "In behandeling"),
+        new("Werkorder 1003", "Afgerond")
+    ];
+
+    private string _filter = string.Empty;
+
+    private IEnumerable<StarterItem> FilteredItems => string.IsNullOrWhiteSpace(_filter)
+        ? Items
+        : Items.Where(item => item.Name.Contains(_filter, StringComparison.OrdinalIgnoreCase) || item.Status.Contains(_filter, StringComparison.OrdinalIgnoreCase));
+
+    private Task OnFilterChanged(string? value)
+    {
+        _filter = value ?? string.Empty;
+        return Task.CompletedTask;
+    }
+
+    private sealed record StarterItem(string Name, string Status);
+}

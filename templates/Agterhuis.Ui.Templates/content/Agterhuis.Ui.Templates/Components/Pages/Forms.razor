@@ -1,0 +1,70 @@
+@page "/forms"
+
+<PageTitle>Formulier</PageTitle>
+
+<div class="agt-page agt-stack">
+    <AgtPageHeader Kicker="Patroon" Title="Formulierpagina" Description="Labels, secties en actieknoppen voor een compacte invoerflow." />
+
+    <AgtCard>
+        <Header>Nieuwe aanvraag</Header>
+        <ChildContent>
+            <EditForm Model="_draft">
+                <DataAnnotationsValidator />
+
+                <div class="starter-form-grid">
+                    <AgtTextField Label="Naam" Placeholder="Bijv. Marie Jansen" Value="@_draft.Name" ValueChanged="OnNameChanged" ValueExpression="@(() => _draft.Name)" />
+                    <AgtTextField Label="E-mail" Placeholder="naam@bedrijf.nl" Value="@_draft.Email" ValueChanged="OnEmailChanged" ValueExpression="@(() => _draft.Email)" />
+                    <AgtTextField Label="Opmerking" Placeholder="Korte context voor de aanvraag" Value="@_draft.Notes" ValueChanged="OnNotesChanged" ValueExpression="@(() => _draft.Notes)" />
+                </div>
+
+                <AgtFormActions SaveText="Opslaan" CancelText="Wissen" Save="OnSave" Cancel="OnReset" />
+            </EditForm>
+        </ChildContent>
+    </AgtCard>
+</div>
+
+@code {
+    private readonly DraftModel _draft = new();
+
+    private Task OnNameChanged(string? value)
+    {
+        _draft.Name = value ?? string.Empty;
+        return Task.CompletedTask;
+    }
+
+    private Task OnEmailChanged(string? value)
+    {
+        _draft.Email = value ?? string.Empty;
+        return Task.CompletedTask;
+    }
+
+    private Task OnNotesChanged(string? value)
+    {
+        _draft.Notes = value ?? string.Empty;
+        return Task.CompletedTask;
+    }
+
+    private Task OnSave(MouseEventArgs args)
+    {
+        return Task.CompletedTask;
+    }
+
+    private Task OnReset(MouseEventArgs args)
+    {
+        _draft.Name = string.Empty;
+        _draft.Email = string.Empty;
+        _draft.Notes = string.Empty;
+        return Task.CompletedTask;
+    }
+
+    private sealed class DraftModel
+    {
+        [Required]
+        public string Name { get; set; } = string.Empty;
+
+        [Required]
+        public string Email { get; set; } = string.Empty;
+
+        public string Notes { get; set; } = string.Empty;
+    }
+}

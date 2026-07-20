@@ -8,6 +8,8 @@ The format is based on Keep a Changelog and this project adheres to Semantic Ver
 
 ### Added
 
+- Capstone vervolg: toegevoegd starter-templatepakket `Agterhuis.Ui.Templates`, visual-regression harness onder `eng/visual-regression`, plus documentatie en smoke-testdekking voor de `dotnet new`-flow.
+
 - Prompt 43 vervolgbatch met 20 extra standalone pagina's: `/catalog/stacked-area-series`, `/catalog/stacked-bar-series`, `/catalog/stacked-column-series`, `/catalog/stacked-line-series`, `/catalog/timeline` en `/catalog/waterfall-series`, plus de utility-standalones `RadzenAxisCrosshair`, `RadzenBarOptions`, `RadzenComponent`, `RadzenComponentWithChildren`, `RadzenComponents`, `RadzenContent`, `RadzenFlexComponent`, `RadzenGridLines`, `RadzenHeading`, `RadzenHeatmap`, `RadzenLiveRegion`, `RadzenMarkers`, `RadzenTheme` en `RadzenTicks` in de all-components matrix, inclusief voorbeeldsets, index-/navigatiekoppelingen, smoke-tests en geactualiseerde inventory-dekking (156/161).
 - Prompt 43 vervolgbatch met 20 extra standalone pagina's: `/catalog/full-stacked-line-series`, `/catalog/funnel-series`, `/catalog/heatmap-series`, `/catalog/high-low-series`, `/catalog/horizontal-waterfall-series`, `/catalog/line-series`, `/catalog/linear-gauge`, `/catalog/ohlc-series`, `/catalog/pie-series`, `/catalog/pyramid-series`, `/catalog/radial-gauge`, `/catalog/range-area-series`, `/catalog/range-bar-series`, `/catalog/range-column-series`, `/catalog/sankey-diagram`, `/catalog/scatter-series`, `/catalog/sparkline`, `/catalog/spider-chart`, `/catalog/spider-column-series` en `/catalog/spider-series`, inclusief voorbeeldsets, index-/navigatiekoppelingen, smoke-tests en geactualiseerde inventory-dekking (136/161).
 - Initial scaffold for Agterhuis.Ui Razor Class Library.

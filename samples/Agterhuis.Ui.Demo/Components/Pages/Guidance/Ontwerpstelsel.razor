@@ -1,0 +1,39 @@
+@page "/guidance/ontwerpstelsel"
+
+<PageTitle>Ontwerpstelsel</PageTitle>
+
+<div class="agt-page agt-stack">
+    <AgtPageHeader Kicker="Ontwerpstelsel"
+                   Title="Start, export en regressie"
+                   Description="De toegangspoort naar de bouwblokken die het design system buiten de demo bruikbaar maken." />
+
+    <div class="guidance-grid">
+        <AgtCard>
+            <Header>Starter template</Header>
+            <ChildContent>
+                <p>De starter-template staat nu op een eigen pagina met de CLI, inhoud en startinstructies.</p>
+                <p><RadzenLink Path="/guidance/starter-template" Text="Open starter template" /></p>
+            </ChildContent>
+        </AgtCard>
+
+        <AgtCard>
+            <Header>Token-export</Header>
+            <ChildContent>
+                <p>Token-export heeft een eigen pagina met de designer-handoff en de exportopdracht.</p>
+                <p><RadzenLink Path="/guidance/token-export" Text="Open token-export" /></p>
+            </ChildContent>
+        </AgtCard>
+
+        <AgtCard>
+            <Header>Visuele regressie</Header>
+            <ChildContent>
+                <p>Vergelijk vaste capture-routes tegen gecommitteerde baselines zodat theme- of layoutwijzigingen zichtbaar blijven.</p>
+                <p><a href="https://github.com/RobertAgterhuis/Blazor.Radzen.Themes/blob/main/eng/visual-regression/README.md" target="_blank" rel="noreferrer">Open de visual-regression handleiding</a></p>
+                <ul>
+                    <li><strong>Test:</strong> <code>npm run vr:test</code></li>
+                    <li><strong>Approve:</strong> <code>npm run vr:approve</code></li>
+                </ul>
+            </ChildContent>
+        </AgtCard>
+    </div>
+</div>

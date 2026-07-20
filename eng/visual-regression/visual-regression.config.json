@@ -1,0 +1,16 @@
+{
+  "threshold": 0.04,
+  "viewports": [
+    { "name": "desktop", "width": 1600, "height": 900 },
+    { "name": "tablet", "width": 1280, "height": 800 }
+  ],
+  "themes": ["plum-dark", "hoth-light", "imperial-dark", "autotaalglas-light", "volt-dark"],
+  "captures": [
+    { "key": "home", "route": "/", "selector": "h2", "description": "Home" },
+    { "key": "buttons", "route": "/components/buttons", "selector": "h1", "description": "Buttons" },
+    { "key": "data-grid", "route": "/components/data/grid", "selector": "h1", "description": "Data grid" },
+    { "key": "forms", "route": "/components/forms/text-field", "selector": "h1", "description": "Forms" },
+    { "key": "werkorders", "route": "/app/werkorders", "selector": "h1", "description": "Showcase workorders" },
+    { "key": "blog", "route": "/blog", "selector": "h1", "description": "Blog" }
+  ]
+}

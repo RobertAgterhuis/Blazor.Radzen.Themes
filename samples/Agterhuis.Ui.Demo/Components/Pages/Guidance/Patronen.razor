@@ -1,0 +1,59 @@
+@page "/guidance/patterns"
+
+<PageTitle>Patronen</PageTitle>
+
+<ComponentPage Kicker="Patronen"
+               Title="Patronenbibliotheek"
+               Introduction="Gecodificeerde UX-patronen met live referenties naar de bestaande demo- en showcasepagina's.">
+    <AgtCard>
+        <Header>Overzicht</Header>
+        <ChildContent>
+            <p>Deze pagina zet de patronen uit docs/patterns om in levendige referenties. Elk voorbeeld toont de live demo en de exacte broncode via de code-tab.</p>
+            <ul>
+                <li>Formulierpagina: labels, secties en AgtFormActions.</li>
+                <li>Lijst/CRUD-pagina: grid, chips, views en detailcontext.</li>
+                <li>Master-detail, wizard, dashboard, zoeken, foutafhandeling en bevestiging.</li>
+            </ul>
+        </ChildContent>
+    </AgtCard>
+
+    <DemoExample Title="Formulierpagina"
+                 Description="Labels zichtbaar, secties logisch gegroepeerd en acties aan het einde."
+                 ExampleComponentType="typeof(Agterhuis.Ui.Demo.Components.Pages.FormActionsDemo)"
+                 SourcePath="Components/Pages/FormActionsDemo.razor" />
+
+    <DemoExample Title="Lijst / CRUD-pagina"
+                 Description="Een overzicht met filters, selectie en detailcontext in dezelfde werkstroom."
+                 ExampleComponentType="typeof(Agterhuis.Ui.Demo.Components.Pages.App.ShowcaseWerkorders)"
+                 SourcePath="Components/Pages/App/ShowcaseWerkorders.razor" />
+
+    <DemoExample Title="Master-detail"
+                 Description="De detailcontext blijft in beeld terwijl de lijst de hoofdtaak blijft."
+                 ExampleComponentType="typeof(Agterhuis.Ui.Demo.Components.Pages.App.ShowcaseAssets)"
+                 SourcePath="Components/Pages/App/ShowcaseAssets.razor" />
+
+    <DemoExample Title="Wizard"
+                 Description="Stapsgewijze navigatie met duidelijke terugval en beperkte cognitieve belasting."
+                 ExampleComponentType="typeof(Agterhuis.Ui.Demo.Components.Pages.TabsDemo)"
+                 SourcePath="Components/Pages/TabsDemo.razor" />
+
+    <DemoExample Title="Dashboard"
+                 Description="Een compact overzicht met signalen, metrics en rustige informatie-dichtheid."
+                 ExampleComponentType="typeof(Agterhuis.Ui.Demo.Components.Pages.Guidance.GuidanceDashboardDemo)"
+                 SourcePath="Components/Pages/Guidance/GuidanceDashboardDemo.razor" />
+
+    <DemoExample Title="Zoeken & filteren"
+                 Description="Debounce, actieve filters en een heldere empty state voor zoekgedreven workflows."
+                 ExampleComponentType="typeof(Agterhuis.Ui.Demo.Components.Pages.App.ShowcaseKlanten)"
+                 SourcePath="Components/Pages/App/ShowcaseKlanten.razor" />
+
+    <DemoExample Title="Foutafhandeling"
+                 Description="Toon validatie, recoverable errors en een echte error state op de juiste plek."
+                 ExampleComponentType="typeof(Agterhuis.Ui.Demo.Components.Pages.Error)"
+                 SourcePath="Components/Pages/Error.razor" />
+
+    <DemoExample Title="Bevestiging & destructieve acties"
+                 Description="Vraag alleen bevestiging wanneer de actie echt niet snel te herstellen is."
+                 ExampleComponentType="typeof(Agterhuis.Ui.Demo.Components.Pages.ConfirmDialogDemo)"
+                 SourcePath="Components/Pages/ConfirmDialogDemo.razor" />
+</ComponentPage>

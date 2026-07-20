@@ -1,0 +1,44 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Agterhuis",
+  "classifications": ["Blazor", "Web", "Starter", "Design system"],
+  "identity": "Agterhuis.Ui.Templates.BlazorWebApp",
+  "name": "Agterhuis.Ui starter",
+  "shortName": "agterhuis-app",
+  "sourceName": "Agterhuis.Ui.Templates",
+  "preferNameDirectory": true,
+  "symbols": {
+    "theme": {
+      "type": "parameter",
+      "datatype": "choice",
+      "defaultValue": "plum",
+      "replaces": "THEME_FAMILY_TOKEN",
+      "choices": [
+        { "choice": "plum" },
+        { "choice": "ocean" },
+        { "choice": "dagobah" },
+        { "choice": "dathomir" },
+        { "choice": "hoth" },
+        { "choice": "tatooine" },
+        { "choice": "imperial" },
+        { "choice": "azure" },
+        { "choice": "ms365" },
+        { "choice": "volt" },
+        { "choice": "autotaalglas" },
+        { "choice": "autotaalglas-contrast" },
+        { "choice": "autotaalglas-portal" },
+        { "choice": "autotaalglas-mono" }
+      ]
+    },
+    "variant": {
+      "type": "parameter",
+      "datatype": "choice",
+      "defaultValue": "dark",
+      "replaces": "THEME_VARIANT_TOKEN",
+      "choices": [
+        { "choice": "light" },
+        { "choice": "dark" }
+      ]
+    }
+  }
+}

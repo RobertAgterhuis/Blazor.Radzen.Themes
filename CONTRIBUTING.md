@@ -39,6 +39,7 @@ dotnet run --project samples/Agterhuis.Ui.Demo
 - Wrap Radzen components; do not inherit from Radzen components.
 - Form wrappers must receive Label or AriaLabel.
 - Demo pages must show as many examples as there are materially distinct capabilities, with a minimum of one honest example (no synthetic duplication to satisfy a fixed count).
+- Demo and showcase copy follow docs/CONTENT-GUIDELINES.md: professional-direct tone, sentence case, verb-first actions, nl-NL as the default language, and no exclamation marks in system text.
 - Zero-warning builds are required. Warnings are treated as errors in CI.
 
 ## Add a Theme

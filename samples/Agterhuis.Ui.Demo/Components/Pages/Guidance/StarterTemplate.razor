@@ -1,0 +1,43 @@
+@page "/guidance/starter-template"
+
+<PageTitle>Starter template</PageTitle>
+
+<div class="agt-page agt-stack">
+    <AgtPageHeader Kicker="Ontwerpstelsel"
+                   Title="Starter template"
+                   Description="Instantieer een nieuwe Blazor Web App met de juiste shell, theming en voorbeeldpagina's." />
+
+    <div class="guidance-grid">
+        <AgtCard>
+            <Header>Wat levert het op</Header>
+            <ChildContent>
+                <ul>
+                    <li>Package-referentie naar Agterhuis.Ui.</li>
+                    <li>`AddAgterhuisUi()` en de juiste CSS/JS-volgorde.</li>
+                    <li>App.razor met theme-attribuut, skip-link en landmarks.</li>
+                    <li>MainLayout met AgtSidebarLayout, switcher en dichtheidstoggle.</li>
+                    <li>Voorbeeldpagina's voor formulier en lijst.</li>
+                </ul>
+            </ChildContent>
+        </AgtCard>
+
+        <AgtCard>
+            <Header>CLI</Header>
+            <ChildContent>
+                <p>Maak een nieuw project met:</p>
+                <pre><code>dotnet new agterhuis-app -n MijnApp --theme plum --variant dark</code></pre>
+            </ChildContent>
+        </AgtCard>
+
+        <AgtCard>
+            <Header>Bron</Header>
+            <ChildContent>
+                <ul>
+                    <li><a href="https://github.com/RobertAgterhuis/Blazor.Radzen.Themes/tree/main/templates/Agterhuis.Ui.Templates" target="_blank" rel="noreferrer">Template package</a></li>
+                    <li><a href="https://github.com/RobertAgterhuis/Blazor.Radzen.Themes/blob/main/README.md" target="_blank" rel="noreferrer">README starter notitie</a></li>
+                    <li><a href="https://github.com/RobertAgterhuis/Blazor.Radzen.Themes/blob/main/docs/CONSUMING.md" target="_blank" rel="noreferrer">Host integration guide</a></li>
+                </ul>
+            </ChildContent>
+        </AgtCard>
+    </div>
+</div>

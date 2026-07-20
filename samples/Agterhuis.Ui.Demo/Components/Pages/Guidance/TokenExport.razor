@@ -1,0 +1,43 @@
+@page "/guidance/token-export"
+
+<PageTitle>Token-export</PageTitle>
+
+<div class="agt-page agt-stack">
+    <AgtPageHeader Kicker="Ontwerpstelsel"
+                   Title="Token-export"
+                   Description="Exporteer tokens naar designer-vriendelijke JSON voor Figma Variables en Tokens Studio." />
+
+    <div class="guidance-grid">
+        <AgtCard>
+            <Header>Exportvormen</Header>
+            <ChildContent>
+                <ul>
+                    <li>W3C Design Tokens JSON per themefamilie.</li>
+                    <li>Style Dictionary-compatibele JSON voor tooling.
+                    </li>
+                    <li>Light en dark als aparte modes per familie.</li>
+                    <li>Tokenbronnen komen rechtstreeks uit de theme-CSS.</li>
+                </ul>
+            </ChildContent>
+        </AgtCard>
+
+        <AgtCard>
+            <Header>Script</Header>
+            <ChildContent>
+                <p>Genereer de exports met:</p>
+                <pre><code>npm run token:export</code></pre>
+                <p>De output staat in <code>eng/token-export/output</code>.</p>
+            </ChildContent>
+        </AgtCard>
+
+        <AgtCard>
+            <Header>Designer-handoff</Header>
+            <ChildContent>
+                <ul>
+                    <li><a href="https://github.com/RobertAgterhuis/Blazor.Radzen.Themes/blob/main/docs/DESIGN-KIT.md" target="_blank" rel="noreferrer">Open de design-kit handleiding</a></li>
+                    <li><a href="https://github.com/RobertAgterhuis/Blazor.Radzen.Themes/tree/main/eng/token-export" target="_blank" rel="noreferrer">Bekijk het exportproject</a></li>
+                </ul>
+            </ChildContent>
+        </AgtCard>
+    </div>
+</div>

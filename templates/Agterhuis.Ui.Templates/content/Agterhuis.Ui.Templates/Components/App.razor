@@ -1,0 +1,36 @@
+@using Agterhuis.Ui.Templates.Components.Layout
+
+<!DOCTYPE html>
+<html lang="nl" data-agt-theme="THEME_FAMILY_TOKEN-THEME_VARIANT_TOKEN">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="/" />
+    <link rel="stylesheet" href="_content/Radzen.Blazor/css/material-base.css" />
+    <link rel="stylesheet" href="_content/Agterhuis.Ui/css/agt-theme.css" />
+    <link rel="stylesheet" href="_content/Agterhuis.Ui/css/agt-utilities.css" />
+    <link rel="stylesheet" href="app.css" />
+    <script>
+        (() => {
+            const key = "agt-ui-theme";
+            const raw = (localStorage.getItem(key) || "THEME_FAMILY_TOKEN-THEME_VARIANT_TOKEN").trim().toLowerCase();
+            const normalized = raw === "dark"
+                ? "THEME_FAMILY_TOKEN-dark"
+                : raw === "light"
+                    ? "THEME_FAMILY_TOKEN-light"
+                    : raw || "THEME_FAMILY_TOKEN-THEME_VARIANT_TOKEN";
+            document.documentElement.setAttribute("data-agt-theme", normalized);
+        })();
+    </script>
+    <HeadOutlet @rendermode="InteractiveServer" />
+</head>
+
+<body>
+    <Routes @rendermode="InteractiveServer" />
+    <script src="_content/Radzen.Blazor/Radzen.Blazor.min.js"></script>
+    <script src="_content/Agterhuis.Ui/theme-interop.js"></script>
+    <script src="_framework/blazor.web.js"></script>
+</body>
+
+</html>

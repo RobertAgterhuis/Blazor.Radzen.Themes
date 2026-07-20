@@ -1,0 +1,61 @@
+@page "/guidance/schrijfwijzer"
+
+<PageTitle>Schrijfwijzer</PageTitle>
+
+<div class="agt-page agt-stack">
+    <AgtPageHeader Kicker="Schrijfwijzer"
+                   Title="Content-richtlijnen"
+                   Description="De standaard voor demo-copy, foutmeldingen, empty states en knopteksten." />
+
+    <AgtCard>
+        <Header>Basisregels</Header>
+        <ChildContent>
+            <ul>
+                <li>Gebruik een professionele, directe toon zonder uitroeptekens in systeemtekst.</li>
+                <li>Schrijf knoppen werkwoord-eerst: Opslaan, Aanmaken, Wissen.</li>
+                <li>Laat foutmeldingen zeggen wat er gebeurde en wat de gebruiker nu kan doen.</li>
+                <li>Gebruik empty states als uitnodiging, niet als verontschuldiging.</li>
+                <li>Houd voorbeelden in nl-NL en gebruik echte placeholders.</li>
+            </ul>
+        </ChildContent>
+    </AgtCard>
+
+    <div class="guidance-grid">
+        <AgtCard>
+            <Header>Goed</Header>
+            <ChildContent>
+                <ul>
+                    <li><strong>Knop:</strong> Opslaan</li>
+                    <li><strong>Fout:</strong> De e-mail is ongeldig. Voer een adres in zoals naam@bedrijf.nl.</li>
+                    <li><strong>Empty state:</strong> Nog geen resultaten. Voeg een filter toe of maak de eerste werkorder aan.</li>
+                    <li><strong>Placeholder:</strong> Bijvoorbeeld Werkorder 1042</li>
+                </ul>
+            </ChildContent>
+        </AgtCard>
+
+        <AgtCard>
+            <Header>Niet doen</Header>
+            <ChildContent>
+                <ul>
+                    <li><strong>Knop:</strong> OK</li>
+                    <li><strong>Fout:</strong> Invalid email address.</li>
+                    <li><strong>Empty state:</strong> Sorry, er is niets gevonden.</li>
+                    <li><strong>Placeholder:</strong> Naam</li>
+                </ul>
+            </ChildContent>
+        </AgtCard>
+    </div>
+
+    <AgtCard>
+        <Header>Toepassing in de demo</Header>
+        <ChildContent>
+            <p>Gebruik deze regels in alle nieuwe demo's, showcaseflows en begeleidende tekst. De pagina's voor formulieren, werkorders, bevestigingen en empty states zijn de eerste referenties.</p>
+            <ul>
+                <li><RadzenLink Path="/components/forms/form-actions" Text="Form actions demo" /></li>
+                <li><RadzenLink Path="/components/feedback/confirm-dialog" Text="Confirm dialog demo" /></li>
+                <li><RadzenLink Path="/app/werkorders" Text="Werkorders showcase" /></li>
+                <li><RadzenLink Path="/components/feedback/empty-state" Text="Empty state demo" /></li>
+            </ul>
+        </ChildContent>
+    </AgtCard>
+</div>

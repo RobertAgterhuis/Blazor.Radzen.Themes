@@ -1,0 +1,307 @@
+{
+  "generatedAtUtc": "2026-07-20T08:46:00.140Z",
+  "mode": "test",
+  "threshold": 0.04,
+  "results": [
+    {
+      "fileName": "home.desktop.plum-dark.png",
+      "status": "ok",
+      "diffRatio": 0.017994444444444445
+    },
+    {
+      "fileName": "buttons.desktop.plum-dark.png",
+      "status": "ok",
+      "diffRatio": 0.012565277777777778
+    },
+    {
+      "fileName": "data-grid.desktop.plum-dark.png",
+      "status": "ok",
+      "diffRatio": 0.01530625
+    },
+    {
+      "fileName": "forms.desktop.plum-dark.png",
+      "status": "ok",
+      "diffRatio": 0.013438194444444444
+    },
+    {
+      "fileName": "werkorders.desktop.plum-dark.png",
+      "status": "ok",
+      "diffRatio": 0.016427777777777777
+    },
+    {
+      "fileName": "blog.desktop.plum-dark.png",
+      "status": "ok",
+      "diffRatio": 0.005028472222222222
+    },
+    {
+      "fileName": "home.desktop.hoth-light.png",
+      "status": "ok",
+      "diffRatio": 0.02022847222222222
+    },
+    {
+      "fileName": "buttons.desktop.hoth-light.png",
+      "status": "ok",
+      "diffRatio": 0.012295833333333334
+    },
+    {
+      "fileName": "data-grid.desktop.hoth-light.png",
+      "status": "ok",
+      "diffRatio": 0.012681944444444444
+    },
+    {
+      "fileName": "forms.desktop.hoth-light.png",
+      "status": "ok",
+      "diffRatio": 0.01173263888888889
+    },
+    {
+      "fileName": "werkorders.desktop.hoth-light.png",
+      "status": "ok",
+      "diffRatio": 0.013372222222222223
+    },
+    {
+      "fileName": "blog.desktop.hoth-light.png",
+      "status": "ok",
+      "diffRatio": 0.012634722222222223
+    },
+    {
+      "fileName": "home.desktop.imperial-dark.png",
+      "status": "ok",
+      "diffRatio": 0.023734027777777778
+    },
+    {
+      "fileName": "buttons.desktop.imperial-dark.png",
+      "status": "ok",
+      "diffRatio": 0.03044583333333333
+    },
+    {
+      "fileName": "data-grid.desktop.imperial-dark.png",
+      "status": "ok",
+      "diffRatio": 0.014983333333333333
+    },
+    {
+      "fileName": "forms.desktop.imperial-dark.png",
+      "status": "ok",
+      "diffRatio": 0.016725694444444446
+    },
+    {
+      "fileName": "werkorders.desktop.imperial-dark.png",
+      "status": "ok",
+      "diffRatio": 0.018779861111111112
+    },
+    {
+      "fileName": "blog.desktop.imperial-dark.png",
+      "status": "ok",
+      "diffRatio": 0.012634722222222223
+    },
+    {
+      "fileName": "home.desktop.autotaalglas-light.png",
+      "status": "ok",
+      "diffRatio": 0.019679166666666668
+    },
+    {
+      "fileName": "buttons.desktop.autotaalglas-light.png",
+      "status": "ok",
+      "diffRatio": 0.011179166666666667
+    },
+    {
+      "fileName": "data-grid.desktop.autotaalglas-light.png",
+      "status": "ok",
+      "diffRatio": 0.012336111111111112
+    },
+    {
+      "fileName": "forms.desktop.autotaalglas-light.png",
+      "status": "ok",
+      "diffRatio": 0.01118125
+    },
+    {
+      "fileName": "werkorders.desktop.autotaalglas-light.png",
+      "status": "ok",
+      "diffRatio": 0.013770138888888889
+    },
+    {
+      "fileName": "blog.desktop.autotaalglas-light.png",
+      "status": "ok",
+      "diffRatio": 0.012634722222222223
+    },
+    {
+      "fileName": "home.desktop.volt-dark.png",
+      "status": "ok",
+      "diffRatio": 0.014519444444444444
+    },
+    {
+      "fileName": "buttons.desktop.volt-dark.png",
+      "status": "ok",
+      "diffRatio": 0.008353472222222222
+    },
+    {
+      "fileName": "data-grid.desktop.volt-dark.png",
+      "status": "ok",
+      "diffRatio": 0.009161111111111111
+    },
+    {
+      "fileName": "forms.desktop.volt-dark.png",
+      "status": "ok",
+      "diffRatio": 0.00938611111111111
+    },
+    {
+      "fileName": "werkorders.desktop.volt-dark.png",
+      "status": "ok",
+      "diffRatio": 0.01572152777777778
+    },
+    {
+      "fileName": "blog.desktop.volt-dark.png",
+      "status": "ok",
+      "diffRatio": 0.012634722222222223
+    },
+    {
+      "fileName": "home.tablet.plum-dark.png",
+      "status": "ok",
+      "diffRatio": 0.018447265625
+    },
+    {
+      "fileName": "buttons.tablet.plum-dark.png",
+      "status": "ok",
+      "diffRatio": 0.0150380859375
+    },
+    {
+      "fileName": "data-grid.tablet.plum-dark.png",
+      "status": "ok",
+      "diffRatio": 0.0138671875
+    },
+    {
+      "fileName": "forms.tablet.plum-dark.png",
+      "status": "ok",
+      "diffRatio": 0.01448828125
+    },
+    {
+      "fileName": "werkorders.tablet.plum-dark.png",
+      "status": "ok",
+      "diffRatio": 0.0183662109375
+    },
+    {
+      "fileName": "blog.tablet.plum-dark.png",
+      "status": "ok",
+      "diffRatio": 0.0026298828125
+    },
+    {
+      "fileName": "home.tablet.hoth-light.png",
+      "status": "ok",
+      "diffRatio": 0.022216796875
+    },
+    {
+      "fileName": "buttons.tablet.hoth-light.png",
+      "status": "ok",
+      "diffRatio": 0.0138408203125
+    },
+    {
+      "fileName": "data-grid.tablet.hoth-light.png",
+      "status": "ok",
+      "diffRatio": 0.0140048828125
+    },
+    {
+      "fileName": "forms.tablet.hoth-light.png",
+      "status": "ok",
+      "diffRatio": 0.0120888671875
+    },
+    {
+      "fileName": "werkorders.tablet.hoth-light.png",
+      "status": "ok",
+      "diffRatio": 0.014833984375
+    },
+    {
+      "fileName": "blog.tablet.hoth-light.png",
+      "status": "ok",
+      "diffRatio": 0.0141611328125
+    },
+    {
+      "fileName": "home.tablet.imperial-dark.png",
+      "status": "ok",
+      "diffRatio": 0.0220087890625
+    },
+    {
+      "fileName": "buttons.tablet.imperial-dark.png",
+      "status": "ok",
+      "diffRatio": 0.016169921875
+    },
+    {
+      "fileName": "data-grid.tablet.imperial-dark.png",
+      "status": "ok",
+      "diffRatio": 0.0189208984375
+    },
+    {
+      "fileName": "forms.tablet.imperial-dark.png",
+      "status": "ok",
+      "diffRatio": 0.0171611328125
+    },
+    {
+      "fileName": "werkorders.tablet.imperial-dark.png",
+      "status": "ok",
+      "diffRatio": 0.0171494140625
+    },
+    {
+      "fileName": "blog.tablet.imperial-dark.png",
+      "status": "ok",
+      "diffRatio": 0.0141611328125
+    },
+    {
+      "fileName": "home.tablet.autotaalglas-light.png",
+      "status": "ok",
+      "diffRatio": 0.0193037109375
+    },
+    {
+      "fileName": "buttons.tablet.autotaalglas-light.png",
+      "status": "ok",
+      "diffRatio": 0.0122197265625
+    },
+    {
+      "fileName": "data-grid.tablet.autotaalglas-light.png",
+      "status": "ok",
+      "diffRatio": 0.01317578125
+    },
+    {
+      "fileName": "forms.tablet.autotaalglas-light.png",
+      "status": "ok",
+      "diffRatio": 0.0124521484375
+    },
+    {
+      "fileName": "werkorders.tablet.autotaalglas-light.png",
+      "status": "ok",
+      "diffRatio": 0.012044921875
+    },
+    {
+      "fileName": "blog.tablet.autotaalglas-light.png",
+      "status": "ok",
+      "diffRatio": 0.0141611328125
+    },
+    {
+      "fileName": "home.tablet.volt-dark.png",
+      "status": "ok",
+      "diffRatio": 0.015494140625
+    },
+    {
+      "fileName": "buttons.tablet.volt-dark.png",
+      "status": "ok",
+      "diffRatio": 0.0087900390625
+    },
+    {
+      "fileName": "data-grid.tablet.volt-dark.png",
+      "status": "ok",
+      "diffRatio": 0.009076171875
+    },
+    {
+      "fileName": "forms.tablet.volt-dark.png",
+      "status": "ok",
+      "diffRatio": 0.01115234375
+    },
+    {
+      "fileName": "werkorders.tablet.volt-dark.png",
+      "status": "ok",
+      "diffRatio": 0.010935546875
+    },
+    {
+      "fileName": "blog.tablet.volt-dark.png",
+      "status": "ok",
+      "diffRatio": 0.0141611328125
+    }
+  ]
+}

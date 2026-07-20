@@ -400,6 +400,12 @@
       "tokenaudit": {
         "type": "Project"
       },
+      "tokenexport": {
+        "type": "Project",
+        "dependencies": {
+          "TokenAudit": "[1.0.0, )"
+        }
+      },
       "AngleSharp": {
         "type": "CentralTransitive",
         "requested": "[1.4.1, )",

@@ -1,8 +1,8 @@
 # Example Audit
 
-Generated: 2026-07-20 06:11:27 UTC
+Generated: 2026-07-20 08:47:06 UTC
 
-Pages audited: 135
+Pages audited: 136
 Scan report loaded: yes
 Unallowlisted similarity violations: 0
 Unallowlisted empty examples: 0
@@ -146,6 +146,7 @@ Unallowlisted title/code mismatches: 0
 | samples/Agterhuis.Ui.Demo/Components/Pages/Catalog/CatalogUploadPage.razor | Forms | 3 | 0 | 0 | 0 | ok |
 | samples/Agterhuis.Ui.Demo/Components/Pages/Catalog/CatalogWaterfallSeriesPage.razor | Data Visualization | 3 | 0 | 0 | 0 | ok |
 | samples/Agterhuis.Ui.Demo/Components/Pages/DataGridDemo.razor | Data | 3 | 0 | 0 | 0 | ok |
+| samples/Agterhuis.Ui.Demo/Components/Pages/Guidance/Patronen.razor | Other | 8 | 0 | 0 | 0 | ok |
 
 ## Category Summary
 
@@ -158,4 +159,4 @@ Unallowlisted title/code mismatches: 0
 | Feedback | 5 | 5/5 | 0 | 0 | 0 | 0 | 100% |
 | Data Visualization | 41 | 41/41 | 0 | 0 | 0 | 0 | 100% |
 | Display | 12 | 12/12 | 0 | 0 | 0 | 0 | 100% |
-| Other | 22 | 22/22 | 0 | 0 | 0 | 0 | 100% |
+| Other | 23 | 23/23 | 0 | 0 | 0 | 0 | 100% |
