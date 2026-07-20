@@ -1,4 +1,72 @@
 window.designerInterop = (() => {
+    let monacoLoaderPromise;
+    let requirePromise;
+
+    const ensureScript = (src) => new Promise((resolve, reject) => {
+        const existing = document.querySelector(`script[data-agt-src="${src}"]`);
+        if (existing) {
+            existing.addEventListener("load", () => resolve(), { once: true });
+            existing.addEventListener("error", (error) => reject(error), { once: true });
+            if (existing.dataset.loaded === "true") {
+                resolve();
+            }
+
+            return;
+        }
+
+        const script = document.createElement("script");
+        script.src = src;
+        script.async = true;
+        script.dataset.agtSrc = src;
+        script.addEventListener("load", () => {
+            script.dataset.loaded = "true";
+            resolve();
+        }, { once: true });
+        script.addEventListener("error", (error) => reject(error), { once: true });
+        document.head.appendChild(script);
+    });
+
+    const ensureMonaco = async () => {
+        if (window.monaco?.editor) {
+            return window.monaco;
+        }
+
+        monacoLoaderPromise ??= (async () => {
+            const loaderPath = "/lib/monaco-editor/min/vs/loader.js";
+            await ensureScript(loaderPath);
+
+            requirePromise ??= new Promise((resolve, reject) => {
+                const amdRequire = window.require;
+                if (!amdRequire) {
+                    reject(new Error("Monaco loader did not expose window.require."));
+                    return;
+                }
+
+                amdRequire.config({ paths: { vs: "/lib/monaco-editor/min/vs" } });
+                amdRequire(["vs/editor/editor.main"], () => resolve(window.monaco), reject);
+            });
+
+            return await requirePromise;
+        })();
+
+        return await monacoLoaderPromise;
+    };
+
+    const createMonacoEditor = async (element, options) => {
+        if (!element) {
+            return null;
+        }
+
+        const monaco = await ensureMonaco();
+        return monaco.editor.create(element, options);
+    };
+
+    const setMonacoTheme = async (themeName, definition) => {
+        const monaco = await ensureMonaco();
+        monaco.editor.defineTheme(themeName, definition);
+        monaco.editor.setTheme(themeName);
+    };
+
     const tryParse = (raw, fallback) => {
         if (!raw) {
             return fallback;
@@ -107,6 +175,7 @@ window.designerInterop = (() => {
     };
 
     return {
+        createMonacoEditor,
         getJson,
         getText,
         registerKeyScope,
@@ -114,6 +183,7 @@ window.designerInterop = (() => {
         pickDesignDocument,
         saveBytesFile,
         saveDesignDocument,
+        setMonacoTheme,
         setJson
     };
 })();

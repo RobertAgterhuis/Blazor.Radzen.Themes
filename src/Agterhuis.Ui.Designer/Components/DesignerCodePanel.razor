@@ -3,6 +3,7 @@
 @using Agterhuis.Ui.Designer.CodeGen
 @using Agterhuis.Ui.Designer.Serialization
 @using Agterhuis.Ui.Designer.Validation
+@using Microsoft.JSInterop
 @namespace Agterhuis.Ui.Designer.Components
 
 <div class="agt-designer-code-panel">
@@ -23,23 +24,31 @@
         @if (CurrentTab == "code")
         {
             <div class="agt-code-preview">
-                <pre><code>
+                <div class="agt-code-monaco-host" @ref="_codeHost" hidden="@(!_monacoCodeReady)"></div>
+                @if (!_monacoCodeReady)
+                {
+                    <pre><code>
 @foreach (var line in PreviewLines)
 {
 <span class="@(line.IsHighlighted ? "agt-code-line agt-code-line--highlight" : "agt-code-line")">@line.Text</span>
 }
 </code></pre>
+                }
             </div>
         }
         else
         {
             <div class="agt-model-editor">
-                <textarea 
-                    class="agt-model-textarea"
-                    value="@ModelJson"
-                    @oninput="OnModelJsonInput"
-                    rows="20">
-                </textarea>
+                <div class="agt-code-monaco-host" @ref="_modelHost" hidden="@(!_monacoModelReady)"></div>
+                @if (!_monacoModelReady)
+                {
+                    <textarea 
+                        class="agt-model-textarea"
+                        value="@ModelJson"
+                        @oninput="OnModelJsonInput"
+                        rows="20">
+                    </textarea>
+                }
                 @if (!string.IsNullOrEmpty(ModelValidationError))
                 {
                     <div class="agt-validation-error">
@@ -75,6 +84,12 @@
     [Parameter]
     public string? SelectedNodeId { get; set; }
 
+    [Parameter]
+    public bool EnableMonaco { get; set; } = true;
+
+    [Inject]
+    public IJSRuntime JS { get; set; } = default!;
+
     private string CurrentTab { get; set; } = "code";
     private string GeneratedCode { get; set; } = string.Empty;
     private string ModelJson { get; set; } = string.Empty;
@@ -84,11 +99,54 @@
     private bool _tabInitialized;
     private string? _lastDocumentSnapshot;
     private IReadOnlyList<PreviewLine> PreviewLines { get; set; } = [];
+    private ElementReference _codeHost;
+    private ElementReference _modelHost;
+    private bool _monacoCodeReady;
+    private bool _monacoModelReady;
 
     protected override void OnInitialized()
     {
         _codeGenerator = new RazorCodeGenerator();
         RefreshGeneratedCode();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || !EnableMonaco)
+        {
+            return;
+        }
+
+        try
+        {
+            await JS.InvokeVoidAsync("designerInterop.createMonacoEditor", _codeHost, new
+            {
+                value = GeneratedCode,
+                language = "razor",
+                readOnly = true,
+                automaticLayout = true,
+                minimap = new { enabled = false },
+                scrollBeyondLastLine = false
+            });
+            _monacoCodeReady = true;
+
+            await JS.InvokeVoidAsync("designerInterop.createMonacoEditor", _modelHost, new
+            {
+                value = ModelJson,
+                language = "json",
+                readOnly = false,
+                automaticLayout = true,
+                minimap = new { enabled = false },
+                scrollBeyondLastLine = false
+            });
+            _monacoModelReady = true;
+            StateHasChanged();
+        }
+        catch
+        {
+            _monacoCodeReady = false;
+            _monacoModelReady = false;
+        }
     }
 
     protected override void OnParametersSet()

@@ -21,6 +21,7 @@ public sealed class DesignerCodePanelTests
             .Add(component => component.CurrentPage, document.Pages[0])
             .Add(component => component.Document, document)
             .Add(component => component.InitialTab, "model")
+            .Add(component => component.EnableMonaco, false)
             .Add(component => component.InitialModelJson, "{\"SchemaVersion\":2,\"Pages\":[{\"Route\":\"/\",\"Title\":\"\",\"Nodes\":[]}]}" )
             .Add(component => component.OnDocumentChanged, EventCallback.Factory.Create<DesignDocument>(ctx, value => received = value)));
 
@@ -45,6 +46,7 @@ public sealed class DesignerCodePanelTests
             .Add(component => component.CurrentPage, document.Pages[0])
             .Add(component => component.Document, document)
             .Add(component => component.InitialTab, "model")
+            .Add(component => component.EnableMonaco, false)
             .Add(component => component.InitialModelJson, "{ invalid json }")
             .Add(component => component.OnDocumentChanged, EventCallback.Factory.Create<DesignDocument>(ctx, value => received = value)));
 
@@ -68,6 +70,7 @@ public sealed class DesignerCodePanelTests
             .Add(component => component.CurrentPage, document.Pages[0])
             .Add(component => component.Document, document)
             .Add(component => component.InitialTab, "code")
+            .Add(component => component.EnableMonaco, false)
             .Add(component => component.SelectedNodeId, selectedNodeId));
 
         Assert.Contains("agt-code-line--highlight", cut.Markup, StringComparison.Ordinal);
