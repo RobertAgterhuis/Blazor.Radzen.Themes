@@ -6,6 +6,7 @@ public sealed record ComponentParameterDescriptor(
     Type ParameterType,
     string DefaultValue,
     string Description,
+    bool IsBindable,
     bool IsEditorRequired,
     bool IsEventCallback,
     bool IsRenderFragment,

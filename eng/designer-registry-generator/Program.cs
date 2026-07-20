@@ -172,6 +172,7 @@ public static class Program
                     parameter.ParameterType,
                     parameter.DefaultValue,
                     parameter.Description,
+                    parameter.IsBindable,
                     parameter.IsEditorRequired,
                     parameter.IsEventCallback,
                     parameter.IsRenderFragment,
@@ -363,11 +364,12 @@ public static class Program
         builder.AppendLine("        Type parameterType,");
         builder.AppendLine("        string defaultValue,");
         builder.AppendLine("        string description,");
+        builder.AppendLine("        bool isBindable,");
         builder.AppendLine("        bool isEditorRequired,");
         builder.AppendLine("        bool isEventCallback,");
         builder.AppendLine("        bool isRenderFragment,");
         builder.AppendLine("        bool isTemplatedRenderFragment)");
-        builder.AppendLine("        => new(name, typeName, parameterType, defaultValue, description, isEditorRequired, isEventCallback, isRenderFragment, isTemplatedRenderFragment);");
+        builder.AppendLine("        => new(name, typeName, parameterType, defaultValue, description, isBindable, isEditorRequired, isEventCallback, isRenderFragment, isTemplatedRenderFragment);");
         builder.AppendLine("}");
 
         return builder.ToString();
@@ -411,6 +413,7 @@ public static class Program
         builder.AppendLine($"                        {GetTypeExpression(parameter.ParameterType)},");
         builder.AppendLine($"                        {ToLiteral(parameter.DefaultValue)},");
         builder.AppendLine($"                        {ToLiteral(parameter.Description)},");
+        builder.AppendLine($"                        {parameter.IsBindable.ToString().ToLowerInvariant()},");
         builder.AppendLine($"                        {parameter.IsEditorRequired.ToString().ToLowerInvariant()},");
         builder.AppendLine($"                        {parameter.IsEventCallback.ToString().ToLowerInvariant()},");
         builder.AppendLine($"                        {parameter.IsRenderFragment.ToString().ToLowerInvariant()},");
@@ -496,6 +499,7 @@ public static class Program
         Type ParameterType,
         string DefaultValue,
         string Description,
+        bool IsBindable,
         bool IsEditorRequired,
         bool IsEventCallback,
         bool IsRenderFragment,

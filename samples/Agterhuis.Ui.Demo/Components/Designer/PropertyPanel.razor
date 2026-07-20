@@ -94,6 +94,10 @@ else
                     <div class="designer-properties__field" data-agt-designer-editor-kind="@editorKind" data-agt-designer-param="@parameter.Name">
                         <div class="designer-properties__field-head">
                             <span class="designer-properties__field-label">@parameter.Name</span>
+                            @if (parameter.IsBindable)
+                            {
+                                <span class="designer-properties__modified" title="Kan aan demo-data worden gekoppeld">Bindbaar</span>
+                            }
                             @if (hasCustomValue)
                             {
                                 <span class="designer-properties__modified" title="Afwijkend van default">Gewijzigd</span>

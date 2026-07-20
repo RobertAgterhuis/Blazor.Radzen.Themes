@@ -175,6 +175,7 @@ public sealed class DesignerComponentRegistryTests
                     parameter.ParameterType,
                     parameter.DefaultValue,
                     parameter.Description,
+                    parameter.IsBindable,
                     parameter.IsEditorRequired,
                     parameter.IsEventCallback,
                     parameter.IsRenderFragment,

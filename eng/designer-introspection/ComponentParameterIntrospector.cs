@@ -40,6 +40,7 @@ public static class ComponentParameterIntrospector
                 parameterType,
                 GetDefaultValue(property, instance),
                 GetSummary(summaries, componentType, property.Name),
+                IsBindable(property.Name, parameterType),
                 property.GetCustomAttribute<EditorRequiredAttribute>() is not null,
                 IsEventCallback(parameterType),
                 IsRenderFragment(parameterType),
@@ -202,4 +203,18 @@ public static class ComponentParameterIntrospector
 
     private static bool IsTemplatedRenderFragment(Type type) =>
         type.IsGenericType && type.GetGenericTypeDefinition() == typeof(RenderFragment<>);
+
+    private static bool IsBindable(string propertyName, Type propertyType)
+    {
+        if (IsEventCallback(propertyType) || IsRenderFragment(propertyType))
+        {
+            return false;
+        }
+
+        return propertyName switch
+        {
+            "Data" or "Items" or "Value" or "TextProperty" or "ValueProperty" or "Count" or "Query" or "Filter" or "SearchText" => true,
+            _ => false
+        };
+    }
 }
