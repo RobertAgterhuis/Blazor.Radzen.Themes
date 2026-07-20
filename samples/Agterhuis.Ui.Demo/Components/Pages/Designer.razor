@@ -92,27 +92,39 @@
 
             <div class="designer-canvas-frame" style="@CanvasFrameStyle">
                 <div class="designer-canvas" data-agt-theme="@_canvasTheme" @ref="_canvasRef">
-                    <div class="designer-dropzone designer-dropzone--root"
-                         @ondragover="OnDropZoneDragOver"
-                         @ondrop="() => OnDropRequested(new DesignerDropTarget(DesignNodeLocation.Root(_commands.Document.Pages[0].Nodes.Count)))"
-                         title="Drop op canvas"></div>
-
-                    @for (var index = 0; index < _commands.Document.Pages[0].Nodes.Count; index++)
+                    @if (_commands.Document.Pages[0].Nodes.Count == 0)
                     {
-                        var node = _commands.Document.Pages[0].Nodes[index];
-
-                        <DesignerCanvasNode Node="node"
-                                            Registry="_registry"
-                                            SelectedNodeId="_selectedNodeId"
-                                            SelectNode="OnSelectNode"
-                                            StartDrag="OnDragStart"
-                                            EndDrag="OnDragEnd"
-                                            DropNode="OnDropRequested" />
-
+                        <div class="designer-canvas--empty">
+                            <AgtEmptyState 
+                                Title="Begin met ontwerpen"
+                                Description="Sleep componenten uit het palet of kies een patroon als startpunt."
+                                Icon="widgets" />
+                        </div>
+                    }
+                    else
+                    {
                         <div class="designer-dropzone designer-dropzone--root"
                              @ondragover="OnDropZoneDragOver"
-                             @ondrop="() => OnDropRequested(new DesignerDropTarget(DesignNodeLocation.Root(index + 1)))"
+                             @ondrop="() => OnDropRequested(new DesignerDropTarget(DesignNodeLocation.Root(_commands.Document.Pages[0].Nodes.Count)))"
                              title="Drop op canvas"></div>
+
+                        @for (var index = 0; index < _commands.Document.Pages[0].Nodes.Count; index++)
+                        {
+                            var node = _commands.Document.Pages[0].Nodes[index];
+
+                            <DesignerCanvasNode Node="node"
+                                                Registry="_registry"
+                                                SelectedNodeId="_selectedNodeId"
+                                                SelectNode="OnSelectNode"
+                                                StartDrag="OnDragStart"
+                                                EndDrag="OnDragEnd"
+                                                DropNode="OnDropRequested" />
+
+                            <div class="designer-dropzone designer-dropzone--root"
+                                 @ondragover="OnDropZoneDragOver"
+                                 @ondrop="() => OnDropRequested(new DesignerDropTarget(DesignNodeLocation.Root(index + 1)))"
+                                 title="Drop op canvas"></div>
+                        }
                     }
                 </div>
             </div>
