@@ -1,0 +1,24 @@
+@page "/catalog/profile-menu"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.ProfileMenu
+
+<PageTitle>ProfileMenu (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Navigation & Actions"
+               Title="ProfileMenu"
+               Introduction="Profielmenu voor accountacties en workspace-navigatie in topbars."
+               RadzenDocumentationUrl="https://blazor.radzen.com/profilemenu">
+    <DemoExample Title="Basis"
+                 Description="Eenvoudig profielmenu met kernacties."
+                 ExampleComponentType="typeof(ProfileMenuBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/ProfileMenu/ProfileMenuBasicExample.razor" />
+
+    <DemoExample Title="Avatar-template"
+                 Description="Custom trigger met avatar en gebruikersnaam."
+                 ExampleComponentType="typeof(ProfileMenuAvatarExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/ProfileMenu/ProfileMenuAvatarExample.razor" />
+
+    <DemoExample Title="Workspace-acties"
+                 Description="Gegroepeerde items voor teams en integraties."
+                 ExampleComponentType="typeof(ProfileMenuGroupedExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/ProfileMenu/ProfileMenuGroupedExample.razor" />
+</ComponentPage>

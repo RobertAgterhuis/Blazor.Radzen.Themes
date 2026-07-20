@@ -1,0 +1,24 @@
+@page "/catalog/checkbox-list"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.CheckBoxList
+
+<PageTitle>CheckBoxList (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Forms & Inputs"
+               Title="CheckBoxList"
+               Introduction="Meervoudige selectie via checkboxgroepen in formulieren."
+               RadzenDocumentationUrl="https://blazor.radzen.com/checkboxlist">
+    <DemoExample Title="Basis"
+                 Description="Verticale lijst met meerdere geselecteerde waarden."
+                 ExampleComponentType="typeof(CheckBoxListBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/CheckBoxList/CheckBoxListBasicExample.razor" />
+
+    <DemoExample Title="Horizontaal"
+                 Description="Horizontale weergave voor compacte optielijsten."
+                 ExampleComponentType="typeof(CheckBoxListHorizontalExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/CheckBoxList/CheckBoxListHorizontalExample.razor" />
+
+    <DemoExample Title="Disabled"
+                 Description="Niet-bewerkbare checkboxlijst voor vaste configuratie."
+                 ExampleComponentType="typeof(CheckBoxListDisabledExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/CheckBoxList/CheckBoxListDisabledExample.razor" />
+</ComponentPage>

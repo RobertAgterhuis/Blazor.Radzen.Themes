@@ -1,0 +1,9 @@
+<div class="agt-stack demo-example-gap-sm">
+    <RadzenDropDown Data="Owners" @bind-Value="_owner" Placeholder="Kies eigenaar" class="demo-textbox-full" />
+    <p class="agt-muted">Eigenaar: @_owner</p>
+</div>
+
+@code {
+    private string _owner = string.Empty;
+    private static readonly IReadOnlyList<string> Owners = ["Noor", "Pim", "Ravi", "Sara"];
+}

@@ -1,0 +1,23 @@
+<RadzenTemplateForm TItem="DataModel" Data="_model" Submit="OnSubmit">
+    <RadzenStack Gap="0.75rem">
+        <RadzenTextBox Name="name" @bind-Value="_model.Name" Placeholder="Naam" />
+        <RadzenTextBox Name="email" @bind-Value="_model.Email" Placeholder="Email" />
+        <RadzenDataAnnotationValidator />
+        <RadzenButton Text="Valideren" ButtonType="ButtonType.Submit" />
+    </RadzenStack>
+</RadzenTemplateForm>
+
+@code {
+    private readonly DataModel _model = new();
+
+    private void OnSubmit(DataModel _) { }
+
+    private sealed class DataModel
+    {
+        [System.ComponentModel.DataAnnotations.Required]
+        public string? Name { get; set; }
+
+        [System.ComponentModel.DataAnnotations.EmailAddress]
+        public string? Email { get; set; }
+    }
+}

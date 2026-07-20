@@ -1,0 +1,24 @@
+@page "/catalog/template-form"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.TemplateForm
+
+<PageTitle>TemplateForm (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Forms & Inputs"
+               Title="TemplateForm"
+               Introduction="Formcontainer met modelbinding en validatie-events."
+               RadzenDocumentationUrl="https://blazor.radzen.com/templateform">
+    <DemoExample Title="Basis"
+                 Description="Eenvoudig formulier met submitflow."
+                 ExampleComponentType="typeof(TemplateFormBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/TemplateForm/TemplateFormBasicExample.razor" />
+
+    <DemoExample Title="Validatie"
+                 Description="Required validator binnen templateform."
+                 ExampleComponentType="typeof(TemplateFormValidationExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/TemplateForm/TemplateFormValidationExample.razor" />
+
+    <DemoExample Title="Invalid submit"
+                 Description="Voorbeeld met invalid submit callback."
+                 ExampleComponentType="typeof(TemplateFormInvalidExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/TemplateForm/TemplateFormInvalidExample.razor" />
+</ComponentPage>

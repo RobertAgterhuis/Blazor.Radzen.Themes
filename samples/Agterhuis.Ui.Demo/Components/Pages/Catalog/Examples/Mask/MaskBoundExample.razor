@@ -1,0 +1,8 @@
+<div class="agt-stack demo-example-gap-sm">
+    <RadzenMask Name="postcode-bound" Mask="9999 AA" @bind-Value="_postcode" />
+    <span class="agt-muted">Waarde: @_postcode</span>
+</div>
+
+@code {
+    private string? _postcode = "3511 AZ";
+}

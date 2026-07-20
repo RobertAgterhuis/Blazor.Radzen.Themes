@@ -1,0 +1,24 @@
+@page "/catalog/custom-validator"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.CustomValidator
+
+<PageTitle>CustomValidator (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Validators"
+               Title="CustomValidator"
+               Introduction="Biedt domeinspecifieke validatie via een eigen validatorfunctie."
+               RadzenDocumentationUrl="https://blazor.radzen.com/customvalidator">
+    <DemoExample Title="Prefix-regel"
+                 Description="Controle op verplicht WO-prefix."
+                 ExampleComponentType="typeof(CustomValidatorBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/CustomValidator/CustomValidatorBasicExample.razor" />
+
+    <DemoExample Title="Lengte"
+                 Description="Custom regel op minimale tekstlengte."
+                 ExampleComponentType="typeof(CustomValidatorLengthExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/CustomValidator/CustomValidatorLengthExample.razor" />
+
+    <DemoExample Title="Even getal"
+                 Description="Numerieke regel buiten standaardvalidators."
+                 ExampleComponentType="typeof(CustomValidatorNumericExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/CustomValidator/CustomValidatorNumericExample.razor" />
+</ComponentPage>

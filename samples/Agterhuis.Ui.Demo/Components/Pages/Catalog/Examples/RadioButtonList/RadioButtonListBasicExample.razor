@@ -1,0 +1,20 @@
+<RadzenRadioButtonList TValue="string"
+                       Data="_options"
+                       TextProperty="Text"
+                       ValueProperty="Value"
+                       @bind-Value="_selected" />
+
+<span class="agt-muted">Geselecteerd: @_selected</span>
+
+@code {
+    private string _selected = "standard";
+
+    private static readonly IReadOnlyList<OptionItem> _options =
+    [
+        new("Standaard", "standard"),
+        new("Premium", "premium"),
+        new("Enterprise", "enterprise")
+    ];
+
+    private sealed record OptionItem(string Text, string Value);
+}

@@ -1,0 +1,16 @@
+<RadzenChart Style="height: 18rem;">
+    <RadzenScatterSeries Data="Rows" CategoryProperty="Weight" ValueProperty="Height" Title="People" />
+    <RadzenCategoryAxis />
+    <RadzenValueAxis />
+</RadzenChart>
+
+@code {
+    private static readonly IReadOnlyList<ScatterRow> Rows =
+    [
+        new(60, 170),
+        new(72, 182),
+        new(55, 165)
+    ];
+
+    private sealed record ScatterRow(double Weight, double Height);
+}

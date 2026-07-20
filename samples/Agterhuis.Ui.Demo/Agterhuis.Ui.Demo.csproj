@@ -13,4 +13,8 @@
     <Content Include="..\..\prompts\*.md" Link="blog-prompts\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Include="Components\Pages\**\Examples\**\*.razor" />
+  </ItemGroup>
+
 </Project>

@@ -1,4 +1,5 @@
 using Agterhuis.Ui.Demo.Components.Pages.App;
+using Agterhuis.Ui.Demo.Components.Pages.Catalog;
 using Agterhuis.Ui.Demo.Services;
 using Agterhuis.Ui.Extensions;
 using Bunit;
@@ -29,6 +30,53 @@ public sealed class ShowcaseAppSmokeTests
 
         Assert.Contains("Werkorders", cut.Markup);
         Assert.Contains("Nieuwe werkorder", cut.Markup);
+    }
+
+    [Fact]
+    public void WerkordersGrid_HeaderAndFirstCellsRemainAligned()
+    {
+        using var ctx = CreateContext();
+        var cut = ctx.Render<ShowcaseWerkorders>();
+
+        var headers = cut.FindAll(".showcase-page__workorders-grid thead th")
+            .Select(header => header.TextContent.Trim())
+            .Where(text => !string.IsNullOrWhiteSpace(text))
+            .Take(3)
+            .ToArray();
+
+        Assert.Equal(["Nummer", "Klant", "Adres"], headers);
+
+        var firstRowCells = cut.FindAll(".showcase-page__workorders-grid tbody tr:first-child td")
+            .Select(cell => cell.TextContent.Trim())
+            .Where(text => !string.IsNullOrWhiteSpace(text))
+            .Take(3)
+            .ToArray();
+
+        Assert.Equal(3, firstRowCells.Length);
+        Assert.StartsWith("WO-", firstRowCells[0], StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void CatalogDataGrid_HeaderAndFirstCellsRemainAligned()
+    {
+        using var ctx = CreateContext();
+        var cut = ctx.Render<CatalogDataGridPage>();
+
+        var headers = cut.FindAll("thead th")
+            .Select(header => header.TextContent.Trim())
+            .Where(text => !string.IsNullOrWhiteSpace(text))
+            .Take(3)
+            .ToArray();
+
+        Assert.Equal(["Naam", "Team", "Score"], headers);
+
+        var firstRowCells = cut.FindAll("tbody tr:first-child td")
+            .Select(cell => cell.TextContent.Trim())
+            .Where(text => !string.IsNullOrWhiteSpace(text))
+            .Take(3)
+            .ToArray();
+
+        Assert.Equal(["Alfa", "Noord", "95"], firstRowCells);
     }
 
     [Fact]
@@ -185,6 +233,7 @@ public sealed class ShowcaseAppSmokeTests
         ctx.Services.AddRadzenComponents();
         ctx.Services.AddAgterhuisUi();
         ctx.Services.AddScoped<ShowcaseDataService>();
+        ctx.Services.AddSingleton<DemoSourceProvider>();
         ctx.JSInterop.Mode = JSRuntimeMode.Loose;
         ctx.JSInterop.SetupVoid("agtTheme.closeAllPopups").SetVoidResult();
         ctx.JSInterop.Setup<bool>("agtTheme.prefersReducedMotion").SetResult(true);

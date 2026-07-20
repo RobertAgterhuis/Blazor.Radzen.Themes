@@ -1,0 +1,16 @@
+<RadzenListBox TValue="int" Data="_options" TextProperty="Text" ValueProperty="Value" @bind-Value="_selected" />
+
+<span class="agt-muted">Selectie: @_selected</span>
+
+@code {
+    private int _selected = 2;
+
+    private static readonly IReadOnlyList<OptionItem> _options =
+    [
+        new("Alpha", 1),
+        new("Bravo", 2),
+        new("Charlie", 3)
+    ];
+
+    private sealed record OptionItem(string Text, int Value);
+}

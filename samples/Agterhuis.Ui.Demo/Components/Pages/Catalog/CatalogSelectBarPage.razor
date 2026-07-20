@@ -1,0 +1,24 @@
+@page "/catalog/select-bar"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.SelectBar
+
+<PageTitle>SelectBar (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Forms & Inputs"
+               Title="SelectBar"
+               Introduction="Horizontale selectiekeuze met duidelijke statussegmenten."
+               RadzenDocumentationUrl="https://blazor.radzen.com/selectbar">
+    <DemoExample Title="Basis"
+                 Description="Statuskeuze met stringwaarden."
+                 ExampleComponentType="typeof(SelectBarBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/SelectBar/SelectBarBasicExample.razor" />
+
+    <DemoExample Title="Binding"
+                 Description="Numerieke selectie met terugkoppeling."
+                 ExampleComponentType="typeof(SelectBarBoundExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/SelectBar/SelectBarBoundExample.razor" />
+
+    <DemoExample Title="Disabled"
+                 Description="Niet-bewerkbare selectbar status."
+                 ExampleComponentType="typeof(SelectBarDisabledExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/SelectBar/SelectBarDisabledExample.razor" />
+</ComponentPage>

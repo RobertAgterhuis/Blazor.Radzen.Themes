@@ -1,0 +1,11 @@
+<RadzenTree Data="_nodes" TextProperty="Text" ChildrenProperty="Children" AllowCheckBoxes="true" />
+
+@code {
+    private static readonly IReadOnlyList<TreeNode> _nodes =
+    [
+        new("Project A", [new TreeNode("Taak 1", []), new TreeNode("Taak 2", [])]),
+        new("Project B", [new TreeNode("Taak 3", [])])
+    ];
+
+    private sealed record TreeNode(string Text, IReadOnlyList<TreeNode> Children);
+}

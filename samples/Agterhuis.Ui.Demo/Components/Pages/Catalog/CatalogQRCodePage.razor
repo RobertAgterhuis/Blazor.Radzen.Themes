@@ -1,0 +1,24 @@
+@page "/catalog/qr-code"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.QRCode
+
+<PageTitle>QRCode (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Layout & Display"
+               Title="QRCode"
+               Introduction="QR-codes voor snelle toegang tot links, assets en onboardingstromen."
+               RadzenDocumentationUrl="https://blazor.radzen.com/qrcode">
+    <DemoExample Title="Basis"
+                 Description="URL in QR-code voor deep link naar detailpagina."
+                 ExampleComponentType="typeof(QRCodeBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/QRCode/QRCodeBasicExample.razor" />
+
+    <DemoExample Title="WiFi"
+                 Description="QR-code met netwerkconfiguratie-string."
+                 ExampleComponentType="typeof(QRCodeWifiExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/QRCode/QRCodeWifiExample.razor" />
+
+    <DemoExample Title="Asset"
+                 Description="Interne assetreferentie als scanbare code."
+                 ExampleComponentType="typeof(QRCodeAssetExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/QRCode/QRCodeAssetExample.razor" />
+</ComponentPage>

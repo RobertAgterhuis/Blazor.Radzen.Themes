@@ -1,0 +1,24 @@
+@page "/catalog/pager"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.Pager
+
+<PageTitle>Pager (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Data & Scheduling"
+               Title="Pager"
+               Introduction="Paginatiecomponent voor grotere datasets en resultatenlijsten."
+               RadzenDocumentationUrl="https://blazor.radzen.com/pager">
+    <DemoExample Title="Basis"
+                 Description="Standaard paginatie op dataset van 120 items."
+                 ExampleComponentType="typeof(PagerBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Pager/PagerBasicExample.razor" />
+
+    <DemoExample Title="Medium"
+                 Description="Middelgrote page size configuratie."
+                 ExampleComponentType="typeof(PagerMediumExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Pager/PagerMediumExample.razor" />
+
+    <DemoExample Title="Large"
+                 Description="Grotere dataset met grotere paginaomvang."
+                 ExampleComponentType="typeof(PagerLargeExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Pager/PagerLargeExample.razor" />
+</ComponentPage>

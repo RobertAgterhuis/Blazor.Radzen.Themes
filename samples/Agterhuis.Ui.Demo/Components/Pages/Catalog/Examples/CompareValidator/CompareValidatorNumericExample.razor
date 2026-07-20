@@ -1,0 +1,21 @@
+<RadzenTemplateForm TItem="NumberModel" Data="_model" Submit="OnSubmit">
+    <RadzenStack Gap="0.75rem">
+        <RadzenNumeric Name="n-a" TValue="int" @bind-Value="_model.A" />
+        <RadzenNumeric Name="n-b" TValue="int" @bind-Value="_model.B" />
+        <RadzenCompareValidator Component="n-b" Value="@_model.A" Text="Waarden moeten gelijk zijn" Popup="false" />
+        <RadzenButton Text="Controle" ButtonType="ButtonType.Submit" />
+    </RadzenStack>
+</RadzenTemplateForm>
+
+@code {
+    private readonly NumberModel _model = new() { A = 5, B = 7 };
+
+    private void OnSubmit(NumberModel _) { }
+
+    private sealed class NumberModel
+    {
+        public int A { get; set; }
+
+        public int B { get; set; }
+    }
+}

@@ -1,0 +1,24 @@
+@page "/catalog/menu"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.Menu
+
+<PageTitle>Menu (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Navigation"
+               Title="Menu"
+               Introduction="Menu-patronen met basisnavigatie, nested structuren en click events."
+               RadzenDocumentationUrl="https://blazor.radzen.com/menu">
+    <DemoExample Title="Basis"
+                 Description="Een vlak menu met iconen voor primaire navigatie."
+                 ExampleComponentType="typeof(MenuBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Menu/MenuBasicExample.razor" />
+
+    <DemoExample Title="Genest menu"
+                 Description="Submenu's voor hiërarchische informatiearchitectuur."
+                 ExampleComponentType="typeof(MenuNestedExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Menu/MenuNestedExample.razor" />
+
+    <DemoExample Title="Click-events"
+                 Description="MenuItemEventArgs verwerken en status terugkoppelen."
+                 ExampleComponentType="typeof(MenuClickExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Menu/MenuClickExample.razor" />
+</ComponentPage>

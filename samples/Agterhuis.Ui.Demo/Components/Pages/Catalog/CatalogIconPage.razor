@@ -1,0 +1,24 @@
+@page "/catalog/icon"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.Icon
+
+<PageTitle>Icon (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Layout & Display"
+               Title="Icon"
+               Introduction="Pictogramcomponent voor visuele hints in UI-acties en statusregels."
+               RadzenDocumentationUrl="https://blazor.radzen.com/icon">
+    <DemoExample Title="Basis"
+                 Description="Icon gecombineerd met statuslabel."
+                 ExampleComponentType="typeof(IconBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Icon/IconBasicExample.razor" />
+
+    <DemoExample Title="Set"
+                 Description="Meerdere iconen in één compacte lijn."
+                 ExampleComponentType="typeof(IconSetExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Icon/IconSetExample.razor" />
+
+    <DemoExample Title="In button"
+                 Description="Icon als onderdeel van een primaire actie."
+                 ExampleComponentType="typeof(IconButtonExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Icon/IconButtonExample.razor" />
+</ComponentPage>

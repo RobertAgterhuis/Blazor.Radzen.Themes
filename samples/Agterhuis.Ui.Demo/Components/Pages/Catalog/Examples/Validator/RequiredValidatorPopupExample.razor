@@ -1,0 +1,21 @@
+<RadzenTemplateForm TItem="Model" Data="_model" Submit="OnSubmit">
+    <RadzenStack Gap="0.5rem">
+        <RadzenDropDown Name="Priority" Data="_priorities" @bind-Value="_model.Priority" Placeholder="Kies prioriteit" />
+        <RadzenRequiredValidator Component="Priority" Text="Prioriteit is verplicht" Popup="true" />
+        <RadzenButton Text="Bewaren" ButtonType="ButtonType.Submit" />
+    </RadzenStack>
+</RadzenTemplateForm>
+
+@code {
+    private readonly Model _model = new();
+    private static readonly IReadOnlyList<string> _priorities = ["Laag", "Midden", "Hoog"];
+
+    private void OnSubmit(Model _)
+    {
+    }
+
+    private sealed class Model
+    {
+        public string? Priority { get; set; }
+    }
+}

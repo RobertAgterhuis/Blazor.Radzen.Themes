@@ -1,0 +1,20 @@
+<RadzenTemplateForm TItem="LengthModel" Data="_model" Submit="OnSubmit">
+    <RadzenStack Gap="0.75rem">
+        <RadzenTextBox Name="subject" @bind-Value="_model.Subject" Placeholder="Onderwerp" />
+        <RadzenCustomValidator Component="subject" Text="Minimaal 5 tekens" Validator="ValidateLength" Popup="false" />
+        <RadzenButton Text="Controle" ButtonType="ButtonType.Submit" />
+    </RadzenStack>
+</RadzenTemplateForm>
+
+@code {
+    private readonly LengthModel _model = new();
+
+    private void OnSubmit(LengthModel _) { }
+
+    private bool ValidateLength() => (_model.Subject?.Length ?? 0) >= 5;
+
+    private sealed class LengthModel
+    {
+        public string? Subject { get; set; }
+    }
+}

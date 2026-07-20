@@ -1,0 +1,24 @@
+@page "/catalog/breadcrumb"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.BreadCrumb
+
+<PageTitle>BreadCrumb (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Navigation & Actions"
+               Title="BreadCrumb"
+               Introduction="Breadcrumb-navigatie om context en hiërarchie zichtbaar te maken."
+               RadzenDocumentationUrl="https://blazor.radzen.com/breadcrumb">
+    <DemoExample Title="Basis"
+                 Description="Standaard breadcrumb met pad van home naar huidige locatie."
+                 ExampleComponentType="typeof(BreadCrumbBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/BreadCrumb/BreadCrumbBasicExample.razor" />
+
+    <DemoExample Title="Met iconen"
+                 Description="Compacte breadcrumb met iconen voor herkenbaarheid."
+                 ExampleComponentType="typeof(BreadCrumbIconExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/BreadCrumb/BreadCrumbIconExample.razor" />
+
+    <DemoExample Title="Diep pad"
+                 Description="Langer pad voor multi-level navigatiestructuren."
+                 ExampleComponentType="typeof(BreadCrumbLongPathExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/BreadCrumb/BreadCrumbLongPathExample.razor" />
+</ComponentPage>

@@ -1,0 +1,24 @@
+@page "/catalog/length-validator"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.LengthValidator
+
+<PageTitle>LengthValidator (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Validators"
+               Title="LengthValidator"
+               Introduction="Valideert minimale en/of maximale invoerlengte van een veld."
+               RadzenDocumentationUrl="https://blazor.radzen.com/lengthvalidator">
+    <DemoExample Title="Basis"
+                 Description="Minimumlengte-validatie op één tekstveld."
+                 ExampleComponentType="typeof(LengthValidatorBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/LengthValidator/LengthValidatorBasicExample.razor" />
+
+    <DemoExample Title="Range"
+                 Description="Lengtebeperking met minimum en maximum."
+                 ExampleComponentType="typeof(LengthValidatorRangeExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/LengthValidator/LengthValidatorRangeExample.razor" />
+
+    <DemoExample Title="Popup"
+                 Description="Popup foutmelding bij te korte invoer."
+                 ExampleComponentType="typeof(LengthValidatorPopupExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/LengthValidator/LengthValidatorPopupExample.razor" />
+</ComponentPage>

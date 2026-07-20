@@ -5,6 +5,17 @@
 <div class="catalog-page">
     <h1>Data Advanced (Radzen)</h1>
 
+    <p class="agt-muted">Deze categoriepagina toont een compacte preview. Voor worked examples met live demo + code gebruik je de componentpagina's hieronder.</p>
+
+    <ul>
+        <li><RadzenLink Path="/catalog/data-filter" Text="DataFilter" /></li>
+        <li><RadzenLink Path="/catalog/data-list" Text="DataList" /></li>
+        <li><RadzenLink Path="/catalog/table" Text="Table" /></li>
+        <li><RadzenLink Path="/catalog/treemap" Text="Treemap" /></li>
+    </ul>
+
+    <p class="agt-muted">Child-componenten zoals DataFilterItem, DataFilterProperty en DataListRow worden op hun parent componentpagina's gedemonstreerd.</p>
+
     <RadzenDataFilter TItem="DataRow" Data="Rows" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
 
     <RadzenPickList TItem="DataRow" TValue="int" Data="Rows" TextProperty="Name" ValueProperty="Id" />

@@ -1,0 +1,24 @@
+@page "/catalog/sidebar-toggle"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.SidebarToggle
+
+<PageTitle>SidebarToggle (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Layout & Display"
+               Title="SidebarToggle"
+               Introduction="Knopcomponent om de shell-zijbalk te openen of sluiten."
+               RadzenDocumentationUrl="https://blazor.radzen.com/sidebar">
+    <DemoExample Title="Basis"
+                 Description="Losse toggle interactie."
+                 ExampleComponentType="typeof(SidebarToggleBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/SidebarToggle/SidebarToggleBasicExample.razor" />
+
+    <DemoExample Title="Met label"
+                 Description="Toggle met ondersteunende contexttekst."
+                 ExampleComponentType="typeof(SidebarToggleWithTextExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/SidebarToggle/SidebarToggleWithTextExample.razor" />
+
+    <DemoExample Title="In header"
+                 Description="Gebruik van toggle in een headerbalk."
+                 ExampleComponentType="typeof(SidebarToggleInHeaderExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/SidebarToggle/SidebarToggleInHeaderExample.razor" />
+</ComponentPage>

@@ -1,0 +1,24 @@
+@page "/catalog/chip"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.Chip
+
+<PageTitle>Chip (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Forms & Inputs"
+               Title="Chip"
+               Introduction="Compacte labels voor status, filters en metadata."
+               RadzenDocumentationUrl="https://blazor.radzen.com/chip">
+    <DemoExample Title="Basis"
+                 Description="Enkelvoudige chip met tekstlabel."
+                 ExampleComponentType="typeof(ChipBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Chip/ChipBasicExample.razor" />
+
+    <DemoExample Title="Chipset"
+                 Description="Meerdere chips in een compacte rij."
+                 ExampleComponentType="typeof(ChipSetExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Chip/ChipSetExample.razor" />
+
+    <DemoExample Title="Disabled"
+                 Description="Read-only chip voor gesloten statussen."
+                 ExampleComponentType="typeof(ChipDisabledExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Chip/ChipDisabledExample.razor" />
+</ComponentPage>

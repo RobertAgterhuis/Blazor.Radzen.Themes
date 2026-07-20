@@ -1,0 +1,24 @@
+@page "/catalog/fab-menu"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.FabMenu
+
+<PageTitle>FabMenu (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Navigation & Actions"
+               Title="FabMenu"
+               Introduction="Uitklapbaar FAB-menu voor gegroepeerde snelle acties."
+               RadzenDocumentationUrl="https://blazor.radzen.com/fab-menu">
+    <DemoExample Title="Basis"
+                 Description="FAB-menu met twee primaire acties."
+                 ExampleComponentType="typeof(FabMenuBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/FabMenu/FabMenuBasicExample.razor" />
+
+    <DemoExample Title="Drie acties"
+                 Description="Uitbreiding naar meerdere operationele acties."
+                 ExampleComponentType="typeof(FabMenuThreeActionsExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/FabMenu/FabMenuThreeActionsExample.razor" />
+
+    <DemoExample Title="Iconfocus"
+                 Description="Variant met action-first iconenset."
+                 ExampleComponentType="typeof(FabMenuIconExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/FabMenu/FabMenuIconExample.razor" />
+</ComponentPage>

@@ -1,0 +1,20 @@
+<RadzenCheckBoxList TValue="int"
+                    Data="_options"
+                    TextProperty="Text"
+                    ValueProperty="Value"
+                    @bind-Value="_selected" />
+
+<span class="agt-muted">Geselecteerd: @string.Join(", ", _selected)</span>
+
+@code {
+    private IEnumerable<int> _selected = [1, 3];
+
+    private static readonly IReadOnlyList<OptionItem> _options =
+    [
+        new("Inspectie", 1),
+        new("Onderhoud", 2),
+        new("Installatie", 3)
+    ];
+
+    private sealed record OptionItem(string Text, int Value);
+}

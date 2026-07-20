@@ -1,0 +1,24 @@
+@page "/catalog/rating"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.Rating
+
+<PageTitle>Rating (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Forms & Inputs"
+               Title="Rating"
+               Introduction="Sterbeoordeling voor feedback- en evaluatiestromen."
+               RadzenDocumentationUrl="https://blazor.radzen.com/rating">
+    <DemoExample Title="Basis"
+                 Description="Statische beoordeling met vijf sterren."
+                 ExampleComponentType="typeof(RatingBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Rating/RatingBasicExample.razor" />
+
+    <DemoExample Title="Binding"
+                 Description="Interactieve beoordeling met direct zichtbare score."
+                 ExampleComponentType="typeof(RatingBoundExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Rating/RatingBoundExample.razor" />
+
+    <DemoExample Title="Read-only"
+                 Description="Alleen-lezen variant voor historische scores."
+                 ExampleComponentType="typeof(RatingReadOnlyExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Rating/RatingReadOnlyExample.razor" />
+</ComponentPage>

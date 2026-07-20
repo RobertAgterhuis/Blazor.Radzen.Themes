@@ -155,6 +155,14 @@
     color: color-mix(in srgb, var(--agt-text-body) 86%, var(--agt-text-muted));
 }
 
+.demo-panel-menu :deep(.demo-panel-menu__catalog-category > .rz-navigation-item-children) {
+    padding-inline-start: var(--agt-spacing-2);
+}
+
+.demo-panel-menu :deep(.demo-panel-menu__catalog-category > .rz-navigation-item-children .rz-navigation-item-wrapper) {
+    padding-inline-start: var(--agt-spacing-3);
+}
+
 .demo-panel-menu :deep(.demo-panel-menu__group--catalog .rz-navigation-item.rz-state-active > .rz-navigation-item-wrapper),
 .demo-panel-menu :deep(.demo-panel-menu__group--catalog .rz-navigation-item-wrapper:hover),
 .demo-panel-menu :deep(.demo-panel-menu__group--catalog .rz-navigation-item-wrapper:focus-visible) {
@@ -216,4 +224,37 @@
 
 :deep(.demo-sidebar.demo-sidebar--desktop-collapsed .rz-navigation-item-icon) {
     margin-inline-end: 0;
+}
+
+:deep(.demo-sidebar.demo-sidebar--desktop-collapsed .demo-panel-menu__catalog-category) {
+    position: relative;
+}
+
+:deep(.demo-sidebar.demo-sidebar--desktop-collapsed .demo-panel-menu__catalog-category > .rz-navigation-item-children) {
+    background: var(--agt-surface-1);
+    border: 1px solid color-mix(in srgb, var(--agt-input-border) 80%, transparent);
+    border-radius: var(--agt-border-radius-md);
+    box-shadow: var(--agt-shadow-md);
+    display: none;
+    left: calc(100% + var(--agt-spacing-1));
+    max-height: min(26rem, 70vh);
+    min-width: 15rem;
+    overflow: auto;
+    padding: var(--agt-spacing-1);
+    position: absolute;
+    top: 0;
+    z-index: 1200;
+}
+
+:deep(.demo-sidebar.demo-sidebar--desktop-collapsed .demo-panel-menu__catalog-category:hover > .rz-navigation-item-children),
+:deep(.demo-sidebar.demo-sidebar--desktop-collapsed .demo-panel-menu__catalog-category:focus-within > .rz-navigation-item-children) {
+    display: block;
+}
+
+:deep(.demo-sidebar.demo-sidebar--desktop-collapsed .demo-panel-menu__catalog-category > .rz-navigation-item-children .rz-navigation-item-text) {
+    display: inline;
+}
+
+:deep(.demo-sidebar.demo-sidebar--desktop-collapsed .demo-panel-menu__catalog-category > .rz-navigation-item-children .rz-navigation-item-icon-children) {
+    display: inline-flex;
 }

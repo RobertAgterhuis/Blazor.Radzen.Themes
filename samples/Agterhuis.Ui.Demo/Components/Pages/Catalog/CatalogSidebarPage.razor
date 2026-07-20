@@ -1,0 +1,24 @@
+@page "/catalog/sidebar"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.Sidebar
+
+<PageTitle>Sidebar (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Layout & Display"
+               Title="Sidebar"
+               Introduction="Zijbalkcontainer voor shellnavigatie en contextacties."
+               RadzenDocumentationUrl="https://blazor.radzen.com/sidebar">
+    <DemoExample Title="Basis"
+                 Description="Uitgeklapte sidebar met eenvoudige content."
+                 ExampleComponentType="typeof(SidebarBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Sidebar/SidebarBasicExample.razor" />
+
+    <DemoExample Title="Ingeklapt"
+                 Description="Sidebar in gesloten staat."
+                 ExampleComponentType="typeof(SidebarCollapsedExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Sidebar/SidebarCollapsedExample.razor" />
+
+    <DemoExample Title="In layout"
+                 Description="Sidebar in combinatie met layout + body."
+                 ExampleComponentType="typeof(SidebarInLayoutExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Sidebar/SidebarInLayoutExample.razor" />
+</ComponentPage>

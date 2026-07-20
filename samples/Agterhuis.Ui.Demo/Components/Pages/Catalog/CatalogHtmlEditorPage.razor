@@ -1,0 +1,24 @@
+@page "/catalog/html-editor"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.HtmlEditor
+
+<PageTitle>HtmlEditor (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Layout & Display"
+               Title="HtmlEditor"
+               Introduction="Rich text editor voor langere notities en documentatievelden."
+               RadzenDocumentationUrl="https://blazor.radzen.com/html-editor">
+    <DemoExample Title="Basis"
+                 Description="Standaard editor met basisinhoud."
+                 ExampleComponentType="typeof(HtmlEditorBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/HtmlEditor/HtmlEditorBasicExample.razor" />
+
+    <DemoExample Title="Toolbar"
+                 Description="Editor met werkordertekst inclusief opmaak."
+                 ExampleComponentType="typeof(HtmlEditorToolbarExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/HtmlEditor/HtmlEditorToolbarExample.razor" />
+
+    <DemoExample Title="Readback"
+                 Description="Editor gecombineerd met contextuele helpertekst."
+                 ExampleComponentType="typeof(HtmlEditorReadExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/HtmlEditor/HtmlEditorReadExample.razor" />
+</ComponentPage>

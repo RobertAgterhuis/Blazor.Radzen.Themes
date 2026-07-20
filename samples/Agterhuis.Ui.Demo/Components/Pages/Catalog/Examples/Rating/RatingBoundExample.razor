@@ -1,0 +1,8 @@
+<div class="agt-stack demo-example-gap-sm">
+    <RadzenRating @bind-Value="_score" Stars="5" />
+    <span class="agt-muted">Score: @_score</span>
+</div>
+
+@code {
+    private int _score = 4;
+}

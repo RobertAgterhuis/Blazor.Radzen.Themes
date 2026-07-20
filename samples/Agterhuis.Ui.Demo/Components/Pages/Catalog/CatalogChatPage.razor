@@ -1,0 +1,24 @@
+@page "/catalog/chat"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.Chat
+
+<PageTitle>Chat (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Feedback & Overlays"
+               Title="Chat"
+               Introduction="Realtime chatinterface voor support- en samenwerkingservaringen."
+               RadzenDocumentationUrl="https://blazor.radzen.com/chat">
+    <DemoExample Title="Basis"
+                 Description="Standaard chatcomponent in een neutrale container."
+                 ExampleComponentType="typeof(ChatBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Chat/ChatBasicExample.razor" />
+
+    <DemoExample Title="Compact"
+                 Description="Small-footprint chatweergave voor panelen."
+                 ExampleComponentType="typeof(ChatThemedExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Chat/ChatThemedExample.razor" />
+
+    <DemoExample Title="Panel-context"
+                 Description="Chat in een cardachtige supportcontext."
+                 ExampleComponentType="typeof(ChatPanelExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Chat/ChatPanelExample.razor" />
+</ComponentPage>

@@ -1,0 +1,15 @@
+<RadzenChart Style="height: 18rem;">
+    <RadzenStackedBarSeries Data="Rows" CategoryProperty="Label" ValueProperty="ValueA" Title="Installatie" />
+    <RadzenStackedBarSeries Data="Rows" CategoryProperty="Label" ValueProperty="ValueB" Title="Onderhoud" />
+</RadzenChart>
+
+@code {
+    private static readonly IReadOnlyList<SeriesRow> Rows =
+    [
+        new("Jan", 12, 8, 6),
+        new("Feb", 16, 10, 7),
+        new("Mar", 14, 11, 9)
+    ];
+
+    private sealed record SeriesRow(string Label, double ValueA, double ValueB, double ValueC);
+}

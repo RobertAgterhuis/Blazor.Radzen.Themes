@@ -1,0 +1,24 @@
+@page "/catalog/numeric"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.Numeric
+
+<PageTitle>Numeric (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Forms & Inputs"
+               Title="Numeric"
+               Introduction="Numerieke invoer met stappen, grenzen en formattering."
+               RadzenDocumentationUrl="https://blazor.radzen.com/numeric">
+    <DemoExample Title="Basis"
+                 Description="Eenvoudige numerieke invoer met min/max en step."
+                 ExampleComponentType="typeof(NumericBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Numeric/NumericBasicExample.razor" />
+
+    <DemoExample Title="Formattering"
+                 Description="Currency en percentage formattering voor financiële scenario's."
+                 ExampleComponentType="typeof(NumericCurrencyExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Numeric/NumericCurrencyExample.razor" />
+
+    <DemoExample Title="States"
+                 Description="Disabled en compacte variant zonder up/down knoppen."
+                 ExampleComponentType="typeof(NumericDisabledExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Numeric/NumericDisabledExample.razor" />
+</ComponentPage>

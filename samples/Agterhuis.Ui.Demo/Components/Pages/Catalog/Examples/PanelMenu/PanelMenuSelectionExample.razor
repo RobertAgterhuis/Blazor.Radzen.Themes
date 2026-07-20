@@ -1,0 +1,17 @@
+<div class="agt-stack demo-example-gap-sm">
+    <RadzenPanelMenu Click="OnMenuClick">
+        <RadzenPanelMenuItem Text="Inbox" Value="@("Inbox")" />
+        <RadzenPanelMenuItem Text="Taken" Value="@("Taken")" />
+        <RadzenPanelMenuItem Text="Instellingen" Value="@("Instellingen")" />
+    </RadzenPanelMenu>
+    <p class="agt-muted" aria-live="polite">Gekozen: @_selected</p>
+</div>
+
+@code {
+    private string _selected = "Nog niets";
+
+    private void OnMenuClick(MenuItemEventArgs args)
+    {
+        _selected = args.Value?.ToString() ?? args.Text ?? "Onbekend";
+    }
+}

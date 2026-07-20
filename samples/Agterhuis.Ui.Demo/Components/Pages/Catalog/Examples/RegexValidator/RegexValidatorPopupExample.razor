@@ -1,0 +1,18 @@
+<RadzenTemplateForm TItem="RegexModel" Data="_model" Submit="OnSubmit">
+    <RadzenStack Gap="0.75rem">
+        <RadzenTextBox Name="serial" @bind-Value="_model.Serial" Placeholder="SN-1234" />
+        <RadzenRegexValidator Component="serial" Pattern="^SN-[0-9]{4}$" Text="Gebruik SN-1234" Popup="true" />
+        <RadzenButton Text="Controle" ButtonType="ButtonType.Submit" />
+    </RadzenStack>
+</RadzenTemplateForm>
+
+@code {
+    private readonly RegexModel _model = new();
+
+    private void OnSubmit(RegexModel _) { }
+
+    private sealed class RegexModel
+    {
+        public string? Serial { get; set; }
+    }
+}

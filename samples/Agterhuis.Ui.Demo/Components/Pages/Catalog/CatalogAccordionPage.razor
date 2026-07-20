@@ -1,0 +1,24 @@
+@page "/catalog/accordion"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.Accordion
+
+<PageTitle>Accordion (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Navigation & Actions"
+               Title="Accordion"
+               Introduction="Accordion-varianten voor compacte, uitklapbare informatieblokken."
+               RadzenDocumentationUrl="https://blazor.radzen.com/accordion">
+    <DemoExample Title="Basis"
+                 Description="Twee eenvoudige secties met tekstinhoud."
+                 ExampleComponentType="typeof(AccordionBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Accordion/AccordionBasicExample.razor" />
+
+    <DemoExample Title="Met iconen"
+                 Description="Secties met iconen voor betere scanbaarheid."
+                 ExampleComponentType="typeof(AccordionIconsExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Accordion/AccordionIconsExample.razor" />
+
+    <DemoExample Title="Template header"
+                 Description="Custom headertemplate voor nadruk op samenvatting."
+                 ExampleComponentType="typeof(AccordionTemplateExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Accordion/AccordionTemplateExample.razor" />
+</ComponentPage>

@@ -106,6 +106,27 @@ public sealed class MainLayoutSignatureTests
     }
 
     [Fact]
+    public void ClickingCatalogNavItem_DoesNotCollapseSidebar()
+    {
+        using var ctx = CreateContext(
+            new TestNavigationManager("https://localhost/", "https://localhost/catalog"),
+            enableAmbientEffects: true,
+            prefersReducedMotion: false,
+            isMobileViewport: false,
+            initialSidebarState: "expanded");
+
+        var cut = ctx.Render<MainLayout>(p =>
+            p.Add(x => x.Body, body => body.AddMarkupContent(0, "<p>Body</p>")));
+
+        cut.WaitForAssertion(() => Assert.Equal("true", cut.Find(".demo-topbar__menu-toggle").GetAttribute("aria-expanded")));
+
+        cut.Find("a[href='/catalog/linear-gauge']").Click();
+
+        cut.WaitForAssertion(() => Assert.Equal("true", cut.Find(".demo-topbar__menu-toggle").GetAttribute("aria-expanded")));
+        Assert.Contains("Radzen catalogus · QA", cut.Markup);
+    }
+
+    [Fact]
     public void FirstRender_SyncsPersistedThemeIntoThemeState()
     {
         using var ctx = CreateContext(

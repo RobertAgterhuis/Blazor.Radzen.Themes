@@ -1,0 +1,24 @@
+@page "/catalog/badge"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.Badge
+
+<PageTitle>Badge (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Feedback & Overlays"
+               Title="Badge"
+               Introduction="Compacte statusindicatoren voor labels, counters en urgentie."
+               RadzenDocumentationUrl="https://blazor.radzen.com/badge">
+    <DemoExample Title="Basis"
+                 Description="Eenvoudige badge met tekstlabel."
+                 ExampleComponentType="typeof(BadgeBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Badge/BadgeBasicExample.razor" />
+
+    <DemoExample Title="Varianten"
+                 Description="Info, success en warning stijlen naast elkaar."
+                 ExampleComponentType="typeof(BadgeVariantExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Badge/BadgeVariantExample.razor" />
+
+    <DemoExample Title="Numeriek"
+                 Description="Badge als compacte tellerweergave."
+                 ExampleComponentType="typeof(BadgeNumberExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Badge/BadgeNumberExample.razor" />
+</ComponentPage>

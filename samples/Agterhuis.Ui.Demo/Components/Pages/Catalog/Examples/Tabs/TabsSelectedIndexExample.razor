@@ -1,0 +1,14 @@
+<div class="agt-stack demo-example-gap-sm">
+    <RadzenTabs @bind-SelectedIndex="_selectedIndex">
+        <Tabs>
+            <RadzenTabsItem Text="Eerste">Eerste paneel</RadzenTabsItem>
+            <RadzenTabsItem Text="Tweede">Tweede paneel</RadzenTabsItem>
+            <RadzenTabsItem Text="Derde">Derde paneel</RadzenTabsItem>
+        </Tabs>
+    </RadzenTabs>
+    <p class="agt-muted">Geselecteerde tab-index: @_selectedIndex</p>
+</div>
+
+@code {
+    private int _selectedIndex;
+}

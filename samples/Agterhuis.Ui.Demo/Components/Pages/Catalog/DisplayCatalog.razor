@@ -5,21 +5,14 @@
 <div class="catalog-page">
     <h1>Display (Radzen)</h1>
 
-    <RadzenTimeline>
-        <RadzenTimelineItem Text="Created" Date="@DateTime.Today.AddDays(-2)" />
-        <RadzenTimelineItem Text="Reviewed" Date="@DateTime.Today.AddDays(-1)" />
-    </RadzenTimeline>
+    <p class="agt-muted">Deze categoriepagina is een index. Voor worked examples met live demo + code gebruik je de componentpagina's hieronder.</p>
 
-    <RadzenImage Path="https://placehold.co/320x160" AlternateText="Sample image" />
-    <RadzenGravatar Email="someone@example.com" />
-    <RadzenIcon Icon="palette" />
-
-    <RadzenMarkdown Value="### Markdown\n**Brand typography** sample." />
-
-    <RadzenHtmlEditor @bind-Value="HtmlValue" Style="height: 200px;" />
-
+    <ul>
+        <li><RadzenLink Path="/catalog/icon" Text="Icon" /></li>
+        <li><RadzenLink Path="/catalog/gravatar" Text="Gravatar" /></li>
+        <li><RadzenLink Path="/catalog/fieldset" Text="Fieldset" /></li>
+        <li><RadzenLink Path="/catalog/image" Text="Image" /></li>
+        <li><RadzenLink Path="/catalog/markdown" Text="Markdown" /></li>
+        <li><RadzenLink Path="/catalog/html-editor" Text="HtmlEditor" /></li>
+    </ul>
 </div>
-
-@code {
-    private string HtmlValue { get; set; } = "<p>Editor content</p>";
-}

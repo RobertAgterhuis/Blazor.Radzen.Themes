@@ -1,0 +1,11 @@
+@page "/catalog/header"
+@inject NavigationManager NavigationManager
+
+<PageTitle>Header (Radzen)</PageTitle>
+
+@code {
+    protected override void OnInitialized()
+    {
+        NavigationManager.NavigateTo("/catalog/layout-component#header", true);
+    }
+}

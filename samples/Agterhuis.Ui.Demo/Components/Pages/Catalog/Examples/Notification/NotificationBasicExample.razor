@@ -1,0 +1,16 @@
+@inject NotificationService NotificationService
+
+<RadzenButton Text="Toon info-notificatie" Click="ShowInfo" />
+
+@code {
+    private void ShowInfo()
+    {
+        NotificationService.Notify(new NotificationMessage
+        {
+            Severity = NotificationSeverity.Info,
+            Summary = "Informatie",
+            Detail = "Dit is een standaard notificatie.",
+            Duration = 3000
+        });
+    }
+}

@@ -1,0 +1,7 @@
+<RadzenSidebarToggle Click="@Toggle" />
+
+@code {
+    private bool _expanded;
+
+    private void Toggle() => _expanded = !_expanded;
+}

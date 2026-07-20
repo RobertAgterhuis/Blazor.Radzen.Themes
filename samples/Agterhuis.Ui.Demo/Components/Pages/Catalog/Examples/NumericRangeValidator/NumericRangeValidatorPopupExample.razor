@@ -1,0 +1,18 @@
+<RadzenTemplateForm TItem="ValidatorModel" Data="_model" Submit="OnSubmit">
+    <RadzenStack Gap="0.75rem">
+        <RadzenNumeric Name="quantity" TValue="int" @bind-Value="_model.Quantity" Min="0" Max="100" />
+        <RadzenNumericRangeValidator Component="quantity" Min="10" Max="60" Text="Aantal buiten toegestane bandbreedte" Popup="true" />
+        <RadzenButton Text="Controleren" ButtonType="ButtonType.Submit" />
+    </RadzenStack>
+</RadzenTemplateForm>
+
+@code {
+    private readonly ValidatorModel _model = new() { Quantity = 6 };
+
+    private void OnSubmit(ValidatorModel _) { }
+
+    private sealed class ValidatorModel
+    {
+        public int Quantity { get; set; }
+    }
+}

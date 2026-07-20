@@ -1,0 +1,15 @@
+<RadzenChart Style="height: 18rem;">
+    <RadzenPyramidSeries Data="Rows" CategoryProperty="Label" ValueProperty="Value" Title="Funnel" />
+</RadzenChart>
+
+@code {
+    private static readonly IReadOnlyList<PyramidRow> Rows =
+    [
+        new("Lead", 80),
+        new("Kwalificatie", 50),
+        new("Offerte", 30),
+        new("Deal", 15)
+    ];
+
+    private sealed record PyramidRow(string Label, double Value);
+}

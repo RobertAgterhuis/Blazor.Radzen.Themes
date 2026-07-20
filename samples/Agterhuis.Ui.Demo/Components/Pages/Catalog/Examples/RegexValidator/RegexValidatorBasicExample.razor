@@ -1,0 +1,18 @@
+<RadzenTemplateForm TItem="RegexModel" Data="_model" Submit="OnSubmit">
+    <RadzenStack Gap="0.75rem">
+        <RadzenTextBox Name="code" @bind-Value="_model.Code" Placeholder="AA00" />
+        <RadzenRegexValidator Component="code" Pattern="^[A-Z]{2}[0-9]{2}$" Text="Gebruik formaat AA00" Popup="false" />
+        <RadzenButton Text="Valideren" ButtonType="ButtonType.Submit" />
+    </RadzenStack>
+</RadzenTemplateForm>
+
+@code {
+    private readonly RegexModel _model = new();
+
+    private void OnSubmit(RegexModel _) { }
+
+    private sealed class RegexModel
+    {
+        public string? Code { get; set; }
+    }
+}

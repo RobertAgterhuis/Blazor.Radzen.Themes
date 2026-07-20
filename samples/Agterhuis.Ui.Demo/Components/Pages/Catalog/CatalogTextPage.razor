@@ -1,0 +1,24 @@
+@page "/catalog/text"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.Text
+
+<PageTitle>Text (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Forms & Inputs"
+               Title="Text"
+               Introduction="Typografiecomponent voor consistente tekstweergave in formulieren en panels."
+               RadzenDocumentationUrl="https://blazor.radzen.com/text">
+    <DemoExample Title="Basis"
+                 Description="Eenvoudige tekstweergave."
+                 ExampleComponentType="typeof(TextBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Text/TextBasicExample.razor" />
+
+    <DemoExample Title="Heading + Body"
+                 Description="Combinatie van kop en bodytekst binnen één blok."
+                 ExampleComponentType="typeof(TextHeadingExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Text/TextHeadingExample.razor" />
+
+    <DemoExample Title="Caption"
+                 Description="Korte contextregel met subtielere hiërarchie."
+                 ExampleComponentType="typeof(TextMutedExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Text/TextMutedExample.razor" />
+</ComponentPage>

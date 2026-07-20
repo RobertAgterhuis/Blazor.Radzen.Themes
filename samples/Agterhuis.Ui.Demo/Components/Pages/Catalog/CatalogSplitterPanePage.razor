@@ -1,0 +1,11 @@
+@page "/catalog/splitter-pane"
+@inject NavigationManager NavigationManager
+
+<PageTitle>SplitterPane (Radzen)</PageTitle>
+
+@code {
+    protected override void OnInitialized()
+    {
+        NavigationManager.NavigateTo("/catalog/splitter#splitter-pane", true);
+    }
+}

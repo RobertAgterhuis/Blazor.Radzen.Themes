@@ -1,0 +1,24 @@
+@page "/catalog/tree"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.Tree
+
+<PageTitle>Tree (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Data & Scheduling"
+               Title="Tree"
+               Introduction="Hiërarchische weergave voor structuren zoals projecten en assets."
+               RadzenDocumentationUrl="https://blazor.radzen.com/tree">
+    <DemoExample Title="Basis"
+                 Description="Twee root-nodes met onderliggende items."
+                 ExampleComponentType="typeof(TreeBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Tree/TreeBasicExample.razor" />
+
+    <DemoExample Title="Checkboxes"
+                 Description="Selecteerbare nodes met checkboxes."
+                 ExampleComponentType="typeof(TreeCheckboxExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Tree/TreeCheckboxExample.razor" />
+
+    <DemoExample Title="Enkele tak"
+                 Description="Lineaire boomstructuur met één pad."
+                 ExampleComponentType="typeof(TreeSingleBranchExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Tree/TreeSingleBranchExample.razor" />
+</ComponentPage>

@@ -1,0 +1,24 @@
+@page "/catalog/required-validator"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.Validator
+
+<PageTitle>RequiredValidator (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Validators"
+               Title="RequiredValidator"
+               Introduction="Voorbeelden voor inline-validatie en popup-validatie binnen RadzenTemplateForm."
+               RadzenDocumentationUrl="https://blazor.radzen.com/requiredvalidator">
+    <DemoExample Title="Basis"
+                 Description="Verplicht tekstveld met inline foutmelding."
+                 ExampleComponentType="typeof(RequiredValidatorBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Validator/RequiredValidatorBasicExample.razor" />
+
+    <DemoExample Title="Popup"
+                 Description="Popup-validatie voor compacte form layouts."
+                 ExampleComponentType="typeof(RequiredValidatorPopupExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Validator/RequiredValidatorPopupExample.razor" />
+
+    <DemoExample Title="Meerdere velden"
+                 Description="Meerdere required validators binnen één formulierflow."
+                 ExampleComponentType="typeof(RequiredValidatorSummaryExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Validator/RequiredValidatorSummaryExample.razor" />
+</ComponentPage>

@@ -1,0 +1,11 @@
+<RadzenRadioButtonList TValue="string" @bind-Value="_selection">
+    <RadzenRadioButtonListItem Text="Basis" Value="@("basic")" />
+    <RadzenRadioButtonListItem Text="Plus" Value="@("plus")" />
+    <RadzenRadioButtonListItem Text="Pro" Value="@("pro")" />
+</RadzenRadioButtonList>
+
+<span class="agt-muted">Geselecteerd: @_selection</span>
+
+@code {
+    private string _selection = "plus";
+}

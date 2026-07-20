@@ -1,0 +1,14 @@
+<RadzenChart Style="height: 18rem;">
+    <RadzenRangeBarSeries Data="Rows" CategoryProperty="Task" MinProperty="Start" MaxProperty="End" Title="Planning" />
+</RadzenChart>
+
+@code {
+    private static readonly IReadOnlyList<RangeSpanRow> Rows =
+    [
+        new("Analyse", 1, 4),
+        new("Bouw", 4, 8),
+        new("Test", 8, 10)
+    ];
+
+    private sealed record RangeSpanRow(string Task, double Start, double End);
+}

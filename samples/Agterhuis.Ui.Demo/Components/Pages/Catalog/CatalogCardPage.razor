@@ -1,0 +1,24 @@
+@page "/catalog/card"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.Card
+
+<PageTitle>Card (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Layout & Display"
+               Title="Card"
+               Introduction="Generieke contentkaart voor dashboards, overzichten en detailblokken."
+               RadzenDocumentationUrl="https://blazor.radzen.com/card">
+    <DemoExample Title="Basis"
+                 Description="Kaart met titel en tekst."
+                 ExampleComponentType="typeof(CardBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Card/CardBasicExample.razor" />
+
+    <DemoExample Title="Outlined"
+                 Description="Outlined variant voor subtielere visuele scheiding."
+                 ExampleComponentType="typeof(CardVariantExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Card/CardVariantExample.razor" />
+
+    <DemoExample Title="Acties"
+                 Description="Kaart met CTA-knop voor vervolgactie."
+                 ExampleComponentType="typeof(CardActionsExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Card/CardActionsExample.razor" />
+</ComponentPage>

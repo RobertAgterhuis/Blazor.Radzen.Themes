@@ -1,0 +1,22 @@
+<RadzenListBox TValue="IEnumerable<int>"
+               Data="_options"
+               TextProperty="Text"
+               ValueProperty="Value"
+               Multiple="true"
+               @bind-Value="_selected" />
+
+<span class="agt-muted">Aantal geselecteerd: @_selected.Count()</span>
+
+@code {
+    private IEnumerable<int> _selected = [1, 3];
+
+    private static readonly IReadOnlyList<OptionItem> _options =
+    [
+        new("Alpha", 1),
+        new("Bravo", 2),
+        new("Charlie", 3),
+        new("Delta", 4)
+    ];
+
+    private sealed record OptionItem(string Text, int Value);
+}

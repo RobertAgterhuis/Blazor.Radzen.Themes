@@ -1,0 +1,17 @@
+<RadzenDropDownDataGrid TValue="int"
+                        Data="_people"
+                        TextProperty="Text"
+                        ValueProperty="Value"
+                        Value="2"
+                        Disabled="true" />
+
+@code {
+    private static readonly IReadOnlyList<OptionItem> _people =
+    [
+        new("Anna", 1),
+        new("Boris", 2),
+        new("Cato", 3)
+    ];
+
+    private sealed record OptionItem(string Text, int Value);
+}

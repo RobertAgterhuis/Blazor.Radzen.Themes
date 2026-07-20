@@ -1,0 +1,21 @@
+<div class="agt-stack demo-example-gap-sm">
+    <RadzenDropDownDataGrid TValue="int"
+                            Data="_people"
+                            TextProperty="Text"
+                            ValueProperty="Value"
+                            @bind-Value="_selected" />
+    <span class="agt-muted">Geselecteerd: @_selected</span>
+</div>
+
+@code {
+    private int _selected = 2;
+
+    private static readonly IReadOnlyList<OptionItem> _people =
+    [
+        new("Anna", 1),
+        new("Boris", 2),
+        new("Cato", 3)
+    ];
+
+    private sealed record OptionItem(string Text, int Value);
+}

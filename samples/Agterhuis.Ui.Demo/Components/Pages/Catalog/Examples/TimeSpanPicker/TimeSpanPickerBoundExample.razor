@@ -1,0 +1,8 @@
+<div class="agt-stack demo-example-gap-sm">
+    <RadzenTimeSpanPicker TValue="TimeSpan?" @bind-Value="_duration" />
+    <span class="agt-muted">Duur: @_duration</span>
+</div>
+
+@code {
+    private TimeSpan? _duration = TimeSpan.FromMinutes(45);
+}

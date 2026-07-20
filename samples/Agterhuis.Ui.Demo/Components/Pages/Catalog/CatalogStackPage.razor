@@ -1,0 +1,24 @@
+@page "/catalog/stack"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.Stack
+
+<PageTitle>Stack (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Layout & Display"
+               Title="Stack"
+               Introduction="Flexibele stack-layout voor verticale of horizontale groepering."
+               RadzenDocumentationUrl="https://blazor.radzen.com/stack">
+    <DemoExample Title="Basis"
+                 Description="Verticale stack met twee kaarten."
+                 ExampleComponentType="typeof(StackBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Stack/StackBasicExample.razor" />
+
+    <DemoExample Title="Horizontaal"
+                 Description="Horizontale actieset met gap."
+                 ExampleComponentType="typeof(StackHorizontalExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Stack/StackHorizontalExample.razor" />
+
+    <DemoExample Title="Wrap"
+                 Description="Automatisch wrappen van compactere items."
+                 ExampleComponentType="typeof(StackWrapExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Stack/StackWrapExample.razor" />
+</ComponentPage>

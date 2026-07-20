@@ -1,0 +1,30 @@
+@page "/catalog/funnel-series"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.FunnelSeries
+
+<PageTitle>FunnelSeries (Radzen)</PageTitle>
+
+@if (PreviewOnly)
+{
+    <RadzenCard>Chart preview (interactive rendering disabled).</RadzenCard>
+}
+else
+{
+<ComponentPage Kicker="Data Visualization"
+               Title="FunnelSeries"
+               Introduction="Trechterseries voor processtappen en conversie."
+               RadzenDocumentationUrl="https://blazor.radzen.com/chart">
+    <DemoExample Title="Basis"
+                 Description="Basisscenario voor FunnelSeries."
+                 ExampleComponentType="typeof(FunnelSeriesBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/FunnelSeries/FunnelSeriesBasicExample.razor" />
+
+    
+
+    
+</ComponentPage>
+}
+
+@code {
+    [Parameter]
+    public bool PreviewOnly { get; set; }
+}

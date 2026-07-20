@@ -1,0 +1,24 @@
+@page "/catalog/progress-bar"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.ProgressBar
+
+<PageTitle>ProgressBar (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Feedback & Overlays"
+               Title="ProgressBar"
+               Introduction="Lineaire voortgangsbalken voor processen met meetbare status."
+               RadzenDocumentationUrl="https://blazor.radzen.com/progressbar">
+    <DemoExample Title="Basiswaarden"
+                 Description="Eenvoudige voortgangsniveaus met percentageweergave."
+                 ExampleComponentType="typeof(ProgressBarBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/ProgressBar/ProgressBarBasicExample.razor" />
+
+    <DemoExample Title="Statusstijlen"
+                 Description="Visuele statusvarianten voor informatief, waarschuwing en succes."
+                 ExampleComponentType="typeof(ProgressBarStatusExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/ProgressBar/ProgressBarStatusExample.razor" />
+
+    <DemoExample Title="Aangepaste inhoud"
+                 Description="Inhoud in de balk voor een meer contextuele voortgangsboodschap."
+                 ExampleComponentType="typeof(ProgressBarTemplateExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/ProgressBar/ProgressBarTemplateExample.razor" />
+</ComponentPage>

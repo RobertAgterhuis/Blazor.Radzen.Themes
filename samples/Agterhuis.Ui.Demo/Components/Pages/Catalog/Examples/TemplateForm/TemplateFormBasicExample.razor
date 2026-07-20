@@ -1,0 +1,17 @@
+<RadzenTemplateForm TItem="FormModel" Data="_model" Submit="OnSubmit">
+    <RadzenStack Gap="0.75rem">
+        <RadzenTextBox Name="name" @bind-Value="_model.Name" Placeholder="Naam" />
+        <RadzenButton Text="Opslaan" ButtonType="ButtonType.Submit" />
+    </RadzenStack>
+</RadzenTemplateForm>
+
+@code {
+    private readonly FormModel _model = new();
+
+    private void OnSubmit(FormModel _) { }
+
+    private sealed class FormModel
+    {
+        public string? Name { get; set; }
+    }
+}

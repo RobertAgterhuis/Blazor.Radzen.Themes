@@ -1,0 +1,24 @@
+<div class="agt-stack demo-example-gap-md">
+    <p class="agt-muted">Gebruik de density-toggle in de shell om compact en comfy scheduling te vergelijken.</p>
+    <RadzenScheduler TItem="AppointmentItem"
+                     Data="Appointments"
+                     StartProperty="Start"
+                     EndProperty="End"
+                     TextProperty="Text"
+                     class="demo-scheduler demo-scheduler--sm">
+        <RadzenWeekView />
+    </RadzenScheduler>
+</div>
+
+@code {
+    private static readonly DateTime WeekStart = DateTime.Today.AddDays(-(int)DateTime.Today.DayOfWeek + 1);
+
+    private static readonly IReadOnlyList<AppointmentItem> Appointments =
+    [
+        new(WeekStart.AddHours(8), WeekStart.AddHours(9), "Intake"),
+        new(WeekStart.AddDays(2).AddHours(10), WeekStart.AddDays(2).AddHours(12), "Installatie"),
+        new(WeekStart.AddDays(4).AddHours(11), WeekStart.AddDays(4).AddHours(12), "QA-check")
+    ];
+
+    private sealed record AppointmentItem(DateTime Start, DateTime End, string Text);
+}

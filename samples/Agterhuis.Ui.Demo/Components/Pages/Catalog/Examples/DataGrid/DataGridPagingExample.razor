@@ -1,0 +1,22 @@
+<RadzenDataGrid TItem="GridRow" Data="Rows" AllowPaging="true" PageSize="3">
+    <Columns>
+        <RadzenDataGridColumn TItem="GridRow" Property="Number" Title="Nummer" />
+        <RadzenDataGridColumn TItem="GridRow" Property="Owner" Title="Eigenaar" />
+        <RadzenDataGridColumn TItem="GridRow" Property="Amount" Title="Bedrag" />
+    </Columns>
+</RadzenDataGrid>
+
+@code {
+    private static readonly IReadOnlyList<GridRow> Rows =
+    [
+        new("WO-1001", "Ava", "EUR 1.800"),
+        new("WO-1002", "Bo", "EUR 3.150"),
+        new("WO-1003", "Cy", "EUR 2.400"),
+        new("WO-1004", "Dia", "EUR 950"),
+        new("WO-1005", "Eli", "EUR 1.300"),
+        new("WO-1006", "Fae", "EUR 4.050"),
+        new("WO-1007", "Gus", "EUR 2.700")
+    ];
+
+    private sealed record GridRow(string Number, string Owner, string Amount);
+}

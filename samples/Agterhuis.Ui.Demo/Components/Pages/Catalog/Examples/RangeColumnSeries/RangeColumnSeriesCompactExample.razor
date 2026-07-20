@@ -1,0 +1,14 @@
+<RadzenChart Style="height: 18rem;">
+    <RadzenRangeColumnSeries Data="Rows" CategoryProperty="Month" MinProperty="Low" MaxProperty="High" Title="Range" />
+</RadzenChart>
+
+@code {
+    private static readonly IReadOnlyList<RangeColumnRow> Rows =
+    [
+        new("Jan", 1, 5),
+        new("Feb", 3, 7),
+        new("Mar", 2, 8)
+    ];
+
+    private sealed record RangeColumnRow(string Month, double Low, double High);
+}

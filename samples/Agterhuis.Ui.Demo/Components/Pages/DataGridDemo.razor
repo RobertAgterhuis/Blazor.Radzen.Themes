@@ -1,29 +1,27 @@
 @page "/components/data/grid"
+@page "/components/data/data-grid"
+@using Agterhuis.Ui.Demo.Components.Pages.Examples.AgtDataGrid
 
 <PageTitle>Data grid</PageTitle>
 
 <div class="agt-page agt-stack">
-    <AgtPageHeader Title="AgtDataGrid" Description="Datagrid wrapper met paging en sorting defaults." />
+    <ComponentPage Kicker="Agt wrapper"
+                   Title="AgtDataGrid"
+                   Introduction="Wrapper rond RadzenDataGrid met defaults voor paging/sorting plus sticky varianten."
+                   WrapperComponentType="typeof(AgtDataGrid<object>)">
+        <DemoExample Title="Basis"
+                     Description="Eenvoudige two-column grid met voorspelbare header/cel-volgorde."
+                     ExampleComponentType="typeof(AgtDataGridBasicExample)"
+                     SourcePath="Components/Pages/Examples/AgtDataGrid/AgtDataGridBasicExample.razor" />
 
-    <AgtCard>
-        <ChildContent>
-            <AgtDataGrid TItem="DemoRow" Data="_rows">
-                <Columns>
-                    <RadzenDataGridColumn TItem="DemoRow" Property="Name" Title="Naam" />
-                    <RadzenDataGridColumn TItem="DemoRow" Property="Score" Title="Score" />
-                </Columns>
-            </AgtDataGrid>
-        </ChildContent>
-    </AgtCard>
+        <DemoExample Title="Filteren"
+                     Description="FilterMode.Simple met tokenized hover en selectie."
+                     ExampleComponentType="typeof(AgtDataGridFilteringExample)"
+                     SourcePath="Components/Pages/Examples/AgtDataGrid/AgtDataGridFilteringExample.razor" />
+
+        <DemoExample Title="Sticky kolom + footer"
+                     Description="Sticky eerste kolom en sticky summary-footer voor brede tabellen."
+                     ExampleComponentType="typeof(AgtDataGridStickyExample)"
+                     SourcePath="Components/Pages/Examples/AgtDataGrid/AgtDataGridStickyExample.razor" />
+    </ComponentPage>
 </div>
-
-@code {
-    private readonly IReadOnlyList<DemoRow> _rows =
-    [
-        new("Alfa", 95),
-        new("Bravo", 88),
-        new("Charlie", 76)
-    ];
-
-    private sealed record DemoRow(string Name, int Score);
-}

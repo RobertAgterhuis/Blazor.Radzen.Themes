@@ -1,0 +1,19 @@
+<RadzenTemplateForm TItem="RangeModel" Data="_model" Submit="OnSubmit">
+    <RadzenStack Gap="0.75rem">
+        <RadzenNumeric Name="hours" TValue="int" @bind-Value="_model.Hours" />
+        <RadzenDataAnnotationValidator />
+        <RadzenButton Text="Controle" ButtonType="ButtonType.Submit" />
+    </RadzenStack>
+</RadzenTemplateForm>
+
+@code {
+    private readonly RangeModel _model = new() { Hours = 30 };
+
+    private void OnSubmit(RangeModel _) { }
+
+    private sealed class RangeModel
+    {
+        [System.ComponentModel.DataAnnotations.Range(0, 24)]
+        public int Hours { get; set; }
+    }
+}

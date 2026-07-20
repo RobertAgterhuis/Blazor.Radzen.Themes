@@ -1,0 +1,107 @@
+.demo-example {
+    border: 1px solid var(--agt-input-border);
+    border-radius: var(--agt-border-radius-lg);
+    display: grid;
+    gap: var(--agt-spacing-3);
+    padding: var(--agt-spacing-4);
+}
+
+.demo-example__header h3 {
+    margin: 0;
+}
+
+.demo-example__header p {
+    color: var(--agt-text-muted);
+    margin: var(--agt-spacing-1) 0 0;
+}
+
+.demo-example__tabs {
+    align-items: center;
+    border-bottom: 1px solid var(--agt-input-border);
+    display: flex;
+    gap: var(--agt-spacing-2);
+}
+
+.demo-example__tab {
+    background: transparent;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    color: var(--agt-text-muted);
+    cursor: pointer;
+    font: inherit;
+    font-weight: 700;
+    min-height: var(--agt-control-height-xs);
+    padding: 0 var(--agt-spacing-2);
+}
+
+.demo-example__tab.is-active {
+    border-bottom-color: var(--agt-color-accent-400);
+    color: var(--agt-text-heading);
+}
+
+.demo-example__preview {
+    overflow-x: auto;
+    padding-bottom: var(--agt-spacing-1);
+}
+
+.demo-example__code-panel {
+    display: grid;
+    gap: var(--agt-spacing-2);
+}
+
+.demo-example__code-toolbar {
+    align-items: center;
+    display: flex;
+    gap: var(--agt-spacing-2);
+    justify-content: space-between;
+}
+
+.demo-example__copy {
+    background: var(--agt-alpha-primary-10);
+    border: 1px solid var(--agt-input-border);
+    border-radius: var(--agt-border-radius-sm);
+    color: var(--agt-text-body);
+    cursor: pointer;
+    font: inherit;
+    min-height: var(--agt-control-height-xs);
+    padding: 0 var(--agt-spacing-3);
+}
+
+.demo-example__copy:hover,
+.demo-example__copy:focus-visible {
+    background: var(--agt-hover-tint);
+    outline: none;
+}
+
+.demo-example__copy-status {
+    color: var(--agt-text-muted);
+    font-size: var(--agt-font-size-sm);
+}
+
+.demo-code {
+    background: var(--agt-code-bg, var(--agt-surface-1));
+    border: 1px solid var(--agt-input-border);
+    border-radius: var(--agt-border-radius-md);
+    color: var(--agt-code-fg, var(--agt-text-body));
+    margin: 0;
+    max-inline-size: 100%;
+    overflow-x: auto;
+    padding: var(--agt-spacing-3);
+}
+
+:deep(.demo-code__tag) {
+    color: var(--agt-color-primary-400);
+}
+
+:deep(.demo-code__attr) {
+    color: var(--agt-text-heading);
+}
+
+:deep(.demo-code__value),
+:deep(.demo-code__string) {
+    color: var(--agt-color-accent-400);
+}
+
+:deep(.demo-code__directive) {
+    color: var(--agt-color-secondary-400);
+}

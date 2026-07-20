@@ -1,0 +1,24 @@
+@page "/catalog/switch"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.Switch
+
+<PageTitle>Switch (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Forms & Inputs"
+               Title="Switch"
+               Introduction="Schakelaar voor booleaanse keuzes in formulieren en instellingen."
+               RadzenDocumentationUrl="https://blazor.radzen.com/switch">
+    <DemoExample Title="Basis"
+                 Description="Aan/uit staten zonder extra configuratie."
+                 ExampleComponentType="typeof(SwitchBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Switch/SwitchBasicExample.razor" />
+
+    <DemoExample Title="Disabled"
+                 Description="Read-only staten voor weergave van bestaande configuratie."
+                 ExampleComponentType="typeof(SwitchDisabledExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Switch/SwitchDisabledExample.razor" />
+
+    <DemoExample Title="Met label"
+                 Description="Switch gecombineerd met contextuele labels."
+                 ExampleComponentType="typeof(SwitchLabeledExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Switch/SwitchLabeledExample.razor" />
+</ComponentPage>

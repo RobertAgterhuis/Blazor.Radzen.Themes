@@ -1,0 +1,31 @@
+@page "/catalog/bubble-series"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.BubbleSeries
+
+<PageTitle>BubbleSeries (Radzen)</PageTitle>
+
+@if (PreviewOnly)
+{
+    <RadzenCard>Chart preview (interactive rendering disabled).</RadzenCard>
+}
+else
+{
+<ComponentPage Kicker="Data Visualization"
+               Title="BubbleSeries"
+               Introduction="Bubbels met extra dimensie via grootte."
+               RadzenDocumentationUrl="https://blazor.radzen.com/chart">
+    <DemoExample Title="Basis"
+                 Description="Basisscenario voor BubbleSeries."
+                 ExampleComponentType="typeof(BubbleSeriesBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/BubbleSeries/BubbleSeriesBasicExample.razor" />
+
+    
+
+    
+</ComponentPage>
+}
+
+@code {
+    [Parameter]
+    public bool PreviewOnly { get; set; }
+}
+

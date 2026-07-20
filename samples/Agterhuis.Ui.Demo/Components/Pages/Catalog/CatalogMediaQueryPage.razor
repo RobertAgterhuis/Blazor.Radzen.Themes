@@ -1,0 +1,24 @@
+@page "/catalog/media-query"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.MediaQuery
+
+<PageTitle>MediaQuery (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Layout & Display"
+               Title="MediaQuery"
+               Introduction="Breakpointdetectie voor responsieve gedragsschakelingen."
+               RadzenDocumentationUrl="https://blazor.radzen.com/mediaquery">
+    <DemoExample Title="Basis"
+                 Description="Detectie van mobile breakpoint."
+                 ExampleComponentType="typeof(MediaQueryBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/MediaQuery/MediaQueryBasicExample.razor" />
+
+    <DemoExample Title="Tablet"
+                 Description="Status bij tablet en small-desktop breedtes."
+                 ExampleComponentType="typeof(MediaQueryTabletExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/MediaQuery/MediaQueryTabletExample.razor" />
+
+    <DemoExample Title="Compact"
+                 Description="Smalle layoutmodus bij kleinere schermen."
+                 ExampleComponentType="typeof(MediaQueryCompactExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/MediaQuery/MediaQueryCompactExample.razor" />
+</ComponentPage>

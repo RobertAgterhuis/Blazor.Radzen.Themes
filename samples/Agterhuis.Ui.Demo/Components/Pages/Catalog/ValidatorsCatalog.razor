@@ -5,34 +5,15 @@
 <div class="catalog-page">
     <h1>Validators (Radzen)</h1>
 
-    <RadzenTemplateForm TItem="ValidationModel" Data="Model" Submit="OnSubmit" InvalidSubmit="OnInvalidSubmit">
-        <RadzenStack Gap="0.75rem">
-            <RadzenTextBox Name="email" @bind-Value="Model.Email" Placeholder="Email" />
-            <RadzenRequiredValidator Component="email" Text="Required" Popup="false" />
-            <RadzenEmailValidator Component="email" Text="Invalid email" Popup="true" />
+    <p class="agt-muted">Deze categoriepagina is een index. Voor worked examples met live demo + code gebruik je de componentpagina's hieronder.</p>
 
-            <RadzenTextBox Name="code" @bind-Value="Model.Code" Placeholder="Code AA00" />
-            <RadzenRegexValidator Component="code" Pattern="^[A-Z]{2}[0-9]{2}$" Text="AA00 format" Popup="false" />
-
-            <RadzenDataAnnotationValidator />
-            <RadzenButton Text="Validate" ButtonType="ButtonType.Submit" />
-        </RadzenStack>
-    </RadzenTemplateForm>
+    <ul>
+        <li><RadzenLink Path="/catalog/required-validator" Text="RequiredValidator" /></li>
+        <li><RadzenLink Path="/catalog/length-validator" Text="LengthValidator" /></li>
+        <li><RadzenLink Path="/catalog/compare-validator" Text="CompareValidator" /></li>
+        <li><RadzenLink Path="/catalog/custom-validator" Text="CustomValidator" /></li>
+        <li><RadzenLink Path="/catalog/data-annotation-validator" Text="DataAnnotationValidator" /></li>
+        <li><RadzenLink Path="/catalog/email-validator" Text="EmailValidator" /></li>
+        <li><RadzenLink Path="/catalog/regex-validator" Text="RegexValidator" /></li>
+    </ul>
 </div>
-
-@code {
-    private readonly ValidationModel Model = new();
-
-    private void OnSubmit(ValidationModel _) { }
-
-    private void OnInvalidSubmit(FormInvalidSubmitEventArgs _) { }
-
-    public sealed class ValidationModel
-    {
-        [System.ComponentModel.DataAnnotations.Required]
-        [System.ComponentModel.DataAnnotations.EmailAddress]
-        public string? Email { get; set; }
-
-        public string? Code { get; set; }
-    }
-}

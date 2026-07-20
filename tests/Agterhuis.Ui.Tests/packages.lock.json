@@ -394,6 +394,9 @@
           "Agterhuis.Ui": "[1.0.0, )"
         }
       },
+      "exampleaudit": {
+        "type": "Project"
+      },
       "tokenaudit": {
         "type": "Project"
       },

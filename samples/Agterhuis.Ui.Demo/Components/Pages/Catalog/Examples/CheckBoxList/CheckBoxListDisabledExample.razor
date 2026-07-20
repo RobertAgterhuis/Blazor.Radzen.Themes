@@ -1,0 +1,20 @@
+<div class="agt-stack demo-example-gap-sm">
+    <RadzenCheckBoxList TValue="int"
+                        Data="_options"
+                        TextProperty="Text"
+                        ValueProperty="Value"
+                        Value="new[] { 2 }"
+                        Disabled="true" />
+    <span class="agt-muted">Read-only checkboxlijst</span>
+</div>
+
+@code {
+    private static readonly IReadOnlyList<OptionItem> _options =
+    [
+        new("Alpha", 1),
+        new("Bravo", 2),
+        new("Charlie", 3)
+    ];
+
+    private sealed record OptionItem(string Text, int Value);
+}

@@ -1,0 +1,24 @@
+@page "/catalog/google-map"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.GoogleMap
+
+<PageTitle>GoogleMap (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Layout & Display"
+               Title="GoogleMap"
+               Introduction="Kaartcomponent voor locatiecontext in werkorders en assets."
+               RadzenDocumentationUrl="https://blazor.radzen.com/googlemap">
+    <DemoExample Title="Basis"
+                 Description="Standaard kaart met basiszoom."
+                 ExampleComponentType="typeof(GoogleMapBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/GoogleMap/GoogleMapBasicExample.razor" />
+
+    <DemoExample Title="Zoom"
+                 Description="Ingezoomde variant voor detailregio."
+                 ExampleComponentType="typeof(GoogleMapZoomExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/GoogleMap/GoogleMapZoomExample.razor" />
+
+    <DemoExample Title="Compact"
+                 Description="Compacte containerintegratie."
+                 ExampleComponentType="typeof(GoogleMapCompactExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/GoogleMap/GoogleMapCompactExample.razor" />
+</ComponentPage>

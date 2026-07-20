@@ -1,0 +1,36 @@
+@page "/catalog/timeline"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.Timeline
+
+<PageTitle>Timeline (Radzen)</PageTitle>
+
+@if (PreviewOnly)
+{
+    <RadzenCard>Timeline preview (interactive rendering disabled).</RadzenCard>
+}
+else
+{
+<ComponentPage Kicker="Data Visualization"
+               Title="Timeline"
+               Introduction="Chronologische tijdlijn voor mijlpalen en statusovergangen."
+               RadzenDocumentationUrl="https://blazor.radzen.com/scheduler">
+    <DemoExample Title="Basis"
+                 Description="Basisscenario voor Timeline."
+                 ExampleComponentType="typeof(TimelineBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Timeline/TimelineBasicExample.razor" />
+
+    <DemoExample Title="Uitgebreid"
+                 Description="Uitgebreider scenario voor Timeline."
+                 ExampleComponentType="typeof(TimelineAdvancedExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Timeline/TimelineAdvancedExample.razor" />
+
+    <DemoExample Title="Compact"
+                 Description="Compact scenario voor Timeline."
+                 ExampleComponentType="typeof(TimelineCompactExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Timeline/TimelineCompactExample.razor" />
+</ComponentPage>
+}
+
+@code {
+    [Parameter]
+    public bool PreviewOnly { get; set; }
+}

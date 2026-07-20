@@ -1,0 +1,11 @@
+<div class="agt-stack demo-example-gap-sm">
+    <RadzenMediaQuery Query="(max-width: 768px)" Change="@OnChange" />
+    <RadzenText Text="Resize het venster om de state te wisselen." />
+    <RadzenBadge Text="@_state" />
+</div>
+
+@code {
+    private string _state = "Desktop";
+
+    private void OnChange(bool matches) => _state = matches ? "Mobile" : "Desktop";
+}

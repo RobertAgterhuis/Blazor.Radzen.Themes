@@ -1,0 +1,31 @@
+@page "/catalog/full-stacked-column-series"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.FullStackedColumnSeries
+
+<PageTitle>FullStackedColumnSeries (Radzen)</PageTitle>
+
+@if (PreviewOnly)
+{
+    <RadzenCard>Chart preview (interactive rendering disabled).</RadzenCard>
+}
+else
+{
+<ComponentPage Kicker="Data Visualization"
+               Title="FullStackedColumnSeries"
+               Introduction="100%-gestapelde kolomseries per categorie."
+               RadzenDocumentationUrl="https://blazor.radzen.com/chart">
+    <DemoExample Title="Basis"
+                 Description="Basisscenario voor FullStackedColumnSeries."
+                 ExampleComponentType="typeof(FullStackedColumnSeriesBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/FullStackedColumnSeries/FullStackedColumnSeriesBasicExample.razor" />
+
+    
+
+    
+</ComponentPage>
+}
+
+@code {
+    [Parameter]
+    public bool PreviewOnly { get; set; }
+}
+

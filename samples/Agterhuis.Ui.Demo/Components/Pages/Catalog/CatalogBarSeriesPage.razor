@@ -1,0 +1,31 @@
+@page "/catalog/bar-series"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.BarSeries
+
+<PageTitle>BarSeries (Radzen)</PageTitle>
+
+@if (PreviewOnly)
+{
+    <RadzenCard>Chart preview (interactive rendering disabled).</RadzenCard>
+}
+else
+{
+<ComponentPage Kicker="Data Visualization"
+               Title="BarSeries"
+               Introduction="Horizontale bars voor vergelijkende metingen."
+               RadzenDocumentationUrl="https://blazor.radzen.com/chart">
+    <DemoExample Title="Basis"
+                 Description="Basisscenario voor BarSeries."
+                 ExampleComponentType="typeof(BarSeriesBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/BarSeries/BarSeriesBasicExample.razor" />
+
+    
+
+    
+</ComponentPage>
+}
+
+@code {
+    [Parameter]
+    public bool PreviewOnly { get; set; }
+}
+

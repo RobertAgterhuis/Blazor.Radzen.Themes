@@ -1,0 +1,36 @@
+@page "/catalog/signature-pad"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.SignaturePad
+
+<PageTitle>SignaturePad (Radzen)</PageTitle>
+
+@if (PreviewOnly)
+{
+    <RadzenCard>Signature pad preview (interactive rendering disabled).</RadzenCard>
+}
+else
+{
+<ComponentPage Kicker="Misc"
+               Title="SignaturePad"
+               Introduction="Canvascomponent om een handtekening of vrije penstrokes vast te leggen."
+               RadzenDocumentationUrl="https://blazor.radzen.com/">
+    <DemoExample Title="Basis"
+                 Description="Basisconfiguratie met vrije ink en clear-knop."
+                 ExampleComponentType="typeof(SignaturePadBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/SignaturePad/SignaturePadBasicExample.razor" />
+
+    <DemoExample Title="Read-only"
+                 Description="Niet-bewerkbare variant voor ingeladen handtekeningdata."
+                 ExampleComponentType="typeof(SignaturePadReadOnlyExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/SignaturePad/SignaturePadReadOnlyExample.razor" />
+
+    <DemoExample Title="Compact"
+                 Description="Smalle, compacte signature pad-opstelling."
+                 ExampleComponentType="typeof(SignaturePadCompactExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/SignaturePad/SignaturePadCompactExample.razor" />
+</ComponentPage>
+}
+
+@code {
+    [Parameter]
+    public bool PreviewOnly { get; set; }
+}

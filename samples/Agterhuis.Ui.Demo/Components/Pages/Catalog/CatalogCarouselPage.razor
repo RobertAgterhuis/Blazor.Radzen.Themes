@@ -1,0 +1,24 @@
+@page "/catalog/carousel"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.Carousel
+
+<PageTitle>Carousel (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Layout & Display"
+               Title="Carousel"
+               Introduction="Carousel voor sequentiele content zoals highlights en kaarten."
+               RadzenDocumentationUrl="https://blazor.radzen.com/carousel">
+    <DemoExample Title="Basis"
+                 Description="Drie eenvoudige slides."
+                 ExampleComponentType="typeof(CarouselBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Carousel/CarouselBasicExample.razor" />
+
+    <DemoExample Title="Automatisch"
+                 Description="Autoplay met ingestelde interval."
+                 ExampleComponentType="typeof(CarouselIntervalExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Carousel/CarouselIntervalExample.razor" />
+
+    <DemoExample Title="Rich content"
+                 Description="Slides met card-content in plaats van platte tekst."
+                 ExampleComponentType="typeof(CarouselContentExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Carousel/CarouselContentExample.razor" />
+</ComponentPage>

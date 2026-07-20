@@ -1,0 +1,24 @@
+@page "/catalog/regex-validator"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.RegexValidator
+
+<PageTitle>RegexValidator (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Validators"
+               Title="RegexValidator"
+               Introduction="Patroonvalidatie met reguliere expressies voor formatcontrole."
+               RadzenDocumentationUrl="https://blazor.radzen.com/regexvalidator">
+    <DemoExample Title="Basis"
+                 Description="AA00-patrooncontrole op tekstinvoer."
+                 ExampleComponentType="typeof(RegexValidatorBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/RegexValidator/RegexValidatorBasicExample.razor" />
+
+    <DemoExample Title="Popup"
+                 Description="SN-xxxx formatvalidatie als popupmelding."
+                 ExampleComponentType="typeof(RegexValidatorPopupExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/RegexValidator/RegexValidatorPopupExample.razor" />
+
+    <DemoExample Title="MAC-format"
+                 Description="Hexpatroon met streepjescontrole."
+                 ExampleComponentType="typeof(RegexValidatorMacExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/RegexValidator/RegexValidatorMacExample.razor" />
+</ComponentPage>

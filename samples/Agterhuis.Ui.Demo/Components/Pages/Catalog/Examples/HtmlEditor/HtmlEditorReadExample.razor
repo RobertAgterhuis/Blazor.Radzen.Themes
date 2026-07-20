@@ -1,0 +1,8 @@
+<div class="agt-stack demo-example-gap-sm">
+    <RadzenHtmlEditor @bind-Value="_html" Style="height: 180px;" />
+    <RadzenText Text="Voorbeeld van rich text invoer." TextStyle="TextStyle.Caption" />
+</div>
+
+@code {
+    private string _html = "<ul><li>Onderdeel vervangen</li><li>Systeem herstart</li></ul>";
+}

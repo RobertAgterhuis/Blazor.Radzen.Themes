@@ -1,0 +1,30 @@
+@page "/catalog/horizontal-waterfall-series"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.HorizontalWaterfallSeries
+
+<PageTitle>HorizontalWaterfallSeries (Radzen)</PageTitle>
+
+@if (PreviewOnly)
+{
+    <RadzenCard>Chart preview (interactive rendering disabled).</RadzenCard>
+}
+else
+{
+<ComponentPage Kicker="Data Visualization"
+               Title="HorizontalWaterfallSeries"
+               Introduction="Horizontale waterfall voor running totals en delta’s."
+               RadzenDocumentationUrl="https://blazor.radzen.com/chart">
+    <DemoExample Title="Basis"
+                 Description="Basisscenario voor HorizontalWaterfallSeries."
+                 ExampleComponentType="typeof(HorizontalWaterfallSeriesBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/HorizontalWaterfallSeries/HorizontalWaterfallSeriesBasicExample.razor" />
+
+    
+
+    
+</ComponentPage>
+}
+
+@code {
+    [Parameter]
+    public bool PreviewOnly { get; set; }
+}

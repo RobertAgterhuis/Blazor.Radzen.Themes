@@ -16,6 +16,7 @@ builder.Services
 builder.Services.AddAgterhuisUi();
 builder.Services.AddScoped<Agterhuis.Ui.Demo.Services.ShowcaseDataService>();
 builder.Services.AddScoped<Agterhuis.Ui.Demo.Services.BlogShowcaseService>();
+builder.Services.AddSingleton<Agterhuis.Ui.Demo.Services.DemoSourceProvider>();
 
 var app = builder.Build();
 

@@ -1,0 +1,24 @@
+@page "/catalog/toggle-button"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.ToggleButton
+
+<PageTitle>ToggleButton (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Navigation & Actions"
+               Title="ToggleButton"
+               Introduction="Toggleknoppen voor binaire state in actierijen en filters."
+               RadzenDocumentationUrl="https://blazor.radzen.com/togglebutton">
+    <DemoExample Title="Basis"
+                 Description="Eenvoudige toggle met statische startwaarde."
+                 ExampleComponentType="typeof(ToggleButtonBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/ToggleButton/ToggleButtonBasicExample.razor" />
+
+    <DemoExample Title="Binding"
+                 Description="Two-way binding om togglewaarde in UI te tonen."
+                 ExampleComponentType="typeof(ToggleButtonBoundExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/ToggleButton/ToggleButtonBoundExample.razor" />
+
+    <DemoExample Title="Disabled"
+                 Description="Read-only toggles voor niet-bewerkbare instellingen."
+                 ExampleComponentType="typeof(ToggleButtonDisabledExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/ToggleButton/ToggleButtonDisabledExample.razor" />
+</ComponentPage>

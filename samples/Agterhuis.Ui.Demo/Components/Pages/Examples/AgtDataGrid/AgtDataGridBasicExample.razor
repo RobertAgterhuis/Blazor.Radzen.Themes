@@ -1,0 +1,17 @@
+<AgtDataGrid TItem="GridRow" Data="Rows" PageSize="5">
+    <Columns>
+        <RadzenDataGridColumn TItem="GridRow" Property="Name" Title="Naam" />
+        <RadzenDataGridColumn TItem="GridRow" Property="Score" Title="Score" />
+    </Columns>
+</AgtDataGrid>
+
+@code {
+    private static readonly IReadOnlyList<GridRow> Rows =
+    [
+        new("Alfa", 95),
+        new("Bravo", 88),
+        new("Charlie", 76)
+    ];
+
+    private sealed record GridRow(string Name, int Score);
+}

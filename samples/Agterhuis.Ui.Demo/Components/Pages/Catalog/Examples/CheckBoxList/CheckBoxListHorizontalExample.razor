@@ -1,0 +1,19 @@
+<RadzenCheckBoxList TValue="string"
+                    Orientation="Orientation.Horizontal"
+                    Data="_options"
+                    TextProperty="Text"
+                    ValueProperty="Value"
+                    @bind-Value="_selected" />
+
+@code {
+    private IEnumerable<string> _selected = ["a", "c"];
+
+    private static readonly IReadOnlyList<OptionItem> _options =
+    [
+        new("A", "a"),
+        new("B", "b"),
+        new("C", "c")
+    ];
+
+    private sealed record OptionItem(string Text, string Value);
+}

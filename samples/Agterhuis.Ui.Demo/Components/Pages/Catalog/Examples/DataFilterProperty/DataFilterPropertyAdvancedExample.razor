@@ -1,0 +1,12 @@
+<RadzenDataFilter TItem="FilterRow" Data="Rows" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+
+@code {
+    private static readonly IReadOnlyList<FilterRow> Rows =
+    [
+        new("Alpha", "Noord", 12),
+        new("Bravo", "West", 20),
+        new("Charlie", "Zuid", 15)
+    ];
+
+    private sealed record FilterRow(string Name, string Team, int Score);
+}

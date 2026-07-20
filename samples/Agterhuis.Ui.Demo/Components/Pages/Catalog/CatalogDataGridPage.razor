@@ -1,0 +1,44 @@
+@page "/catalog/data-grid"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.DataGrid
+
+<PageTitle>DataGrid (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Data"
+               Title="DataGrid"
+               Introduction="De DataGrid-pagina gebruikt hetzelfde voorbeeldpatroon als blazor.radzen.com: meerdere worked examples met live rendering en exacte broncode."
+               RadzenDocumentationUrl="https://blazor.radzen.com/datagrid">
+    <DemoExample Title="Basis"
+                 Description="Een compacte grid met drie kolommen en paging."
+                 ExampleComponentType="typeof(DataGridBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/DataGrid/DataGridBasicExample.razor" />
+
+    <DemoExample Title="Sorteren"
+                 Description="Kolommen zijn sorteerbaar en blijven leesbaar in elke theme-family."
+                 ExampleComponentType="typeof(DataGridSortingExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/DataGrid/DataGridSortingExample.razor" />
+
+    <DemoExample Title="Filteren"
+                 Description="FilterMode.Simple voor snelle table-scoping op tekstkolommen."
+                 ExampleComponentType="typeof(DataGridFilteringExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/DataGrid/DataGridFilteringExample.razor" />
+
+    <DemoExample Title="Paging"
+                 Description="Klein page size-profiel voor tablet en compact density."
+                 ExampleComponentType="typeof(DataGridPagingExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/DataGrid/DataGridPagingExample.razor" />
+
+    <DemoExample Title="Selectie"
+                 Description="RowSelect toont de actieve rij-context onder de tabel."
+                 ExampleComponentType="typeof(DataGridSelectionExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/DataGrid/DataGridSelectionExample.razor" />
+
+    <DemoExample Title="Templates en groepen"
+                 Description="Templatekolommen met badges en group-ready configuratie."
+                 ExampleComponentType="typeof(DataGridTemplateExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/DataGrid/DataGridTemplateExample.razor" />
+
+    <DemoExample Title="Export workflow"
+                 Description="CSV/Excel export-acties in een herhaalbaar toolbar-patroon."
+                 ExampleComponentType="typeof(DataGridExportExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/DataGrid/DataGridExportExample.razor" />
+</ComponentPage>

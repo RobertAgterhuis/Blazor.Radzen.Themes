@@ -5,27 +5,11 @@
 <div class="catalog-page">
     <h1>Data (Radzen)</h1>
 
-    <RadzenDataGrid Data="Rows" TItem="RowItem" AllowPaging="true" PageSize="5" AllowSorting="true" AllowFiltering="true">
-        <Columns>
-            <RadzenDataGridColumn TItem="RowItem" Property="Name" Title="Name" />
-            <RadzenDataGridColumn TItem="RowItem" Property="Score" Title="Score" />
-        </Columns>
-    </RadzenDataGrid>
+    <p class="agt-muted">Deze categoriepagina is een index. Voor worked examples met live demo + code gebruik je de componentpagina's hieronder.</p>
 
-    <RadzenDataList Data="Rows" TItem="RowItem">
-        <Template Context="row">
-            <RadzenCard>@row.Name - @row.Score</RadzenCard>
-        </Template>
-    </RadzenDataList>
-
-    <RadzenPager Count="50" PageSize="10" />
+    <ul>
+        <li><RadzenLink Path="/catalog/data-grid" Text="DataGrid" /></li>
+        <li><RadzenLink Path="/catalog/data-list" Text="DataList" /></li>
+        <li><RadzenLink Path="/catalog/pager" Text="Pager" /></li>
+    </ul>
 </div>
-
-@code {
-    private static readonly IReadOnlyList<RowItem> Rows =
-    [
-        new("Alpha", 10), new("Beta", 20), new("Gamma", 30), new("Delta", 40), new("Epsilon", 50)
-    ];
-
-    private sealed record RowItem(string Name, int Score);
-}

@@ -1,0 +1,24 @@
+@page "/catalog/color-picker"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.ColorPicker
+
+<PageTitle>ColorPicker (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Forms & Inputs"
+               Title="ColorPicker"
+               Introduction="Kleurkiezer voor thematische of visuele instellingen."
+               RadzenDocumentationUrl="https://blazor.radzen.com/colorpicker">
+    <DemoExample Title="Basis"
+                 Description="Standaard kleurkiezer met initiële tokenkleur."
+                 ExampleComponentType="typeof(ColorPickerBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/ColorPicker/ColorPickerBasicExample.razor" />
+
+    <DemoExample Title="Inline"
+                 Description="Compacte opstelling met label en HSV-optie."
+                 ExampleComponentType="typeof(ColorPickerInlineExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/ColorPicker/ColorPickerInlineExample.razor" />
+
+    <DemoExample Title="Disabled"
+                 Description="Read-only toestand voor vaste kleurkeuzes."
+                 ExampleComponentType="typeof(ColorPickerDisabledExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/ColorPicker/ColorPickerDisabledExample.razor" />
+</ComponentPage>

@@ -1,0 +1,11 @@
+@page "/catalog/data-list-row"
+@inject NavigationManager NavigationManager
+
+<PageTitle>DataListRow (Radzen)</PageTitle>
+
+@code {
+    protected override void OnInitialized()
+    {
+        NavigationManager.NavigateTo("/catalog/data-list#data-list-row", true);
+    }
+}

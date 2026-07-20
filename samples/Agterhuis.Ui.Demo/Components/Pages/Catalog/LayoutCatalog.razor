@@ -5,30 +5,25 @@
 <div class="catalog-page">
     <h1>Layout (Radzen)</h1>
 
-    <RadzenCard>
-        <RadzenRow Gap="1rem">
-            <RadzenColumn Size="12" SizeMD="4">
-                <RadzenCard>Column A</RadzenCard>
-            </RadzenColumn>
-            <RadzenColumn Size="12" SizeMD="8">
-                <RadzenCard>Column B</RadzenCard>
-            </RadzenColumn>
-        </RadzenRow>
-    </RadzenCard>
+    <p class="agt-muted">Deze categoriepagina is een index. Voor worked examples met live demo + code gebruik je de componentpagina's hieronder.</p>
 
-    <RadzenPanel Text="Panel title">Panel body</RadzenPanel>
+    <ul>
+        <li><RadzenLink Path="/catalog/row" Text="Row" /></li>
+        <li><RadzenLink Path="/catalog/panel" Text="Panel" /></li>
+        <li><RadzenLink Path="/catalog/carousel" Text="Carousel" /></li>
+        <li><RadzenLink Path="/catalog/card-group" Text="CardGroup" /></li>
+        <li><RadzenLink Path="/catalog/card" Text="Card" /></li>
+        <li><RadzenLink Path="/catalog/layout-component" Text="Layout" /></li>
+        <li><RadzenLink Path="/catalog/sidebar" Text="Sidebar" /></li>
+        <li><RadzenLink Path="/catalog/sidebar-toggle" Text="SidebarToggle" /></li>
+        <li><RadzenLink Path="/catalog/splitter" Text="Splitter" /></li>
+        <li><RadzenLink Path="/catalog/stack" Text="Stack" /></li>
+        <li><RadzenLink Path="/catalog/tile-layout" Text="TileLayout" /></li>
+        <li><RadzenLink Path="/catalog/toc" Text="Toc" /></li>
+        <li><RadzenLink Path="/catalog/media-query" Text="MediaQuery" /></li>
+        <li><RadzenLink Path="/catalog/appearance-toggle" Text="AppearanceToggle" /></li>
+        <li><RadzenLink Path="/catalog/html-editor" Text="HtmlEditor" /></li>
+    </ul>
 
-    <RadzenFieldset Text="Fieldset">Fieldset body</RadzenFieldset>
-
-    <RadzenStack Orientation="Orientation.Horizontal" Gap="0.75rem">
-        <RadzenCard>Card 1</RadzenCard>
-        <RadzenCard>Card 2</RadzenCard>
-    </RadzenStack>
-
-    <RadzenCarousel>
-        <Items>
-            <RadzenCarouselItem>Slide 1</RadzenCarouselItem>
-            <RadzenCarouselItem>Slide 2</RadzenCarouselItem>
-        </Items>
-    </RadzenCarousel>
+    <p class="agt-muted">Child-componenten zoals Header, Body, Footer, GridRow en SplitterPane worden in context gedemonstreerd op hun parent componentpagina's.</p>
 </div>

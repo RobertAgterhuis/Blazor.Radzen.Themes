@@ -1,0 +1,10 @@
+<div class="agt-inline-cluster">
+    <RadzenSidebarToggle Click="@Toggle" />
+    <span class="agt-muted">Toggle zijbalk</span>
+</div>
+
+@code {
+    private bool _expanded;
+
+    private void Toggle() => _expanded = !_expanded;
+}

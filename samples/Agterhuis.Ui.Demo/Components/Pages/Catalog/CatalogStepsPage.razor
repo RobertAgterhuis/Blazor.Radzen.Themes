@@ -1,0 +1,24 @@
+@page "/catalog/steps"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.Steps
+
+<PageTitle>Steps (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Navigation & Actions"
+               Title="Steps"
+               Introduction="Stapnavigatie voor lineaire workflows en voortgang."
+               RadzenDocumentationUrl="https://blazor.radzen.com/steps">
+    <DemoExample Title="Basis"
+                 Description="Drie workflowstappen in horizontale weergave."
+                 ExampleComponentType="typeof(StepsBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Steps/StepsBasicExample.razor" />
+
+    <DemoExample Title="Met iconen"
+                 Description="Staplabels aangevuld met iconen."
+                 ExampleComponentType="typeof(StepsIconsExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Steps/StepsIconsExample.razor" />
+
+    <DemoExample Title="Verticaal"
+                 Description="Verticale steps voor smalle layouts."
+                 ExampleComponentType="typeof(StepsVerticalExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Steps/StepsVerticalExample.razor" />
+</ComponentPage>

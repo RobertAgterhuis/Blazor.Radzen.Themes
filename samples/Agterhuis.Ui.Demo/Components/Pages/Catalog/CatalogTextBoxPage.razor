@@ -1,0 +1,24 @@
+@page "/catalog/textbox"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.TextBox
+
+<PageTitle>TextBox (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Forms & Inputs"
+               Title="TextBox"
+               Introduction="TextBox-voorbeelden voor basisinput, statusvarianten en gebonden waarden."
+               RadzenDocumentationUrl="https://blazor.radzen.com/textbox">
+    <DemoExample Title="Basis"
+                 Description="Standaard invoerveld met placeholder."
+                 ExampleComponentType="typeof(TextBoxBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/TextBox/TextBoxBasicExample.razor" />
+
+    <DemoExample Title="States"
+                 Description="Actief en uitgeschakeld veld naast elkaar voor state-verificatie."
+                 ExampleComponentType="typeof(TextBoxStatesExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/TextBox/TextBoxStatesExample.razor" />
+
+    <DemoExample Title="Gebonden waarde"
+                 Description="Two-way binding met live waarde-terugkoppeling."
+                 ExampleComponentType="typeof(TextBoxBoundExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/TextBox/TextBoxBoundExample.razor" />
+</ComponentPage>

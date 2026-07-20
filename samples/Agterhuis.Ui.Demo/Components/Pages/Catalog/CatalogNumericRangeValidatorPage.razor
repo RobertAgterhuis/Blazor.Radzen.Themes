@@ -1,0 +1,24 @@
+@page "/catalog/numeric-range-validator"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.NumericRangeValidator
+
+<PageTitle>NumericRangeValidator (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Forms & Inputs"
+               Title="NumericRangeValidator"
+               Introduction="Valideert numerieke invoer op basis van minimale en maximale grenswaarden."
+               RadzenDocumentationUrl="https://blazor.radzen.com/numeric-range-validator">
+    <DemoExample Title="Basis"
+                 Description="Integer validatie met inline foutmelding."
+                 ExampleComponentType="typeof(NumericRangeValidatorBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/NumericRangeValidator/NumericRangeValidatorBasicExample.razor" />
+
+    <DemoExample Title="Popup"
+                 Description="Validatiefout als popup naast het invoerveld."
+                 ExampleComponentType="typeof(NumericRangeValidatorPopupExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/NumericRangeValidator/NumericRangeValidatorPopupExample.razor" />
+
+    <DemoExample Title="Decimal"
+                 Description="Bereikcontrole voor decimale waarden."
+                 ExampleComponentType="typeof(NumericRangeValidatorDecimalExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/NumericRangeValidator/NumericRangeValidatorDecimalExample.razor" />
+</ComponentPage>

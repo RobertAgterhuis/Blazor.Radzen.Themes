@@ -1,0 +1,35 @@
+<RadzenDataGrid TItem="GridRow"
+                Data="Rows"
+                AllowPaging="true"
+                PageSize="5"
+                AllowRowSelectOnRowClick="true"
+                RowSelect="OnRowSelect">
+    <Columns>
+        <RadzenDataGridColumn TItem="GridRow" Property="Name" Title="Naam" />
+        <RadzenDataGridColumn TItem="GridRow" Property="Priority" Title="Prioriteit" />
+        <RadzenDataGridColumn TItem="GridRow" Property="Owner" Title="Eigenaar" />
+    </Columns>
+</RadzenDataGrid>
+
+@if (_selected is not null)
+{
+    <p class="agt-muted demo-example-margin-top">Geselecteerd: <strong>@_selected.Name</strong> (@_selected.Priority)</p>
+}
+
+@code {
+    private GridRow? _selected;
+
+    private static readonly IReadOnlyList<GridRow> Rows =
+    [
+        new("Inspectie", "Hoog", "Noor"),
+        new("Onderhoud", "Midden", "Pim"),
+        new("Installatie", "Laag", "Ravi")
+    ];
+
+    private void OnRowSelect(GridRow row)
+    {
+        _selected = row;
+    }
+
+    private sealed record GridRow(string Name, string Priority, string Owner);
+}

@@ -1,0 +1,8 @@
+<div class="agt-stack demo-example-gap-sm">
+    <RadzenSlider Min="0" Max="90" Step="5" @bind-Value="_value" />
+    <span class="agt-muted">Waarde: @_value minuten</span>
+</div>
+
+@code {
+    private int _value = 30;
+}

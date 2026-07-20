@@ -1,0 +1,53 @@
+<section class="component-page">
+    <header class="component-page__header">
+        <p class="component-page__kicker">@Kicker</p>
+        <h1>@Title</h1>
+        @if (!string.IsNullOrWhiteSpace(Introduction))
+        {
+            <p class="component-page__intro">@Introduction</p>
+        }
+    </header>
+
+    <section class="component-page__examples" aria-label="Voorbeelden">
+        @ChildContent
+    </section>
+
+    @if (WrapperComponentType is not null)
+    {
+        <ComponentParameterTable ComponentType="WrapperComponentType" />
+    }
+    else if (!string.IsNullOrWhiteSpace(RadzenDocumentationUrl))
+    {
+        <section class="demo-api" aria-labelledby="component-page-radzen-api">
+            <h3 id="component-page-radzen-api">API</h3>
+            <p>
+                Officiele documentatie:
+                <a href="@RadzenDocumentationUrl" target="_blank" rel="noreferrer">@RadzenDocumentationUrl</a>
+            </p>
+            <p class="component-page__theme-notes">@ThemeNotes</p>
+        </section>
+    }
+</section>
+
+@code {
+    [Parameter]
+    public string Kicker { get; set; } = "Component";
+
+    [Parameter, EditorRequired]
+    public string Title { get; set; } = string.Empty;
+
+    [Parameter]
+    public string? Introduction { get; set; }
+
+    [Parameter, EditorRequired]
+    public RenderFragment ChildContent { get; set; } = default!;
+
+    [Parameter]
+    public Type? WrapperComponentType { get; set; }
+
+    [Parameter]
+    public string? RadzenDocumentationUrl { get; set; }
+
+    [Parameter]
+    public string ThemeNotes { get; set; } = "Theme-notities: deze demo gebruikt uitsluitend tokenized styling en blijft geldig voor alle families en dichtheden.";
+}

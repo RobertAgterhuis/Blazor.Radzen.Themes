@@ -1,0 +1,24 @@
+@page "/catalog/aichat"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.AIChat
+
+<PageTitle>AIChat (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Feedback & Overlays"
+               Title="AIChat"
+               Introduction="AI-chat UI voor assistentinteracties binnen applicatiecontext."
+               RadzenDocumentationUrl="https://blazor.radzen.com/aichat">
+    <DemoExample Title="Basis"
+                 Description="Standaard AI-chatcontainer voor algemene assistentflows."
+                 ExampleComponentType="typeof(AIChatBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/AIChat/AIChatBasicExample.razor" />
+
+    <DemoExample Title="Compact"
+                 Description="Compacte variant voor sidepanels en overlays."
+                 ExampleComponentType="typeof(AIChatCompactExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/AIChat/AIChatCompactExample.razor" />
+
+    <DemoExample Title="Panel-context"
+                 Description="AI-assistent in een support- of operationspaneel."
+                 ExampleComponentType="typeof(AIChatPanelExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/AIChat/AIChatPanelExample.razor" />
+</ComponentPage>

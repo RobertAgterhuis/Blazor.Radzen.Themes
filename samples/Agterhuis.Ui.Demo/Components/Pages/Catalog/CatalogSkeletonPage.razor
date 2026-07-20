@@ -1,0 +1,24 @@
+@page "/catalog/skeleton"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.Skeleton
+
+<PageTitle>Skeleton (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Feedback & Overlays"
+               Title="Skeleton"
+               Introduction="Skeleton placeholders voor loading states zonder layout-shift."
+               RadzenDocumentationUrl="https://blazor.radzen.com/skeleton">
+    <DemoExample Title="Tekstregels"
+                 Description="Text placeholders voor paragrafen en lijsten."
+                 ExampleComponentType="typeof(SkeletonTextExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Skeleton/SkeletonTextExample.razor" />
+
+    <DemoExample Title="Avatar + copy"
+                 Description="Combinatie van avatar en tekst als social/feed laadstaat."
+                 ExampleComponentType="typeof(SkeletonAvatarExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Skeleton/SkeletonAvatarExample.razor" />
+
+    <DemoExample Title="Cardplaceholder"
+                 Description="Kaartachtige laadstatus voor dashboards en overzichten."
+                 ExampleComponentType="typeof(SkeletonCardExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Skeleton/SkeletonCardExample.razor" />
+</ComponentPage>

@@ -1,0 +1,24 @@
+@page "/catalog/checkbox"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.CheckBox
+
+<PageTitle>CheckBox (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Forms & Inputs"
+               Title="CheckBox"
+               Introduction="CheckBox-varianten voor boolean input in formulieren."
+               RadzenDocumentationUrl="https://blazor.radzen.com/checkbox">
+    <DemoExample Title="Basis"
+                 Description="Standaard bool-check met binding."
+                 ExampleComponentType="typeof(CheckBoxBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/CheckBox/CheckBoxBasicExample.razor" />
+
+    <DemoExample Title="Met label"
+                 Description="Semantische labeling voor formuliercontext."
+                 ExampleComponentType="typeof(CheckBoxLabeledExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/CheckBox/CheckBoxLabeledExample.razor" />
+
+    <DemoExample Title="Uitgeschakeld"
+                 Description="Locked states voor readonly workflows."
+                 ExampleComponentType="typeof(CheckBoxDisabledExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/CheckBox/CheckBoxDisabledExample.razor" />
+</ComponentPage>

@@ -1,0 +1,24 @@
+@page "/catalog/card-group"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.CardGroup
+
+<PageTitle>CardGroup (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Layout & Display"
+               Title="CardGroup"
+               Introduction="Groepeert meerdere kaarten in een samenhangende layoutsectie."
+               RadzenDocumentationUrl="https://blazor.radzen.com/card-group">
+    <DemoExample Title="Basis"
+                 Description="Twee kaarten gegroepeerd in één contextblok."
+                 ExampleComponentType="typeof(CardGroupBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/CardGroup/CardGroupBasicExample.razor" />
+
+    <DemoExample Title="Drie kaarten"
+                 Description="Drie compacte kaartitems voor team- of statussamenvatting."
+                 ExampleComponentType="typeof(CardGroupThreeCardsExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/CardGroup/CardGroupThreeCardsExample.razor" />
+
+    <DemoExample Title="Gemengde inhoud"
+                 Description="Kaarten met lijsten en tekst voor inhoudelijke vergelijking."
+                 ExampleComponentType="typeof(CardGroupMixedContentExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/CardGroup/CardGroupMixedContentExample.razor" />
+</ComponentPage>

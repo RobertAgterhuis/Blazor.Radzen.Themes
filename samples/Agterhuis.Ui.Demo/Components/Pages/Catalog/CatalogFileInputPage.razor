@@ -1,0 +1,24 @@
+@page "/catalog/file-input"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.FileInput
+
+<PageTitle>FileInput (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Forms & Inputs"
+               Title="FileInput"
+               Introduction="Bestandsinput voor lokale selectie binnen formulierflows."
+               RadzenDocumentationUrl="https://blazor.radzen.com/fileinput">
+    <DemoExample Title="Basis"
+                 Description="Eenvoudige bestandsselectie met standaardknop."
+                 ExampleComponentType="typeof(FileInputBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/FileInput/FileInputBasicExample.razor" />
+
+    <DemoExample Title="Afbeeldingen"
+                 Description="Accept-filter voor image-bestanden."
+                 ExampleComponentType="typeof(FileInputImageExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/FileInput/FileInputImageExample.razor" />
+
+    <DemoExample Title="Disabled"
+                 Description="Niet-bewerkbare bestandsinput voor gesloten staten."
+                 ExampleComponentType="typeof(FileInputDisabledExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/FileInput/FileInputDisabledExample.razor" />
+</ComponentPage>

@@ -1,0 +1,24 @@
+@page "/catalog/dropdown-data-grid"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.DropDownDataGrid
+
+<PageTitle>DropDownDataGrid (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Forms & Inputs"
+               Title="DropDownDataGrid"
+               Introduction="Dropdown met gridpresentatie voor rijke selectiecontext."
+               RadzenDocumentationUrl="https://blazor.radzen.com/dropdown-datagrid">
+    <DemoExample Title="Basis"
+                 Description="Kies medewerker uit compacte dataweergave."
+                 ExampleComponentType="typeof(DropDownDataGridBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/DropDownDataGrid/DropDownDataGridBasicExample.razor" />
+
+    <DemoExample Title="Binding"
+                 Description="Two-way binding met directe terugkoppeling."
+                 ExampleComponentType="typeof(DropDownDataGridBoundExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/DropDownDataGrid/DropDownDataGridBoundExample.razor" />
+
+    <DemoExample Title="Disabled"
+                 Description="Read-only variant voor vaste selecties."
+                 ExampleComponentType="typeof(DropDownDataGridDisabledExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/DropDownDataGrid/DropDownDataGridDisabledExample.razor" />
+</ComponentPage>

@@ -1,0 +1,11 @@
+@page "/catalog/column-options"
+@inject NavigationManager NavigationManager
+
+<PageTitle>ColumnOptions (Radzen)</PageTitle>
+
+@code {
+    protected override void OnInitialized()
+    {
+        NavigationManager.NavigateTo("/catalog/data-grid#column-options", true);
+    }
+}

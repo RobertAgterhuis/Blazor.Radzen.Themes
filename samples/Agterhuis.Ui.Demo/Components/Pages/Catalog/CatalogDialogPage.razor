@@ -1,0 +1,24 @@
+@page "/catalog/dialog"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.Dialog
+
+<PageTitle>Dialog (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Feedback & Overlays"
+               Title="Dialog"
+               Introduction="Dialoogvensters voor confirmaties en aanvullende interacties."
+               RadzenDocumentationUrl="https://blazor.radzen.com/dialog">
+    <DemoExample Title="Basis"
+                 Description="Open een standaard dialoog met eenvoudige inhoud."
+                 ExampleComponentType="typeof(DialogBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Dialog/DialogBasicExample.razor" />
+
+    <DemoExample Title="Brede variant"
+                 Description="Dialoog met expliciete afmetingen voor extra content."
+                 ExampleComponentType="typeof(DialogWideExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Dialog/DialogWideExample.razor" />
+
+    <DemoExample Title="Actiegericht"
+                 Description="Dialoog met actie-context en escape-sluiting."
+                 ExampleComponentType="typeof(DialogActionExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Dialog/DialogActionExample.razor" />
+</ComponentPage>

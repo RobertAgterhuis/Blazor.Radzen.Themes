@@ -1,0 +1,31 @@
+@page "/catalog/full-stacked-area-series"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.FullStackedAreaSeries
+
+<PageTitle>FullStackedAreaSeries (Radzen)</PageTitle>
+
+@if (PreviewOnly)
+{
+    <RadzenCard>Chart preview (interactive rendering disabled).</RadzenCard>
+}
+else
+{
+<ComponentPage Kicker="Data Visualization"
+               Title="FullStackedAreaSeries"
+               Introduction="100%-gestapelde area-series voor aandeelvergelijking."
+               RadzenDocumentationUrl="https://blazor.radzen.com/chart">
+    <DemoExample Title="Basis"
+                 Description="Basisscenario voor FullStackedAreaSeries."
+                 ExampleComponentType="typeof(FullStackedAreaSeriesBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/FullStackedAreaSeries/FullStackedAreaSeriesBasicExample.razor" />
+
+    
+
+    
+</ComponentPage>
+}
+
+@code {
+    [Parameter]
+    public bool PreviewOnly { get; set; }
+}
+

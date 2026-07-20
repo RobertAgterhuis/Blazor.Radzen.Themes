@@ -1,0 +1,19 @@
+<RadzenTemplateForm TItem="RequiredModel" Data="_model" Submit="OnSubmit">
+    <RadzenStack Gap="0.75rem">
+        <RadzenTextBox Name="subject" @bind-Value="_model.Subject" Placeholder="Onderwerp" />
+        <RadzenDataAnnotationValidator />
+        <RadzenButton Text="Opslaan" ButtonType="ButtonType.Submit" />
+    </RadzenStack>
+</RadzenTemplateForm>
+
+@code {
+    private readonly RequiredModel _model = new();
+
+    private void OnSubmit(RequiredModel _) { }
+
+    private sealed class RequiredModel
+    {
+        [System.ComponentModel.DataAnnotations.Required]
+        public string? Subject { get; set; }
+    }
+}

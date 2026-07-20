@@ -38,6 +38,7 @@ dotnet run --project samples/Agterhuis.Ui.Demo
 - Guard suites must stay green: token parity, token bleed, and accessibility guard tests.
 - Wrap Radzen components; do not inherit from Radzen components.
 - Form wrappers must receive Label or AriaLabel.
+- Demo pages must show as many examples as there are materially distinct capabilities, with a minimum of one honest example (no synthetic duplication to satisfy a fixed count).
 - Zero-warning builds are required. Warnings are treated as errors in CI.
 
 ## Add a Theme

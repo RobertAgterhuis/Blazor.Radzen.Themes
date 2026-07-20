@@ -1,0 +1,26 @@
+<div class="agt-stack demo-example-gap-sm">
+    <RadzenButton Text="Dismissible popup" ButtonStyle="ButtonStyle.Light" Click="Open" />
+    @if (_show)
+    {
+        <RadzenPopup Visible="true" class="catalog-popup-surface">
+            <div class="agt-inline-cluster">
+                <span>Popup actief</span>
+                <RadzenButton Text="Sluiten" Size="ButtonSize.Small" Click="Close" />
+            </div>
+        </RadzenPopup>
+    }
+</div>
+
+@code {
+    private bool _show;
+
+    private void Open()
+    {
+        _show = true;
+    }
+
+    private void Close()
+    {
+        _show = false;
+    }
+}

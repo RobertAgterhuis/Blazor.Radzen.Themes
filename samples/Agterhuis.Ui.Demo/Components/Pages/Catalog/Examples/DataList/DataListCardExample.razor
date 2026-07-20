@@ -1,0 +1,18 @@
+<RadzenDataList Data="_items" TItem="CardItem">
+    <Template Context="item">
+        <RadzenCard>
+            <h4>@item.Title</h4>
+            <p>@item.Description</p>
+        </RadzenCard>
+    </Template>
+</RadzenDataList>
+
+@code {
+    private static readonly IReadOnlyList<CardItem> _items =
+    [
+        new("Installatie", "Nieuwe unit geplaatst"),
+        new("Onderhoud", "Filter vervangen")
+    ];
+
+    private sealed record CardItem(string Title, string Description);
+}

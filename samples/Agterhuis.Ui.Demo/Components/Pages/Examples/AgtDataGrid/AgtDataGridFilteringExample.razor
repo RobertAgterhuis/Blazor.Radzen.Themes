@@ -1,0 +1,19 @@
+<AgtDataGrid TItem="GridRow" Data="Rows" AllowFiltering="true" FilterMode="FilterMode.Simple" PageSize="5">
+    <Columns>
+        <RadzenDataGridColumn TItem="GridRow" Property="Name" Title="Naam" />
+        <RadzenDataGridColumn TItem="GridRow" Property="Region" Title="Regio" />
+        <RadzenDataGridColumn TItem="GridRow" Property="Status" Title="Status" />
+    </Columns>
+</AgtDataGrid>
+
+@code {
+    private static readonly IReadOnlyList<GridRow> Rows =
+    [
+        new("Alfa", "Noord", "Actief"),
+        new("Bravo", "West", "Actief"),
+        new("Charlie", "West", "Gepauzeerd"),
+        new("Delta", "Zuid", "Afgerond")
+    ];
+
+    private sealed record GridRow(string Name, string Region, string Status);
+}

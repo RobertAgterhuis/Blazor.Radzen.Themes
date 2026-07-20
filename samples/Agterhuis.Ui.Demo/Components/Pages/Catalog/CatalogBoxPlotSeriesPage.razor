@@ -1,0 +1,31 @@
+@page "/catalog/box-plot-series"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.BoxPlotSeries
+
+<PageTitle>BoxPlotSeries (Radzen)</PageTitle>
+
+@if (PreviewOnly)
+{
+    <RadzenCard>Chart preview (interactive rendering disabled).</RadzenCard>
+}
+else
+{
+<ComponentPage Kicker="Data Visualization"
+               Title="BoxPlotSeries"
+               Introduction="Spreidingsvisualisatie met mediaan en kwartielen."
+               RadzenDocumentationUrl="https://blazor.radzen.com/chart">
+    <DemoExample Title="Basis"
+                 Description="Basisscenario voor BoxPlotSeries."
+                 ExampleComponentType="typeof(BoxPlotSeriesBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/BoxPlotSeries/BoxPlotSeriesBasicExample.razor" />
+
+    
+
+    
+</ComponentPage>
+}
+
+@code {
+    [Parameter]
+    public bool PreviewOnly { get; set; }
+}
+

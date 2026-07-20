@@ -1,0 +1,24 @@
+@page "/catalog/datepicker"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.DatePicker
+
+<PageTitle>DatePicker (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Forms & Inputs"
+               Title="DatePicker"
+               Introduction="DatePicker met datumselectie, tijdselectie en gebonden output."
+               RadzenDocumentationUrl="https://blazor.radzen.com/datepicker">
+    <DemoExample Title="Basis"
+                 Description="Datumveld met Nederlands formaat."
+                 ExampleComponentType="typeof(DatePickerBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/DatePicker/DatePickerBasicExample.razor" />
+
+    <DemoExample Title="Datum en tijd"
+                 Description="DateTime-selectie met tijdpicker."
+                 ExampleComponentType="typeof(DatePickerTimeExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/DatePicker/DatePickerTimeExample.razor" />
+
+    <DemoExample Title="Gebonden datum"
+                 Description="Two-way binding met live datumweergave."
+                 ExampleComponentType="typeof(DatePickerBoundExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/DatePicker/DatePickerBoundExample.razor" />
+</ComponentPage>

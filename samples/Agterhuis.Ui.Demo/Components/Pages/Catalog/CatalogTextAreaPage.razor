@@ -1,0 +1,24 @@
+@page "/catalog/textarea"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.TextArea
+
+<PageTitle>TextArea (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Forms & Inputs"
+               Title="TextArea"
+               Introduction="TextArea-voorbeelden voor notities, binding en langere inhoud."
+               RadzenDocumentationUrl="https://blazor.radzen.com/textarea">
+    <DemoExample Title="Basis"
+                 Description="Eenvoudige meerregelige invoer."
+                 ExampleComponentType="typeof(TextAreaBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/TextArea/TextAreaBasicExample.razor" />
+
+    <DemoExample Title="Gebonden waarde"
+                 Description="Two-way binding met tekenaantal."
+                 ExampleComponentType="typeof(TextAreaBoundExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/TextArea/TextAreaBoundExample.razor" />
+
+    <DemoExample Title="Lange tekst"
+                 Description="Ruimer veld voor uitgebreide omschrijvingen."
+                 ExampleComponentType="typeof(TextAreaResizeExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/TextArea/TextAreaResizeExample.razor" />
+</ComponentPage>

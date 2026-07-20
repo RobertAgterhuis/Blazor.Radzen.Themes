@@ -1,0 +1,24 @@
+@page "/catalog/autocomplete"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.AutoComplete
+
+<PageTitle>AutoComplete (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Forms & Inputs"
+               Title="AutoComplete"
+               Introduction="AutoComplete met basiszoek, gebonden waarde en min-length gedrag."
+               RadzenDocumentationUrl="https://blazor.radzen.com/autocomplete">
+    <DemoExample Title="Basis"
+                 Description="Suggesties uit een statische lijst."
+                 ExampleComponentType="typeof(AutoCompleteBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/AutoComplete/AutoCompleteBasicExample.razor" />
+
+    <DemoExample Title="Gebonden waarde"
+                 Description="Two-way binding met live feedback."
+                 ExampleComponentType="typeof(AutoCompleteBoundExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/AutoComplete/AutoCompleteBoundExample.razor" />
+
+    <DemoExample Title="Minimale lengte"
+                 Description="Zoeken start vanaf twee tekens."
+                 ExampleComponentType="typeof(AutoCompleteMinLengthExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/AutoComplete/AutoCompleteMinLengthExample.razor" />
+</ComponentPage>

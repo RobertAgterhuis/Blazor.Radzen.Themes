@@ -1,0 +1,36 @@
+@page "/catalog/radial-gauge"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.RadialGauge
+
+<PageTitle>RadialGauge (Radzen)</PageTitle>
+
+@if (PreviewOnly)
+{
+    <RadzenCard>Gauge preview (interactive rendering disabled).</RadzenCard>
+}
+else
+{
+<ComponentPage Kicker="Data Visualization"
+               Title="RadialGauge"
+               Introduction="Radiale gauge voor compacte KPI-weergave."
+               RadzenDocumentationUrl="https://blazor.radzen.com/gauge">
+    <DemoExample Title="Basis"
+                 Description="Basisscenario voor RadialGauge."
+                 ExampleComponentType="typeof(RadialGaugeBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/RadialGauge/RadialGaugeBasicExample.razor" />
+
+    <DemoExample Title="Uitgebreid"
+                 Description="Uitgebreider scenario voor RadialGauge."
+                 ExampleComponentType="typeof(RadialGaugeAdvancedExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/RadialGauge/RadialGaugeAdvancedExample.razor" />
+
+    <DemoExample Title="Compact"
+                 Description="Compact scenario voor RadialGauge."
+                 ExampleComponentType="typeof(RadialGaugeCompactExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/RadialGauge/RadialGaugeCompactExample.razor" />
+</ComponentPage>
+}
+
+@code {
+    [Parameter]
+    public bool PreviewOnly { get; set; }
+}

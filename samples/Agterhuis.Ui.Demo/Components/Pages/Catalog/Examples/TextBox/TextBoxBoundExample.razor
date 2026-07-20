@@ -1,0 +1,8 @@
+<div class="agt-stack demo-example-gap-sm">
+    <RadzenTextBox Name="tb-bound" @bind-Value="_value" Placeholder="Typ hier" class="demo-textbox-full" />
+    <p class="agt-muted">Huidige waarde: @_value</p>
+</div>
+
+@code {
+    private string _value = "Startwaarde";
+}

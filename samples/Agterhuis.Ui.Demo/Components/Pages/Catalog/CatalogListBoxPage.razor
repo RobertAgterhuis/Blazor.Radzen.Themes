@@ -1,0 +1,24 @@
+@page "/catalog/list-box"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.ListBox
+
+<PageTitle>ListBox (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Forms & Inputs"
+               Title="ListBox"
+               Introduction="Lijstselectiecomponent voor enkel- en multiselect scenario's."
+               RadzenDocumentationUrl="https://blazor.radzen.com/listbox">
+    <DemoExample Title="Basis"
+                 Description="Enkelvoudige selectie met data-binding."
+                 ExampleComponentType="typeof(ListBoxBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/ListBox/ListBoxBasicExample.razor" />
+
+    <DemoExample Title="Multiselect"
+                 Description="Meerdere waarden selecteren binnen dezelfde lijst."
+                 ExampleComponentType="typeof(ListBoxMultipleExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/ListBox/ListBoxMultipleExample.razor" />
+
+    <DemoExample Title="Disabled"
+                 Description="Read-only variant van een lijstcomponent."
+                 ExampleComponentType="typeof(ListBoxDisabledExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/ListBox/ListBoxDisabledExample.razor" />
+</ComponentPage>

@@ -1,0 +1,24 @@
+@page "/catalog/tile-layout"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.TileLayout
+
+<PageTitle>TileLayout (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Layout & Display"
+               Title="TileLayout"
+               Introduction="Tegelgebaseerde indeling voor dashboards en samenvattingen."
+               RadzenDocumentationUrl="https://blazor.radzen.com/tile-layout">
+    <DemoExample Title="Basis"
+                 Description="Twee eenvoudige tiles met kaartinhoud."
+                 ExampleComponentType="typeof(TileLayoutBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/TileLayout/TileLayoutBasicExample.razor" />
+
+    <DemoExample Title="Drie tiles"
+                 Description="Compacte driedelige tegelverdeling."
+                 ExampleComponentType="typeof(TileLayoutThreeTilesExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/TileLayout/TileLayoutThreeTilesExample.razor" />
+
+    <DemoExample Title="Gemengde inhoud"
+                 Description="Tiles met verschillende informatietypes."
+                 ExampleComponentType="typeof(TileLayoutMixedContentExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/TileLayout/TileLayoutMixedContentExample.razor" />
+</ComponentPage>

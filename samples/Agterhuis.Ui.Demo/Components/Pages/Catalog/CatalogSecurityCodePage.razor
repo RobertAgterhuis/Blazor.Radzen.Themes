@@ -1,0 +1,24 @@
+@page "/catalog/security-code"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.SecurityCode
+
+<PageTitle>SecurityCode (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Forms & Inputs"
+               Title="SecurityCode"
+               Introduction="Invoercomponent voor verificatiecodes in beveiligde flows."
+               RadzenDocumentationUrl="https://blazor.radzen.com/security-code">
+    <DemoExample Title="Basis"
+                 Description="Standaard code-invoer met placeholder."
+                 ExampleComponentType="typeof(SecurityCodeBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/SecurityCode/SecurityCodeBasicExample.razor" />
+
+    <DemoExample Title="Gelabeld"
+                 Description="Combinatie met label en aria-omschrijving."
+                 ExampleComponentType="typeof(SecurityCodeLabeledExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/SecurityCode/SecurityCodeLabeledExample.razor" />
+
+    <DemoExample Title="Disabled"
+                 Description="Read-only codeweergave voor auditdoeleinden."
+                 ExampleComponentType="typeof(SecurityCodeDisabledExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/SecurityCode/SecurityCodeDisabledExample.razor" />
+</ComponentPage>

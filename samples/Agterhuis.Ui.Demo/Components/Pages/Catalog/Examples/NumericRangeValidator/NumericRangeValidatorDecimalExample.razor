@@ -1,0 +1,18 @@
+<RadzenTemplateForm TItem="ValidatorModel" Data="_model" Submit="OnSubmit">
+    <RadzenStack Gap="0.75rem">
+        <RadzenNumeric Name="percentage" TValue="decimal" @bind-Value="_model.Percentage" Min="0" Max="100" Step="0.5m" />
+        <RadzenNumericRangeValidator Component="percentage" Min="5" Max="95" Text="Percentage moet tussen 5 en 95 liggen" Popup="false" />
+        <RadzenButton Text="Check" ButtonType="ButtonType.Submit" />
+    </RadzenStack>
+</RadzenTemplateForm>
+
+@code {
+    private readonly ValidatorModel _model = new() { Percentage = 2m };
+
+    private void OnSubmit(ValidatorModel _) { }
+
+    private sealed class ValidatorModel
+    {
+        public decimal Percentage { get; set; }
+    }
+}

@@ -1,0 +1,14 @@
+<RadzenChart Style="height: 18rem;">
+    <RadzenWaterfallSeries Data="Rows" CategoryProperty="Label" ValueProperty="Amount" SummaryProperty="IsSummary" Title="Totaal" />
+</RadzenChart>
+
+@code {
+    private static readonly IReadOnlyList<WaterfallRow> Rows =
+    [
+        new("Opening", 80, false),
+        new("Wijziging", 15, false),
+        new("Eindsaldo", 95, true)
+    ];
+
+    private sealed record WaterfallRow(string Label, double Amount, bool IsSummary);
+}

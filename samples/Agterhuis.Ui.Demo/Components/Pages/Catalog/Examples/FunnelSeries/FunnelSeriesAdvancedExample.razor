@@ -1,0 +1,15 @@
+<RadzenChart Style="height: 18rem;">
+    <RadzenFunnelSeries Data="Rows" CategoryProperty="Label" ValueProperty="Value" Title="Conversie" />
+</RadzenChart>
+
+@code {
+    private static readonly IReadOnlyList<FunnelRow> Rows =
+    [
+        new("Lead", 80),
+        new("Kwalificatie", 50),
+        new("Offerte", 30),
+        new("Deal", 15)
+    ];
+
+    private sealed record FunnelRow(string Label, double Value);
+}

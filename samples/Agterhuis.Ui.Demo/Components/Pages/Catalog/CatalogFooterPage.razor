@@ -1,0 +1,11 @@
+@page "/catalog/footer"
+@inject NavigationManager NavigationManager
+
+<PageTitle>Footer (Radzen)</PageTitle>
+
+@code {
+    protected override void OnInitialized()
+    {
+        NavigationManager.NavigateTo("/catalog/layout-component#footer", true);
+    }
+}

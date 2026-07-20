@@ -1,0 +1,36 @@
+@page "/catalog/stacked-line-series"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.StackedLineSeries
+
+<PageTitle>StackedLineSeries (Radzen)</PageTitle>
+
+@if (PreviewOnly)
+{
+    <RadzenCard>Chart preview (interactive rendering disabled).</RadzenCard>
+}
+else
+{
+<ComponentPage Kicker="Data Visualization"
+               Title="StackedLineSeries"
+               Introduction="Gestapelde lijngrafiek voor cumulatieve trends."
+               RadzenDocumentationUrl="https://blazor.radzen.com/chart">
+    <DemoExample Title="Basis"
+                 Description="Basisscenario voor StackedLineSeries."
+                 ExampleComponentType="typeof(StackedLineSeriesBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/StackedLineSeries/StackedLineSeriesBasicExample.razor" />
+
+    <DemoExample Title="Uitgebreid"
+                 Description="Uitgebreider scenario voor StackedLineSeries."
+                 ExampleComponentType="typeof(StackedLineSeriesAdvancedExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/StackedLineSeries/StackedLineSeriesAdvancedExample.razor" />
+
+    <DemoExample Title="Compact"
+                 Description="Compact scenario voor StackedLineSeries."
+                 ExampleComponentType="typeof(StackedLineSeriesCompactExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/StackedLineSeries/StackedLineSeriesCompactExample.razor" />
+</ComponentPage>
+}
+
+@code {
+    [Parameter]
+    public bool PreviewOnly { get; set; }
+}

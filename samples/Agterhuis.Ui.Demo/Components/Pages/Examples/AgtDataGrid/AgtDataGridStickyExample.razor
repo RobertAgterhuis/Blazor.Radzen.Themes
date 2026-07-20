@@ -1,0 +1,28 @@
+<AgtDataGrid TItem="GridRow"
+             Data="Rows"
+             StickyFirstColumn="true"
+             StickySummaryFooter="true"
+             PageSize="5">
+    <Columns>
+        <RadzenDataGridColumn TItem="GridRow" Property="Number" Title="Nummer" />
+        <RadzenDataGridColumn TItem="GridRow" Property="Customer" Title="Klant" />
+        <RadzenDataGridColumn TItem="GridRow" Property="Amount" Title="Bedrag">
+            <FooterTemplate>
+                <strong>@TotalAmount</strong>
+            </FooterTemplate>
+        </RadzenDataGridColumn>
+    </Columns>
+</AgtDataGrid>
+
+@code {
+    private static readonly IReadOnlyList<GridRow> Rows =
+    [
+        new("WO-4101", "Aster", 1200),
+        new("WO-4102", "Boreal", 1750),
+        new("WO-4103", "Cygnus", 900)
+    ];
+
+    private static string TotalAmount => $"EUR {Rows.Sum(x => x.Amount)}";
+
+    private sealed record GridRow(string Number, string Customer, int Amount);
+}

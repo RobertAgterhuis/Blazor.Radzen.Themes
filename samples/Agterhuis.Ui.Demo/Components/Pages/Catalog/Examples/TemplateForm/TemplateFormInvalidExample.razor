@@ -1,0 +1,20 @@
+<RadzenTemplateForm TItem="FormModel" Data="_model" Submit="OnSubmit" InvalidSubmit="OnInvalidSubmit">
+    <RadzenStack Gap="0.75rem">
+        <RadzenTextBox Name="code" @bind-Value="_model.Code" Placeholder="Code" />
+        <RadzenLengthValidator Component="code" Min="4" Text="Minimaal 4 tekens" Popup="false" />
+        <RadzenButton Text="Valideren" ButtonType="ButtonType.Submit" />
+    </RadzenStack>
+</RadzenTemplateForm>
+
+@code {
+    private readonly FormModel _model = new();
+
+    private void OnSubmit(FormModel _) { }
+
+    private void OnInvalidSubmit(FormInvalidSubmitEventArgs _) { }
+
+    private sealed class FormModel
+    {
+        public string? Code { get; set; }
+    }
+}

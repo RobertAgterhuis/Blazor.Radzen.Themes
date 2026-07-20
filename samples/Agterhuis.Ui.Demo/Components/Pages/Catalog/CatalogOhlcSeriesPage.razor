@@ -1,0 +1,30 @@
+@page "/catalog/ohlc-series"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.OhlcSeries
+
+<PageTitle>OhlcSeries (Radzen)</PageTitle>
+
+@if (PreviewOnly)
+{
+    <RadzenCard>Chart preview (interactive rendering disabled).</RadzenCard>
+}
+else
+{
+<ComponentPage Kicker="Data Visualization"
+               Title="OhlcSeries"
+               Introduction="OHLC-series voor financiële trendanalyse."
+               RadzenDocumentationUrl="https://blazor.radzen.com/chart">
+    <DemoExample Title="Basis"
+                 Description="Basisscenario voor OhlcSeries."
+                 ExampleComponentType="typeof(OhlcSeriesBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/OhlcSeries/OhlcSeriesBasicExample.razor" />
+
+    
+
+    
+</ComponentPage>
+}
+
+@code {
+    [Parameter]
+    public bool PreviewOnly { get; set; }
+}

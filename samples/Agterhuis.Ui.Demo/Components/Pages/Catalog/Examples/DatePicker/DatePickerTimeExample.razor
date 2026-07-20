@@ -1,0 +1,5 @@
+<RadzenDatePicker Name="dp-time" @bind-Value="_dateTime" DateFormat="dd-MM-yyyy HH:mm" ShowTime="true" class="demo-textbox-full" />
+
+@code {
+    private DateTime _dateTime = DateTime.Today.AddHours(9);
+}

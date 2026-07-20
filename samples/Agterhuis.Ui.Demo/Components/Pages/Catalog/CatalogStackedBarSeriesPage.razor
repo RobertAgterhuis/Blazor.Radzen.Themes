@@ -1,0 +1,36 @@
+@page "/catalog/stacked-bar-series"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.StackedBarSeries
+
+<PageTitle>StackedBarSeries (Radzen)</PageTitle>
+
+@if (PreviewOnly)
+{
+    <RadzenCard>Chart preview (interactive rendering disabled).</RadzenCard>
+}
+else
+{
+<ComponentPage Kicker="Data Visualization"
+               Title="StackedBarSeries"
+               Introduction="Horizontale gestapelde balkseries per categorie."
+               RadzenDocumentationUrl="https://blazor.radzen.com/chart">
+    <DemoExample Title="Basis"
+                 Description="Basisscenario voor StackedBarSeries."
+                 ExampleComponentType="typeof(StackedBarSeriesBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/StackedBarSeries/StackedBarSeriesBasicExample.razor" />
+
+    <DemoExample Title="Uitgebreid"
+                 Description="Uitgebreider scenario voor StackedBarSeries."
+                 ExampleComponentType="typeof(StackedBarSeriesAdvancedExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/StackedBarSeries/StackedBarSeriesAdvancedExample.razor" />
+
+    <DemoExample Title="Compact"
+                 Description="Compact scenario voor StackedBarSeries."
+                 ExampleComponentType="typeof(StackedBarSeriesCompactExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/StackedBarSeries/StackedBarSeriesCompactExample.razor" />
+</ComponentPage>
+}
+
+@code {
+    [Parameter]
+    public bool PreviewOnly { get; set; }
+}

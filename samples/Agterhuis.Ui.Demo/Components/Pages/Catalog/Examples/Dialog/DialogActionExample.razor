@@ -1,0 +1,10 @@
+@inject DialogService DialogService
+
+<RadzenButton Text="Open actiedialoog" ButtonStyle="ButtonStyle.Primary" Click="OpenActionDialog" />
+
+@code {
+    private async Task OpenActionDialog()
+    {
+        await DialogService.OpenAsync("Actie vereist", _ => @<div class="catalog-dialog-content">Bevestig deze actie in een vervolgstap.</div>, new DialogOptions { CloseDialogOnEsc = true });
+    }
+}

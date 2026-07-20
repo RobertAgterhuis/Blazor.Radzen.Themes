@@ -1,0 +1,11 @@
+<div class="agt-stack demo-example-gap-sm">
+    <RadzenMediaQuery Query="(max-width: 600px)" Change="@OnChange" />
+    <RadzenText Text="Compact mode:" />
+    <RadzenBadge Text="@_state" />
+</div>
+
+@code {
+    private string _state = "Uit";
+
+    private void OnChange(bool matches) => _state = matches ? "Aan" : "Uit";
+}

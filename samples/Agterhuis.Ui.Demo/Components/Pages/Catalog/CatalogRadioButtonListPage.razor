@@ -1,0 +1,24 @@
+@page "/catalog/radio-button-list"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.RadioButtonList
+
+<PageTitle>RadioButtonList (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Navigation & Actions"
+               Title="RadioButtonList"
+               Introduction="Radio-lijsten voor exclusieve keuzes in verticale of horizontale layout."
+               RadzenDocumentationUrl="https://blazor.radzen.com/radiobuttonlist">
+    <DemoExample Title="Basis"
+                 Description="Verticale lijst met stringwaarden en geselecteerde waarde."
+                 ExampleComponentType="typeof(RadioButtonListBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/RadioButtonList/RadioButtonListBasicExample.razor" />
+
+    <DemoExample Title="Horizontaal"
+                 Description="Horizontale weergave voor compacte keuze-sets."
+                 ExampleComponentType="typeof(RadioButtonListHorizontalExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/RadioButtonList/RadioButtonListHorizontalExample.razor" />
+
+    <DemoExample Title="Disabled"
+                 Description="Read-only variant voor niet-bewerkbare instellingen."
+                 ExampleComponentType="typeof(RadioButtonListDisabledExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/RadioButtonList/RadioButtonListDisabledExample.razor" />
+</ComponentPage>

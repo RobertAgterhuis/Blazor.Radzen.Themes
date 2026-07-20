@@ -1,0 +1,24 @@
+@page "/catalog/popup"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.Popup
+
+<PageTitle>Popup (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Feedback & Overlays"
+               Title="Popup"
+               Introduction="Lichtgewicht overlays voor contextuele informatie en snelle acties."
+               RadzenDocumentationUrl="https://blazor.radzen.com/popup">
+    <DemoExample Title="Basis"
+                 Description="Togglebare popup met eenvoudige tekstinhoud."
+                 ExampleComponentType="typeof(PopupBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Popup/PopupBasicExample.razor" />
+
+    <DemoExample Title="Kaartinhoud"
+                 Description="Popup met compacte kaartstructuur."
+                 ExampleComponentType="typeof(PopupCardExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Popup/PopupCardExample.razor" />
+
+    <DemoExample Title="Dismissible"
+                 Description="Popup met expliciete sluitactie in de inhoud."
+                 ExampleComponentType="typeof(PopupDismissExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Popup/PopupDismissExample.razor" />
+</ComponentPage>

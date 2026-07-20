@@ -1,0 +1,30 @@
+@page "/catalog/arc-gauge"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.ArcGauge
+
+<PageTitle>ArcGauge (Radzen)</PageTitle>
+
+@if (PreviewOnly)
+{
+    <RadzenCard>Gauge preview (interactive rendering disabled).</RadzenCard>
+}
+else
+{
+<ComponentPage Kicker="Data Visualization"
+               Title="ArcGauge"
+               Introduction="Booggauge voor KPI-indicatoren met schaalwaarde."
+               RadzenDocumentationUrl="https://blazor.radzen.com/gauge">
+    <DemoExample Title="Basis"
+                 Description="Basisscenario voor ArcGauge."
+                 ExampleComponentType="typeof(ArcGaugeBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/ArcGauge/ArcGaugeBasicExample.razor" />
+
+    
+
+    
+</ComponentPage>
+}
+
+@code {
+    [Parameter]
+    public bool PreviewOnly { get; set; }
+}

@@ -1,0 +1,24 @@
+@page "/catalog/upload"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.Upload
+
+<PageTitle>Upload (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Forms & Inputs"
+               Title="Upload"
+               Introduction="Bestandsuploadcomponent met handmatige of automatische verzending."
+               RadzenDocumentationUrl="https://blazor.radzen.com/upload">
+    <DemoExample Title="Basis"
+                 Description="Handmatige upload met expliciete gebruikersactie."
+                 ExampleComponentType="typeof(UploadBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Upload/UploadBasicExample.razor" />
+
+    <DemoExample Title="Auto"
+                 Description="Automatische verzending direct na bestandsselectie."
+                 ExampleComponentType="typeof(UploadAutoExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Upload/UploadAutoExample.razor" />
+
+    <DemoExample Title="Header context"
+                 Description="Toelichting op UploadHeader-gebruik in geavanceerde scenario's."
+                 ExampleComponentType="typeof(UploadHeaderExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Upload/UploadHeaderExample.razor" />
+</ComponentPage>

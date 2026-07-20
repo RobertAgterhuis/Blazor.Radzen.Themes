@@ -1,0 +1,8 @@
+<div class="agt-stack demo-example-gap-sm">
+    <RadzenDatePicker Name="dp-bound" @bind-Value="_selected" DateFormat="dd-MM-yyyy" class="demo-textbox-full" />
+    <p class="agt-muted">Geselecteerd: @_selected.ToString("dd-MM-yyyy")</p>
+</div>
+
+@code {
+    private DateTime _selected = DateTime.Today.AddDays(1);
+}

@@ -1,0 +1,24 @@
+@page "/catalog/context-menu"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.ContextMenu
+
+<PageTitle>ContextMenu (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Navigation & Actions"
+               Title="ContextMenu"
+               Introduction="Hostcomponent voor contextmenu-acties via de ContextMenuService."
+               RadzenDocumentationUrl="https://blazor.radzen.com/contextmenu">
+    <DemoExample Title="Basis host"
+                 Description="Minimale hostcomponent voor contextmenu-ondersteuning."
+                 ExampleComponentType="typeof(ContextMenuBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/ContextMenu/ContextMenuBasicExample.razor" />
+
+    <DemoExample Title="Oppervlakcontext"
+                 Description="Host in combinatie met een doeloppervlak voor rechtsklikinteractie."
+                 ExampleComponentType="typeof(ContextMenuWithSurfaceExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/ContextMenu/ContextMenuWithSurfaceExample.razor" />
+
+    <DemoExample Title="Layout host"
+                 Description="Veelvoorkomende plaatsing op layoutniveau voor app-brede beschikbaarheid."
+                 ExampleComponentType="typeof(ContextMenuLayoutHostExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/ContextMenu/ContextMenuLayoutHostExample.razor" />
+</ComponentPage>

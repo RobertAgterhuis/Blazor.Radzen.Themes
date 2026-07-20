@@ -1,0 +1,19 @@
+<RadzenPickList TValue="int"
+                TItem="TechItem"
+                Data="_technicians"
+                TextProperty="Name"
+                ValueProperty="Id"
+                @bind-Value="_selected" />
+
+@code {
+    private IEnumerable<int> _selected = [2];
+
+    private static readonly IReadOnlyList<TechItem> _technicians =
+    [
+        new(1, "Ari"),
+        new(2, "Bo"),
+        new(3, "Cem")
+    ];
+
+    private sealed record TechItem(int Id, string Name);
+}

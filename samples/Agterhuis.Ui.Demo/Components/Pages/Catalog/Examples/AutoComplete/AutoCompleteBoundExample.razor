@@ -1,0 +1,9 @@
+<div class="agt-stack demo-example-gap-sm">
+    <RadzenAutoComplete Data="Cities" @bind-Value="_selected" Placeholder="Kies stad" class="demo-textbox-full" />
+    <p class="agt-muted">Gekozen: @_selected</p>
+</div>
+
+@code {
+    private string _selected = string.Empty;
+    private static readonly IReadOnlyList<string> Cities = ["Zwolle", "Leeuwarden", "Arnhem", "Breda", "Leiden"];
+}

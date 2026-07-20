@@ -1,0 +1,24 @@
+@page "/catalog/data-list"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.DataList
+
+<PageTitle>DataList (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Data & Scheduling"
+               Title="DataList"
+               Introduction="Template-gebaseerde lijstweergave voor card- en regelgebaseerde datasets."
+               RadzenDocumentationUrl="https://blazor.radzen.com/datalist">
+    <DemoExample Title="Basis"
+                 Description="Lijst met kaarttemplate en scorevelden."
+                 ExampleComponentType="typeof(DataListBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/DataList/DataListBasicExample.razor" />
+
+    <DemoExample Title="Simpel"
+                 Description="Lichte template met tekstregels."
+                 ExampleComponentType="typeof(DataListSimpleTemplateExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/DataList/DataListSimpleTemplateExample.razor" />
+
+    <DemoExample Title="Cards"
+                 Description="Card-gebaseerde contentblokken in datalijstvorm."
+                 ExampleComponentType="typeof(DataListCardExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/DataList/DataListCardExample.razor" />
+</ComponentPage>

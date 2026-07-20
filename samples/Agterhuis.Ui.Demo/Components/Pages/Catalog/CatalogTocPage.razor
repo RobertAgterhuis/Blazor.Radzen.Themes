@@ -1,0 +1,24 @@
+@page "/catalog/toc"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.Toc
+
+<PageTitle>Toc (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Layout & Display"
+               Title="Toc"
+               Introduction="Automatische inhoudsopgave op basis van kopstructuur in contentblokken."
+               RadzenDocumentationUrl="https://blazor.radzen.com/toc">
+    <DemoExample Title="Basis"
+                 Description="Navigatie op h2/h3 sectiekoppen."
+                 ExampleComponentType="typeof(TocBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Toc/TocBasicExample.razor" />
+
+    <DemoExample Title="Genest"
+                 Description="Diepere kopstructuur met meerdere niveaus."
+                 ExampleComponentType="typeof(TocNestedExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Toc/TocNestedExample.razor" />
+
+    <DemoExample Title="In card"
+                 Description="ToC ingebed in kaartlay-out."
+                 ExampleComponentType="typeof(TocLayoutExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Toc/TocLayoutExample.razor" />
+</ComponentPage>

@@ -1,0 +1,14 @@
+<RadzenChart Style="height: 18rem;">
+    <RadzenPieSeries Data="Rows" CategoryProperty="Label" ValueProperty="Value" Title="Verdeling" />
+</RadzenChart>
+
+@code {
+    private static readonly IReadOnlyList<PieRow> Rows =
+    [
+        new("Service", 40),
+        new("Installatie", 25),
+        new("Onderhoud", 35)
+    ];
+
+    private sealed record PieRow(string Label, double Value);
+}

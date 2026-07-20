@@ -1,0 +1,24 @@
+@page "/catalog/time-span-picker"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.TimeSpanPicker
+
+<PageTitle>TimeSpanPicker (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Forms & Inputs"
+               Title="TimeSpanPicker"
+               Introduction="Tijdsduurinvoer voor planning en servicetijden."
+               RadzenDocumentationUrl="https://blazor.radzen.com/timespanpicker">
+    <DemoExample Title="Basis"
+                 Description="Standaard duurselectie met vooraf ingestelde waarde."
+                 ExampleComponentType="typeof(TimeSpanPickerBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/TimeSpanPicker/TimeSpanPickerBasicExample.razor" />
+
+    <DemoExample Title="Binding"
+                 Description="Duurwaarde live zichtbaar naast de picker."
+                 ExampleComponentType="typeof(TimeSpanPickerBoundExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/TimeSpanPicker/TimeSpanPickerBoundExample.razor" />
+
+    <DemoExample Title="Disabled"
+                 Description="Read-only configuratie voor vaste servicetijd."
+                 ExampleComponentType="typeof(TimeSpanPickerDisabledExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/TimeSpanPicker/TimeSpanPickerDisabledExample.razor" />
+</ComponentPage>

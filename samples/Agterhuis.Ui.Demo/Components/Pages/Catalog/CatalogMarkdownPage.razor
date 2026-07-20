@@ -1,0 +1,24 @@
+@page "/catalog/markdown"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.Markdown
+
+<PageTitle>Markdown (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Layout & Display"
+               Title="Markdown"
+               Introduction="Render markdown-content voor documentatie, help en contextuele uitleg."
+               RadzenDocumentationUrl="https://blazor.radzen.com/markdown">
+    <DemoExample Title="Basis"
+                 Description="Kop en lijst in markdown-opmaak."
+                 ExampleComponentType="typeof(MarkdownBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Markdown/MarkdownBasicExample.razor" />
+
+    <DemoExample Title="Tabel"
+                 Description="Eenvoudige markdown tabelweergave."
+                 ExampleComponentType="typeof(MarkdownTableExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Markdown/MarkdownTableExample.razor" />
+
+    <DemoExample Title="Code"
+                 Description="Codeblok binnen markdown output."
+                 ExampleComponentType="typeof(MarkdownCodeExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Markdown/MarkdownCodeExample.razor" />
+</ComponentPage>

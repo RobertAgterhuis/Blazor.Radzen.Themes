@@ -1,0 +1,15 @@
+<RadzenChart Style="height: 18rem;">
+    <RadzenHighLowSeries Data="Rows" CategoryProperty="Date" HighProperty="High" LowProperty="Low" Title="Range" />
+    <RadzenCategoryAxis FormatString="{0:MM/dd}" />
+</RadzenChart>
+
+@code {
+    private static readonly IReadOnlyList<RangeRow> Rows =
+    [
+        new(new DateTime(2026, 1, 1), 18, 9),
+        new(new DateTime(2026, 1, 2), 20, 12),
+        new(new DateTime(2026, 1, 3), 17, 11)
+    ];
+
+    private sealed record RangeRow(DateTime Date, double High, double Low);
+}

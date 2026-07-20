@@ -1,0 +1,17 @@
+@inject NotificationService NotificationService
+
+<RadzenButton Text="Toon sticky notificatie" ButtonStyle="ButtonStyle.Light" Click="ShowSticky" />
+
+@code {
+    private void ShowSticky()
+    {
+        NotificationService.Notify(new NotificationMessage
+        {
+            Severity = NotificationSeverity.Warning,
+            Summary = "Handmatige sluiting",
+            Detail = "Deze melding blijft zichtbaar tot sluiting.",
+            Duration = 0,
+            CloseOnClick = true
+        });
+    }
+}

@@ -1,0 +1,8 @@
+<div class="agt-stack demo-example-gap-sm">
+    <RadzenChipList TValue="string" Data="_items" />
+    <span class="agt-muted">Gebruik Data-binding voor dynamische labels per dossier.</span>
+</div>
+
+@code {
+    private static readonly IReadOnlyList<string> _items = ["WO-314", "WO-402", "WO-418"];
+}

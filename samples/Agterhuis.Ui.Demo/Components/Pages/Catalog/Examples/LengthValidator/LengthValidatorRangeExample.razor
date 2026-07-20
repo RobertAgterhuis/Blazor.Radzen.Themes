@@ -1,0 +1,18 @@
+<RadzenTemplateForm TItem="LengthModel" Data="_model" Submit="OnSubmit">
+    <RadzenStack Gap="0.75rem">
+        <RadzenTextBox Name="code" @bind-Value="_model.Code" Placeholder="Code" />
+        <RadzenLengthValidator Component="code" Min="2" Max="6" Text="Lengte tussen 2 en 6" Popup="false" />
+        <RadzenButton Text="Controle" ButtonType="ButtonType.Submit" />
+    </RadzenStack>
+</RadzenTemplateForm>
+
+@code {
+    private readonly LengthModel _model = new();
+
+    private void OnSubmit(LengthModel _) { }
+
+    private sealed class LengthModel
+    {
+        public string? Code { get; set; }
+    }
+}

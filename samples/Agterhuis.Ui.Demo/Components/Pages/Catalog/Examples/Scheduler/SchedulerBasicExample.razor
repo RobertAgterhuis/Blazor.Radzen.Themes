@@ -1,0 +1,21 @@
+<RadzenScheduler TItem="AppointmentItem"
+                 Data="Appointments"
+                 StartProperty="Start"
+                 EndProperty="End"
+                 TextProperty="Text"
+                 class="demo-scheduler demo-scheduler--md">
+    <RadzenDayView />
+</RadzenScheduler>
+
+@code {
+    private static readonly DateTime Day = DateTime.Today;
+
+    private static readonly IReadOnlyList<AppointmentItem> Appointments =
+    [
+        new(Day.AddHours(9), Day.AddHours(10), "Stand-up"),
+        new(Day.AddHours(11), Day.AddHours(12), "Klantgesprek"),
+        new(Day.AddHours(14), Day.AddHours(15.5), "Inspectie")
+    ];
+
+    private sealed record AppointmentItem(DateTime Start, DateTime End, string Text);
+}

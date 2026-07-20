@@ -1,0 +1,24 @@
+@page "/catalog/tabs"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.Tabs
+
+<PageTitle>Tabs (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Navigation & Actions"
+               Title="Tabs"
+               Introduction="Tabs voor compacte sectienavigatie op één pagina."
+               RadzenDocumentationUrl="https://blazor.radzen.com/tabs">
+    <DemoExample Title="Basis"
+                 Description="Drie tabpanelen met tekstinhoud."
+                 ExampleComponentType="typeof(TabsBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Tabs/TabsBasicExample.razor" />
+
+    <DemoExample Title="Met iconen"
+                 Description="Tablabels met iconen voor snelle herkenning."
+                 ExampleComponentType="typeof(TabsIconsExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Tabs/TabsIconsExample.razor" />
+
+    <DemoExample Title="Selected index"
+                 Description="Geselecteerde tabindex uitlezen via binding."
+                 ExampleComponentType="typeof(TabsSelectedIndexExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Tabs/TabsSelectedIndexExample.razor" />
+</ComponentPage>

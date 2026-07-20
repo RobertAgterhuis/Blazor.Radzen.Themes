@@ -1,0 +1,24 @@
+@page "/catalog/row"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.Row
+
+<PageTitle>Row (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Layout & Display"
+               Title="Row"
+               Introduction="Grid-rijen met responsieve kolomverdeling."
+               RadzenDocumentationUrl="https://blazor.radzen.com/row">
+    <DemoExample Title="Twee kolommen"
+                 Description="Basisverdeling met twee kolommen."
+                 ExampleComponentType="typeof(RowBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Row/RowBasicExample.razor" />
+
+    <DemoExample Title="Drie kolommen"
+                 Description="Compacte verdeling in drie gelijke kolommen."
+                 ExampleComponentType="typeof(RowThreeColumnExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Row/RowThreeColumnExample.razor" />
+
+    <DemoExample Title="Responsief"
+                 Description="Large-breakpoint verschuiving tussen primaire en secundaire content."
+                 ExampleComponentType="typeof(RowResponsiveExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Row/RowResponsiveExample.razor" />
+</ComponentPage>

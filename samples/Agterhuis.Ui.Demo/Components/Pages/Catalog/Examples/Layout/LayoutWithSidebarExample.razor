@@ -1,0 +1,17 @@
+<RadzenLayout>
+    <RadzenHeader>
+        <RadzenSidebarToggle Click="@Toggle" />
+    </RadzenHeader>
+    <RadzenSidebar Expanded="_expanded">
+        <RadzenText Text="Navigatie" />
+    </RadzenSidebar>
+    <RadzenBody>
+        <RadzenText Text="Hoofdinhoud" />
+    </RadzenBody>
+</RadzenLayout>
+
+@code {
+    private bool _expanded = true;
+
+    private void Toggle() => _expanded = !_expanded;
+}

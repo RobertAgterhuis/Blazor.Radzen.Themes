@@ -1,0 +1,24 @@
+@page "/catalog/login"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.Login
+
+<PageTitle>Login (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Feedback & Overlays"
+               Title="Login"
+               Introduction="Inlogformuliercomponent met ingebouwde account-acties."
+               RadzenDocumentationUrl="https://blazor.radzen.com/login">
+    <DemoExample Title="Basis"
+                 Description="Standaard login zonder registratie/reset links."
+                 ExampleComponentType="typeof(LoginBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Login/LoginBasicExample.razor" />
+
+    <DemoExample Title="Met account-acties"
+                 Description="Variatie met registratie- en resetoptie."
+                 ExampleComponentType="typeof(LoginWithRegisterExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Login/LoginWithRegisterExample.razor" />
+
+    <DemoExample Title="Compacte container"
+                 Description="Login in een begrensde breedte voor sidebar of paneel."
+                 ExampleComponentType="typeof(LoginCompactExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Login/LoginCompactExample.razor" />
+</ComponentPage>

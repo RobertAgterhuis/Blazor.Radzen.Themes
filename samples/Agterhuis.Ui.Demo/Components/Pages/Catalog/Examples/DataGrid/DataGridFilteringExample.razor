@@ -1,0 +1,20 @@
+<RadzenDataGrid TItem="GridRow" Data="Rows" AllowFiltering="true" FilterMode="FilterMode.Simple" AllowPaging="true" PageSize="5">
+    <Columns>
+        <RadzenDataGridColumn TItem="GridRow" Property="Name" Title="Naam" />
+        <RadzenDataGridColumn TItem="GridRow" Property="City" Title="Plaats" />
+        <RadzenDataGridColumn TItem="GridRow" Property="Status" Title="Status" />
+    </Columns>
+</RadzenDataGrid>
+
+@code {
+    private static readonly IReadOnlyList<GridRow> Rows =
+    [
+        new("Aron", "Zwolle", "Open"),
+        new("Bram", "Apeldoorn", "Open"),
+        new("Cleo", "Zwolle", "In behandeling"),
+        new("Daan", "Leiden", "Afgerond"),
+        new("Evi", "Apeldoorn", "Open")
+    ];
+
+    private sealed record GridRow(string Name, string City, string Status);
+}

@@ -1,4 +1,6 @@
 @inject IJSRuntime JS
+@inject NavigationManager NavigationManager
+@implements IDisposable
 
 <nav aria-label="Hoofdnavigatie">
     <div class="demo-panel-nav">
@@ -24,7 +26,7 @@
         </div>
 
         <div class="demo-panel-nav__scroll" @ref="_menuRootRef" @onkeydown="OnMenuKeyDown">
-            <RadzenPanelMenu class="demo-panel-menu" Multiple="true" DisplayStyle="MenuItemDisplayStyle.IconAndText">
+            <RadzenPanelMenu class="demo-panel-menu" Multiple="true" DisplayStyle="MenuItemDisplayStyle.IconAndText" Click="OnPanelMenuClick">
                 @if (FilteredGettingStarted.Count > 0)
                 {
                     <RadzenPanelMenuItem Text="Getting started" Icon="rocket_launch" Expanded="true" Class="demo-panel-menu__group demo-panel-menu__group--main">
@@ -53,15 +55,25 @@
                     </RadzenPanelMenuItem>
                 }
 
-                @if (FilteredCatalogItems.Count > 0)
+                @if (FilteredCatalogCategories.Count > 0)
                 {
-                    <RadzenPanelMenuItem Text="Radzen catalogus · QA" Icon="auto_awesome_mosaic" Expanded="@CatalogExpanded" Click="OnCatalogGroupClick" Class="demo-panel-menu__group demo-panel-menu__group--catalog demo-panel-menu__group--main">
+                    <RadzenPanelMenuItem Text="Radzen catalogus · QA" Icon="auto_awesome_mosaic" Expanded="true" Class="demo-panel-menu__group demo-panel-menu__group--catalog demo-panel-menu__group--main">
                         <div class="demo-panel-menu__group-copy">
                             <div class="demo-panel-menu__subtitle">Theme-QA: alle Radzen-componenten in het actieve theme</div>
                         </div>
-                        @foreach (var item in FilteredCatalogItems)
+                        @foreach (var category in FilteredCatalogCategories)
                         {
-                            <RadzenPanelMenuItem Text="@item.Text" Icon="@item.Icon" Path="@item.Path" Match="@item.Match" />
+                            <RadzenPanelMenuItem Text="@category.Text"
+                                                 Icon="@category.Icon"
+                                                 Expanded="@IsCatalogCategoryExpanded(category)"
+                                                 Value="@CatalogCategoryValue(category.Key)"
+                                                 Class="demo-panel-menu__catalog-category">
+                                <RadzenPanelMenuItem Text="Overzicht" Icon="list" Path="@category.OverviewPath" Match="NavLinkMatch.All" />
+                                @foreach (var item in category.Items)
+                                {
+                                    <RadzenPanelMenuItem Text="@item.Text" Icon="@item.Icon" Path="@item.Path" Match="@item.Match" />
+                                }
+                            </RadzenPanelMenuItem>
                         }
                     </RadzenPanelMenuItem>
                 }
@@ -85,7 +97,9 @@
 
     private sealed record NavSection(string Title, IReadOnlyList<NavEntry> Items);
 
-    private const string CatalogGroupStorageKey = "catalog";
+    private sealed record CatalogCategory(string Key, string Text, string Icon, string OverviewPath, IReadOnlyList<NavEntry> Items);
+
+    private sealed record CatalogCategoryView(string Key, string Text, string Icon, string OverviewPath, IReadOnlyList<NavEntry> Items);
 
     private static readonly IReadOnlyList<NavEntry> GettingStartedItems =
     [
@@ -132,9 +146,103 @@
         ])
     ];
 
-    private static readonly IReadOnlyList<NavEntry> CatalogItems =
+    private static readonly IReadOnlyList<NavEntry> RawCatalogItems =
     [
         new("Index (Radzen)", "list", "/catalog", NavLinkMatch.Prefix),
+        new("DataGrid (Radzen)", "table_rows", "/catalog/data-grid"),
+        new("Scheduler (Radzen)", "schedule", "/catalog/scheduler"),
+        new("TextBox (Radzen)", "text_fields", "/catalog/textbox"),
+        new("AutoComplete (Radzen)", "manage_search", "/catalog/autocomplete"),
+        new("DropDown (Radzen)", "arrow_drop_down_circle", "/catalog/dropdown"),
+        new("CheckBox (Radzen)", "check_box", "/catalog/checkbox"),
+        new("CheckBoxList (Radzen)", "checklist", "/catalog/checkbox-list"),
+        new("Chip (Radzen)", "sell", "/catalog/chip"),
+        new("ChipList (Radzen)", "sell", "/catalog/chip-list"),
+        new("Password (Radzen)", "password", "/catalog/password"),
+        new("TextArea (Radzen)", "notes", "/catalog/textarea"),
+        new("Text (Radzen)", "text_fields", "/catalog/text"),
+        new("Fieldset (Radzen)", "folder", "/catalog/fieldset"),
+        new("FormField (Radzen)", "segment", "/catalog/form-field"),
+        new("DatePicker (Radzen)", "event", "/catalog/datepicker"),
+        new("DropDownDataGrid (Radzen)", "table_rows", "/catalog/dropdown-data-grid"),
+        new("Mask (Radzen)", "pin", "/catalog/mask"),
+        new("Numeric (Radzen)", "pin", "/catalog/numeric"),
+        new("NumericRangeValidator (Radzen)", "rule", "/catalog/numeric-range-validator"),
+        new("LengthValidator (Radzen)", "rule", "/catalog/length-validator"),
+        new("ColorPicker (Radzen)", "palette", "/catalog/color-picker"),
+        new("ListBox (Radzen)", "view_list", "/catalog/list-box"),
+        new("Rating (Radzen)", "star", "/catalog/rating"),
+        new("Slider (Radzen)", "tune", "/catalog/slider"),
+        new("TimeSpanPicker (Radzen)", "schedule", "/catalog/time-span-picker"),
+        new("TemplateForm (Radzen)", "dynamic_form", "/catalog/template-form"),
+        new("SelectBar (Radzen)", "view_carousel", "/catalog/select-bar"),
+        new("PickList (Radzen)", "swap_horiz", "/catalog/pick-list"),
+        new("SecurityCode (Radzen)", "password", "/catalog/security-code"),
+        new("Switch (Radzen)", "toggle_on", "/catalog/switch"),
+        new("FileInput (Radzen)", "attach_file", "/catalog/file-input"),
+        new("Upload (Radzen)", "upload_file", "/catalog/upload"),
+        new("BreadCrumb (Radzen)", "alt_route", "/catalog/breadcrumb"),
+        new("Button (Radzen)", "ads_click", "/catalog/button"),
+        new("SplitButton (Radzen)", "splitscreen_left", "/catalog/split-button"),
+        new("RadioButtonList (Radzen)", "radio_button_checked", "/catalog/radio-button-list"),
+        new("RadioButtonListItem (Radzen)", "radio_button_unchecked", "/catalog/radio-button-list-item"),
+        new("ProfileMenu (Radzen)", "account_circle", "/catalog/profile-menu"),
+        new("ContextMenu (Radzen)", "right_click", "/catalog/context-menu"),
+        new("Link (Radzen)", "link", "/catalog/link"),
+        new("Fab (Radzen)", "add_circle", "/catalog/fab"),
+        new("FabMenu (Radzen)", "menu_open", "/catalog/fab-menu"),
+        new("ToggleButton (Radzen)", "toggle_on", "/catalog/toggle-button"),
+        new("SpeechToTextButton (Radzen)", "mic", "/catalog/speech-to-text-button"),
+        new("Menu (Radzen)", "menu", "/catalog/menu"),
+        new("PanelMenu (Radzen)", "account_tree", "/catalog/panel-menu"),
+        new("Accordion (Radzen)", "unfold_more", "/catalog/accordion"),
+        new("Tabs (Radzen)", "tab", "/catalog/tabs"),
+        new("Steps (Radzen)", "checklist", "/catalog/steps"),
+        new("Row (Radzen)", "view_column", "/catalog/row"),
+        new("Panel (Radzen)", "web_asset", "/catalog/panel"),
+        new("Carousel (Radzen)", "view_carousel", "/catalog/carousel"),
+        new("CardGroup (Radzen)", "dashboard", "/catalog/card-group"),
+        new("Badge (Radzen)", "local_offer", "/catalog/badge"),
+        new("Icon (Radzen)", "interests", "/catalog/icon"),
+        new("Gravatar (Radzen)", "account_box", "/catalog/gravatar"),
+        new("QRCode (Radzen)", "qr_code_2", "/catalog/qr-code"),
+        new("Barcode (Radzen)", "view_week", "/catalog/barcode"),
+        new("GoogleMap (Radzen)", "map", "/catalog/google-map"),
+        new("Alert (Radzen)", "warning", "/catalog/alert"),
+        new("ProgressBar (Radzen)", "data_usage", "/catalog/progress-bar"),
+        new("ProgressBarCircular (Radzen)", "donut_small", "/catalog/progress-bar-circular"),
+        new("Skeleton (Radzen)", "skeleton", "/catalog/skeleton"),
+        new("Dialog (Radzen)", "open_in_new", "/catalog/dialog"),
+        new("Notification (Radzen)", "notifications", "/catalog/notification"),
+        new("Popup (Radzen)", "picture_in_picture", "/catalog/popup"),
+        new("Login (Radzen)", "login", "/catalog/login"),
+        new("Chat (Radzen)", "chat", "/catalog/chat"),
+        new("AIChat (Radzen)", "smart_toy", "/catalog/aichat"),
+        new("RequiredValidator (Radzen)", "rule", "/catalog/required-validator"),
+        new("CompareValidator (Radzen)", "rule", "/catalog/compare-validator"),
+        new("CustomValidator (Radzen)", "rule", "/catalog/custom-validator"),
+        new("DataAnnotationValidator (Radzen)", "rule", "/catalog/data-annotation-validator"),
+        new("EmailValidator (Radzen)", "rule", "/catalog/email-validator"),
+        new("RegexValidator (Radzen)", "rule", "/catalog/regex-validator"),
+        new("Card (Radzen)", "crop_5_4", "/catalog/card"),
+        new("Layout (Radzen component)", "splitscreen", "/catalog/layout-component"),
+        new("Header (Radzen)", "dock_to_top", "/catalog/header"),
+        new("Body (Radzen)", "web", "/catalog/body"),
+        new("Footer (Radzen)", "dock_to_bottom", "/catalog/footer"),
+        new("ColumnOptions (Radzen)", "view_column", "/catalog/column-options"),
+        new("GridRow (Radzen)", "grid_on", "/catalog/grid-row"),
+        new("Image (Radzen)", "image", "/catalog/image"),
+        new("Markdown (Radzen)", "article", "/catalog/markdown"),
+        new("HtmlEditor (Radzen)", "edit_note", "/catalog/html-editor"),
+        new("Sidebar (Radzen)", "left_panel_open", "/catalog/sidebar"),
+        new("SidebarToggle (Radzen)", "menu_open", "/catalog/sidebar-toggle"),
+        new("Splitter (Radzen)", "splitscreen", "/catalog/splitter"),
+        new("SplitterPane (Radzen)", "splitscreen_right", "/catalog/splitter-pane"),
+        new("Stack (Radzen)", "view_stream", "/catalog/stack"),
+        new("TileLayout (Radzen)", "dashboard", "/catalog/tile-layout"),
+        new("Toc (Radzen)", "toc", "/catalog/toc"),
+        new("MediaQuery (Radzen)", "devices", "/catalog/media-query"),
+        new("AppearanceToggle (Radzen)", "brightness_6", "/catalog/appearance-toggle"),
         new("Buttons (Radzen)", "ads_click", "/catalog/buttons"),
         new("Text Inputs (Radzen)", "text_fields", "/catalog/text-inputs"),
         new("Selection Inputs (Radzen)", "checklist", "/catalog/selection-inputs"),
@@ -143,6 +251,15 @@
         new("Forms Advanced (Radzen)", "check_box", "/catalog/forms-advanced"),
         new("Validators (Radzen)", "verified", "/catalog/validators"),
         new("Data (Radzen)", "dataset", "/catalog/data"),
+        new("DataList (Radzen)", "view_list", "/catalog/data-list"),
+        new("DataListRow (Radzen)", "table_rows", "/catalog/data-list-row"),
+        new("Pager (Radzen)", "last_page", "/catalog/pager"),
+        new("Tree (Radzen)", "account_tree", "/catalog/tree"),
+        new("DataFilter (Radzen)", "filter_alt", "/catalog/data-filter"),
+        new("DataFilterItem (Radzen)", "filter_list", "/catalog/data-filter-item"),
+        new("DataFilterProperty (Radzen)", "rule_folder", "/catalog/data-filter-property"),
+        new("Table (Radzen)", "table_view", "/catalog/table"),
+        new("Treemap (Radzen)", "account_tree", "/catalog/treemap"),
         new("Data Advanced (Radzen)", "storage", "/catalog/data-advanced"),
         new("Scheduling (Radzen)", "schedule", "/catalog/scheduling"),
         new("Navigation (Radzen)", "alt_route", "/catalog/navigation"),
@@ -152,17 +269,59 @@
         new("Layout Advanced (Radzen)", "splitscreen", "/catalog/layout-advanced"),
         new("Feedback (Radzen)", "notification_important", "/catalog/feedback"),
         new("Charts (Radzen)", "monitoring", "/catalog/charts"),
+        new("Chart (Radzen)", "bar_chart", "/catalog/chart"),
+        new("AreaSeries (Radzen)", "area_chart", "/catalog/area-series"),
+        new("BarSeries (Radzen)", "bar_chart", "/catalog/bar-series"),
+        new("BoxPlotSeries (Radzen)", "analytics", "/catalog/box-plot-series"),
+        new("BubbleSeries (Radzen)", "bubble_chart", "/catalog/bubble-series"),
+        new("BulletSeries (Radzen)", "insights", "/catalog/bullet-series"),
+        new("CandlestickSeries (Radzen)", "candlestick_chart", "/catalog/candlestick-series"),
+        new("ColumnSeries (Radzen)", "stacked_bar_chart", "/catalog/column-series"),
+        new("ContourSeries (Radzen)", "blur_on", "/catalog/contour-series"),
+        new("DonutSeries (Radzen)", "donut_small", "/catalog/donut-series"),
+        new("FullStackedAreaSeries (Radzen)", "area_chart", "/catalog/full-stacked-area-series"),
+        new("FullStackedBarSeries (Radzen)", "bar_chart", "/catalog/full-stacked-bar-series"),
+        new("FullStackedColumnSeries (Radzen)", "stacked_bar_chart", "/catalog/full-stacked-column-series"),
+        new("FullStackedLineSeries (Radzen)", "show_chart", "/catalog/full-stacked-line-series"),
+        new("FunnelSeries (Radzen)", "filter_list", "/catalog/funnel-series"),
+        new("HeatmapSeries (Radzen)", "grid_on", "/catalog/heatmap-series"),
+        new("HighLowSeries (Radzen)", "trending_up", "/catalog/high-low-series"),
+        new("HorizontalWaterfallSeries (Radzen)", "waterfall_chart", "/catalog/horizontal-waterfall-series"),
+        new("LineSeries (Radzen)", "show_chart", "/catalog/line-series"),
+        new("OhlcSeries (Radzen)", "candlestick_chart", "/catalog/ohlc-series"),
+        new("PieSeries (Radzen)", "pie_chart", "/catalog/pie-series"),
+        new("PyramidSeries (Radzen)", "change_history", "/catalog/pyramid-series"),
+        new("RangeAreaSeries (Radzen)", "area_chart", "/catalog/range-area-series"),
+        new("RangeBarSeries (Radzen)", "view_week", "/catalog/range-bar-series"),
+        new("RangeColumnSeries (Radzen)", "stacked_bar_chart", "/catalog/range-column-series"),
+        new("SankeyDiagram (Radzen)", "account_tree", "/catalog/sankey-diagram"),
+        new("ScatterSeries (Radzen)", "scatter_plot", "/catalog/scatter-series"),
+        new("Sparkline (Radzen)", "show_chart", "/catalog/sparkline"),
+        new("SpiderChart (Radzen)", "radar", "/catalog/spider-chart"),
+        new("SpiderColumnSeries (Radzen)", "radar", "/catalog/spider-column-series"),
+        new("SpiderSeries (Radzen)", "radar", "/catalog/spider-series"),
         new("Charts Advanced (Radzen)", "query_stats", "/catalog/charts-advanced"),
         new("Gauges (Radzen)", "speed", "/catalog/gauges"),
+        new("ArcGauge (Radzen)", "speed", "/catalog/arc-gauge"),
+        new("LinearGauge (Radzen)", "linear_scale", "/catalog/linear-gauge"),
+        new("RadialGauge (Radzen)", "radar", "/catalog/radial-gauge"),
         new("Display (Radzen)", "slideshow", "/catalog/display"),
         new("Embed (Radzen)", "integration_instructions", "/catalog/embed"),
+        new("SignaturePad (Radzen)", "gesture", "/catalog/signature-pad"),
         new("All Components (Radzen)", "view_list", "/catalog/all-components")
     ];
 
-    private bool CatalogExpanded { get; set; }
+    private static readonly IReadOnlyList<CatalogCategory> CatalogCategories = BuildCatalogCategories();
+
+    private const string CatalogCategoryStoragePrefix = "agt-ui-catalog-category-";
+    private const string CatalogCategoryValuePrefix = "catalog-category:";
+
     private string FilterText { get; set; } = string.Empty;
+    private string CurrentRoute { get; set; } = string.Empty;
     private ElementReference _filterInputRef;
     private ElementReference _menuRootRef;
+    private bool _catalogStateLoaded;
+    private readonly Dictionary<string, bool> _catalogExpandedState = new(StringComparer.OrdinalIgnoreCase);
 
     private bool HasFilter => !string.IsNullOrWhiteSpace(FilterText);
 
@@ -173,29 +332,33 @@
             .Select(section => new NavSection(section.Title, FilterEntries(section.Items)))
             .Where(section => section.Items.Count > 0)];
 
-    private List<NavEntry> FilteredCatalogItems => FilterEntries(CatalogItems);
+    private List<CatalogCategoryView> FilteredCatalogCategories => FilterCatalogCategories();
 
     private bool HasAgtItems => FilteredAgtSections.Count > 0;
 
-    private bool HasAnyVisibleItems => FilteredGettingStarted.Count > 0 || HasAgtItems || FilteredCatalogItems.Count > 0;
+    private bool HasAnyVisibleItems => FilteredGettingStarted.Count > 0 || HasAgtItems || FilteredCatalogCategories.Count > 0;
+
+    protected override void OnInitialized()
+    {
+        UpdateCurrentRoute();
+        NavigationManager.LocationChanged += HandleLocationChanged;
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            var persistedState = await JS.InvokeAsync<string>("agtTheme.getStoredNavSectionState", CatalogGroupStorageKey, "collapsed");
-            CatalogExpanded = string.Equals(persistedState, "expanded", StringComparison.OrdinalIgnoreCase);
+            await RestoreCatalogCategoryStateAsync();
             await InvokeAsync(StateHasChanged);
         }
 
         await JS.InvokeVoidAsync("agtTheme.applyNavItemTitles", _menuRootRef);
     }
 
-    private async Task OnCatalogGroupClick(MenuItemEventArgs _)
+    private void HandleLocationChanged(object? sender, LocationChangedEventArgs args)
     {
-        CatalogExpanded = !CatalogExpanded;
-        var state = CatalogExpanded ? "expanded" : "collapsed";
-        await JS.InvokeVoidAsync("agtTheme.setStoredNavSectionState", CatalogGroupStorageKey, state);
+        UpdateCurrentRoute();
+        _ = InvokeAsync(StateHasChanged);
     }
 
     private void OnFilterInput(ChangeEventArgs args)
@@ -267,6 +430,20 @@
         await JS.InvokeVoidAsync("agtTheme.focusElement", _filterInputRef);
     }
 
+    private async Task OnPanelMenuClick(MenuItemEventArgs args)
+    {
+        var rawValue = args.Value?.ToString();
+        if (string.IsNullOrWhiteSpace(rawValue) || !rawValue.StartsWith(CatalogCategoryValuePrefix, StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        var key = rawValue[CatalogCategoryValuePrefix.Length..];
+        var nextState = !_catalogExpandedState.TryGetValue(key, out var expanded) || !expanded;
+        await PersistCatalogCategoryStateAsync(key, nextState);
+        await InvokeAsync(StateHasChanged);
+    }
+
     private List<NavEntry> FilterEntries(IEnumerable<NavEntry> entries)
     {
         if (!HasFilter)
@@ -275,5 +452,281 @@
         }
 
         return [.. entries.Where(entry => entry.Text.Contains(FilterText, StringComparison.OrdinalIgnoreCase))];
+    }
+
+    private List<CatalogCategoryView> FilterCatalogCategories()
+    {
+        if (!HasFilter)
+        {
+            return [.. CatalogCategories.Select(category => new CatalogCategoryView(category.Key, category.Text, category.Icon, category.OverviewPath, category.Items))];
+        }
+
+        var filter = FilterText.Trim();
+        var result = new List<CatalogCategoryView>();
+        foreach (var category in CatalogCategories)
+        {
+            var filteredItems = category.Items
+                .Where(item => item.Text.Contains(filter, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            if (filteredItems.Count > 0 || category.Text.Contains(filter, StringComparison.OrdinalIgnoreCase) || "Overzicht".Contains(filter, StringComparison.OrdinalIgnoreCase))
+            {
+                result.Add(new CatalogCategoryView(category.Key, category.Text, category.Icon, category.OverviewPath, filteredItems));
+            }
+        }
+
+        return result;
+    }
+
+    private bool IsCatalogCategoryExpanded(CatalogCategoryView category)
+    {
+        if (HasFilter)
+        {
+            return true;
+        }
+
+        if (category.Items.Any(item => IsCurrentRoute(item.Path)) || IsCurrentRoute(category.OverviewPath))
+        {
+            return true;
+        }
+
+        return _catalogExpandedState.TryGetValue(category.Key, out var expanded) && expanded;
+    }
+
+    private bool IsCurrentRoute(string path)
+    {
+        var target = path.TrimStart('/');
+        return string.Equals(CurrentRoute, target, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private string CatalogCategoryValue(string key) => $"{CatalogCategoryValuePrefix}{key}";
+
+    private async Task RestoreCatalogCategoryStateAsync()
+    {
+        if (_catalogStateLoaded)
+        {
+            return;
+        }
+
+        foreach (var category in CatalogCategories)
+        {
+            var key = BuildCatalogStorageKey(category.Key);
+            var value = await JS.InvokeAsync<string>("agtTheme.getStoredValue", key, "collapsed");
+            _catalogExpandedState[category.Key] = string.Equals(value, "expanded", StringComparison.OrdinalIgnoreCase);
+        }
+
+        _catalogStateLoaded = true;
+    }
+
+    private ValueTask PersistCatalogCategoryStateAsync(string key, bool expanded)
+    {
+        _catalogExpandedState[key] = expanded;
+        var value = expanded ? "expanded" : "collapsed";
+        return JS.InvokeVoidAsync("agtTheme.setStoredValue", BuildCatalogStorageKey(key), value);
+    }
+
+    private static string BuildCatalogStorageKey(string key) => $"{CatalogCategoryStoragePrefix}{key}";
+
+    private void UpdateCurrentRoute()
+    {
+        CurrentRoute = NavigationManager.ToBaseRelativePath(NavigationManager.Uri).Split('?', '#')[0].ToLowerInvariant();
+    }
+
+    private static IReadOnlyList<CatalogCategory> BuildCatalogCategories()
+    {
+        var orderedCategories = new List<CatalogCategory>
+        {
+            new("datagrid", "DataGrid", "table_rows", "/catalog/data" , []),
+            new("data", "Data", "dataset", "/catalog/data", []),
+            new("forms", "Forms", "dynamic_form", "/catalog/forms-advanced", []),
+            new("validators", "Validators", "verified", "/catalog/validators", []),
+            new("navigation", "Navigation", "alt_route", "/catalog/navigation", []),
+            new("layout", "Layout", "grid_view", "/catalog/layout", []),
+            new("overlays", "Overlays", "layers", "/catalog/overlays", []),
+            new("feedback", "Feedback", "notification_important", "/catalog/feedback", []),
+            new("data-visualization", "Data Visualization", "monitoring", "/catalog/charts", []),
+            new("display", "Display", "slideshow", "/catalog/display", [])
+        };
+
+        var grouped = orderedCategories.ToDictionary(
+            category => category.Key,
+            _ => new List<NavEntry>(),
+            StringComparer.OrdinalIgnoreCase);
+
+        foreach (var raw in RawCatalogItems)
+        {
+            var slug = CatalogSlug(raw.Path);
+            if (IsCategoryIndexSlug(slug) || IsChildRouteSlug(slug))
+            {
+                continue;
+            }
+
+            var categoryKey = ResolveCatalogCategoryKey(slug);
+            if (!grouped.TryGetValue(categoryKey, out var bucket))
+            {
+                continue;
+            }
+
+            var text = NormalizeCatalogLabel(raw.Text);
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                continue;
+            }
+
+            if (bucket.Any(item => string.Equals(item.Path, raw.Path, StringComparison.OrdinalIgnoreCase)))
+            {
+                continue;
+            }
+
+            bucket.Add(new NavEntry(text, raw.Icon, raw.Path, raw.Match));
+        }
+
+        var result = new List<CatalogCategory>(orderedCategories.Count);
+        foreach (var category in orderedCategories)
+        {
+            if (!grouped.TryGetValue(category.Key, out var items) || items.Count == 0)
+            {
+                continue;
+            }
+
+            result.Add(category with { Items = [.. items.OrderBy(item => item.Text, StringComparer.OrdinalIgnoreCase)] });
+        }
+
+        return result;
+    }
+
+    private static string NormalizeCatalogLabel(string text)
+    {
+        var withoutSuffix = System.Text.RegularExpressions.Regex.Replace(
+            text,
+            @"\s*\(Radzen(?:\s+component)?\)\s*$",
+            string.Empty,
+            System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.CultureInvariant);
+
+        var cleaned = System.Text.RegularExpressions.Regex.Replace(
+            withoutSuffix,
+            @"[^\p{L}\p{Nd}\s\-\&\+\./]",
+            string.Empty,
+            System.Text.RegularExpressions.RegexOptions.CultureInvariant);
+
+        return System.Text.RegularExpressions.Regex.Replace(cleaned, @"\s+", " ", System.Text.RegularExpressions.RegexOptions.CultureInvariant).Trim();
+    }
+
+    private static string CatalogSlug(string path)
+    {
+        var slug = path.Replace("/catalog/", string.Empty, StringComparison.OrdinalIgnoreCase).Trim('/');
+        return slug.ToLowerInvariant();
+    }
+
+    private static bool IsCategoryIndexSlug(string slug)
+    {
+        return slug switch
+        {
+            "" or
+            "buttons" or
+            "text-inputs" or
+            "selection-inputs" or
+            "pickers" or
+            "forms" or
+            "forms-advanced" or
+            "validators" or
+            "data" or
+            "data-advanced" or
+            "scheduling" or
+            "navigation" or
+            "overlays" or
+            "overlays-advanced" or
+            "layout" or
+            "layout-advanced" or
+            "feedback" or
+            "charts" or
+            "charts-advanced" or
+            "gauges" or
+            "display" or
+            "embed" or
+            "all-components" => true,
+            _ => false
+        };
+    }
+
+    private static bool IsChildRouteSlug(string slug)
+    {
+        return slug switch
+        {
+            "body" or
+            "column-options" or
+            "data-filter-item" or
+            "data-filter-property" or
+            "data-list-row" or
+            "footer" or
+            "grid-row" or
+            "header" or
+            "layout-component" or
+            "radio-button-list-item" or
+            "splitter-pane" => true,
+            _ => false
+        };
+    }
+
+    private static string ResolveCatalogCategoryKey(string slug)
+    {
+        if (slug == "data-grid")
+        {
+            return "datagrid";
+        }
+
+        if (slug.Contains("validator", StringComparison.OrdinalIgnoreCase))
+        {
+            return "validators";
+        }
+
+        if (slug.Contains("series", StringComparison.OrdinalIgnoreCase) ||
+            slug is "chart" or "sparkline" or "sankey-diagram" or "spider-chart" or "treemap" or "arc-gauge" or "linear-gauge" or "radial-gauge")
+        {
+            return "data-visualization";
+        }
+
+        if (slug.StartsWith("data-", StringComparison.OrdinalIgnoreCase) ||
+            slug is "scheduler" or "dropdown-data-grid" or "pager" or "tree" or "table")
+        {
+            return "data";
+        }
+
+        if (slug is "textbox" or "autocomplete" or "dropdown" or "checkbox" or "checkbox-list" or "chip" or "chip-list" or "password" or "textarea" or "fieldset" or "form-field" or "datepicker" or "mask" or "numeric" or "color-picker" or "list-box" or "rating" or "slider" or "time-span-picker" or "template-form" or "select-bar" or "pick-list" or "security-code" or "switch" or "file-input" or "upload" or "text")
+        {
+            return "forms";
+        }
+
+        if (slug is "breadcrumb" or "button" or "split-button" or "radio-button-list" or "profile-menu" or "context-menu" or "link" or "fab" or "fab-menu" or "toggle-button" or "speech-to-text-button" or "menu" or "panel-menu" or "accordion" or "tabs" or "steps")
+        {
+            return "navigation";
+        }
+
+        if (slug is "row" or "panel" or "carousel" or "card-group" or "card" or "image" or "markdown" or "html-editor" or "sidebar" or "sidebar-toggle" or "splitter" or "stack" or "tile-layout" or "toc" or "media-query" or "appearance-toggle")
+        {
+            return "layout";
+        }
+
+        if (slug is "dialog" or "notification" or "popup" or "login" or "chat" or "aichat")
+        {
+            return "overlays";
+        }
+
+        if (slug is "alert" or "progress-bar" or "progress-bar-circular" or "skeleton" or "badge")
+        {
+            return "feedback";
+        }
+
+        if (slug is "icon" or "gravatar" or "qr-code" or "barcode" or "google-map" or "signature-pad")
+        {
+            return "display";
+        }
+
+        return "display";
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= HandleLocationChanged;
     }
 }

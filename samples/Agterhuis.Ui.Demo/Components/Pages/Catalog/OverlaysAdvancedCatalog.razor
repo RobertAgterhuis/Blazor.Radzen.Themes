@@ -5,40 +5,14 @@
 <div class="catalog-page">
     <h1>Overlays Advanced (Radzen)</h1>
 
-    <RadzenStack Orientation="Orientation.Horizontal" Gap="0.75rem" Wrap="FlexWrap.Wrap">
-        <RadzenFabMenu>
-            <RadzenFabMenuItem Text="Nieuw" Icon="add" />
-            <RadzenFabMenuItem Text="Opslaan" Icon="save" />
-        </RadzenFabMenu>
+    <p class="agt-muted">Deze categoriepagina is een index. Voor worked examples met live demo + code gebruik je de componentpagina's hieronder.</p>
 
-        <RadzenSelectBar TValue="string" Data="SelectItems" TextProperty="Text" ValueProperty="Value" />
-
-        <RadzenChipList TValue="string" Data="ChipItems" TextProperty="Text" ValueProperty="Value" />
-    </RadzenStack>
-
-    <RadzenPopup Style="padding: 1rem;" Visible="true">
-        Plum Ink popup voorbeeld
-    </RadzenPopup>
-
-    <RadzenLogin AllowRegister="false" AllowResetPassword="false" />
-
-    <RadzenAIChat />
-
-    <RadzenSpeechToTextButton />
+    <ul>
+        <li><RadzenLink Path="/catalog/dialog" Text="Dialog" /></li>
+        <li><RadzenLink Path="/catalog/notification" Text="Notification" /></li>
+        <li><RadzenLink Path="/catalog/popup" Text="Popup" /></li>
+        <li><RadzenLink Path="/catalog/login" Text="Login" /></li>
+        <li><RadzenLink Path="/catalog/chat" Text="Chat" /></li>
+        <li><RadzenLink Path="/catalog/aichat" Text="AIChat" /></li>
+    </ul>
 </div>
-
-@code {
-    private static readonly IReadOnlyList<SimpleItem> SelectItems =
-    [
-        new("A", "A"),
-        new("B", "B")
-    ];
-
-    private static readonly IReadOnlyList<SimpleItem> ChipItems =
-    [
-        new("Plum", "plum"),
-        new("Ink", "ink")
-    ];
-
-    private sealed record SimpleItem(string Text, string Value);
-}

@@ -1,0 +1,24 @@
+@page "/catalog/panel"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.Panel
+
+<PageTitle>Panel (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Layout & Display"
+               Title="Panel"
+               Introduction="Paneelweergaven voor gegroepeerde content en progressive disclosure."
+               RadzenDocumentationUrl="https://blazor.radzen.com/panel">
+    <DemoExample Title="Basis"
+                 Description="Eenvoudig paneel met tekstcontent."
+                 ExampleComponentType="typeof(PanelBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Panel/PanelBasicExample.razor" />
+
+    <DemoExample Title="Uitgeklapt"
+                 Description="Paneel start uitgeklapt voor directe zichtbaarheid."
+                 ExampleComponentType="typeof(PanelExpandedExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Panel/PanelExpandedExample.razor" />
+
+    <DemoExample Title="Genest"
+                 Description="Paneel in paneel voor subsecties."
+                 ExampleComponentType="typeof(PanelNestedExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Panel/PanelNestedExample.razor" />
+</ComponentPage>

@@ -1,0 +1,24 @@
+@page "/catalog/progress-bar-circular"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.ProgressBarCircular
+
+<PageTitle>ProgressBarCircular (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Feedback & Overlays"
+               Title="ProgressBarCircular"
+               Introduction="Circulaire voortgangsindicatoren voor compacte KPI- of taakkaarten."
+               RadzenDocumentationUrl="https://blazor.radzen.com/progressbar-circular">
+    <DemoExample Title="Basiswaarden"
+                 Description="Meerdere circulaire indicatoren met verschillende voortgangsniveaus."
+                 ExampleComponentType="typeof(ProgressBarCircularBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/ProgressBarCircular/ProgressBarCircularBasicExample.razor" />
+
+    <DemoExample Title="Statusstijlen"
+                 Description="Semantische kleurstijlen voor voortgangscommunicatie."
+                 ExampleComponentType="typeof(ProgressBarCircularStatusExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/ProgressBarCircular/ProgressBarCircularStatusExample.razor" />
+
+    <DemoExample Title="Met contextlabel"
+                 Description="Combinatie van cirkelindicator en korte tekstuele context."
+                 ExampleComponentType="typeof(ProgressBarCircularLabelExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/ProgressBarCircular/ProgressBarCircularLabelExample.razor" />
+</ComponentPage>

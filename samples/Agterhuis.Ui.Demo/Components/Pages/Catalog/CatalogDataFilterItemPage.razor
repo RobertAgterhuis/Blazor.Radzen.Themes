@@ -1,0 +1,11 @@
+@page "/catalog/data-filter-item"
+@inject NavigationManager NavigationManager
+
+<PageTitle>DataFilterItem (Radzen)</PageTitle>
+
+@code {
+    protected override void OnInitialized()
+    {
+        NavigationManager.NavigateTo("/catalog/data-filter#data-filter-item", true);
+    }
+}

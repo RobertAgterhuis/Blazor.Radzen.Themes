@@ -1,0 +1,24 @@
+@page "/catalog/data-annotation-validator"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.DataAnnotationValidator
+
+<PageTitle>DataAnnotationValidator (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Validators"
+               Title="DataAnnotationValidator"
+               Introduction="Leest DataAnnotations op het model en toont validatiefouten automatisch."
+               RadzenDocumentationUrl="https://blazor.radzen.com/dataannotationvalidator">
+    <DemoExample Title="Basis"
+                 Description="Required en EmailAddress attributen op modelvelden."
+                 ExampleComponentType="typeof(DataAnnotationValidatorBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/DataAnnotationValidator/DataAnnotationValidatorBasicExample.razor" />
+
+    <DemoExample Title="Range"
+                 Description="Range-attribute op numeriek veld."
+                 ExampleComponentType="typeof(DataAnnotationValidatorRangeExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/DataAnnotationValidator/DataAnnotationValidatorRangeExample.razor" />
+
+    <DemoExample Title="Required"
+                 Description="Enkel required-regel op tekstveld."
+                 ExampleComponentType="typeof(DataAnnotationValidatorRequiredExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/DataAnnotationValidator/DataAnnotationValidatorRequiredExample.razor" />
+</ComponentPage>

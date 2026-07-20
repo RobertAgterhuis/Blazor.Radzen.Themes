@@ -1,0 +1,24 @@
+@page "/catalog/gravatar"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.Gravatar
+
+<PageTitle>Gravatar (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Layout & Display"
+               Title="Gravatar"
+               Introduction="Avatarweergave op basis van e-mailadres voor gebruikersidentiteit."
+               RadzenDocumentationUrl="https://blazor.radzen.com/gravatar">
+    <DemoExample Title="Basis"
+                 Description="Enkelvoudige avatar voor gebruiker of monteur."
+                 ExampleComponentType="typeof(GravatarBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Gravatar/GravatarBasicExample.razor" />
+
+    <DemoExample Title="Team"
+                 Description="Meerdere avatars voor teamweergave."
+                 ExampleComponentType="typeof(GravatarListExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Gravatar/GravatarListExample.razor" />
+
+    <DemoExample Title="Gelabeld"
+                 Description="Avatar met naam/rol voor context in lijsten."
+                 ExampleComponentType="typeof(GravatarLabelExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Gravatar/GravatarLabelExample.razor" />
+</ComponentPage>

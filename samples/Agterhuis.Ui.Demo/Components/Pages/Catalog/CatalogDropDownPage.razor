@@ -1,0 +1,24 @@
+@page "/catalog/dropdown"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.DropDown
+
+<PageTitle>DropDown (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Forms & Inputs"
+               Title="DropDown"
+               Introduction="DropDown met single-select, binding en multi-select."
+               RadzenDocumentationUrl="https://blazor.radzen.com/dropdown">
+    <DemoExample Title="Basis"
+                 Description="Single-select met eenvoudige opties."
+                 ExampleComponentType="typeof(DropDownBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/DropDown/DropDownBasicExample.razor" />
+
+    <DemoExample Title="Gebonden waarde"
+                 Description="Two-way binding voor gekozen eigenaar."
+                 ExampleComponentType="typeof(DropDownBoundExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/DropDown/DropDownBoundExample.razor" />
+
+    <DemoExample Title="Meervoudige selectie"
+                 Description="Multiple-select voor tagselectie."
+                 ExampleComponentType="typeof(DropDownMultipleExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/DropDown/DropDownMultipleExample.razor" />
+</ComponentPage>

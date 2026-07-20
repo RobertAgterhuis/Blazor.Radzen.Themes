@@ -1,0 +1,11 @@
+@page "/catalog/grid-row"
+@inject NavigationManager NavigationManager
+
+<PageTitle>GridRow (Radzen)</PageTitle>
+
+@code {
+    protected override void OnInitialized()
+    {
+        NavigationManager.NavigateTo("/catalog/data-grid#grid-row", true);
+    }
+}

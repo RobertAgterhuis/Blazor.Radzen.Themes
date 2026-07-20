@@ -1,0 +1,21 @@
+<div class="agt-stack demo-example-gap-sm">
+    <RadzenSelectBar TValue="int"
+                     Data="_options"
+                     TextProperty="Text"
+                     ValueProperty="Value"
+                     @bind-Value="_selected" />
+    <span class="agt-muted">Geselecteerd: @_selected</span>
+</div>
+
+@code {
+    private int _selected = 2;
+
+    private static readonly IReadOnlyList<SelectItem> _options =
+    [
+        new("Laag", 1),
+        new("Normaal", 2),
+        new("Hoog", 3)
+    ];
+
+    private sealed record SelectItem(string Text, int Value);
+}

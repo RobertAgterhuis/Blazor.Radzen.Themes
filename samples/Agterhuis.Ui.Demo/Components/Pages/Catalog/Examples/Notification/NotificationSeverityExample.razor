@@ -1,0 +1,35 @@
+@inject NotificationService NotificationService
+
+<div class="agt-inline-cluster">
+    <RadzenButton Text="Success" ButtonStyle="ButtonStyle.Success" Click="ShowSuccess" />
+    <RadzenButton Text="Warning" ButtonStyle="ButtonStyle.Warning" Click="ShowWarning" />
+    <RadzenButton Text="Error" ButtonStyle="ButtonStyle.Danger" Click="ShowError" />
+</div>
+
+@code {
+    private void ShowSuccess()
+    {
+        Show(NotificationSeverity.Success, "Opgeslagen");
+    }
+
+    private void ShowWarning()
+    {
+        Show(NotificationSeverity.Warning, "Controle nodig");
+    }
+
+    private void ShowError()
+    {
+        Show(NotificationSeverity.Error, "Mislukt");
+    }
+
+    private void Show(NotificationSeverity severity, string summary)
+    {
+        NotificationService.Notify(new NotificationMessage
+        {
+            Severity = severity,
+            Summary = summary,
+            Detail = "Voorbeeldmelding vanuit de catalogus.",
+            Duration = 3500
+        });
+    }
+}

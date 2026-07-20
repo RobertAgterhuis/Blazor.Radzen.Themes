@@ -1,0 +1,28 @@
+<RadzenTable>
+    <RadzenTableHeader>
+        <RadzenTableHeaderRow>
+            <RadzenTableHeaderCell>Naam</RadzenTableHeaderCell>
+            <RadzenTableHeaderCell>Score</RadzenTableHeaderCell>
+        </RadzenTableHeaderRow>
+    </RadzenTableHeader>
+    <RadzenTableBody>
+        @foreach (var row in Rows)
+        {
+            <RadzenTableRow>
+                <RadzenTableCell>@row.Name</RadzenTableCell>
+                <RadzenTableCell>@row.Score</RadzenTableCell>
+            </RadzenTableRow>
+        }
+    </RadzenTableBody>
+</RadzenTable>
+
+@code {
+    private static readonly IReadOnlyList<TableRow> Rows =
+    [
+        new("Alpha", 10),
+        new("Bravo", 20),
+        new("Charlie", 30)
+    ];
+
+    private sealed record TableRow(string Name, int Score);
+}

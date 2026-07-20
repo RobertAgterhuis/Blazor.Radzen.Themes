@@ -1,0 +1,21 @@
+<RadzenTemplateForm TItem="CompareModel" Data="_model" Submit="OnSubmit">
+    <RadzenStack Gap="0.75rem">
+        <RadzenPassword Name="pwd" @bind-Value="_model.Password" Placeholder="Wachtwoord" />
+        <RadzenPassword Name="pwd-confirm" @bind-Value="_model.PasswordConfirm" Placeholder="Herhaal wachtwoord" />
+        <RadzenCompareValidator Component="pwd-confirm" Value="@_model.Password" Text="Wachtwoorden komen niet overeen" Popup="false" />
+        <RadzenButton Text="Valideren" ButtonType="ButtonType.Submit" />
+    </RadzenStack>
+</RadzenTemplateForm>
+
+@code {
+    private readonly CompareModel _model = new();
+
+    private void OnSubmit(CompareModel _) { }
+
+    private sealed class CompareModel
+    {
+        public string? Password { get; set; }
+
+        public string? PasswordConfirm { get; set; }
+    }
+}

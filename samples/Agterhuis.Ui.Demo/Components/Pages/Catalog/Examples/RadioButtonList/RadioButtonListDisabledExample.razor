@@ -1,0 +1,22 @@
+<div class="agt-stack demo-example-gap-sm">
+    <RadzenRadioButtonList TValue="bool"
+                           Data="_toggles"
+                           TextProperty="Text"
+                           ValueProperty="Value"
+                           @bind-Value="_enabled"
+                           Disabled="true" />
+
+    <span class="agt-muted">Disabled voorbeeld voor read-only settings.</span>
+</div>
+
+@code {
+    private bool _enabled = true;
+
+    private static readonly IReadOnlyList<ToggleItem> _toggles =
+    [
+        new("Aan", true),
+        new("Uit", false)
+    ];
+
+    private sealed record ToggleItem(string Text, bool Value);
+}

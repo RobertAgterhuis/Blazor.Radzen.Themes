@@ -1,0 +1,24 @@
+@page "/catalog/notification"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.Notification
+
+<PageTitle>Notification (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Feedback & Overlays"
+               Title="Notification"
+               Introduction="Toastmeldingen voor niet-blokkerende feedback in de UI."
+               RadzenDocumentationUrl="https://blazor.radzen.com/notification">
+    <DemoExample Title="Basis"
+                 Description="Info-notificatie met standaardduur."
+                 ExampleComponentType="typeof(NotificationBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Notification/NotificationBasicExample.razor" />
+
+    <DemoExample Title="Severities"
+                 Description="Success, warning en error varianten met uniforme content."
+                 ExampleComponentType="typeof(NotificationSeverityExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Notification/NotificationSeverityExample.razor" />
+
+    <DemoExample Title="Sticky"
+                 Description="Notificatie die zichtbaar blijft totdat de gebruiker sluit."
+                 ExampleComponentType="typeof(NotificationStickyExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Notification/NotificationStickyExample.razor" />
+</ComponentPage>

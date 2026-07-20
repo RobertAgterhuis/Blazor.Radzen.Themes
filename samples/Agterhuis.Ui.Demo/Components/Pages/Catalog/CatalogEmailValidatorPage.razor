@@ -1,0 +1,24 @@
+@page "/catalog/email-validator"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.EmailValidator
+
+<PageTitle>EmailValidator (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Validators"
+               Title="EmailValidator"
+               Introduction="Valideert of invoer voldoet aan een e-mailpatroon."
+               RadzenDocumentationUrl="https://blazor.radzen.com/emailvalidator">
+    <DemoExample Title="Basis"
+                 Description="Inline validatie voor één e-mailveld."
+                 ExampleComponentType="typeof(EmailValidatorBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/EmailValidator/EmailValidatorBasicExample.razor" />
+
+    <DemoExample Title="Popup"
+                 Description="Foutmelding naast het veld als popup."
+                 ExampleComponentType="typeof(EmailValidatorPopupExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/EmailValidator/EmailValidatorPopupExample.razor" />
+
+    <DemoExample Title="Met required"
+                 Description="Combinatie van required + emailregel."
+                 ExampleComponentType="typeof(EmailValidatorWithRequiredExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/EmailValidator/EmailValidatorWithRequiredExample.razor" />
+</ComponentPage>

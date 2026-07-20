@@ -1,0 +1,31 @@
+@page "/catalog/chart"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.Chart
+
+<PageTitle>Chart (Radzen)</PageTitle>
+
+@if (PreviewOnly)
+{
+    <RadzenCard>Chart preview (interactive rendering disabled).</RadzenCard>
+}
+else
+{
+<ComponentPage Kicker="Data Visualization"
+               Title="Chart"
+               Introduction="Basischartcontainer met meerdere series."
+               RadzenDocumentationUrl="https://blazor.radzen.com/chart">
+    <DemoExample Title="Basis"
+                 Description="Basisscenario voor Chart."
+                 ExampleComponentType="typeof(ChartBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Chart/ChartBasicExample.razor" />
+
+    
+
+    
+</ComponentPage>
+}
+
+@code {
+    [Parameter]
+    public bool PreviewOnly { get; set; }
+}
+

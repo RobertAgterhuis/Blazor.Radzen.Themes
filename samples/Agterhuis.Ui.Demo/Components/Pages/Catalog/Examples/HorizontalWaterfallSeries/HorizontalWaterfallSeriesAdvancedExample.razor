@@ -1,0 +1,15 @@
+<RadzenChart Style="height: 18rem;">
+    <RadzenHorizontalWaterfallSeries Data="Rows" CategoryProperty="Label" ValueProperty="Value" SummaryProperty="IsTotal" Title="Cash flow" />
+</RadzenChart>
+
+@code {
+    private static readonly IReadOnlyList<WaterfallRow> Rows =
+    [
+        new("Start", 100, false),
+        new("Werk", -25, false),
+        new("Service", -15, false),
+        new("Totaal", 60, true)
+    ];
+
+    private sealed record WaterfallRow(string Label, double Value, bool IsTotal);
+}

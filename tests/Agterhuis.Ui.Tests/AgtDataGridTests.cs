@@ -1,5 +1,7 @@
 using Agterhuis.Ui.Components.Data;
+using Agterhuis.Ui.Demo.Components.Pages;
 using Bunit;
+using Microsoft.Extensions.DependencyInjection;
 using Radzen;
 
 namespace Agterhuis.Ui.Tests;
@@ -64,6 +66,33 @@ public sealed class AgtDataGridTests
             .Add(x => x.Settings, settings));
 
         Assert.Same(settings, cut.Instance.Settings);
+    }
+
+    [Fact]
+    public void DataGridDemo_HeaderOrderMatchesFirstRowCellOrder()
+    {
+        using var ctx = new BunitContext();
+        ctx.Services.AddRadzenComponents();
+        ctx.Services.AddSingleton<Agterhuis.Ui.Demo.Services.DemoSourceProvider>();
+        ctx.JSInterop.Mode = JSRuntimeMode.Loose;
+
+        var cut = ctx.Render<DataGridDemo>();
+
+        var headers = cut.FindAll("thead th")
+            .Select(header => header.TextContent.Trim())
+            .Where(text => !string.IsNullOrWhiteSpace(text))
+            .Take(2)
+            .ToArray();
+
+        Assert.Equal(["Naam", "Score"], headers);
+
+        var firstRowCells = cut.FindAll("tbody tr:first-child td")
+            .Select(cell => cell.TextContent.Trim())
+            .Where(text => !string.IsNullOrWhiteSpace(text))
+            .Take(2)
+            .ToArray();
+
+        Assert.Equal(["Alfa", "95"], firstRowCells);
     }
 
     private sealed record Row(string Name);

@@ -1,0 +1,15 @@
+<RadzenChart Style="height: 18rem;">
+    <RadzenHeatmapSeries Data="Rows" CategoryProperty="X" ValueProperty="Y" IntensityProperty="Lux" Title="Illuminance" />
+</RadzenChart>
+
+@code {
+    private static readonly IReadOnlyList<HeatRow> Rows =
+    [
+        new(0, 0, 12),
+        new(1, 0, 20),
+        new(0, 1, 16),
+        new(1, 1, 24)
+    ];
+
+    private sealed record HeatRow(int X, int Y, double Lux);
+}

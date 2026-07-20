@@ -1,0 +1,18 @@
+<div class="agt-stack demo-example-gap-sm">
+    <RadzenButton Text="Kaartpopup" ButtonStyle="ButtonStyle.Secondary" Click="Toggle" />
+    <RadzenPopup Visible="@_open" class="catalog-popup-surface">
+        <div class="agt-stack demo-example-gap-xs">
+            <strong>Servicevenster</strong>
+            <span>Korte status en acties in popover-vorm.</span>
+        </div>
+    </RadzenPopup>
+</div>
+
+@code {
+    private bool _open;
+
+    private void Toggle()
+    {
+        _open = !_open;
+    }
+}

@@ -5,18 +5,13 @@
 <div class="catalog-page">
     <h1>Feedback (Radzen)</h1>
 
-    <RadzenStack Gap="0.75rem">
-        <RadzenAlert AlertStyle="AlertStyle.Primary">Primary alert</RadzenAlert>
-        <RadzenAlert AlertStyle="AlertStyle.Success">Success alert</RadzenAlert>
-        <RadzenAlert AlertStyle="AlertStyle.Warning">Warning alert</RadzenAlert>
-        <RadzenAlert AlertStyle="AlertStyle.Danger">Danger alert</RadzenAlert>
+    <p class="agt-muted">Deze categoriepagina is een index. Voor worked examples met live demo + code gebruik je de componentpagina's hieronder.</p>
 
-        <RadzenBadge Text="Badge" BadgeStyle="BadgeStyle.Primary" />
-
-        <RadzenProgressBar Value="45" ShowValue="true" />
-        <RadzenProgressBarCircular Value="65" ShowValue="true" />
-
-        <RadzenSkeleton Variant="SkeletonVariant.Text" Style="width: 12rem;" />
-        <RadzenSkeleton Variant="SkeletonVariant.Circular" Style="height: 5rem; width: 5rem;" />
-    </RadzenStack>
+    <ul>
+        <li><RadzenLink Path="/catalog/badge" Text="Badge" /></li>
+        <li><RadzenLink Path="/catalog/alert" Text="Alert" /></li>
+        <li><RadzenLink Path="/catalog/progress-bar" Text="ProgressBar" /></li>
+        <li><RadzenLink Path="/catalog/progress-bar-circular" Text="ProgressBarCircular" /></li>
+        <li><RadzenLink Path="/catalog/skeleton" Text="Skeleton" /></li>
+    </ul>
 </div>

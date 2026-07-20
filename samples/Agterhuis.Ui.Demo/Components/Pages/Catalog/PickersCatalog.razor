@@ -5,40 +5,20 @@
 <div class="catalog-page">
     <h1>Pickers (Radzen)</h1>
 
-    @if (PreviewOnly)
-    {
-        <RadzenCard>Picker preview (interactive rendering disabled).</RadzenCard>
-    }
-    else
-    {
-        <RadzenStack Gap="0.75rem">
-            <RadzenDropDown TValue="int" Data="People" TextProperty="Text" ValueProperty="Value" Placeholder="DropDown" />
-            <RadzenDropDownDataGrid TValue="int" Data="People" TextProperty="Text" ValueProperty="Value" Placeholder="DropDownDataGrid" />
-            <RadzenTree Data="TreeNodes" TextProperty="Text" ChildrenProperty="Children" />
-            <RadzenListBox TValue="int" Data="People" TextProperty="Text" ValueProperty="Value" />
-            <RadzenDatePicker TValue="DateTime?" ShowTime="true" Value="@DateTime.Today" />
-            <RadzenTimeSpanPicker TValue="TimeSpan?" Value="@TimeSpan.FromHours(1)" />
-        </RadzenStack>
-    }
+    <p class="agt-muted">Deze categoriepagina is een index. Voor worked examples met live demo + code gebruik je de componentpagina's hieronder.</p>
+
+    <ul>
+        <li><RadzenLink Path="/catalog/datepicker" Text="DatePicker" /></li>
+        <li><RadzenLink Path="/catalog/time-span-picker" Text="TimeSpanPicker" /></li>
+        <li><RadzenLink Path="/catalog/color-picker" Text="ColorPicker" /></li>
+        <li><RadzenLink Path="/catalog/dropdown" Text="DropDown" /></li>
+        <li><RadzenLink Path="/catalog/dropdown-data-grid" Text="DropDownDataGrid" /></li>
+        <li><RadzenLink Path="/catalog/list-box" Text="ListBox" /></li>
+        <li><RadzenLink Path="/catalog/tree" Text="Tree" /></li>
+    </ul>
 </div>
 
 @code {
     [Parameter]
     public bool PreviewOnly { get; set; }
-
-    private static readonly IReadOnlyList<PersonOption> People =
-    [
-        new("Anna", 1),
-        new("Bram", 2),
-        new("Cato", 3)
-    ];
-
-    private static readonly IReadOnlyList<TreeNodeOption> TreeNodes =
-    [
-        new("Root", "root", [new TreeNodeOption("Child", "child", [])])
-    ];
-
-    private sealed record PersonOption(string Text, int Value);
-
-    private sealed record TreeNodeOption(string Text, string Value, IReadOnlyList<TreeNodeOption> Children);
 }

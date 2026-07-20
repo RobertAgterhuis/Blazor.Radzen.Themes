@@ -1,0 +1,24 @@
+@page "/catalog/button"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.Button
+
+<PageTitle>Button (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Navigation & Actions"
+               Title="Button"
+               Introduction="Actieknoppen met stijlen, varianten en states voor workflows."
+               RadzenDocumentationUrl="https://blazor.radzen.com/button">
+    <DemoExample Title="Basisstijlen"
+                 Description="Veelgebruikte buttonstijlen voor primaire en secundaire acties."
+                 ExampleComponentType="typeof(ButtonBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Button/ButtonBasicExample.razor" />
+
+    <DemoExample Title="Varianten"
+                 Description="Filled, outlined en flat varianten met dezelfde intent."
+                 ExampleComponentType="typeof(ButtonVariantExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Button/ButtonVariantExample.razor" />
+
+    <DemoExample Title="State + icon"
+                 Description="Knoppen met iconen en disabled state in één actiecluster."
+                 ExampleComponentType="typeof(ButtonStateExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Button/ButtonStateExample.razor" />
+</ComponentPage>

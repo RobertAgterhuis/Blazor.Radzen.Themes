@@ -1,0 +1,19 @@
+<RadzenTemplateForm TItem="EmailModel" Data="_model" Submit="OnSubmit">
+    <RadzenStack Gap="0.75rem">
+        <RadzenTextBox Name="email-req" @bind-Value="_model.Email" Placeholder="mailadres" />
+        <RadzenRequiredValidator Component="email-req" Text="E-mail is verplicht" Popup="false" />
+        <RadzenEmailValidator Component="email-req" Text="Niet geldig" Popup="false" />
+        <RadzenButton Text="Opslaan" ButtonType="ButtonType.Submit" />
+    </RadzenStack>
+</RadzenTemplateForm>
+
+@code {
+    private readonly EmailModel _model = new();
+
+    private void OnSubmit(EmailModel _) { }
+
+    private sealed class EmailModel
+    {
+        public string? Email { get; set; }
+    }
+}

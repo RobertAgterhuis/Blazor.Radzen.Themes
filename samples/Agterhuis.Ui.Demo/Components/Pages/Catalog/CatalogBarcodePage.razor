@@ -1,0 +1,24 @@
+@page "/catalog/barcode"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.Barcode
+
+<PageTitle>Barcode (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Layout & Display"
+               Title="Barcode"
+               Introduction="Barcodeweergave voor labels, assets en werkorders."
+               RadzenDocumentationUrl="https://blazor.radzen.com/barcode">
+    <DemoExample Title="Basis"
+                 Description="Barcode met standaard werkorderwaarde."
+                 ExampleComponentType="typeof(BarcodeBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Barcode/BarcodeBasicExample.razor" />
+
+    <DemoExample Title="Kort"
+                 Description="Compacte code voor korte identificatoren."
+                 ExampleComponentType="typeof(BarcodeShortExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Barcode/BarcodeShortExample.razor" />
+
+    <DemoExample Title="Lang"
+                 Description="Langere code voor uitgebreide tracking-id's."
+                 ExampleComponentType="typeof(BarcodeLongExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Barcode/BarcodeLongExample.razor" />
+</ComponentPage>

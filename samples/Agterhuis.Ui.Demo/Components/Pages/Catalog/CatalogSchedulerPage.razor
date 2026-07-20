@@ -1,0 +1,38 @@
+@page "/catalog/scheduler"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.Scheduler
+
+<PageTitle>Scheduler (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Data & Scheduling"
+               Title="Scheduler"
+               Introduction="Scheduler-voorbeelden met dag-, week- en maandweergaven en tokenized schaalbaarheid voor compact/comfy density."
+               RadzenDocumentationUrl="https://blazor.radzen.com/scheduler">
+    @if (PreviewOnly)
+    {
+        <RadzenCard>
+            <p class="agt-muted">Scheduler preview-mode actief voor teststabiliteit. Runtime toont alle interactieve scheduler-voorbeelden.</p>
+        </RadzenCard>
+    }
+    else
+    {
+        <DemoExample Title="Dagoverzicht"
+                     Description="Start met een dagplanning inclusief vaste afspraken."
+                     ExampleComponentType="typeof(SchedulerBasicExample)"
+                     SourcePath="Components/Pages/Catalog/Examples/Scheduler/SchedulerBasicExample.razor" />
+
+        <DemoExample Title="Meerdere views"
+                     Description="Day/Week/Month als een configureerbare scheduler-host."
+                     ExampleComponentType="typeof(SchedulerViewsExample)"
+                     SourcePath="Components/Pages/Catalog/Examples/Scheduler/SchedulerViewsExample.razor" />
+
+        <DemoExample Title="Density-check"
+                     Description="Zelfde afspraakdata, ontworpen voor zowel compacte als comfortabele density."
+                     ExampleComponentType="typeof(SchedulerDensityExample)"
+                     SourcePath="Components/Pages/Catalog/Examples/Scheduler/SchedulerDensityExample.razor" />
+    }
+</ComponentPage>
+
+@code {
+    [Parameter]
+    public bool PreviewOnly { get; set; }
+}

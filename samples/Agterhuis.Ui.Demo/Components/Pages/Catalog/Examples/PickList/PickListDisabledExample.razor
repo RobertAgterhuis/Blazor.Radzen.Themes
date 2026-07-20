@@ -1,0 +1,21 @@
+<div class="agt-stack demo-example-gap-sm">
+    <RadzenPickList TValue="int"
+                    TItem="OptionItem"
+                    Data="_items"
+                    TextProperty="Text"
+                    ValueProperty="Value"
+                    Value="new[] { 2 }"
+                    Disabled="true" />
+    <span class="agt-muted">Disabled picklist</span>
+</div>
+
+@code {
+    private static readonly IReadOnlyList<OptionItem> _items =
+    [
+        new("Alpha", 1),
+        new("Bravo", 2),
+        new("Charlie", 3)
+    ];
+
+    private sealed record OptionItem(string Text, int Value);
+}

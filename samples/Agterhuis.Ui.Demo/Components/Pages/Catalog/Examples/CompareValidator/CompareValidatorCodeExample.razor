@@ -1,0 +1,21 @@
+<RadzenTemplateForm TItem="CodeModel" Data="_model" Submit="OnSubmit">
+    <RadzenStack Gap="0.75rem">
+        <RadzenTextBox Name="code-a" @bind-Value="_model.CodeA" Placeholder="Code A" />
+        <RadzenTextBox Name="code-b" @bind-Value="_model.CodeB" Placeholder="Code B" />
+        <RadzenCompareValidator Component="code-b" Value="@_model.CodeA" Text="Codes verschillen" Popup="false" />
+        <RadzenButton Text="Controle" ButtonType="ButtonType.Submit" />
+    </RadzenStack>
+</RadzenTemplateForm>
+
+@code {
+    private readonly CodeModel _model = new();
+
+    private void OnSubmit(CodeModel _) { }
+
+    private sealed class CodeModel
+    {
+        public string? CodeA { get; set; }
+
+        public string? CodeB { get; set; }
+    }
+}

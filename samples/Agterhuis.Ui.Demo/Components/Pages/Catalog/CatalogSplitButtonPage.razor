@@ -1,0 +1,24 @@
+@page "/catalog/split-button"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.SplitButton
+
+<PageTitle>SplitButton (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Navigation & Actions"
+               Title="SplitButton"
+               Introduction="Combinatie van primaire actie en uitklapmenu met secundaire acties."
+               RadzenDocumentationUrl="https://blazor.radzen.com/splitbutton">
+    <DemoExample Title="Basis"
+                 Description="Standaard splitbutton met drie menuacties."
+                 ExampleComponentType="typeof(SplitButtonBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/SplitButton/SplitButtonBasicExample.razor" />
+
+    <DemoExample Title="Stijlen"
+                 Description="Variatie in buttonstijl en variant voor verschillende contexten."
+                 ExampleComponentType="typeof(SplitButtonStyledExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/SplitButton/SplitButtonStyledExample.razor" />
+
+    <DemoExample Title="Eventhandling"
+                 Description="Gekozen menuactie terugkoppelen naar de gebruiker."
+                 ExampleComponentType="typeof(SplitButtonEventExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/SplitButton/SplitButtonEventExample.razor" />
+</ComponentPage>

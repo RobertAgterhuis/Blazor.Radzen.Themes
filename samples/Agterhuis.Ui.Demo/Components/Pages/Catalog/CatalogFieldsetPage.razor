@@ -1,0 +1,24 @@
+@page "/catalog/fieldset"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.Fieldset
+
+<PageTitle>Fieldset (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Layout & Display"
+               Title="Fieldset"
+               Introduction="Groepering van gerelateerde velden met caption en optionele collapse."
+               RadzenDocumentationUrl="https://blazor.radzen.com/fieldset">
+    <DemoExample Title="Basis"
+                 Description="Eenvoudig fieldset-blok met invoer."
+                 ExampleComponentType="typeof(FieldsetBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Fieldset/FieldsetBasicExample.razor" />
+
+    <DemoExample Title="Form"
+                 Description="Fieldset met meerdere form controls."
+                 ExampleComponentType="typeof(FieldsetFormExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Fieldset/FieldsetFormExample.razor" />
+
+    <DemoExample Title="Collapsible"
+                 Description="Inklapbaar fieldset voor secundaire details."
+                 ExampleComponentType="typeof(FieldsetCollapsibleExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Fieldset/FieldsetCollapsibleExample.razor" />
+</ComponentPage>

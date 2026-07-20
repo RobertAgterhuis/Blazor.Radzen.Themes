@@ -1,0 +1,24 @@
+@page "/catalog/fab"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.Fab
+
+<PageTitle>Fab (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Navigation & Actions"
+               Title="Fab"
+               Introduction="Floating Action Button voor snelle, prominente acties."
+               RadzenDocumentationUrl="https://blazor.radzen.com/fab">
+    <DemoExample Title="Basis"
+                 Description="Klassieke FAB-actie met icon en label."
+                 ExampleComponentType="typeof(FabBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Fab/FabBasicExample.razor" />
+
+    <DemoExample Title="Stijlen"
+                 Description="Secundaire en gevaarlijke varianten voor verschillende intenties."
+                 ExampleComponentType="typeof(FabStyledExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Fab/FabStyledExample.razor" />
+
+    <DemoExample Title="Icon-only"
+                 Description="Compacte FAB voor scenario's met beperkte ruimte."
+                 ExampleComponentType="typeof(FabIconOnlyExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Fab/FabIconOnlyExample.razor" />
+</ComponentPage>

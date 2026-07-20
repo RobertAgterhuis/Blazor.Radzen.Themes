@@ -5,40 +5,25 @@
 <div class="catalog-page">
     <h1>Navigation (Radzen)</h1>
 
-    <RadzenMenu>
-        <RadzenMenuItem Text="Home" Path="/" />
-        <RadzenMenuItem Text="Catalog" Path="/catalog" />
-    </RadzenMenu>
+    <p class="agt-muted">Deze categoriepagina is een index. Voor worked examples met live demo + code gebruik je de componentpagina's hieronder.</p>
 
-    <RadzenPanelMenu>
-        <RadzenPanelMenuItem Text="Section A" Icon="folder">
-            <RadzenPanelMenuItem Text="Item A1" />
-        </RadzenPanelMenuItem>
-    </RadzenPanelMenu>
-
-    <RadzenTabs>
-        <Tabs>
-            <RadzenTabsItem Text="First">First tab</RadzenTabsItem>
-            <RadzenTabsItem Text="Second">Second tab</RadzenTabsItem>
-        </Tabs>
-    </RadzenTabs>
-
-    <RadzenSteps>
-        <RadzenStepsItem Text="Start" />
-        <RadzenStepsItem Text="Finish" />
-    </RadzenSteps>
-
-    <RadzenBreadCrumb>
-        <RadzenBreadCrumbItem Text="Home" Path="/" />
-        <RadzenBreadCrumbItem Text="Catalog" Path="/catalog" />
-    </RadzenBreadCrumb>
-
-    <RadzenProfileMenu>
-        <ChildContent>
-            <RadzenProfileMenuItem Text="Account" Icon="person" />
-            <RadzenProfileMenuItem Text="Sign out" Icon="logout" />
-        </ChildContent>
-    </RadzenProfileMenu>
-
-    <RadzenLink Path="/catalog" Text="Link" />
+    <ul>
+        <li><RadzenLink Path="/catalog/breadcrumb" Text="BreadCrumb" /></li>
+        <li><RadzenLink Path="/catalog/button" Text="Button" /></li>
+        <li><RadzenLink Path="/catalog/split-button" Text="SplitButton" /></li>
+        <li><RadzenLink Path="/catalog/radio-button-list" Text="RadioButtonList" /></li>
+        <li><RadzenLink Path="/catalog/radio-button-list-item" Text="RadioButtonListItem" /></li>
+        <li><RadzenLink Path="/catalog/profile-menu" Text="ProfileMenu" /></li>
+        <li><RadzenLink Path="/catalog/context-menu" Text="ContextMenu" /></li>
+        <li><RadzenLink Path="/catalog/link" Text="Link" /></li>
+        <li><RadzenLink Path="/catalog/fab" Text="Fab" /></li>
+        <li><RadzenLink Path="/catalog/fab-menu" Text="FabMenu" /></li>
+        <li><RadzenLink Path="/catalog/toggle-button" Text="ToggleButton" /></li>
+        <li><RadzenLink Path="/catalog/speech-to-text-button" Text="SpeechToTextButton" /></li>
+        <li><RadzenLink Path="/catalog/menu" Text="Menu" /></li>
+        <li><RadzenLink Path="/catalog/panel-menu" Text="PanelMenu" /></li>
+        <li><RadzenLink Path="/catalog/accordion" Text="Accordion" /></li>
+        <li><RadzenLink Path="/catalog/tabs" Text="Tabs" /></li>
+        <li><RadzenLink Path="/catalog/steps" Text="Steps" /></li>
+    </ul>
 </div>

@@ -1,0 +1,24 @@
+@page "/catalog/slider"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.Slider
+
+<PageTitle>Slider (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Forms & Inputs"
+               Title="Slider"
+               Introduction="Range-invoer met sleepinteractie voor numerieke instellingen."
+               RadzenDocumentationUrl="https://blazor.radzen.com/slider">
+    <DemoExample Title="Basis"
+                 Description="Eenvoudige slider met standaard range."
+                 ExampleComponentType="typeof(SliderBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Slider/SliderBasicExample.razor" />
+
+    <DemoExample Title="Binding"
+                 Description="Waarde direct teruggekoppeld via two-way binding."
+                 ExampleComponentType="typeof(SliderBoundExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Slider/SliderBoundExample.razor" />
+
+    <DemoExample Title="Disabled"
+                 Description="Niet-bewerkbare sliderstatus."
+                 ExampleComponentType="typeof(SliderDisabledExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Slider/SliderDisabledExample.razor" />
+</ComponentPage>

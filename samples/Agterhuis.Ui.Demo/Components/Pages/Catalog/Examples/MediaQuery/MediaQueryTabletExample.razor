@@ -1,0 +1,11 @@
+<div class="agt-stack demo-example-gap-sm">
+    <RadzenMediaQuery Query="(max-width: 1024px)" Change="@OnChange" />
+    <RadzenText Text="Tablet breakpoint status:" />
+    <RadzenBadge Text="@_state" />
+</div>
+
+@code {
+    private string _state = "Breed";
+
+    private void OnChange(bool matches) => _state = matches ? "Tablet/Smaller" : "Breed";
+}

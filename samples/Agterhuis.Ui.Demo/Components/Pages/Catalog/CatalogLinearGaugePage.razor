@@ -1,0 +1,36 @@
+@page "/catalog/linear-gauge"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.LinearGauge
+
+<PageTitle>LinearGauge (Radzen)</PageTitle>
+
+@if (PreviewOnly)
+{
+    <RadzenCard>Gauge preview (interactive rendering disabled).</RadzenCard>
+}
+else
+{
+<ComponentPage Kicker="Data Visualization"
+               Title="LinearGauge"
+               Introduction="Lineaire gauge voor voortgang en capaciteit."
+               RadzenDocumentationUrl="https://blazor.radzen.com/gauge">
+    <DemoExample Title="Basis"
+                 Description="Basisscenario voor LinearGauge."
+                 ExampleComponentType="typeof(LinearGaugeBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/LinearGauge/LinearGaugeBasicExample.razor" />
+
+    <DemoExample Title="Uitgebreid"
+                 Description="Uitgebreider scenario voor LinearGauge."
+                 ExampleComponentType="typeof(LinearGaugeAdvancedExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/LinearGauge/LinearGaugeAdvancedExample.razor" />
+
+    <DemoExample Title="Compact"
+                 Description="Compact scenario voor LinearGauge."
+                 ExampleComponentType="typeof(LinearGaugeCompactExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/LinearGauge/LinearGaugeCompactExample.razor" />
+</ComponentPage>
+}
+
+@code {
+    [Parameter]
+    public bool PreviewOnly { get; set; }
+}

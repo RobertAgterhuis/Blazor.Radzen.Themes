@@ -1,0 +1,24 @@
+<RadzenScheduler TItem="AppointmentItem"
+                 Data="Appointments"
+                 StartProperty="Start"
+                 EndProperty="End"
+                 TextProperty="Text"
+                 class="demo-scheduler demo-scheduler--lg">
+    <RadzenDayView />
+    <RadzenWeekView />
+    <RadzenMonthView />
+</RadzenScheduler>
+
+@code {
+    private static readonly DateTime StartOfWeek = DateTime.Today.AddDays(-(int)DateTime.Today.DayOfWeek + 1);
+
+    private static readonly IReadOnlyList<AppointmentItem> Appointments =
+    [
+        new(StartOfWeek.AddHours(9), StartOfWeek.AddHours(10), "Planning"),
+        new(StartOfWeek.AddDays(1).AddHours(13), StartOfWeek.AddDays(1).AddHours(15), "Werkbezoek"),
+        new(StartOfWeek.AddDays(2).AddHours(8.5), StartOfWeek.AddDays(2).AddHours(9.5), "Review"),
+        new(StartOfWeek.AddDays(3).AddHours(15), StartOfWeek.AddDays(3).AddHours(16), "Demo")
+    ];
+
+    private sealed record AppointmentItem(DateTime Start, DateTime End, string Text);
+}

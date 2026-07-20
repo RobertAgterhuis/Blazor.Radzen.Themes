@@ -1,0 +1,9 @@
+<RadzenDataList Data="_items" TItem="string">
+    <Template Context="item">
+        <RadzenText Text="@item" />
+    </Template>
+</RadzenDataList>
+
+@code {
+    private static readonly IReadOnlyList<string> _items = ["Werkorder WO-314", "Werkorder WO-402", "Werkorder WO-418"];
+}

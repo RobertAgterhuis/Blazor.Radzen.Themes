@@ -1,0 +1,11 @@
+<RadzenRadioButtonList TValue="int" Orientation="Orientation.Horizontal" @bind-Value="_level">
+    <RadzenRadioButtonListItem Text="L1" Value="1" />
+    <RadzenRadioButtonListItem Text="L2" Value="2" />
+    <RadzenRadioButtonListItem Text="L3" Value="3" />
+</RadzenRadioButtonList>
+
+<span class="agt-muted">Niveau: @_level</span>
+
+@code {
+    private int _level = 2;
+}

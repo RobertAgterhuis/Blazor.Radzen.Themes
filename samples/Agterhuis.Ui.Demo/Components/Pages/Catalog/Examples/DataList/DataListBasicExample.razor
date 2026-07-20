@@ -1,0 +1,16 @@
+<RadzenDataList Data="_rows" TItem="RowItem">
+    <Template Context="row">
+        <RadzenCard>@row.Name - @row.Score</RadzenCard>
+    </Template>
+</RadzenDataList>
+
+@code {
+    private static readonly IReadOnlyList<RowItem> _rows =
+    [
+        new("Alpha", 10),
+        new("Bravo", 20),
+        new("Charlie", 30)
+    ];
+
+    private sealed record RowItem(string Name, int Score);
+}

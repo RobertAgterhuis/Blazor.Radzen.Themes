@@ -1,0 +1,24 @@
+@page "/catalog/chip-list"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.ChipList
+
+<PageTitle>ChipList (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Forms & Inputs"
+               Title="ChipList"
+               Introduction="Verzameling van chips voor tags en selectiecontext."
+               RadzenDocumentationUrl="https://blazor.radzen.com/chiplist">
+    <DemoExample Title="Basis"
+                 Description="Eenvoudige lijst met statische labels."
+                 ExampleComponentType="typeof(ChipListBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/ChipList/ChipListBasicExample.razor" />
+
+    <DemoExample Title="Uitgebreid"
+                 Description="Grotere tagset voor operationele status."
+                 ExampleComponentType="typeof(ChipListMultipleExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/ChipList/ChipListMultipleExample.razor" />
+
+    <DemoExample Title="Werkorders"
+                 Description="ChipList met werkorderlabels."
+                 ExampleComponentType="typeof(ChipListBoundExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/ChipList/ChipListBoundExample.razor" />
+</ComponentPage>

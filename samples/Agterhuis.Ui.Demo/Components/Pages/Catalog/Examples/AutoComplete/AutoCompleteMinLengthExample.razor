@@ -1,0 +1,8 @@
+<div class="agt-stack demo-example-gap-sm">
+    <p class="agt-muted">Zoeken start pas vanaf 2 tekens.</p>
+    <RadzenAutoComplete Data="Skills" MinLength="2" Placeholder="Vaardigheid" class="demo-textbox-full" />
+</div>
+
+@code {
+    private static readonly IReadOnlyList<string> Skills = ["Installatie", "Inspectie", "Rapportage", "Planning", "Storingsdienst"];
+}

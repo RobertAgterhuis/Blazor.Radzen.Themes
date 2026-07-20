@@ -1,0 +1,18 @@
+<RadzenTemplateForm TItem="RegexModel" Data="_model" Submit="OnSubmit">
+    <RadzenStack Gap="0.75rem">
+        <RadzenTextBox Name="mac" @bind-Value="_model.Mac" Placeholder="AA-BB-CC" />
+        <RadzenRegexValidator Component="mac" Pattern="^[A-F0-9]{2}-[A-F0-9]{2}-[A-F0-9]{2}$" Text="Gebruik AA-BB-CC" Popup="false" />
+        <RadzenButton Text="Opslaan" ButtonType="ButtonType.Submit" />
+    </RadzenStack>
+</RadzenTemplateForm>
+
+@code {
+    private readonly RegexModel _model = new();
+
+    private void OnSubmit(RegexModel _) { }
+
+    private sealed class RegexModel
+    {
+        public string? Mac { get; set; }
+    }
+}

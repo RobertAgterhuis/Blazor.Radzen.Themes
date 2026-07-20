@@ -1,0 +1,8 @@
+<div class="agt-stack demo-example-gap-sm">
+    <RadzenTextArea Name="ta-bound" @bind-Value="_note" Rows="4" class="demo-textbox-full" />
+    <p class="agt-muted">Tekens: @_note.Length</p>
+</div>
+
+@code {
+    private string _note = "Startnotitie";
+}

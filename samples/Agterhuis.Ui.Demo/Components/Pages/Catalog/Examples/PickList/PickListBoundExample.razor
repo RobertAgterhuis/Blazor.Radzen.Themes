@@ -1,0 +1,23 @@
+<div class="agt-stack demo-example-gap-sm">
+    <RadzenPickList TValue="int"
+                    TItem="OptionItem"
+                    Data="_items"
+                    TextProperty="Text"
+                    ValueProperty="Value"
+                    @bind-Value="_picked" />
+    <span class="agt-muted">Geselecteerd: @string.Join(", ", _picked)</span>
+</div>
+
+@code {
+    private IEnumerable<int> _picked = [1, 3];
+
+    private static readonly IReadOnlyList<OptionItem> _items =
+    [
+        new("Alpha", 1),
+        new("Bravo", 2),
+        new("Charlie", 3),
+        new("Delta", 4)
+    ];
+
+    private sealed record OptionItem(string Text, int Value);
+}

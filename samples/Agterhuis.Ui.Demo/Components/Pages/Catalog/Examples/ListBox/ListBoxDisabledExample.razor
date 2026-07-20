@@ -1,0 +1,15 @@
+<div class="agt-stack demo-example-gap-sm">
+    <RadzenListBox TValue="int" Data="_options" TextProperty="Text" ValueProperty="Value" Value="2" Disabled="true" />
+    <span class="agt-muted">Read-only lijststatus</span>
+</div>
+
+@code {
+    private static readonly IReadOnlyList<OptionItem> _options =
+    [
+        new("Alpha", 1),
+        new("Bravo", 2),
+        new("Charlie", 3)
+    ];
+
+    private sealed record OptionItem(string Text, int Value);
+}

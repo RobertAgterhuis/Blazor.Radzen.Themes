@@ -1,0 +1,12 @@
+<RadzenSankeyDiagram Data="Rows" SourceProperty="Source" TargetProperty="Target" ValueProperty="Value" />
+
+@code {
+    private static readonly IReadOnlyList<FlowRow> Rows =
+    [
+        new("Lead", "Sales", 18),
+        new("Sales", "Delivery", 12),
+        new("Delivery", "Support", 8)
+    ];
+
+    private sealed record FlowRow(string Source, string Target, double Value);
+}

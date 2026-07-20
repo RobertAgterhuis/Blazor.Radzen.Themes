@@ -1,0 +1,23 @@
+<div class="agt-stack demo-example-gap-sm">
+    <RadzenRadioButtonList TValue="int"
+                           Orientation="Orientation.Horizontal"
+                           Data="_levels"
+                           TextProperty="Text"
+                           ValueProperty="Value"
+                           @bind-Value="_currentLevel" />
+
+    <span class="agt-muted">Niveau: @_currentLevel</span>
+</div>
+
+@code {
+    private int _currentLevel = 2;
+
+    private static readonly IReadOnlyList<LevelItem> _levels =
+    [
+        new("Laag", 1),
+        new("Midden", 2),
+        new("Hoog", 3)
+    ];
+
+    private sealed record LevelItem(string Text, int Value);
+}

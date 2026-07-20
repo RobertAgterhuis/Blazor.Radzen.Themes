@@ -1,0 +1,10 @@
+@inject DialogService DialogService
+
+<RadzenButton Text="Open brede dialoog" ButtonStyle="ButtonStyle.Secondary" Click="OpenWideDialog" />
+
+@code {
+    private async Task OpenWideDialog()
+    {
+        await DialogService.OpenAsync("Brede dialoog", _ => @<div class="catalog-dialog-content">Deze variant gebruikt grotere afmetingen.</div>, new DialogOptions { Width = "42rem", Height = "16rem" });
+    }
+}

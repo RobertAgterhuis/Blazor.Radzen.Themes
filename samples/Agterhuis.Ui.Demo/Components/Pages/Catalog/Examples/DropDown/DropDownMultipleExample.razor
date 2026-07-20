@@ -1,0 +1,6 @@
+<RadzenDropDown TValue="IEnumerable<string>" Data="Tags" Multiple="true" @bind-Value="_selected" Placeholder="Selecteer tags" class="demo-textbox-full" />
+
+@code {
+    private IEnumerable<string> _selected = [];
+    private static readonly IReadOnlyList<string> Tags = ["Spoed", "Inspectie", "Onderhoud", "Buitenwerk"];
+}

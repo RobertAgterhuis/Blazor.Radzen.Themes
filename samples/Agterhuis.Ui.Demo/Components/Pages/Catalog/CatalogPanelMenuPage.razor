@@ -1,0 +1,24 @@
+@page "/catalog/panel-menu"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.PanelMenu
+
+<PageTitle>PanelMenu (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Navigation & Actions"
+               Title="PanelMenu"
+               Introduction="PanelMenu voor hiërarchische navigatie in zijpanelen."
+               RadzenDocumentationUrl="https://blazor.radzen.com/panelmenu">
+    <DemoExample Title="Basis"
+                 Description="Vlak menu met meerdere entries."
+                 ExampleComponentType="typeof(PanelMenuBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/PanelMenu/PanelMenuBasicExample.razor" />
+
+    <DemoExample Title="Genest"
+                 Description="Uitklapbare subitems binnen een hoofdgroep."
+                 ExampleComponentType="typeof(PanelMenuNestedExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/PanelMenu/PanelMenuNestedExample.razor" />
+
+    <DemoExample Title="Selectie"
+                 Description="Click-event met live statusweergave."
+                 ExampleComponentType="typeof(PanelMenuSelectionExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/PanelMenu/PanelMenuSelectionExample.razor" />
+</ComponentPage>

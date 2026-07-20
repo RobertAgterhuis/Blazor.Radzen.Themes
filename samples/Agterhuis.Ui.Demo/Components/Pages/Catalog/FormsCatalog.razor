@@ -4,39 +4,33 @@
 
 <div class="catalog-page">
     <h1>Forms (Radzen)</h1>
+    <p class="agt-muted">Deze categoriepagina is een index. Voor worked examples met live demo + code gebruik je de componentpagina's hieronder.</p>
 
-    <RadzenTemplateForm TItem="FormModel" Data="Model" Submit="OnSubmit">
-        <RadzenStack Gap="0.75rem">
-            <RadzenFormField Text="Name" Variant="Variant.Outlined">
-                <RadzenTextBox Name="name" @bind-Value="Model.Name" />
-            </RadzenFormField>
-
-            <RadzenLabel Text="File input" Component="file-input" />
-            <RadzenFileInput TValue="string" Name="file-input" ChooseText="Choose" />
-
-            <RadzenUpload Url="upload" ChooseText="Upload" Auto="false" />
-
-            <RadzenFieldset Text="Dropzone">
-                <RadzenDropZone TItem="DropItem" Value='@("A")' />
-            </RadzenFieldset>
-
-            <RadzenButton Text="Submit" ButtonType="ButtonType.Submit" />
-        </RadzenStack>
-    </RadzenTemplateForm>
+    <ul>
+        <li><RadzenLink Path="/catalog/chip" Text="Chip" /></li>
+        <li><RadzenLink Path="/catalog/chip-list" Text="ChipList" /></li>
+        <li><RadzenLink Path="/catalog/checkbox" Text="CheckBox" /></li>
+        <li><RadzenLink Path="/catalog/checkbox-list" Text="CheckBoxList" /></li>
+        <li><RadzenLink Path="/catalog/dropdown" Text="DropDown" /></li>
+        <li><RadzenLink Path="/catalog/datepicker" Text="DatePicker" /></li>
+        <li><RadzenLink Path="/catalog/mask" Text="Mask" /></li>
+        <li><RadzenLink Path="/catalog/numeric" Text="Numeric" /></li>
+        <li><RadzenLink Path="/catalog/numeric-range-validator" Text="NumericRangeValidator" /></li>
+        <li><RadzenLink Path="/catalog/color-picker" Text="ColorPicker" /></li>
+        <li><RadzenLink Path="/catalog/list-box" Text="ListBox" /></li>
+        <li><RadzenLink Path="/catalog/rating" Text="Rating" /></li>
+        <li><RadzenLink Path="/catalog/slider" Text="Slider" /></li>
+        <li><RadzenLink Path="/catalog/text" Text="Text" /></li>
+        <li><RadzenLink Path="/catalog/time-span-picker" Text="TimeSpanPicker" /></li>
+        <li><RadzenLink Path="/catalog/pick-list" Text="PickList" /></li>
+        <li><RadzenLink Path="/catalog/security-code" Text="SecurityCode" /></li>
+        <li><RadzenLink Path="/catalog/switch" Text="Switch" /></li>
+        <li><RadzenLink Path="/catalog/file-input" Text="FileInput" /></li>
+        <li><RadzenLink Path="/catalog/upload" Text="Upload" /></li>
+        <li><RadzenLink Path="/catalog/form-field" Text="FormField" /></li>
+        <li><RadzenLink Path="/catalog/template-form" Text="TemplateForm" /></li>
+        <li><RadzenLink Path="/catalog/select-bar" Text="SelectBar" /></li>
+        <li><RadzenLink Path="/catalog/dropdown-data-grid" Text="DropDownDataGrid" /></li>
+        <li><RadzenLink Path="/catalog/required-validator" Text="RequiredValidator" /></li>
+    </ul>
 </div>
-
-@code {
-    private readonly FormModel Model = new();
-    private void OnSubmit(FormModel _) { }
-
-    public sealed class FormModel
-    {
-        public string? Name { get; set; }
-    }
-
-    public sealed class DropItem
-    {
-        public string Text { get; set; } = string.Empty;
-        public string Zone { get; set; } = "A";
-    }
-}

@@ -1,0 +1,19 @@
+<RadzenDataGrid TItem="GridRow" Data="Rows" AllowPaging="true" PageSize="5" AllowSorting="true">
+    <Columns>
+        <RadzenDataGridColumn TItem="GridRow" Property="Name" Title="Naam" />
+        <RadzenDataGridColumn TItem="GridRow" Property="Score" Title="Score" />
+        <RadzenDataGridColumn TItem="GridRow" Property="LastUpdate" Title="Bijgewerkt" />
+    </Columns>
+</RadzenDataGrid>
+
+@code {
+    private static readonly IReadOnlyList<GridRow> Rows =
+    [
+        new("Alpha", 41, "2026-07-18"),
+        new("Beta", 87, "2026-07-15"),
+        new("Gamma", 62, "2026-07-20"),
+        new("Delta", 74, "2026-07-11")
+    ];
+
+    private sealed record GridRow(string Name, int Score, string LastUpdate);
+}

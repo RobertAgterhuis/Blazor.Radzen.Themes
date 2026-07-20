@@ -1,0 +1,24 @@
+@page "/catalog/mask"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.Mask
+
+<PageTitle>Mask (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Forms & Inputs"
+               Title="Mask"
+               Introduction="Gemaskeerde invoer voor vaste formaten zoals postcode of codevelden."
+               RadzenDocumentationUrl="https://blazor.radzen.com/mask">
+    <DemoExample Title="Basis"
+                 Description="Postcode-masker met placeholder."
+                 ExampleComponentType="typeof(MaskBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Mask/MaskBasicExample.razor" />
+
+    <DemoExample Title="Binding"
+                 Description="Two-way binding met live weergegeven waarde."
+                 ExampleComponentType="typeof(MaskBoundExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Mask/MaskBoundExample.razor" />
+
+    <DemoExample Title="Disabled"
+                 Description="Niet-bewerkbare, vooraf ingevulde mask-waarde."
+                 ExampleComponentType="typeof(MaskDisabledExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Mask/MaskDisabledExample.razor" />
+</ComponentPage>

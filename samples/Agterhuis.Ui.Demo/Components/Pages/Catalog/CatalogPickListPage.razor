@@ -1,0 +1,24 @@
+@page "/catalog/pick-list"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.PickList
+
+<PageTitle>PickList (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Forms & Inputs"
+               Title="PickList"
+               Introduction="Dual-list selectiecomponent voor toewijzingen en planning."
+               RadzenDocumentationUrl="https://blazor.radzen.com/picklist">
+    <DemoExample Title="Basis"
+                 Description="Selectie van items tussen bron- en doellijst."
+                 ExampleComponentType="typeof(PickListBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/PickList/PickListBasicExample.razor" />
+
+    <DemoExample Title="Binding"
+                 Description="Geselecteerde items direct tonen via binding."
+                 ExampleComponentType="typeof(PickListBoundExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/PickList/PickListBoundExample.razor" />
+
+    <DemoExample Title="Disabled"
+                 Description="Read-only picklist voor gecontroleerde workflows."
+                 ExampleComponentType="typeof(PickListDisabledExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/PickList/PickListDisabledExample.razor" />
+</ComponentPage>

@@ -1,0 +1,24 @@
+@page "/catalog/speech-to-text-button"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.SpeechToTextButton
+
+<PageTitle>SpeechToTextButton (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Navigation & Actions"
+               Title="SpeechToTextButton"
+               Introduction="Spraakinvoerknop voor dicteren in ondersteunde browsers."
+               RadzenDocumentationUrl="https://blazor.radzen.com/speech-to-text-button">
+    <DemoExample Title="Basis"
+                 Description="Losse spraakknop voor standaardinvoer."
+                 ExampleComponentType="typeof(SpeechToTextButtonBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/SpeechToTextButton/SpeechToTextButtonBasicExample.razor" />
+
+    <DemoExample Title="Inline met invoer"
+                 Description="Combinatie met tekstveld voor direct dicteren."
+                 ExampleComponentType="typeof(SpeechToTextButtonInlineExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/SpeechToTextButton/SpeechToTextButtonInlineExample.razor" />
+
+    <DemoExample Title="Compact"
+                 Description="Compacte opstelling met ondersteunende uitleg."
+                 ExampleComponentType="typeof(SpeechToTextButtonCompactExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/SpeechToTextButton/SpeechToTextButtonCompactExample.razor" />
+</ComponentPage>

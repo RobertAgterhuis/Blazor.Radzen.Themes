@@ -1,0 +1,101 @@
+@inject IJSRuntime JS
+@inject Agterhuis.Ui.Demo.Services.DemoSourceProvider SourceProvider
+
+<article class="demo-example" aria-labelledby="@_headingId">
+    <header class="demo-example__header">
+        <h3 id="@_headingId">@Title</h3>
+        @if (!string.IsNullOrWhiteSpace(Description))
+        {
+            <p>@Description</p>
+        }
+    </header>
+
+    <div class="demo-example__tabs" role="tablist" aria-label="Voorbeeld tabs">
+        <button type="button"
+                class="demo-example__tab @(ShowCode ? null : "is-active")"
+                role="tab"
+                aria-selected="@(!ShowCode)"
+                @onclick="ShowPreviewTab">
+            Voorbeeld
+        </button>
+        <button type="button"
+                class="demo-example__tab @(ShowCode ? "is-active" : null)"
+                role="tab"
+                aria-selected="@ShowCode"
+                @onclick="ShowCodeTab">
+            Code
+        </button>
+    </div>
+
+    @if (!ShowCode)
+    {
+        <div class="demo-example__preview" role="tabpanel">
+            <DynamicComponent Type="ExampleComponentType" />
+        </div>
+    }
+    else
+    {
+        <section class="demo-example__code-panel" role="tabpanel" aria-label="Broncode">
+            <div class="demo-example__code-toolbar">
+                <button type="button" class="demo-example__copy" @onclick="CopySource" aria-label="Kopieer broncode">
+                    Kopieer code
+                </button>
+                <span class="demo-example__copy-status" aria-live="polite">@_copyStatus</span>
+            </div>
+            <pre class="demo-code" tabindex="0"><code>@((MarkupString)_highlightedSource)</code></pre>
+        </section>
+    }
+</article>
+
+@code {
+    [Parameter, EditorRequired]
+    public string Title { get; set; } = string.Empty;
+
+    [Parameter]
+    public string? Description { get; set; }
+
+    [Parameter, EditorRequired]
+    public Type ExampleComponentType { get; set; } = typeof(object);
+
+    [Parameter, EditorRequired]
+    public string SourcePath { get; set; } = string.Empty;
+
+    private bool ShowCode { get; set; }
+    private string _highlightedSource = string.Empty;
+    private string _rawSource = string.Empty;
+    private string _copyStatus = string.Empty;
+    private readonly string _headingId = $"demo-example-{Guid.NewGuid():N}";
+
+    protected override void OnParametersSet()
+    {
+        _rawSource = SourceProvider.GetSource(SourcePath);
+        _highlightedSource = Agterhuis.Ui.Demo.Services.RazorCodeHighlighter.Highlight(_rawSource);
+    }
+
+    private void ShowPreviewTab()
+    {
+        ShowCode = false;
+        _copyStatus = string.Empty;
+    }
+
+    private void ShowCodeTab()
+    {
+        ShowCode = true;
+    }
+
+    private async Task CopySource()
+    {
+        var copied = false;
+
+        try
+        {
+            copied = await JS.InvokeAsync<bool>("agtBlog.copyText", _rawSource);
+        }
+        catch
+        {
+            copied = false;
+        }
+
+        _copyStatus = copied ? "Code gekopieerd" : "Kopieren is niet beschikbaar";
+    }
+}

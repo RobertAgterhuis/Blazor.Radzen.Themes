@@ -1,0 +1,29 @@
+<RadzenDataGrid TItem="GridRow" Data="Rows" AllowPaging="true" PageSize="5" AllowGrouping="true">
+    <Columns>
+        <RadzenDataGridColumn TItem="GridRow" Property="Name" Title="Naam" />
+        <RadzenDataGridColumn TItem="GridRow" Property="Category" Title="Categorie" />
+        <RadzenDataGridColumn TItem="GridRow" Title="Status">
+            <Template Context="row">
+                <AgtBadge Text="@row.Status" Icon="flag" Intent="@StatusIntent(row.Status)" />
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+
+@code {
+    private static readonly IReadOnlyList<GridRow> Rows =
+    [
+        new("Installatie", "Project", "Actief"),
+        new("Audit", "Kwaliteit", "Risico"),
+        new("Nazorg", "Service", "Afgerond")
+    ];
+
+    private static AgtIntent StatusIntent(string status) => status switch
+    {
+        "Actief" => AgtIntent.Success,
+        "Risico" => AgtIntent.Warning,
+        _ => AgtIntent.Info
+    };
+
+    private sealed record GridRow(string Name, string Category, string Status);
+}

@@ -1,0 +1,24 @@
+@page "/catalog/link"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.Link
+
+<PageTitle>Link (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Navigation & Actions"
+               Title="Link"
+               Introduction="Linkcomponent voor interne routing en externe verwijzingen."
+               RadzenDocumentationUrl="https://blazor.radzen.com/link">
+    <DemoExample Title="Interne links"
+                 Description="Navigatie naar routes binnen de demo-app."
+                 ExampleComponentType="typeof(LinkBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Link/LinkBasicExample.razor" />
+
+    <DemoExample Title="Externe links"
+                 Description="Openen van externe documentatie in een nieuw tabblad."
+                 ExampleComponentType="typeof(LinkExternalExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Link/LinkExternalExample.razor" />
+
+    <DemoExample Title="Contextlink"
+                 Description="Link gecombineerd met begeleidende uitlegtekst."
+                 ExampleComponentType="typeof(LinkMutedExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Link/LinkMutedExample.razor" />
+</ComponentPage>

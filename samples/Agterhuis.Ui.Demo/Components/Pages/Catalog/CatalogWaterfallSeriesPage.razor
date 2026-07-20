@@ -1,0 +1,36 @@
+@page "/catalog/waterfall-series"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.WaterfallSeries
+
+<PageTitle>WaterfallSeries (Radzen)</PageTitle>
+
+@if (PreviewOnly)
+{
+    <RadzenCard>Chart preview (interactive rendering disabled).</RadzenCard>
+}
+else
+{
+<ComponentPage Kicker="Data Visualization"
+               Title="WaterfallSeries"
+               Introduction="Waterfall-grafiek voor stijgingen, dalingen en de eindsom."
+               RadzenDocumentationUrl="https://blazor.radzen.com/chart">
+    <DemoExample Title="Basis"
+                 Description="Basisscenario voor WaterfallSeries."
+                 ExampleComponentType="typeof(WaterfallSeriesBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/WaterfallSeries/WaterfallSeriesBasicExample.razor" />
+
+    <DemoExample Title="Uitgebreid"
+                 Description="Uitgebreider scenario voor WaterfallSeries."
+                 ExampleComponentType="typeof(WaterfallSeriesAdvancedExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/WaterfallSeries/WaterfallSeriesAdvancedExample.razor" />
+
+    <DemoExample Title="Compact"
+                 Description="Compact scenario voor WaterfallSeries."
+                 ExampleComponentType="typeof(WaterfallSeriesCompactExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/WaterfallSeries/WaterfallSeriesCompactExample.razor" />
+</ComponentPage>
+}
+
+@code {
+    [Parameter]
+    public bool PreviewOnly { get; set; }
+}

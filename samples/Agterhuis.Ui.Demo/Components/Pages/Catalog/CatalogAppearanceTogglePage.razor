@@ -1,0 +1,24 @@
+@page "/catalog/appearance-toggle"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.AppearanceToggle
+
+<PageTitle>AppearanceToggle (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Layout & Display"
+               Title="AppearanceToggle"
+               Introduction="Snelle toggle voor light/dark appearance in de UI-shell."
+               RadzenDocumentationUrl="https://blazor.radzen.com/appearance-toggle">
+    <DemoExample Title="Basis"
+                 Description="Losse togglecomponent."
+                 ExampleComponentType="typeof(AppearanceToggleBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/AppearanceToggle/AppearanceToggleBasicExample.razor" />
+
+    <DemoExample Title="Gelabeld"
+                 Description="Toggle met begeleidende contexttekst."
+                 ExampleComponentType="typeof(AppearanceToggleLabeledExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/AppearanceToggle/AppearanceToggleLabeledExample.razor" />
+
+    <DemoExample Title="Toolbar"
+                 Description="Gebruik in header/toolbarrij."
+                 ExampleComponentType="typeof(AppearanceToggleToolbarExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/AppearanceToggle/AppearanceToggleToolbarExample.razor" />
+</ComponentPage>

@@ -1,0 +1,24 @@
+@page "/catalog/layout-component"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.Layout
+
+<PageTitle>Layout (Radzen component)</PageTitle>
+
+<ComponentPage Kicker="Layout & Display"
+               Title="Layout"
+               Introduction="Shell-container die Header, Sidebar en Body combineert."
+               RadzenDocumentationUrl="https://blazor.radzen.com/layout">
+    <DemoExample Title="Basis"
+                 Description="Layout met header en body."
+                 ExampleComponentType="typeof(LayoutBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Layout/LayoutBasicExample.razor" />
+
+    <DemoExample Title="Met sidebar"
+                 Description="Layout met in/uitklapbare sidebar."
+                 ExampleComponentType="typeof(LayoutWithSidebarExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Layout/LayoutWithSidebarExample.razor" />
+
+    <DemoExample Title="Body card"
+                 Description="Layout-body met kaartinhoud."
+                 ExampleComponentType="typeof(LayoutCardExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Layout/LayoutCardExample.razor" />
+</ComponentPage>

@@ -1,0 +1,19 @@
+<RadzenSelectBar TValue="string"
+                 Data="_options"
+                 TextProperty="Text"
+                 ValueProperty="Value"
+                 Value="@_selected"
+                 Disabled="true" />
+
+@code {
+    private const string _selected = "open";
+
+    private static readonly IReadOnlyList<SelectItem> _options =
+    [
+        new("Open", "open"),
+        new("In uitvoering", "progress"),
+        new("Afgerond", "done")
+    ];
+
+    private sealed record SelectItem(string Text, string Value);
+}

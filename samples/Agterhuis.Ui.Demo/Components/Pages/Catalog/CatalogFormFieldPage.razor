@@ -1,0 +1,24 @@
+@page "/catalog/form-field"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.FormField
+
+<PageTitle>FormField (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Forms & Inputs"
+               Title="FormField"
+               Introduction="Label- en containercomponent om form controls consistent te groeperen."
+               RadzenDocumentationUrl="https://blazor.radzen.com/form-field">
+    <DemoExample Title="Basis"
+                 Description="FormField met tekstinvoer."
+                 ExampleComponentType="typeof(FormFieldBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/FormField/FormFieldBasicExample.razor" />
+
+    <DemoExample Title="Numeriek"
+                 Description="FormField met numerieke invoer."
+                 ExampleComponentType="typeof(FormFieldNumericExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/FormField/FormFieldNumericExample.razor" />
+
+    <DemoExample Title="Met textarea"
+                 Description="FormField met langere tekstinvoer."
+                 ExampleComponentType="typeof(FormFieldWithHintExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/FormField/FormFieldWithHintExample.razor" />
+</ComponentPage>

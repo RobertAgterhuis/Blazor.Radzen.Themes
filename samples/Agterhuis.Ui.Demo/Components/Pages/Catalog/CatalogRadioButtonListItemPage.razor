@@ -1,0 +1,11 @@
+@page "/catalog/radio-button-list-item"
+@inject NavigationManager NavigationManager
+
+<PageTitle>RadioButtonListItem (Radzen)</PageTitle>
+
+@code {
+    protected override void OnInitialized()
+    {
+        NavigationManager.NavigateTo("/catalog/radio-button-list#radio-button-list-item", true);
+    }
+}

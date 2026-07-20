@@ -1,0 +1,8 @@
+<div class="agt-stack demo-example-gap-sm">
+    <label for="notify">Notificaties ontvangen</label>
+    <RadzenCheckBox @bind-Value="_notify" TValue="bool" Name="notify" />
+</div>
+
+@code {
+    private bool _notify = true;
+}

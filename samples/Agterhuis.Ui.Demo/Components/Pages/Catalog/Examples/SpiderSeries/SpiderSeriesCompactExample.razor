@@ -1,0 +1,15 @@
+<RadzenSpiderChart GridShape="SpiderChartGridShape.Circular" ShowMarkers="true" ShowTooltip="true">
+    <RadzenSpiderSeries Data="Rows" CategoryProperty="Metric" ValueProperty="Value" Title="KPI" />
+</RadzenSpiderChart>
+
+@code {
+    private static readonly IReadOnlyList<SpiderRow> Rows =
+    [
+        new("Snelheid", 7),
+        new("Kwaliteit", 8),
+        new("Samenwerking", 9),
+        new("Stabiliteit", 6)
+    ];
+
+    private sealed record SpiderRow(string Metric, double Value);
+}

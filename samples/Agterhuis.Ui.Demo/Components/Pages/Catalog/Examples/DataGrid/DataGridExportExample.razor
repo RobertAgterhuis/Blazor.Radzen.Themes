@@ -1,0 +1,40 @@
+<div class="agt-stack demo-example-gap-md">
+    <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem">
+        <AgtSecondaryButton Text="Export CSV" Click="OnExportCsv" />
+        <AgtSecondaryButton Text="Export Excel" Click="OnExportExcel" />
+    </RadzenStack>
+
+    <RadzenDataGrid TItem="GridRow" Data="Rows" AllowPaging="true" PageSize="4">
+        <Columns>
+            <RadzenDataGridColumn TItem="GridRow" Property="Number" Title="Nummer" />
+            <RadzenDataGridColumn TItem="GridRow" Property="Customer" Title="Klant" />
+            <RadzenDataGridColumn TItem="GridRow" Property="Amount" Title="Bedrag" />
+        </Columns>
+    </RadzenDataGrid>
+
+    <p class="agt-muted" aria-live="polite">@_message</p>
+</div>
+
+@code {
+    private string _message = "Kies een exporttype om de workflow te simuleren.";
+
+    private static readonly IReadOnlyList<GridRow> Rows =
+    [
+        new("WO-3001", "Aster", "EUR 1.250"),
+        new("WO-3002", "Boreal", "EUR 2.120"),
+        new("WO-3003", "Cyan", "EUR 980"),
+        new("WO-3004", "Delta", "EUR 3.010")
+    ];
+
+    private void OnExportCsv(MouseEventArgs _)
+    {
+        _message = "CSV export klaar: werkorders.csv";
+    }
+
+    private void OnExportExcel(MouseEventArgs _)
+    {
+        _message = "Excel export klaar: werkorders.xlsx";
+    }
+
+    private sealed record GridRow(string Number, string Customer, string Amount);
+}

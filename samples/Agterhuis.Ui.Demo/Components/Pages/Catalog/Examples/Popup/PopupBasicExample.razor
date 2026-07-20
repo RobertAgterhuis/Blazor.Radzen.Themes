@@ -1,0 +1,15 @@
+<div class="agt-stack demo-example-gap-sm">
+    <RadzenButton Text="Popup tonen" Click="TogglePopup" />
+    <RadzenPopup Visible="@_visible" class="catalog-popup-surface">
+        Basispopup met tekstinhoud.
+    </RadzenPopup>
+</div>
+
+@code {
+    private bool _visible;
+
+    private void TogglePopup()
+    {
+        _visible = !_visible;
+    }
+}

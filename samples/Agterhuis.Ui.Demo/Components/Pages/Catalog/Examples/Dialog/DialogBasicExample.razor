@@ -1,0 +1,10 @@
+@inject DialogService DialogService
+
+<RadzenButton Text="Open basisdialog" Click="OpenDialog" />
+
+@code {
+    private async Task OpenDialog()
+    {
+        await DialogService.OpenAsync("Basisdialog", _ => @<div class="catalog-dialog-content">Eenvoudige dialooginhoud.</div>);
+    }
+}

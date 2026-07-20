@@ -1,0 +1,24 @@
+<RadzenTemplateForm TItem="Model" Data="_model" Submit="OnSubmit">
+    <RadzenStack Gap="0.5rem">
+        <RadzenTextBox Name="Title" @bind-Value="_model.Title" Placeholder="Titel" />
+        <RadzenRequiredValidator Component="Title" Text="Titel is verplicht" Popup="false" />
+        <RadzenTextArea Name="Description" @bind-Value="_model.Description" Placeholder="Beschrijving" />
+        <RadzenRequiredValidator Component="Description" Text="Beschrijving is verplicht" Popup="false" />
+        <RadzenButton Text="Verzenden" ButtonType="ButtonType.Submit" />
+    </RadzenStack>
+</RadzenTemplateForm>
+
+@code {
+    private readonly Model _model = new();
+
+    private void OnSubmit(Model _)
+    {
+    }
+
+    private sealed class Model
+    {
+        public string? Title { get; set; }
+
+        public string? Description { get; set; }
+    }
+}

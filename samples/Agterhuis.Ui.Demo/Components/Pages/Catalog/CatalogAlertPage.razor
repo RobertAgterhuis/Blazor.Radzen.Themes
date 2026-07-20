@@ -1,0 +1,24 @@
+@page "/catalog/alert"
+@using Agterhuis.Ui.Demo.Components.Pages.Catalog.Examples.Alert
+
+<PageTitle>Alert (Radzen)</PageTitle>
+
+<ComponentPage Kicker="Feedback & Overlays"
+               Title="Alert"
+               Introduction="Statusmeldingen voor success, waarschuwingen en fouten in context."
+               RadzenDocumentationUrl="https://blazor.radzen.com/alert">
+    <DemoExample Title="Basisstijlen"
+                 Description="De vier kernstijlen voor semantische statusberichten."
+                 ExampleComponentType="typeof(AlertBasicExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Alert/AlertBasicExample.razor" />
+
+    <DemoExample Title="Sluitbaar"
+                 Description="Dismissible alerts voor tijdelijke feedback die de gebruiker kan wegklikken."
+                 ExampleComponentType="typeof(AlertCloseExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Alert/AlertCloseExample.razor" />
+
+    <DemoExample Title="Rijke content"
+                 Description="Alert met compacte, gestructureerde inhoud."
+                 ExampleComponentType="typeof(AlertDenseContentExample)"
+                 SourcePath="Components/Pages/Catalog/Examples/Alert/AlertDenseContentExample.razor" />
+</ComponentPage>
