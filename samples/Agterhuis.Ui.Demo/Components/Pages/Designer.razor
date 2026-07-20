@@ -1,4 +1,4 @@
-@page "/designer"
+@page "/designer/edit"
 @layout DesignerLayout
 @using Agterhuis.Ui.Components.Layout
 @using Agterhuis.Ui.Designer.Commands
@@ -7,8 +7,11 @@
 @using Agterhuis.Ui.Designer.Registry
 @using Agterhuis.Ui.Designer.Serialization
 @using Agterhuis.Ui.Demo.Components.Designer
+@using Agterhuis.Ui.Demo.Services
 @using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components
 @inject IAgtCommandRegistry CommandRegistry
+@inject LocalDesignStore DesignStore
 @inject IJSRuntime JS
 
 <PageTitle>Designer</PageTitle>
@@ -169,6 +172,11 @@
     private DesignDocumentTemplateKind _selectedTemplateKind = DesignDocumentTemplateKind.FormPage;
     private List<string> _savedDocumentNames = [];
     private bool _hasRecoveredDraft;
+    [SupplyParameterFromQuery(Name = "template")]
+    public string? TemplateQuery { get; set; }
+
+    [SupplyParameterFromQuery(Name = "name")]
+    public string? NameQuery { get; set; }
 
     private IReadOnlyList<string> SavedDocumentNames => _savedDocumentNames;
 
@@ -218,6 +226,7 @@
         }
 
         RegisterCommands();
+        await LoadInitialDocumentAsync();
         await RestoreDocumentsFromStorageAsync();
         _hasRecoveredDraft = !string.IsNullOrWhiteSpace(await JS.InvokeAsync<string>("designerInterop.getText", LocalStorageDraftPrefix + _commands.Document.Name));
         _keyScopeRef = DotNetObjectReference.Create(this);
@@ -233,7 +242,7 @@
 
     private async Task RestoreDocumentsFromStorageAsync()
     {
-        _savedDocumentNames = await JS.InvokeAsync<List<string>>("designerInterop.getJson", LocalStorageIndexKey) ?? [];
+        _savedDocumentNames = (await DesignStore.GetRecentNamesAsync()).ToList();
         _savedDocumentNames = _savedDocumentNames
             .Where(static name => !string.IsNullOrWhiteSpace(name))
             .Distinct(StringComparer.Ordinal)
@@ -348,7 +357,7 @@
         var name = _commands.Document.Name;
         var json = DesignDocumentSerializer.Serialize(_commands.Document);
         await JS.InvokeVoidAsync("designerInterop.saveDesignDocument", $"{name}.agtdesign", json);
-        await JS.InvokeVoidAsync("designerInterop.setJson", LocalStoragePrefix + name, json);
+        await DesignStore.SaveAsync(name, _commands.Document);
         await JS.InvokeVoidAsync("designerInterop.removeItem", LocalStorageDraftPrefix + name);
 
         if (!_savedDocumentNames.Contains(name, StringComparer.Ordinal))
@@ -401,7 +410,7 @@
         }
 
         _selectedSavedName = selected;
-        var json = await JS.InvokeAsync<string>("designerInterop.getText", LocalStoragePrefix + selected);
+        var json = await DesignStore.LoadAsync(selected);
         if (string.IsNullOrWhiteSpace(json))
         {
             return;
@@ -425,6 +434,28 @@
         _hasRecoveredDraft = false;
         await AutoSaveAsync();
         StateHasChanged();
+    }
+
+    private async Task LoadInitialDocumentAsync()
+    {
+        if (!string.IsNullOrWhiteSpace(NameQuery))
+        {
+            var json = await DesignStore.LoadAsync(NameQuery);
+            if (!string.IsNullOrWhiteSpace(json))
+            {
+                ApplyLoadedDocument(json, markSaved: true);
+                return;
+            }
+        }
+
+        if (!string.IsNullOrWhiteSpace(TemplateQuery) && Enum.TryParse<DesignDocumentTemplateKind>(TemplateQuery, out var templateKind))
+        {
+            _selectedTemplateKind = templateKind;
+            _commands.ReplaceDocument(CreateNewDocument($"Document-{DateTime.UtcNow:yyyyMMdd-HHmmss}", templateKind), markSaved: true);
+            _selectedEntityName = _commands.Document.DataModel.Entities.FirstOrDefault()?.Name;
+            _selectedNodeId = null;
+            _hasRecoveredDraft = false;
+        }
     }
 
     private void ApplyLoadedDocument(string json, bool markSaved)

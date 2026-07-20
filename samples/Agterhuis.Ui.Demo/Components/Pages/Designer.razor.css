@@ -4,6 +4,39 @@
     min-height: calc(100vh - (var(--agt-spacing-3) * 2));
 }
 
+.designer-startscreen {
+    display: grid;
+    gap: var(--agt-spacing-3);
+    max-width: 72rem;
+}
+
+.designer-startscreen__hero,
+.designer-startscreen__panel {
+    background: var(--agt-surface-1);
+    border: 1px solid var(--agt-input-border);
+    border-radius: var(--agt-border-radius-md);
+    padding: var(--agt-spacing-3);
+}
+
+.designer-startscreen__patterns,
+.designer-startscreen__list {
+    display: grid;
+    gap: var(--agt-spacing-2);
+}
+
+.designer-startscreen__patterns button,
+.designer-startscreen__list button {
+    align-items: start;
+    background: var(--agt-surface-0);
+    border: 1px solid var(--agt-input-border);
+    border-radius: var(--agt-border-radius-sm);
+    color: var(--agt-text-body);
+    display: grid;
+    gap: var(--agt-spacing-1);
+    padding: var(--agt-spacing-2);
+    text-align: left;
+}
+
 .designer-toolbar {
     align-items: center;
     background: var(--agt-surface-1);

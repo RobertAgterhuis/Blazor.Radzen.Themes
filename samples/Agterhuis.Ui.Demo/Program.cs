@@ -14,6 +14,7 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 builder.Services.AddAgterhuisUi();
 builder.Services.AddScoped<Agterhuis.Ui.Demo.Services.ShowcaseDataService>();
 builder.Services.AddScoped<Agterhuis.Ui.Demo.Services.BlogShowcaseService>();
+builder.Services.AddScoped<Agterhuis.Ui.Demo.Services.LocalDesignStore>();
 builder.Services.AddSingleton<Agterhuis.Ui.Demo.Services.DemoSourceProvider>();
 
 await using var app = builder.Build();

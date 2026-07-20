@@ -1,0 +1,70 @@
+@page "/designer"
+@layout DesignerLayout
+@using Agterhuis.Ui.Designer.Model
+@using Agterhuis.Ui.Demo.Services
+@inject NavigationManager Navigation
+@inject LocalDesignStore DesignStore
+
+<PageTitle>Designer</PageTitle>
+
+<div class="designer-startscreen">
+    <section class="designer-startscreen__hero">
+        <h1>Designer</h1>
+        <p>Kies een recent ontwerp of start vanuit een patroon.</p>
+    </section>
+
+    <section class="designer-startscreen__panel" aria-label="Recente ontwerpen">
+        <h2>Recent</h2>
+        @if (_recentNames.Count == 0)
+        {
+            <AgtEmptyState Title="Geen recente ontwerpen"
+                           Description="Start met een leeg ontwerp of kies een patroon."
+                           Icon="folder_open" />
+        }
+        else
+        {
+            <ul class="designer-startscreen__list">
+                @foreach (var name in _recentNames)
+                {
+                    <li>
+                        <button type="button" @onclick="() => OpenExistingAsync(name)">@name</button>
+                    </li>
+                }
+            </ul>
+        }
+    </section>
+
+    <section class="designer-startscreen__panel" aria-label="Patronen">
+        <h2>Patronen</h2>
+        <div class="designer-startscreen__patterns">
+            @foreach (var template in DesignDocumentTemplates.DefinitionsList)
+            {
+                <button type="button" @onclick="() => CreateFromTemplateAsync(template.Kind)">
+                    <strong>@template.DisplayName</strong>
+                    <span>@template.Description</span>
+                </button>
+            }
+        </div>
+    </section>
+</div>
+
+@code {
+    private IReadOnlyList<string> _recentNames = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        _recentNames = await DesignStore.GetRecentNamesAsync();
+    }
+
+    private Task CreateFromTemplateAsync(DesignDocumentTemplateKind kind)
+    {
+        Navigation.NavigateTo($"/designer/edit?template={kind}");
+        return Task.CompletedTask;
+    }
+
+    private Task OpenExistingAsync(string name)
+    {
+        Navigation.NavigateTo($"/designer/edit?name={Uri.EscapeDataString(name)}");
+        return Task.CompletedTask;
+    }
+}
