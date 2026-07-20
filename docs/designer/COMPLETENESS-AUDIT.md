@@ -63,7 +63,7 @@ Nulmeting op basis van inspectie van prompts 48 t/m 55 en de huidige designer-im
 | Kwaliteitscheck: geen hardcoded kleuren, Label/AriaLabel aanwezig | ⚠️ Gedeeltelijk | Er zijn regels en tests in de omgeving, maar de generator zelf biedt nog geen volledige, expliciete kwaliteitsafhandelingslaag voor alle gevallen. |
 | Monaco Editor: lazy-loaded, zelf-gehost (npm, niet CDN) | ❌ Ontbreekt | De code-tab gebruikt een textarea; er is geen Monaco-integratie. |
 | Code-tab (read-only Razor preview) met selectie-highlight | ⚠️ Gedeeltelijk | Er is een read-only codeweergave, maar geen bewezen selectie-highlighting. |
-| Model JSON-tab (bewerkbaar met schema-validatie + Apply) | ⚠️ Gedeeltelijk | JSON-bewerking bestaat, maar de huidige flow toont geen volledige schema-validatie. |
+| Model JSON-tab (bewerkbaar met schema-validatie + Apply) | ✅ Compleet | JSON-bewerking valideert nu migratiebewust, meldt parse/shape-fouten expliciet en behoudt de laatste geldige toestand. |
 | Projectexport: volledig client-side (WASM), embedded template-resources | ✅ Compleet | Export draait client-side en gebruikt embedded template-resources in de designer-assembly. |
 | Export zip via System.IO.Compression in browser | ✅ Compleet | Export gebruikt `ZipArchive` en levert een zip-bytearray. |
 | CI-smoke: export → `dotnet build` van uitgepakt project slaagt | ⚠️ Gedeeltelijk | Een structurele export-smoke bestaat; een volledige standalone build-smoke vergt packaged dependencies buiten deze workspace. |

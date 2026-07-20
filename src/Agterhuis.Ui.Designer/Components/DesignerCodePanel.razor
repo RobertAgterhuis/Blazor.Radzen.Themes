@@ -74,6 +74,7 @@
     private DesignDocument? _lastValidDocument;
     private RazorCodeGenerator? _codeGenerator;
     private bool _tabInitialized;
+    private string? _lastDocumentSnapshot;
 
     protected override void OnInitialized()
     {
@@ -105,8 +106,14 @@
             {
                 WriteIndented = true
             };
-            ModelJson = InitialModelJson ?? JsonSerializer.Serialize(Document, options);
-            _lastValidDocument = Document;
+            var documentJson = InitialModelJson ?? JsonSerializer.Serialize(Document, options);
+            if (!string.Equals(_lastDocumentSnapshot, documentJson, StringComparison.Ordinal))
+            {
+                ModelJson = documentJson;
+                _lastDocumentSnapshot = documentJson;
+            }
+
+            _lastValidDocument = DesignDocumentMigrator.Migrate(JsonSerializer.Deserialize<DesignDocument>(JsonSerializer.Serialize(Document, DesignJsonOptions.Default), DesignJsonOptions.Default) ?? Document);
         }
     }
 
@@ -116,7 +123,7 @@
 
         try
         {
-            var options = new System.Text.Json.JsonSerializerOptions
+            var options = new System.Text.Json.JsonSerializerOptions(DesignJsonOptions.Default)
             {
                 PropertyNameCaseInsensitive = true,
                 WriteIndented = true
@@ -125,10 +132,12 @@
             var newDocument = JsonSerializer.Deserialize<DesignDocument>(ModelJson, options);
             if (newDocument is null)
             {
-                ModelValidationError = "Failed to deserialize model.";
+                ModelValidationError = "Model JSON kon niet worden gelezen.";
                 StateHasChanged();
                 return Task.CompletedTask;
             }
+
+            newDocument = DesignDocumentMigrator.Migrate(newDocument);
 
             var validationErrors = DesignDocumentValidator.Validate(newDocument);
             if (validationErrors.Count > 0)
@@ -140,6 +149,7 @@
                     {
                         WriteIndented = true
                     });
+                    _lastDocumentSnapshot = ModelJson;
                 }
 
                 StateHasChanged();
@@ -147,6 +157,10 @@
             }
 
             _lastValidDocument = newDocument;
+            _lastDocumentSnapshot = JsonSerializer.Serialize(newDocument, new System.Text.Json.JsonSerializerOptions(DesignJsonOptions.Default)
+            {
+                WriteIndented = true
+            });
 
             // Apply the changes
             StateHasChanged();
@@ -154,13 +168,13 @@
         }
         catch (JsonException ex)
         {
-            ModelValidationError = $"JSON Error: {ex.Message}";
+            ModelValidationError = $"JSON-fout: {ex.Message}";
             StateHasChanged();
             return Task.CompletedTask;
         }
         catch (Exception ex)
         {
-            ModelValidationError = $"Error: {ex.Message}";
+            ModelValidationError = $"Model-fout: {ex.Message}";
             StateHasChanged();
             return Task.CompletedTask;
         }
