@@ -60,7 +60,7 @@ Nulmeting op basis van inspectie van prompts 48 t/m 55 en de huidige designer-im
 |---|---|---|
 | CodeGen: model → `.razor` met nette, menswaardige code | ✅ Compleet | `RazorCodeGenerator` en `ProjectExporter` genereren leesbare Razor-output. |
 | Deterministisch: zelfde model = identieke output | ✅ Compleet | Er zijn determinisme- en roundtriptests rond de generator en serializer. |
-| Kwaliteitscheck: geen hardcoded kleuren, Label/AriaLabel aanwezig | ⚠️ Gedeeltelijk | Er zijn regels en tests in de omgeving, maar de generator zelf biedt nog geen volledige, expliciete kwaliteitsafhandelingslaag voor alle gevallen. |
+| Kwaliteitscheck: geen hardcoded kleuren, Label/AriaLabel aanwezig | ✅ Compleet | Generator en export blokkeren nu expliciet hardcoded hex-kleuren en ontbrekende `Label`/`AriaLabel`-guards voor toegankelijke wrappers. |
 | Monaco Editor: lazy-loaded, zelf-gehost (npm, niet CDN) | ✅ Compleet | Monaco-assets worden self-hosted vanuit `wwwroot/lib`, lazy-loaded via designer interop, met fallback naar de bestaande preview/editor. |
 | Code-tab (read-only Razor preview) met selectie-highlight | ✅ Compleet | De read-only codeweergave is ingebed en markeert nu het blok van de geselecteerde designer-node. |
 | Model JSON-tab (bewerkbaar met schema-validatie + Apply) | ✅ Compleet | JSON-bewerking valideert nu migratiebewust, meldt parse/shape-fouten expliciet en behoudt de laatste geldige toestand. |

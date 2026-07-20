@@ -144,4 +144,55 @@ public class RazorCodeGeneratorTests
         var lines = normalized.Split(Environment.NewLine);
         Assert.All(lines, line => Assert.False(line.EndsWith(" "), $"Line '{line}' has trailing space"));
     }
+
+    [Fact]
+    public void GeneratePageCode_Throws_ForHardcodedHexColor()
+    {
+        var document = new DesignDocument { Name = "Color Test" };
+        var page = new DesignPage
+        {
+            Route = "/color",
+            Title = "Color",
+            Nodes =
+            [
+                new DesignNode
+                {
+                    Id = "node-1",
+                    ComponentType = "AgtTextField",
+                    Parameters = new()
+                    {
+                        ["Label"] = DesignParameterValue.FromValue("Naam"),
+                        ["AriaLabel"] = DesignParameterValue.FromValue("Naam"),
+                        ["Style"] = DesignParameterValue.FromValue("color:#ffffff")
+                    }
+                }
+            ]
+        };
+
+        var ex = Assert.Throws<InvalidOperationException>(() => _generator.GeneratePageCode(page, document));
+        Assert.Contains("hardcoded hex color", ex.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void GeneratePageCode_Throws_ForMissingAccessibleLabel()
+    {
+        var document = new DesignDocument { Name = "A11y Test" };
+        var page = new DesignPage
+        {
+            Route = "/a11y",
+            Title = "A11y",
+            Nodes =
+            [
+                new DesignNode
+                {
+                    Id = "node-1",
+                    ComponentType = "AgtTextField",
+                    Parameters = new()
+                }
+            ]
+        };
+
+        var ex = Assert.Throws<InvalidOperationException>(() => _generator.GeneratePageCode(page, document));
+        Assert.Contains("requires Label or AriaLabel", ex.Message, StringComparison.Ordinal);
+    }
 }

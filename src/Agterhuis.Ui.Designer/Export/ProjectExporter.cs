@@ -5,6 +5,7 @@ using System.Reflection;
 using Agterhuis.Ui.Designer.CodeGen;
 using Agterhuis.Ui.Designer.Model;
 using Agterhuis.Ui.Designer.Serialization;
+using Agterhuis.Ui.Designer.Validation;
 
 namespace Agterhuis.Ui.Designer.Export;
 
@@ -66,6 +67,12 @@ public sealed class ProjectExporter
         if (!SupportedThemeFamilies.Contains(themeFamily, StringComparer.OrdinalIgnoreCase))
         {
             throw new ArgumentException($"Invalid theme family. Must be one of: {string.Join(", ", SupportedThemeFamilies)}", nameof(themeFamily));
+        }
+
+        var validationErrors = DesignDocumentValidator.Validate(document);
+        if (validationErrors.Count > 0)
+        {
+            throw new InvalidOperationException(string.Join("; ", validationErrors.Select(error => $"{error.Path}: {error.Message}")));
         }
 
         var projectFiles = new Dictionary<string, string>(StringComparer.Ordinal);

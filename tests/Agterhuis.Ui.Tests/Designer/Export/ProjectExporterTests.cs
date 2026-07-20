@@ -74,6 +74,34 @@ public class ProjectExporterTests
             () => _exporter.ExportProject(null!, "MyProject", "plum"));
     }
 
+    [Fact]
+    public void ExportProject_WithInvalidAccessibleDocument_ThrowsException()
+    {
+        var document = new DesignDocument
+        {
+            Name = "Invalid Export",
+            Pages =
+            [
+                new DesignPage
+                {
+                    Route = "/",
+                    Title = "Home",
+                    Nodes =
+                    [
+                        new DesignNode
+                        {
+                            ComponentType = "AgtTextField",
+                            Parameters = new Dictionary<string, DesignParameterValue>(StringComparer.Ordinal)
+                        }
+                    ]
+                }
+            ]
+        };
+
+        var ex = Assert.Throws<InvalidOperationException>(() => _exporter.ExportProject(document, "MyProject", "plum"));
+        Assert.Contains("Label or AriaLabel", ex.Message, StringComparison.Ordinal);
+    }
+
     [Theory]
     [InlineData("plum")]
     [InlineData("ocean")]

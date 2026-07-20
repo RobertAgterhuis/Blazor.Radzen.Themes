@@ -37,6 +37,12 @@ public sealed class RazorCodeGenerator
         ArgumentNullException.ThrowIfNull(page);
         ArgumentNullException.ThrowIfNull(document);
 
+        var qualityErrors = CodeGenerationGuard.ValidatePageForCodeGen(page, _registry);
+        if (qualityErrors.Count > 0)
+        {
+            throw new InvalidOperationException(string.Join("; ", qualityErrors.Select(error => $"{error.Path}: {error.Message}")));
+        }
+
         var lines = new List<string>();
 
         // Header with generator version (timestamp omitted for determinism in production)
