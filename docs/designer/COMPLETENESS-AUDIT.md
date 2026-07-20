@@ -8,7 +8,7 @@ Nulmeting op basis van inspectie van prompts 48 t/m 55 en de huidige designer-im
 
 | Totaal | Compleet | Gedeeltelijk | Ontbreekt | Stub |
 |---|---:|---:|---:|---:|
-| 71 | 48 | 13 | 10 | 0 |
+| 71 | 50 | 11 | 10 | 0 |
 
 ## Prompt 48 — Model + registry + renderer
 
@@ -64,10 +64,10 @@ Nulmeting op basis van inspectie van prompts 48 t/m 55 en de huidige designer-im
 | Monaco Editor: lazy-loaded, zelf-gehost (npm, niet CDN) | ❌ Ontbreekt | De code-tab gebruikt een textarea; er is geen Monaco-integratie. |
 | Code-tab (read-only Razor preview) met selectie-highlight | ⚠️ Gedeeltelijk | Er is een read-only codeweergave, maar geen bewezen selectie-highlighting. |
 | Model JSON-tab (bewerkbaar met schema-validatie + Apply) | ⚠️ Gedeeltelijk | JSON-bewerking bestaat, maar de huidige flow toont geen volledige schema-validatie. |
-| Projectexport: volledig client-side (WASM), embedded template-resources | ⚠️ Gedeeltelijk | Export werkt client-side, maar templates zijn nu hardcoded strings in plaats van aantoonbaar embedded resources. |
+| Projectexport: volledig client-side (WASM), embedded template-resources | ✅ Compleet | Export draait client-side en gebruikt embedded template-resources in de designer-assembly. |
 | Export zip via System.IO.Compression in browser | ✅ Compleet | Export gebruikt `ZipArchive` en levert een zip-bytearray. |
 | CI-smoke: export → `dotnet build` van uitgepakt project slaagt | ⚠️ Gedeeltelijk | Een structurele export-smoke bestaat; een volledige standalone build-smoke vergt packaged dependencies buiten deze workspace. |
-| `docs/designer/EXPORT.md` bestaat | ❌ Ontbreekt | Er is geen `EXPORT.md` in `docs/designer`. |
+| `docs/designer/EXPORT.md` bestaat | ✅ Compleet | Exportdocumentatie bestaat en beschrijft inhoud, beperkingen en verificatiedoel. |
 
 ## Prompt 52 — Demo-datamodel + databinding (autoruitschade)
 
@@ -77,7 +77,7 @@ Nulmeting op basis van inspectie van prompts 48 t/m 55 en de huidige designer-im
 | Data-paneel in de designer (tab naast palet) | ✅ Compleet | De demo-pagina bevat een aparte data-paneelkolom. |
 | Voorgedefinieerde domeinentiteiten (Schadedossier, Klant, Voertuig, Werkorder, Factuur, Voorraad) | ✅ Compleet | Seeder en documentmodel leveren deze entiteiten. |
 | Seed-generator: deterministische Nederlandstalige data, min. 25 dossiers | ✅ Compleet | Seeder is deterministisch en de default data heeft de gevraagde Nederlandse domeinset en aantallen. |
-| Bindbare parameters in registry gemarkeerd | ⚠️ Gedeeltelijk | Registry- en parameterinfo bestaan, maar bindbaarheid is nog niet als expliciet eerste-klas metadata aangetoond voor alle relevante parameters. |
+| Bindbare parameters in registry gemarkeerd | ✅ Compleet | Bindbaarheid is expliciete metadata in introspection, generator, registry en property panel. |
 | DataGrid kolommen-editor in property panel | ❌ Ontbreekt | Er is geen aparte kolommen-editor zichtbaar in het property panel. |
 | Formulier genereren uit entiteit | ❌ Ontbreekt | Er is geen entiteitsgedreven form builder zichtbaar in de huidige surface. |
 | Export: per entiteit record + DataService, DI-registratie | ⚠️ Gedeeltelijk | Export genereert service/recordbestanden, maar een volledige DI-registratiesurface is niet aangetoond. |
@@ -125,21 +125,16 @@ Nulmeting op basis van inspectie van prompts 48 t/m 55 en de huidige designer-im
 
 1. Voeg Monaco-editorintegratie toe voor de code/model-workbench en vervang de huidige textarea-achtige modeltab door lazy-loaded, zelf-gehoste editorassets.
 2. Voeg schema-validatie en expliciete apply-flow toe voor de model-JSON-tab, inclusief behoud van de laatste geldige toestand.
-3. Maak de exportlaag resource-gedreven in plaats van hardcoded stringtemplates, en voeg `docs/designer/EXPORT.md` toe.
-4. Voeg de export CI-smoke toe die het uitgepakte project daadwerkelijk bouwt na export.
-5. Markeer bindbare registry-parameters expliciet en voeg de DataGrid-kolommeneditor toe in het property panel.
-6. Voeg entiteitsgedreven formuliergeneratie toe voor de autoruitschade-dataflow en maak de DI-registratie expliciet in exportoutput.
-7. Introduceer `IDesignStore`, projectbeheer-startscherm, leegstaat en patroonstartpunten als aparte persistentie-/opstartlaag.
-8. Voeg designer-specifieke contrast- en bleed-guards toe voor de `/designer`-routes.
-9. Maak de WASM-trimmingstory expliciet met trimmer-roots en verifieer dit in de designer-documentatie en buildconfiguratie.
-10. Verwijder het resterende `System.Reflection`-gebruik uit de designer-runtimepaden waar het niet nodig is voor de generator/verificatie.
+3. Voeg de DataGrid-kolommeneditor toe in het property panel.
+4. Voeg entiteitsgedreven formuliergeneratie toe voor de autoruitschade-dataflow en maak de DI-registratie expliciet in exportoutput.
+5. Verifieer de export-smoke tegen een publishbare dependency-set buiten de repo-workspace.
 
 ## Niet-repareerbaar in deze prompt
 
 | Item | Waarom |
 |---|---|
 | Actuele CI-sweepstatus (“alle sweeps groen”) | Vereist een echte CI-/browser-run; kan niet uit statische inspectie worden afgeleid. |
-| Export-build smoke op uitgepakt project | Vereist een uitvoerbare export- en buildrun met gegenereerde output. |
+| Export-build smoke op uitgepakt project | Vereist een publishbare dependency-set of standalone pakketbron voor de geëxporteerde Agterhuis/Radzen-afhankelijkheden. |
 | Volledige Monaco-assets en bundling | Vereist additionele frontend-assets en bundel-/hostconfiguratie buiten deze nulmeting. |
 
 ## Na reparatie
