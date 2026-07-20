@@ -1,5 +1,7 @@
 # Prompt 56 — Designer completeness audit
 
+<!-- markdownlint-disable MD060 -->
+
 Nulmeting op basis van inspectie van prompts 48 t/m 55 en de huidige designer-implementatie.
 
 ## Samenvatting
@@ -85,16 +87,16 @@ Nulmeting op basis van inspectie van prompts 48 t/m 55 en de huidige designer-im
 
 | Eis | Status | Toelichting |
 |---|---|---|
-| `IDesignStore` abstractie | ❌ Ontbreekt | Geen expliciete store-abtractie aangetroffen in de designer-surface. |
-| `.agtdesign` JSON-formaat met schema-versie | ⚠️ Gedeeltelijk | JSON-serialisatie en schema-versie bestaan, maar het bestandsformaat is nog niet als aparte opslaglaag uitgekristalliseerd. |
+| `IDesignStore` abstractie | ✅ Compleet | `IDesignStore` bestaat en wordt via de demo-app aan de designer geserveerd. |
+| `.agtdesign` JSON-formaat met schema-versie | ✅ Compleet | Het documentformaat is expliciet geladen/opgeslagen via `LocalDesignStore` en documentserialisatie. |
 | File System Access API (Chromium) + blob-download fallback | ⚠️ Gedeeltelijk | Interop bevat open/save file picker en fallback-downloadgedrag. |
 | localStorage autosave + herstel-banner | ✅ Compleet | Herstelbanner en localStorage-interactie zijn aanwezig. |
-| Projectbeheer-startscherm op `/designer` | ❌ Ontbreekt | `/designer` opent direct de editor, niet een startscherm met projectbeheer. |
-| Patronen als startpunten (JSON-sjablonen voor formulier, CRUD, master-detail, wizard, dashboard) | ⚠️ Gedeeltelijk | Templates bestaan, maar de volledige patroonset en startpunt-ervaring zijn niet zichtbaar als aparte laag. |
+| Projectbeheer-startscherm op `/designer` | ✅ Compleet | `/designer` opent nu een startscherm met recente ontwerpen en patroonstartpunten. |
+| Patronen als startpunten (JSON-sjablonen voor formulier, CRUD, master-detail, wizard, dashboard) | ✅ Compleet | De startscreen knoppen navigeren naar editor-templates als startpunt. |
 | Command palette integratie (Ctrl+K) | ✅ Compleet | Er is een command-palettecomponent in de toolbarflow. |
-| Leegstaat voor leeg ontwerp (AgtEmptyState) | ❌ Ontbreekt | Geen expliciete empty-state component of leegstartscherm aangetroffen. |
+| Leegstaat voor leeg ontwerp (AgtEmptyState) | ✅ Compleet | Het startscherm toont `AgtEmptyState` wanneer er geen recente ontwerpen zijn. |
 | Onbekend-component weerbaarheid | ✅ Compleet | Onbekende componenttypes worden via validator en renderer als foutkader afgehandeld. |
-| Guards: contrast-sweep, bleed-audit over designer-routes | ❌ Ontbreekt | Geen designer-specifieke guard-suites aangetroffen voor deze routes. |
+| Guards: contrast-sweep, bleed-audit over designer-routes | ✅ Compleet | Designer routes zijn opgenomen in visual-regression/contrast coverage voor startscreen en canvas. |
 | `docs/designer/README.md` met overzicht zes fasen + beperkingen + roadmap | ✅ Compleet | README beschrijft fasen, beperkingen en roadmap. |
 
 ## Prompt 54 — WASM + SWA conversie
@@ -103,18 +105,18 @@ Nulmeting op basis van inspectie van prompts 48 t/m 55 en de huidige designer-im
 |---|---|---|
 | Demo-app is standalone Blazor WebAssembly (geen Server) | ✅ Compleet | Host gebruikt `blazor.webassembly.js` en een WASM-specifieke index. |
 | `index.html` met correcte head (theme-CSS, anti-FOUC) | ✅ Compleet | Head bevat themestijlen, anti-FOUC-script en correcte laadsamenstelling. |
-| Publish-trimming met trimmer-roots | ⚠️ Gedeeltelijk | Trimming- en trimmer-rootverificatie zijn niet volledig onderbouwd in de huidige inspectie. |
+| Publish-trimming met trimmer-roots | ✅ Compleet | De WASM demo heeft expliciete trimmer roots en buildt succesvol in Release. |
 | Loading-scherm in huisstijl | ✅ Compleet | Laadscherm is aanwezig en thematisch gestyled. |
 | `staticwebapp.config.json` met fallback + cache-headers | ✅ Compleet | SWA-config bevat fallback en cache-headers. |
 | GitHub Actions workflow `.github/workflows/azure-swa.yml` | ✅ Compleet | Workflow voor Azure Static Web Apps bestaat. |
-| Alle sweeps groen na conversie | ⚠️ Gedeeltelijk | De configuratie bestaat, maar actuele sweep-uitvoering is niet hier geverifieerd. |
+| Alle sweeps groen na conversie | ⚠️ Gedeeltelijk | De configuratie bestaat; actuele sweep-uitvoering blijft een runtime-verificatie buiten deze statische audit. |
 
 ## Prompt 55 — Registry build-time migratie
 
 | Eis | Status | Toelichting |
 |---|---|---|
 | Registry gevuld via build-time generator (source generator of MSBuild-stap), NIET runtime reflectie | ✅ Compleet | Er is een generatorproject en een gegenereerde `DesignerComponentRegistry.g.cs`. |
-| Geen `System.Reflection` in Designer-runtime-paden (grep-bewijs) | ⚠️ Gedeeltelijk | Runtime-paden bevatten nog `System.Reflection`-gebruik, onder meer in slot-rendering/binder-implementaties. |
+| Geen `System.Reflection` in Designer-runtime-paden (grep-bewijs) | ✅ Compleet | In de huidige designer runtime-paden is geen `System.Reflection`-gebruik gevonden. |
 | Generator-vs-reflectie vergelijkingstest | ✅ Compleet | De registrytests vergelijken de gegenereerde metadata met reflectiemetadata. |
 | XML-summaries gebakken in gegenereerde code | ✅ Compleet | De gegenereerde registry bevat samenvattingsstrings in code. |
 | `docs/designer/MODEL.md` bijgewerkt | ✅ Compleet | De documentatie beschrijft het generatorpad en de trimmer-root-rol. |
