@@ -66,9 +66,10 @@
     gap: var(--agt-spacing-3);
     grid-template-areas:
         "palette canvas props"
-        "tree canvas data";
+        "tree canvas data"
+        "code code code";
     grid-template-columns: minmax(16rem, 20rem) minmax(0, 1fr) minmax(12rem, 16rem);
-    grid-template-rows: minmax(0, 1fr) minmax(12rem, auto);
+    grid-template-rows: minmax(0, 1fr) minmax(12rem, auto) minmax(16rem, auto);
 }
 
 .designer-panel {
@@ -98,6 +99,10 @@
 
 .designer-panel--tree {
     grid-area: tree;
+}
+
+.designer-panel--code {
+    grid-area: code;
 }
 
 .designer-panel h2 {

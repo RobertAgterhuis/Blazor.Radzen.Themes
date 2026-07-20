@@ -84,4 +84,20 @@ public sealed class DesignerPageTests
             Assert.Contains("AgtFormActions", cut.Markup, StringComparison.Ordinal);
         });
     }
+
+    [Fact]
+    public void DesignerPage_RendersCodeWorkbench()
+    {
+        using var ctx = new BunitContext();
+        ctx.Services.AddRadzenComponents();
+        ctx.Services.AddSingleton<IAgtCommandRegistry>(_ => new AgtCommandRegistry());
+        var jsRuntime = new DesignerJsRuntimeStub();
+        ctx.Services.AddSingleton<IJSRuntime>(jsRuntime);
+        ctx.Services.AddSingleton(new LocalDesignStore(jsRuntime));
+
+        var cut = ctx.Render<Agterhuis.Ui.Demo.Components.Pages.Designer>();
+
+        Assert.Contains("Code (Read-Only)", cut.Markup, StringComparison.Ordinal);
+        Assert.Contains("Model (JSON)", cut.Markup, StringComparison.Ordinal);
+    }
 }

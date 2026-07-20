@@ -2,6 +2,7 @@
 @layout DesignerLayout
 @using Agterhuis.Ui.Components.Layout
 @using Agterhuis.Ui.Designer.Commands
+@using Agterhuis.Ui.Designer.Components
 @using Agterhuis.Ui.Designer.Export
 @using Agterhuis.Ui.Designer.Model
 @using Agterhuis.Ui.Designer.Registry
@@ -143,6 +144,12 @@
             <h2>Structuur</h2>
             <RadzenTree Data="TreeRoots" TextProperty="Text" ChildrenProperty="Children" Change="OnTreeChange" />
         </aside>
+
+        <section class="designer-panel designer-panel--code" aria-label="Code en model">
+            <DesignerCodePanel CurrentPage="@_commands.Document.Pages[0]"
+                               Document="@_commands.Document"
+                               OnDocumentChanged="OnDocumentChanged" />
+        </section>
     </div>
 </div>
 
@@ -550,6 +557,15 @@
             return;
         }
 
+        await AutoSaveAsync();
+        StateHasChanged();
+    }
+
+    private async Task OnDocumentChanged(DesignDocument document)
+    {
+        _commands.ReplaceDocument(document, markSaved: false);
+        _selectedEntityName = _commands.Document.DataModel.Entities.FirstOrDefault()?.Name;
+        _hasRecoveredDraft = true;
         await AutoSaveAsync();
         StateHasChanged();
     }
