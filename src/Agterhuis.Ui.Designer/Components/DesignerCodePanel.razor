@@ -1,0 +1,128 @@
+@using System.Text.Json
+@using Agterhuis.Ui.Designer.Model
+@using Agterhuis.Ui.Designer.CodeGen
+@using Agterhuis.Ui.Designer.Serialization
+@namespace Agterhuis.Ui.Designer.Components
+
+<div class="agt-designer-code-panel">
+    <div class="agt-code-tabs">
+        <button 
+            class="agt-code-tab @(CurrentTab == "code" ? "active" : "")"
+            @onclick="@(() => CurrentTab = "code")">
+            Code (Read-Only)
+        </button>
+        <button 
+            class="agt-code-tab @(CurrentTab == "model" ? "active" : "")"
+            @onclick="@(() => CurrentTab = "model")">
+            Model (JSON)
+        </button>
+    </div>
+
+    <div class="agt-code-content">
+        @if (CurrentTab == "code")
+        {
+            <div class="agt-code-preview">
+                <pre><code>@GeneratedCode</code></pre>
+            </div>
+        }
+        else
+        {
+            <div class="agt-model-editor">
+                <textarea 
+                    class="agt-model-textarea"
+                    @bind="ModelJson"
+                    @onchange="@(() => ValidateAndApplyModel())"
+                    rows="20">
+                </textarea>
+                @if (!string.IsNullOrEmpty(ModelValidationError))
+                {
+                    <div class="agt-validation-error">
+                        @ModelValidationError
+                    </div>
+                }
+                <button 
+                    class="agt-model-apply-btn"
+                    @onclick="@(() => ValidateAndApplyModel())">
+                    Apply
+                </button>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public DesignPage? CurrentPage { get; set; }
+
+    [Parameter]
+    public DesignDocument? Document { get; set; }
+
+    [Parameter]
+    public EventCallback<DesignDocument> OnDocumentChanged { get; set; }
+
+    private string CurrentTab { get; set; } = "code";
+    private string GeneratedCode { get; set; } = string.Empty;
+    private string ModelJson { get; set; } = string.Empty;
+    private string? ModelValidationError { get; set; }
+    private RazorCodeGenerator? _codeGenerator;
+
+    protected override void OnInitialized()
+    {
+        _codeGenerator = new RazorCodeGenerator();
+        RefreshGeneratedCode();
+    }
+
+    protected override void OnParametersSet()
+    {
+        RefreshGeneratedCode();
+    }
+
+    private void RefreshGeneratedCode()
+    {
+        if (CurrentPage is not null && Document is not null && _codeGenerator is not null)
+        {
+            GeneratedCode = _codeGenerator.GeneratePageCode(CurrentPage, Document);
+        }
+
+        if (Document is not null)
+        {
+            var options = new System.Text.Json.JsonSerializerOptions(DesignJsonOptions.Default)
+            {
+                WriteIndented = true
+            };
+            ModelJson = JsonSerializer.Serialize(Document, options);
+        }
+    }
+
+    private void ValidateAndApplyModel()
+    {
+        ModelValidationError = null;
+
+        try
+        {
+            var options = new System.Text.Json.JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+                WriteIndented = true
+            };
+
+            var newDocument = JsonSerializer.Deserialize<DesignDocument>(ModelJson, options);
+            if (newDocument is null)
+            {
+                ModelValidationError = "Failed to deserialize model.";
+                return;
+            }
+
+            // Apply the changes
+            _ = OnDocumentChanged.InvokeAsync(newDocument);
+        }
+        catch (JsonException ex)
+        {
+            ModelValidationError = $"JSON Error: {ex.Message}";
+        }
+        catch (Exception ex)
+        {
+            ModelValidationError = $"Error: {ex.Message}";
+        }
+    }
+}
