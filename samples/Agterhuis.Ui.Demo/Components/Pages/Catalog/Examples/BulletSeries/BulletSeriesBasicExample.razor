@@ -1,15 +1,19 @@
 <RadzenChart Style="height: 18rem;">
-    <RadzenBulletSeries Data="Rows" CategoryProperty="Label" ValueProperty="Value" />
+    <RadzenBulletSeries Data="Rows"
+                        CategoryProperty="Label"
+                        ValueProperty="Actual"
+                        TargetProperty="Target"
+                        MaxProperty="Max" />
 </RadzenChart>
 
 @code {
     private static readonly IReadOnlyList<SeriesRow> Rows =
     [
-        new("Jan", 12),
-        new("Feb", 16),
-        new("Mar", 14)
+        new("Installatie", 64, 70, 100),
+        new("Onderhoud", 78, 80, 100),
+        new("Inspectie", 52, 65, 100)
     ];
 
-    private sealed record SeriesRow(string Label, double Value);
+    private sealed record SeriesRow(string Label, double Actual, double Target, double Max);
 }
 

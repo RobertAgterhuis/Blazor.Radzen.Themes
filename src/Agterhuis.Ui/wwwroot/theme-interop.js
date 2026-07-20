@@ -415,6 +415,18 @@ window.agtTheme = window.agtTheme || (() => {
             return true;
         }
 
+        const componentPage = main.querySelector(".component-page");
+        if (componentPage) {
+            const componentHeader = componentPage.querySelector(".component-page__header");
+            if (componentHeader) {
+                componentHeader.insertAdjacentElement("afterend", contextLink);
+            } else {
+                componentPage.prepend(contextLink);
+            }
+
+            return true;
+        }
+
         const catalogPage = main.querySelector(".catalog-page");
         if (catalogPage) {
             const intro = catalogPage.querySelector("p");

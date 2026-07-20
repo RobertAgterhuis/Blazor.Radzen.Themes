@@ -1,15 +1,21 @@
 <RadzenChart Style="height: 18rem;">
-    <RadzenCandlestickSeries Data="Rows" CategoryProperty="Label" ValueProperty="Value" />
+    <RadzenCandlestickSeries Data="Rows"
+                             CategoryProperty="Label"
+                             OpenProperty="Open"
+                             HighProperty="High"
+                             LowProperty="Low"
+                             CloseProperty="Close" />
 </RadzenChart>
 
 @code {
     private static readonly IReadOnlyList<SeriesRow> Rows =
     [
-        new("Jan", 12),
-        new("Feb", 16),
-        new("Mar", 14)
+        new("Week 1", 128, 141, 122, 137),
+        new("Week 2", 137, 149, 133, 136),
+        new("Week 3", 136, 145, 130, 142),
+        new("Week 4", 142, 154, 139, 150)
     ];
 
-    private sealed record SeriesRow(string Label, double Value);
+    private sealed record SeriesRow(string Label, double Open, double High, double Low, double Close);
 }
 

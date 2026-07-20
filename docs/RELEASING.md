@@ -7,9 +7,10 @@
 Public release automation runs from GitHub Actions on pushed tags that match v*.
 
 1. Update CHANGELOG.md with the release section.
-2. Commit to main.
-3. Create and push a tag, for example v1.2.3.
-4. GitHub Actions workflow release.yml will:
+2. Run `npm run example:scan` and confirm `docs/EXAMPLE-SCAN.md` reports zero `LEEG` and zero `ERROR` examples.
+3. Commit to main.
+4. Create and push a tag, for example v1.2.3.
+5. GitHub Actions workflow release.yml will:
    - restore, build, and test in Release mode,
    - pack Agterhuis.Ui using the tag version,
    - create a GitHub Release,

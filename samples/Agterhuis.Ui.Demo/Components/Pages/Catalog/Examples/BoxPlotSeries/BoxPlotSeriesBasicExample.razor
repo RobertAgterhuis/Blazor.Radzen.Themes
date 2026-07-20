@@ -1,15 +1,21 @@
 <RadzenChart Style="height: 18rem;">
-    <RadzenBoxPlotSeries Data="Rows" CategoryProperty="Label" ValueProperty="Value" />
+    <RadzenBoxPlotSeries Data="Rows"
+                         CategoryProperty="Label"
+                         LowerWhiskerProperty="LowerWhisker"
+                         LowerQuartileProperty="LowerQuartile"
+                         MedianProperty="Median"
+                         UpperQuartileProperty="UpperQuartile"
+                         UpperWhiskerProperty="UpperWhisker" />
 </RadzenChart>
 
 @code {
     private static readonly IReadOnlyList<SeriesRow> Rows =
     [
-        new("Jan", 12),
-        new("Feb", 16),
-        new("Mar", 14)
+        new("Noord", 18, 24, 31, 38, 44),
+        new("West", 15, 21, 29, 36, 41),
+        new("Zuid", 12, 19, 26, 33, 40)
     ];
 
-    private sealed record SeriesRow(string Label, double Value);
+    private sealed record SeriesRow(string Label, double LowerWhisker, double LowerQuartile, double Median, double UpperQuartile, double UpperWhisker);
 }
 

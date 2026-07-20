@@ -6,6 +6,7 @@
     "a11y:install": "playwright install --with-deps chromium",
     "a11y:test": "playwright test tests/a11y",
     "a11y:journey": "playwright test tests/a11y/blog-journey.spec.mjs",
+    "example:scan": "node eng/example-scan/example-scan.mjs",
     "contrast:sweep": "node eng/contrast-sweep/contrast-sweep.mjs",
     "contrast:sweep:blog-volt": "node eng/contrast-sweep/contrast-sweep.mjs --themes=volt --variants=light,dark --routes=/blog,/blog/projecten,/blog/projecten/1,/blog/agents,/blog/prompts,/blog/skills,/blog/artikel/1,/blog/over --checkpoint=eng/contrast-sweep/blog-volt.checkpoint.json --checkpoint-every=2",
     "contrast:sweep:resume": "node eng/contrast-sweep/contrast-sweep.mjs --resume=true",

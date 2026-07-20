@@ -1,10 +1,18 @@
 <RadzenAccordion>
-    <RadzenAccordionItem Text="Compact overzicht">
-        <Template>
-            Samenvatting met custom template-inhoud.
-        </Template>
-    </RadzenAccordionItem>
-    <RadzenAccordionItem Text="Details">
-        Verdere details van het item.
-    </RadzenAccordionItem>
+    <Items>
+        <RadzenAccordionItem>
+            <Template>
+                <div class="agt-stack demo-example-gap-sm" role="presentation">
+                    <strong>Compact overzicht</strong>
+                    <span class="agt-text-meta">Laatste update: vandaag 09:30</span>
+                </div>
+            </Template>
+            <ChildContent>
+                Samenvatting met custom headertemplate en contextinformatie.
+            </ChildContent>
+        </RadzenAccordionItem>
+        <RadzenAccordionItem Text="Details">
+            Verdere details van het item met status, notities en opvolgactie.
+        </RadzenAccordionItem>
+    </Items>
 </RadzenAccordion>

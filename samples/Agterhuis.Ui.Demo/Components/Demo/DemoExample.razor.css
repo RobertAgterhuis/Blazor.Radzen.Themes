@@ -40,6 +40,8 @@
 }
 
 .demo-example__preview {
+    display: block;
+    min-block-size: 2.5rem;
     overflow-x: auto;
     padding-bottom: var(--agt-spacing-1);
 }

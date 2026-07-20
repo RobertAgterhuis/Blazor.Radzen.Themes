@@ -4,7 +4,13 @@ Vijf sporen die het systeem compleet maken: gecodificeerde patronen, content-ric
 
 ---
 
-Copy below into Claude Code in the repo root:
+## Uitvoeringscontext (GitHub Copilot agent mode)
+
+Voer alles hieronder uit met GitHub Copilot in **agent mode** (met terminal-toegang), geopend in de repo-root `D:\repositories\Blazor.Radzen.Themes`. Verplichte werkwijze:
+- Volg de repo-regels in `.github/copilot-instructions.md` — die zijn bindend (tokens-only, guard-tests, zero-warning builds, docs-in-dezelfde-wijziging).
+- Dit is een grote prompt: werk de vijf sporen als AFZONDERLIJKE fasen af, in de volgorde hieronder, met na elk spoor `dotnet build -c Release && dotnet test` groen en een eigen commit (`feat(capstone): spoor N — ...`). Begin niet aan een volgend spoor met een rode build.
+- Bestaande infrastructuur HERGEBRUIKEN, niet dupliceren: `eng/screenshots` (Playwright-basis voor spoor 4), `eng/token-audit` (parser voor spoor 5), het DemoExample/ComponentPage-sjabloon (spoor 1), de bestaande npm-scripts-conventie in `package.json`.
+- Bij twijfel over een bestandslocatie: eerst zoeken in de repo (de structuur staat in `.github/copilot-instructions.md` onder "Project layout"), niets op een nieuwe plek beginnen dat ergens al bestaat.
 
 ---
 

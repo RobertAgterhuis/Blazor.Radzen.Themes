@@ -1,1 +1,17 @@
-<RadzenGoogleMap Zoom="8" />
+@if (HasApiKey)
+{
+	<RadzenGoogleMap ApiKey="@ApiKey" Zoom="8" />
+}
+else
+{
+	<div class="agt-stack demo-example-gap-sm" role="status" aria-live="polite">
+		<RadzenIcon Icon="map" />
+		<span>Google Maps API-sleutel ontbreekt. Stel `AGT_GOOGLE_MAPS_API_KEY` in om de live kaart te tonen.</span>
+	</div>
+}
+
+@code {
+	private static readonly string ApiKey = Environment.GetEnvironmentVariable("AGT_GOOGLE_MAPS_API_KEY") ?? string.Empty;
+
+	private static bool HasApiKey => !string.IsNullOrWhiteSpace(ApiKey);
+}

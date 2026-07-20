@@ -15,7 +15,8 @@ public sealed class ExampleAuditTests
         File.WriteAllText(reportPath, markdown);
 
         Assert.True(File.Exists(reportPath));
+        Assert.True(result.ScanReportLoaded, "Example scan report was not loaded. Run npm run example:scan to refresh docs/EXAMPLE-SCAN.md.");
         Assert.True(result.IsSuccess,
-            $"Example audit failed: similarity={result.UnallowlistedSimilarityViolations}, title={result.UnallowlistedTitleMismatches}. See docs/EXAMPLE-AUDIT.md");
+            $"Example audit failed: similarity={result.UnallowlistedSimilarityViolations}, empty={result.UnallowlistedEmptyViolations}, error={result.UnallowlistedErrorViolations}, title={result.UnallowlistedTitleMismatches}. See docs/EXAMPLE-AUDIT.md");
     }
 }
