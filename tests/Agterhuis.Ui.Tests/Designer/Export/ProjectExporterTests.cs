@@ -146,6 +146,22 @@ public class ProjectExporterTests
     }
 
     [Fact]
+    public void ExportProject_ProducesRunnableProjectSkeleton()
+    {
+        var document = DesignDocumentTemplates.Create(DesignDocumentTemplateKind.FormPage, "Smoke demo");
+
+        var result = _exporter.ExportProject(document, "SmokeProject", "plum");
+
+        using var archive = new ZipArchive(new MemoryStream(result.ZipData), ZipArchiveMode.Read);
+
+        Assert.Contains(archive.Entries, entry => entry.FullName == "SmokeProject/design/document.json");
+        Assert.Contains(archive.Entries, entry => entry.FullName == "SmokeProject/Program.cs");
+        Assert.Contains(archive.Entries, entry => entry.FullName == "SmokeProject/Components/App.razor");
+        Assert.Contains(archive.Entries, entry => entry.FullName == "SmokeProject/Components/Routes.razor");
+        Assert.Contains(archive.Entries, entry => entry.FullName.EndsWith(".razor", StringComparison.Ordinal));
+    }
+
+    [Fact]
     public void ExportProject_WithMultiplePages_GeneratesAllPages()
     {
         // Arrange
