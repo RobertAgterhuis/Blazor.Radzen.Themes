@@ -146,6 +146,22 @@ public class ProjectExporterTests
     }
 
     [Fact]
+    public void ExportProject_RegistersGeneratedDataServiceInProgram()
+    {
+        var document = DesignDocumentTemplates.Create(DesignDocumentTemplateKind.FormPage, "Data demo");
+
+        var result = _exporter.ExportProject(document, "DataProject", "plum");
+
+        using var archive = new ZipArchive(new MemoryStream(result.ZipData), ZipArchiveMode.Read);
+        using var programStream = archive.GetEntry("DataProject/Program.cs")!.Open();
+        using var reader = new StreamReader(programStream, Encoding.UTF8);
+        var programSource = reader.ReadToEnd();
+
+        Assert.Contains("using ExportedApp.Services;", programSource, StringComparison.Ordinal);
+        Assert.Contains("builder.Services.AddScoped<DesignDataService>();", programSource, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void ExportProject_ProducesRunnableProjectSkeleton()
     {
         var document = DesignDocumentTemplates.Create(DesignDocumentTemplateKind.FormPage, "Smoke demo");

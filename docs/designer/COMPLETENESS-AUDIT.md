@@ -80,7 +80,7 @@ Nulmeting op basis van inspectie van prompts 48 t/m 55 en de huidige designer-im
 | Bindbare parameters in registry gemarkeerd | ✅ Compleet | Bindbaarheid is expliciete metadata in introspection, generator, registry en property panel. |
 | DataGrid kolommen-editor in property panel | ✅ Compleet | Het property panel toont nu een aparte kolommen-editor voor grid-nodes met `Columns`-slot. |
 | Formulier genereren uit entiteit | ✅ Compleet | Het data-paneel kan nu voor de geselecteerde entiteit een veldset en formulieracties in de designerpagina invoegen. |
-| Export: per entiteit record + DataService, DI-registratie | ⚠️ Gedeeltelijk | Export genereert service/recordbestanden, maar een volledige DI-registratiesurface is niet aangetoond. |
+| Export: per entiteit record + DataService, DI-registratie | ✅ Compleet | Export genereert records en data service, en registreert die service expliciet in het gegenereerde Program-bestand. |
 | `docs/designer/DATA.md` bestaat | ✅ Compleet | Document beschrijft model, seed en exportcontract. |
 
 ## Prompt 53 — Persistentie + patronen + afwerking

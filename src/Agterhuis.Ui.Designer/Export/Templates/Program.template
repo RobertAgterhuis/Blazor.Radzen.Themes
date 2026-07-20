@@ -1,8 +1,10 @@
 using Agterhuis.Ui.Extensions;
+using ExportedApp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.UseStaticWebAssets();
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
+builder.Services.AddScoped<DesignDataService>();
 
 var app = builder.Build();
 app.UseHttpsRedirection();
