@@ -1,0 +1,526 @@
+{
+  "alpha/accent/10": {
+    "azure-light": "rgb(0 120 212 / 10%)",
+    "azure-dark": "rgb(40 153 245 / 10%)"
+  },
+  "alpha/accent/20": {
+    "azure-light": "rgb(0 120 212 / 20%)",
+    "azure-dark": "rgb(40 153 245 / 20%)"
+  },
+  "alpha/accent/40": {
+    "azure-light": "rgb(0 120 212 / 40%)",
+    "azure-dark": "rgb(40 153 245 / 40%)"
+  },
+  "alpha/accent/5": {
+    "azure-light": "rgb(0 120 212 / 5%)",
+    "azure-dark": "rgb(40 153 245 / 5%)"
+  },
+  "alpha/primary/10": {
+    "azure-light": "rgb(0 120 212 / 10%)",
+    "azure-dark": "rgb(40 153 245 / 10%)"
+  },
+  "alpha/primary/20": {
+    "azure-light": "rgb(0 120 212 / 20%)",
+    "azure-dark": "rgb(40 153 245 / 20%)"
+  },
+  "alpha/primary/4": {
+    "azure-light": "rgb(0 120 212 / 4%)",
+    "azure-dark": "rgb(40 153 245 / 4%)"
+  },
+  "alpha/primary/40": {
+    "azure-light": "rgb(0 120 212 / 40%)",
+    "azure-dark": "rgb(40 153 245 / 40%)"
+  },
+  "alpha/primary/5": {
+    "azure-light": "rgb(0 120 212 / 5%)",
+    "azure-dark": "rgb(40 153 245 / 5%)"
+  },
+  "btn/base/fill": {
+    "azure-light": "#f3f2f1",
+    "azure-dark": "#323130"
+  },
+  "btn/danger/fill": {
+    "azure-light": "#d13438",
+    "azure-dark": "#d13438"
+  },
+  "btn/dark/fill": {
+    "azure-light": "#201f1e",
+    "azure-dark": "#1b1a19"
+  },
+  "btn/dark/ink": {
+    "azure-light": "#f3f2f1",
+    "azure-dark": "#c8c6c4"
+  },
+  "btn/info/fill": {
+    "azure-light": "#0078d4",
+    "azure-dark": "#0078d4"
+  },
+  "btn/light/fill": {
+    "azure-light": "#ffffff",
+    "azure-dark": "#f3f2f1"
+  },
+  "btn/light/ink": {
+    "azure-light": "#605e5c",
+    "azure-dark": "#201f1e"
+  },
+  "btn/primary/fill": {
+    "azure-light": "#0078d4",
+    "azure-dark": "#0078d4"
+  },
+  "btn/secondary/border": {
+    "azure-light": "#0078d4",
+    "azure-dark": "#2899f5"
+  },
+  "btn/secondary/fill": {
+    "azure-light": "#106ebe",
+    "azure-dark": "#0078d4"
+  },
+  "btn/secondary/hover/bg": {
+    "azure-light": "rgb(0 120 212 / 8%)",
+    "azure-dark": "rgb(40 153 245 / 14%)"
+  },
+  "btn/secondary/hover/text": {
+    "azure-light": "#004578",
+    "azure-dark": "#deecf9"
+  },
+  "btn/secondary/text": {
+    "azure-light": "#005a9e",
+    "azure-dark": "#71afe5"
+  },
+  "btn/success/fill": {
+    "azure-light": "#107c10",
+    "azure-dark": "#107c10"
+  },
+  "btn/warning/fill": {
+    "azure-light": "#ffb900",
+    "azure-dark": "#ffb900"
+  },
+  "canvas/backdrop": {
+    "azure-light": "linear-gradient(180deg, rgb(0 120 212 / 0%) 0%, rgb(0 120 212 / 0%) 100%)",
+    "azure-dark": "linear-gradient(180deg, rgb(40 153 245 / 0%) 0%, rgb(40 153 245 / 0%) 100%)"
+  },
+  "chart/axis/text": {
+    "azure-light": "#605e5c",
+    "azure-dark": "#979593"
+  },
+  "chart/gridline": {
+    "azure-light": "#d2d0ce",
+    "azure-dark": "#3b3a39"
+  },
+  "chart/series/1": {
+    "azure-light": "#0078d4",
+    "azure-dark": "#2899f5"
+  },
+  "chart/series/2": {
+    "azure-light": "#00188f",
+    "azure-dark": "#71afe5"
+  },
+  "chart/series/3": {
+    "azure-light": "#00bcf2",
+    "azure-dark": "#00bcf2"
+  },
+  "chart/series/4": {
+    "azure-light": "#107c10",
+    "azure-dark": "#107c10"
+  },
+  "chart/series/5": {
+    "azure-light": "#986f0b",
+    "azure-dark": "#986f0b"
+  },
+  "chart/series/6": {
+    "azure-light": "#a4262c",
+    "azure-dark": "#d13438"
+  },
+  "chart/series/7": {
+    "azure-light": "#605e5c",
+    "azure-dark": "#c8c6c4"
+  },
+  "chart/series/8": {
+    "azure-light": "#8a8886",
+    "azure-dark": "#605e5c"
+  },
+  "color/accent/300": {
+    "azure-light": "#c7e0f4",
+    "azure-dark": "#71afe5"
+  },
+  "color/accent/400": {
+    "azure-light": "#0078d4",
+    "azure-dark": "#0078d4"
+  },
+  "color/accent/500": {
+    "azure-light": "#106ebe",
+    "azure-dark": "#106ebe"
+  },
+  "color/accent/600": {
+    "azure-light": "#005a9e",
+    "azure-dark": "#005a9e"
+  },
+  "color/accent/700": {
+    "azure-light": "#004578",
+    "azure-dark": "#005a9e"
+  },
+  "color/accent/text": {
+    "azure-light": "#005a9e",
+    "azure-dark": "#71afe5"
+  },
+  "color/danger": {
+    "azure-light": "#a4262c",
+    "azure-dark": "#d13438"
+  },
+  "color/danger/text": {
+    "azure-light": "#a4262c",
+    "azure-dark": "#ffb3b7"
+  },
+  "color/gray/100": {
+    "azure-light": "#f3f2f1",
+    "azure-dark": "#c8c6c4"
+  },
+  "color/gray/200": {
+    "azure-light": "#e1dfdd",
+    "azure-dark": "#a19f9d"
+  },
+  "color/gray/50": {
+    "azure-light": "#faf9f8",
+    "azure-dark": "#f3f2f1"
+  },
+  "color/gray/500": {
+    "azure-light": "#8a8886",
+    "azure-dark": "#979593"
+  },
+  "color/gray/700": {
+    "azure-light": "#605e5c",
+    "azure-dark": "#605e5c"
+  },
+  "color/gray/900": {
+    "azure-light": "#201f1e",
+    "azure-dark": "#201f1e"
+  },
+  "color/info": {
+    "azure-light": "#0078d4",
+    "azure-dark": "#2899f5"
+  },
+  "color/primary/100": {
+    "azure-light": "#deecf9",
+    "azure-dark": "#deecf9"
+  },
+  "color/primary/200": {
+    "azure-light": "#c7e0f4",
+    "azure-dark": "#c7e0f4"
+  },
+  "color/primary/300": {
+    "azure-light": "#9fd3f2",
+    "azure-dark": "#9fd3f2"
+  },
+  "color/primary/400": {
+    "azure-light": "#40a0f0",
+    "azure-dark": "#2899f5"
+  },
+  "color/primary/50": {
+    "azure-light": "#f3f9fd",
+    "azure-dark": "#eef7fd"
+  },
+  "color/primary/500": {
+    "azure-light": "#0078d4",
+    "azure-dark": "#0078d4"
+  },
+  "color/primary/600": {
+    "azure-light": "#106ebe",
+    "azure-dark": "#106ebe"
+  },
+  "color/primary/700": {
+    "azure-light": "#005a9e",
+    "azure-dark": "#005a9e"
+  },
+  "color/primary/800": {
+    "azure-light": "#004578",
+    "azure-dark": "#005a9e"
+  },
+  "color/primary/900": {
+    "azure-light": "#003966",
+    "azure-dark": "#003966"
+  },
+  "color/primary/950": {
+    "azure-light": "#001b3a",
+    "azure-dark": "#001b3a"
+  },
+  "color/success": {
+    "azure-light": "#107c10",
+    "azure-dark": "#107c10"
+  },
+  "color/warning": {
+    "azure-light": "#986f0b",
+    "azure-dark": "#986f0b"
+  },
+  "color/white": {
+    "azure-light": "#ffffff",
+    "azure-dark": "#ffffff"
+  },
+  "control/disabled/bg": {
+    "azure-light": "#edebe9",
+    "azure-dark": "#323130"
+  },
+  "focus/ring": {
+    "azure-light": "0 0 0 3px rgb(0 120 212 / 18%)",
+    "azure-dark": "0 0 0 3px rgb(40 153 245 / 24%)"
+  },
+  "focus/ring/style": {
+    "azure-light": "0 0 0 1px rgb(0 120 212 / 24%)",
+    "azure-dark": "0 0 0 1px rgb(40 153 245 / 30%)"
+  },
+  "font/body": {
+    "azure-light": "\u0022Segoe UI Variable\u0022, \u0022Segoe UI\u0022, -apple-system, BlinkMacSystemFont, sans-serif",
+    "azure-dark": "\u0022Segoe UI Variable\u0022, \u0022Segoe UI\u0022, -apple-system, BlinkMacSystemFont, sans-serif"
+  },
+  "font/display": {
+    "azure-light": "\u0022Segoe UI Variable\u0022, \u0022Segoe UI\u0022, -apple-system, BlinkMacSystemFont, sans-serif",
+    "azure-dark": "\u0022Segoe UI Variable\u0022, \u0022Segoe UI\u0022, -apple-system, BlinkMacSystemFont, sans-serif"
+  },
+  "glass/bg": {
+    "azure-light": "rgb(255 255 255 / 96%)",
+    "azure-dark": "rgb(32 31 30 / 96%)"
+  },
+  "glass/border": {
+    "azure-light": "1px solid var(--agt-glass-border-color)",
+    "azure-dark": "1px solid var(--agt-glass-border-color)"
+  },
+  "glass/border/color": {
+    "azure-light": "rgb(96 94 92 / 18%)",
+    "azure-dark": "rgb(243 242 241 / 10%)"
+  },
+  "glow/accent": {
+    "azure-light": "0 0 0 1px rgb(0 120 212 / 10%)",
+    "azure-dark": "0 0 0 1px rgb(40 153 245 / 12%)"
+  },
+  "glow/primary": {
+    "azure-light": "0 0 0 1px rgb(0 120 212 / 8%)",
+    "azure-dark": "0 0 0 1px rgb(40 153 245 / 10%)"
+  },
+  "glow/strength": {
+    "azure-light": "1",
+    "azure-dark": "1"
+  },
+  "gradient/accent": {
+    "azure-light": "linear-gradient(135deg, #0078d4 0%, #0078d4 100%)",
+    "azure-dark": "linear-gradient(135deg, #0078d4 0%, #0078d4 100%)"
+  },
+  "gradient/hero": {
+    "azure-light": "linear-gradient(180deg, #f5f5f5 0%, #f5f5f5 100%)",
+    "azure-dark": "linear-gradient(180deg, #1b1a19 0%, #1b1a19 100%)"
+  },
+  "gradient/surface": {
+    "azure-light": "linear-gradient(145deg, #ffffff 0%, #ffffff 100%)",
+    "azure-dark": "linear-gradient(145deg, #252423 0%, #201f1e 100%)"
+  },
+  "grid/header/bg": {
+    "azure-light": "#ffffff",
+    "azure-dark": "#201f1e"
+  },
+  "grid/header/border": {
+    "azure-light": "#d2d0ce",
+    "azure-dark": "#605e5c"
+  },
+  "grid/header/text": {
+    "azure-light": "#201f1e",
+    "azure-dark": "#f3f2f1"
+  },
+  "grid/row/hover/bg": {
+    "azure-light": "#f3f2f1",
+    "azure-dark": "#252423"
+  },
+  "grid/row/selected/bg": {
+    "azure-light": "#deecf9",
+    "azure-dark": "#213a52"
+  },
+  "grid/row/selected/text": {
+    "azure-light": "#201f1e",
+    "azure-dark": "#f3f2f1"
+  },
+  "heading/tracking": {
+    "azure-light": "0",
+    "azure-dark": "0"
+  },
+  "heading/weight": {
+    "azure-light": "700",
+    "azure-dark": "700"
+  },
+  "hover/tint": {
+    "azure-light": "#f3f2f1",
+    "azure-dark": "#323130"
+  },
+  "indicator/transition": {
+    "azure-light": "150ms cubic-bezier(0.1, 0.9, 0.2, 1)",
+    "azure-dark": "150ms cubic-bezier(0.1, 0.9, 0.2, 1)"
+  },
+  "input/border": {
+    "azure-light": "#8a8886",
+    "azure-dark": "#979593"
+  },
+  "input/focus/border": {
+    "azure-light": "#0078d4",
+    "azure-dark": "#2899f5"
+  },
+  "input/focus/ring": {
+    "azure-light": "0 0 0 3px rgb(0 120 212 / 20%)",
+    "azure-dark": "0 0 0 3px rgb(40 153 245 / 24%)"
+  },
+  "lift/distance": {
+    "azure-light": "0",
+    "azure-dark": "0"
+  },
+  "link/color": {
+    "azure-light": "#0065b3",
+    "azure-dark": "#2899f5"
+  },
+  "link/hover/color": {
+    "azure-light": "#005a9e",
+    "azure-dark": "#71afe5"
+  },
+  "nav/focus/outline": {
+    "azure-light": "#0078d4",
+    "azure-dark": "#71afe5"
+  },
+  "nav/group/text": {
+    "azure-light": "#605e5c",
+    "azure-dark": "#979593"
+  },
+  "nav/item/active/bg": {
+    "azure-light": "#deecf9",
+    "azure-dark": "#213a52"
+  },
+  "nav/item/active/icon": {
+    "azure-light": "#0078d4",
+    "azure-dark": "#2899f5"
+  },
+  "nav/item/active/text": {
+    "azure-light": "#005a9e",
+    "azure-dark": "#f3f2f1"
+  },
+  "nav/item/hover/bg": {
+    "azure-light": "#f3f2f1",
+    "azure-dark": "#323130"
+  },
+  "nav/item/hover/text": {
+    "azure-light": "#201f1e",
+    "azure-dark": "#f3f2f1"
+  },
+  "nav/item/icon": {
+    "azure-light": "#605e5c",
+    "azure-dark": "#979593"
+  },
+  "nav/item/text": {
+    "azure-light": "#201f1e",
+    "azure-dark": "#c8c6c4"
+  },
+  "on/accent": {
+    "azure-light": "#ffffff",
+    "azure-dark": "#ffffff"
+  },
+  "on/base": {
+    "azure-light": "#201f1e",
+    "azure-dark": "#f3f2f1"
+  },
+  "on/danger": {
+    "azure-light": "#ffffff",
+    "azure-dark": "#ffffff"
+  },
+  "on/dark": {
+    "azure-light": "#ffffff",
+    "azure-dark": "#f3f2f1"
+  },
+  "on/info": {
+    "azure-light": "#ffffff",
+    "azure-dark": "#ffffff"
+  },
+  "on/light": {
+    "azure-light": "#201f1e",
+    "azure-dark": "#201f1e"
+  },
+  "on/primary": {
+    "azure-light": "#ffffff",
+    "azure-dark": "#ffffff"
+  },
+  "on/secondary": {
+    "azure-light": "#ffffff",
+    "azure-dark": "#ffffff"
+  },
+  "on/success": {
+    "azure-light": "#ffffff",
+    "azure-dark": "#ffffff"
+  },
+  "on/warning": {
+    "azure-light": "#201f1e",
+    "azure-dark": "#201f1e"
+  },
+  "press/scale": {
+    "azure-light": "0.992",
+    "azure-dark": "0.992"
+  },
+  "radius/scale": {
+    "azure-light": "0.25",
+    "azure-dark": "0.25"
+  },
+  "selection/tint": {
+    "azure-light": "#deecf9",
+    "azure-dark": "#213a52"
+  },
+  "shadow/md": {
+    "azure-light": "0 2px 6px rgb(32 31 30 / 12%), 0 8px 18px rgb(32 31 30 / 8%)",
+    "azure-dark": "0 3px 8px rgb(0 0 0 / 34%), 0 12px 24px rgb(0 0 0 / 20%)"
+  },
+  "shadow/sm": {
+    "azure-light": "0 1px 2px rgb(32 31 30 / 10%), 0 4px 10px rgb(32 31 30 / 5%)",
+    "azure-dark": "0 1px 2px rgb(0 0 0 / 28%), 0 6px 14px rgb(0 0 0 / 16%)"
+  },
+  "surface/0": {
+    "azure-light": "#f5f5f5",
+    "azure-dark": "#1b1a19"
+  },
+  "surface/1": {
+    "azure-light": "#ffffff",
+    "azure-dark": "#201f1e"
+  },
+  "surface/2": {
+    "azure-light": "#ffffff",
+    "azure-dark": "#252423"
+  },
+  "surface/3": {
+    "azure-light": "#f3f2f1",
+    "azure-dark": "#323130"
+  },
+  "text/body": {
+    "azure-light": "#201f1e",
+    "azure-dark": "#f3f2f1"
+  },
+  "text/disabled": {
+    "azure-light": "#a19f9d",
+    "azure-dark": "#797775"
+  },
+  "text/heading": {
+    "azure-light": "#201f1e",
+    "azure-dark": "#f3f2f1"
+  },
+  "text/muted": {
+    "azure-light": "#605e5c",
+    "azure-dark": "#979593"
+  },
+  "tooltip/text": {
+    "azure-light": "#201f1e",
+    "azure-dark": "#f3f2f1"
+  },
+  "topbar/brand/accent": {
+    "azure-light": "#2899f5",
+    "azure-dark": "#2899f5"
+  },
+  "topbar/brand/color": {
+    "azure-light": "#ffffff",
+    "azure-dark": "#ffffff"
+  },
+  "topbar/icon/color": {
+    "azure-light": "#c8c6c4",
+    "azure-dark": "#c8c6c4"
+  },
+  "topbar/icon/hover/color": {
+    "azure-light": "#ffffff",
+    "azure-dark": "#ffffff"
+  }
+}

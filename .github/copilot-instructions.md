@@ -1,11 +1,11 @@
 # Agterhuis.Ui — repository instructions
 
-Internal Blazor design system: a Razor Class Library (`src/Agterhuis.Ui`) packaged as a NuGet package (Azure Artifacts, feed in project ICT365.NuGet) containing Radzen-based wrapper components, a multi-theme token system, and static assets. Consumers are internal Blazor Web Apps. PackageId stays `Agterhuis.Ui` (repo name `ICT365.NuGet.UI.Theme` intentionally differs).
+Internal Blazor design system: a Razor Class Library (`src/Agterhuis.Ui`) packaged as a NuGet package (Azure Artifacts, feed in project ICT365.NuGet) containing Radzen-based wrapper components, a multi-theme token system, and static assets. Consumers are internal Blazor apps (Blazor Web Apps, standalone WebAssembly, and similar host models). PackageId stays `Agterhuis.Ui` (repo name `ICT365.NuGet.UI.Theme` intentionally differs).
 
 ## Project layout
 
 - `src/Agterhuis.Ui` — the RCL (only packable project, `Sdk=Microsoft.NET.Sdk.Razor`, net10.0)
-- `samples/Agterhuis.Ui.Demo` — demo/dev harness with component pages + full Radzen catalog
+- `samples/Agterhuis.Ui.Demo` — standalone Blazor WebAssembly demo/dev harness with component pages + full Radzen catalog
 - `tests/Agterhuis.Ui.Tests` — xunit + bUnit v2 (`BunitContext`)
 - `prompts/` — numbered work prompts (history of how this repo was built; keep numbering when adding)
 - `docs/` — living evidence docs (see "Docs that must stay current" below)
@@ -56,7 +56,7 @@ Contrast ≥ 4.5:1 (text) / 3:1 (large text, UI boundaries) in every theme and v
 - Central Package Management (`Directory.Packages.props`), no versions in csproj, no wildcards; lock files committed (`dotnet restore --force-evaluate` after dependency changes); `--locked-mode` in CI.
 - `Radzen.Blazor` is a plain `PackageReference` in the RCL (never `PrivateAssets="all"` — it must flow to consumers). Treat a Radzen upgrade as a controlled change: rerun the component inventory, theme-coverage check, and visual regression walk.
 - Never copy/embed Radzen premium theme assets; no secrets/PATs anywhere.
-- Consumer CSS order: Radzen `material-base.css` → `agt-theme.css` → `agt-utilities.css` → app css; plus `theme-interop.js` and the anti-FOUC snippet (see `docs/CONSUMING.md`).
+- Consumer CSS order: Radzen `material-base.css` → `agt-theme.css` → `agt-utilities.css` → app css; plus `theme-interop.js` and the anti-FOUC snippet (see `docs/CONSUMING.md`). For standalone WebAssembly hosts, put the shell in `wwwroot/index.html`; for Blazor Web Apps, keep the same order in the host page/App shell.
 
 ## Docs that must stay current (update in the same PR as the change)
 

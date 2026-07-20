@@ -1,0 +1,84 @@
+.designer-canvas-node {
+    background: var(--agt-surface-1);
+    border: 1px solid var(--agt-input-border);
+    border-radius: var(--agt-border-radius-md);
+    margin-bottom: var(--agt-spacing-3);
+    overflow: clip;
+}
+
+.designer-canvas-node--selected {
+    border-color: var(--agt-color-primary-500);
+    box-shadow: 0 0 0 2px var(--agt-alpha-primary-20);
+}
+
+.designer-canvas-node__bar {
+    align-items: center;
+    background: var(--agt-surface-2);
+    border-bottom: 1px solid var(--agt-input-border);
+    display: flex;
+    min-height: 2rem;
+    padding: 0 var(--agt-spacing-2);
+}
+
+.designer-canvas-node__select {
+    align-items: center;
+    background: none;
+    border: 0;
+    color: var(--agt-text-muted);
+    cursor: pointer;
+    display: inline-flex;
+    font-size: var(--agt-font-size-xs);
+    gap: var(--agt-spacing-1);
+    padding: 0;
+}
+
+.designer-canvas-node--selected .designer-canvas-node__select {
+    color: var(--agt-text-heading);
+}
+
+.designer-canvas-node__preview {
+    padding: var(--agt-spacing-3);
+}
+
+.designer-canvas-node__error {
+    background: var(--agt-surface-2);
+    color: var(--agt-text-body);
+    padding: var(--agt-spacing-2);
+}
+
+.designer-slot {
+    border-top: 1px dashed var(--agt-input-border);
+    padding: var(--agt-spacing-2) var(--agt-spacing-2) var(--agt-spacing-3);
+}
+
+.designer-slot__hint {
+    color: var(--agt-text-muted);
+    font-size: var(--agt-font-size-xs);
+    margin-bottom: var(--agt-spacing-2);
+}
+
+.designer-slot__empty {
+    border: 1px dashed var(--agt-input-border);
+    border-radius: var(--agt-border-radius-sm);
+    color: var(--agt-text-muted);
+    font-size: var(--agt-font-size-xs);
+    padding: var(--agt-spacing-2);
+    text-align: center;
+}
+
+.designer-dropzone {
+    border-radius: var(--agt-border-radius-sm);
+    height: 0.65rem;
+    margin: var(--agt-spacing-1) 0;
+    transition: background-color 160ms ease;
+}
+
+.designer-dropzone:hover {
+    background: var(--agt-alpha-accent-20);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .designer-dropzone {
+        transition: none;
+    }
+}

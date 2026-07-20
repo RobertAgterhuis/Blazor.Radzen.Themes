@@ -54,9 +54,9 @@ Use this order in your host page:
 6. Radzen JS
 7. Agterhuis theme interop JS
 
-Example (`Components/App.razor`):
+Example (`wwwroot/index.html` for standalone WebAssembly, or the equivalent host shell in a Blazor Web App):
 
-```razor
+```html
 <head>
   <link rel="stylesheet" href="_content/Radzen.Blazor/css/material-base.css" />
   <link rel="stylesheet" href="_content/Agterhuis.Ui/css/agt-theme.css" />
@@ -80,6 +80,8 @@ Example (`Components/App.razor`):
   <script src="_content/Agterhuis.Ui/theme-interop.js"></script>
 </body>
 ```
+
+For a standalone WebAssembly host, place the bootstrap shell in `wwwroot/index.html` and load `_framework/blazor.webassembly.js`. For a Blazor Web App, keep the same asset order in the host shell.
 
 ## 5. Import and use components
 

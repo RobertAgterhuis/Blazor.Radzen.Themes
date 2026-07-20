@@ -1,0 +1,632 @@
+@page "/designer"
+@layout DesignerLayout
+@using Agterhuis.Ui.Designer.Commands
+@using Agterhuis.Ui.Designer.Model
+@using Agterhuis.Ui.Designer.Registry
+@using Agterhuis.Ui.Designer.Serialization
+@using Agterhuis.Ui.Demo.Components.Designer
+@inject IJSRuntime JS
+
+<PageTitle>Designer</PageTitle>
+
+<div class="designer-page" @onkeydown="OnPageKeyDown" tabindex="0">
+    <header class="designer-toolbar" aria-label="Designer toolbar">
+        <div class="designer-toolbar__group">
+            <RadzenButton Text="Nieuw" Icon="add_box" ButtonStyle="ButtonStyle.Base" Variant="Variant.Flat" Click="OnNewDocument" />
+            <RadzenDropDown TValue="string" Data="SavedDocumentNames" Value="@_selectedSavedName" Placeholder="Open uit localStorage" Change="OnSavedSelectionChanged" />
+            <RadzenButton Text="Opslaan" Icon="save" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Flat" Click="OnSaveDocument" />
+        </div>
+
+        <div class="designer-toolbar__group">
+            <RadzenButton Text="Undo" Icon="undo" Disabled="@(!_commands.CanUndo)" ButtonStyle="ButtonStyle.Base" Variant="Variant.Flat" Click="OnUndo" />
+            <RadzenButton Text="Redo" Icon="redo" Disabled="@(!_commands.CanRedo)" ButtonStyle="ButtonStyle.Base" Variant="Variant.Flat" Click="OnRedo" />
+            <span class="designer-toolbar__dirty" aria-live="polite">@(_commands.IsDirty ? "Wijzigingen niet opgeslagen" : "Alles opgeslagen")</span>
+        </div>
+
+        <div class="designer-toolbar__group">
+            <RadzenDropDown TValue="string" Data="CanvasThemeOptions" Value="@_canvasTheme" Change="OnCanvasThemeChanged" />
+            <div class="designer-toolbar__group">
+                <RadzenButton Text="Mobiel" ButtonStyle="ButtonStyle.Base" Variant="Variant.Flat" Click='@(() => SetViewport("mobile"))' />
+                <RadzenButton Text="Tablet" ButtonStyle="ButtonStyle.Base" Variant="Variant.Flat" Click='@(() => SetViewport("tablet"))' />
+                <RadzenButton Text="Desktop" ButtonStyle="ButtonStyle.Base" Variant="Variant.Flat" Click='@(() => SetViewport("desktop"))' />
+            </div>
+        </div>
+    </header>
+
+    <div class="designer-grid">
+        <aside class="designer-panel designer-panel--palette" aria-label="Componentenpalet">
+            <div class="designer-panel__header">
+                <h2>Palet</h2>
+                <input class="designer-filter" type="text" placeholder="Filter componenten..." value="@_paletteFilter" @oninput="OnPaletteFilterChanged" />
+            </div>
+
+            @foreach (var category in PaletteByCategory)
+            {
+                <section class="designer-category">
+                    <h3>@category.Key</h3>
+                    @foreach (var descriptor in category.Value)
+                    {
+                        <button type="button"
+                                class="designer-palette-item"
+                                draggable="true"
+                                @ondragstart="() => OnPaletteDragStart(descriptor.ComponentType)"
+                                @ondragend="OnDragEnd"
+                                title="@descriptor.ComponentType">
+                            <RadzenIcon Icon="@descriptor.Icon" />
+                            <span>@descriptor.DisplayName</span>
+                        </button>
+                    }
+                </section>
+            }
+        </aside>
+
+        <section class="designer-panel designer-panel--canvas" aria-label="Canvas">
+            <div class="designer-breadcrumb" aria-live="polite">@SelectionBreadcrumb</div>
+
+            <div class="designer-canvas-frame" style="@CanvasFrameStyle">
+                <div class="designer-canvas" data-agt-theme="@_canvasTheme" @ref="_canvasRef">
+                    <div class="designer-dropzone designer-dropzone--root"
+                         @ondragover="OnDropZoneDragOver"
+                         @ondrop="() => OnDropRequested(new DesignerDropTarget(DesignNodeLocation.Root(_commands.Document.Pages[0].Nodes.Count)))"
+                         title="Drop op canvas"></div>
+
+                    @for (var index = 0; index < _commands.Document.Pages[0].Nodes.Count; index++)
+                    {
+                        var node = _commands.Document.Pages[0].Nodes[index];
+
+                        <DesignerCanvasNode Node="node"
+                                            Registry="_registry"
+                                            SelectedNodeId="_selectedNodeId"
+                                            SelectNode="OnSelectNode"
+                                            StartDrag="OnDragStart"
+                                            EndDrag="OnDragEnd"
+                                            DropNode="OnDropRequested" />
+
+                        <div class="designer-dropzone designer-dropzone--root"
+                             @ondragover="OnDropZoneDragOver"
+                             @ondrop="() => OnDropRequested(new DesignerDropTarget(DesignNodeLocation.Root(index + 1)))"
+                             title="Drop op canvas"></div>
+                    }
+                </div>
+            </div>
+        </section>
+
+        <aside class="designer-panel designer-panel--properties" aria-label="Properties panel">
+            <h2>Properties</h2>
+            <p>Fase 3: property panel.</p>
+        </aside>
+
+        <aside class="designer-panel designer-panel--tree" aria-label="Structuurboom">
+            <h2>Structuur</h2>
+            <RadzenTree Data="TreeRoots" TextProperty="Text" ChildrenProperty="Children" Change="OnTreeChange" />
+        </aside>
+    </div>
+</div>
+
+@code {
+    private const string LocalStorageIndexKey = "agt-designer-documents";
+    private const string LocalStoragePrefix = "agt-designer-document-";
+
+    private readonly DesignerComponentRegistry _registry = DesignerComponentRegistry.Instance;
+    private readonly DesignDocumentCommandStack _commands = new(CreateNewDocument("Untitled"));
+
+    private readonly IReadOnlyDictionary<string, int> _viewportWidths = new Dictionary<string, int>(StringComparer.Ordinal)
+    {
+        ["mobile"] = 360,
+        ["tablet"] = 768,
+        ["desktop"] = 1200
+    };
+
+    private ElementReference _canvasRef;
+    private DotNetObjectReference<Designer>? _keyScopeRef;
+    private DesignerDragPayload? _activeDrag;
+    private string? _selectedNodeId;
+    private string _paletteFilter = string.Empty;
+    private string _canvasTheme = "plum-dark";
+    private string _viewport = "desktop";
+    private string? _selectedSavedName;
+    private List<string> _savedDocumentNames = [];
+
+    private IReadOnlyList<string> SavedDocumentNames => _savedDocumentNames;
+
+    private IReadOnlyList<string> CanvasThemeOptions => AgtTheme.All
+        .SelectMany(static theme => new[] { theme.LightVariantId, theme.DarkVariantId })
+        .OrderBy(static id => id, StringComparer.Ordinal)
+        .ToArray();
+
+    private IReadOnlyDictionary<string, IReadOnlyList<DesignerComponentDescriptor>> PaletteByCategory => _registry.Components
+        .Where(static descriptor => descriptor.AllowedInPalette)
+        .Where(DescriptorMatchesFilter)
+        .GroupBy(static descriptor => descriptor.Category, StringComparer.Ordinal)
+        .OrderBy(static group => group.Key, StringComparer.Ordinal)
+        .ToDictionary(
+            static group => group.Key,
+            static group => (IReadOnlyList<DesignerComponentDescriptor>)group.OrderBy(static descriptor => descriptor.DisplayName, StringComparer.Ordinal).ToArray(),
+            StringComparer.Ordinal);
+
+    private IReadOnlyList<DesignerTreeNode> TreeRoots => BuildTree(_commands.Document.Pages[0].Nodes);
+
+    private string SelectionBreadcrumb => BuildBreadcrumb(_selectedNodeId) ?? "Selecteer een node";
+
+    private string CanvasFrameStyle => _viewportWidths.TryGetValue(_viewport, out var width)
+        ? $"max-width: {width}px;"
+        : "max-width: 1200px;";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        await RestoreDocumentsFromStorageAsync();
+        _keyScopeRef = DotNetObjectReference.Create(this);
+        await JS.InvokeVoidAsync("designerInterop.registerKeyScope", _keyScopeRef, _canvasRef);
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        _keyScopeRef?.Dispose();
+    }
+
+    private async Task RestoreDocumentsFromStorageAsync()
+    {
+        _savedDocumentNames = await JS.InvokeAsync<List<string>>("designerInterop.getJson", LocalStorageIndexKey) ?? [];
+        _savedDocumentNames = _savedDocumentNames
+            .Where(static name => !string.IsNullOrWhiteSpace(name))
+            .Distinct(StringComparer.Ordinal)
+            .OrderBy(static name => name, StringComparer.Ordinal)
+            .ToList();
+    }
+
+    private void OnPaletteFilterChanged(ChangeEventArgs args)
+    {
+        _paletteFilter = args.Value?.ToString() ?? string.Empty;
+    }
+
+    private void OnPaletteDragStart(string componentType)
+    {
+        _activeDrag = DesignerDragPayload.Palette(componentType);
+    }
+
+    private Task OnDragStart(DesignerDragPayload payload)
+    {
+        _activeDrag = payload;
+        return Task.CompletedTask;
+    }
+
+    private Task OnDragEnd()
+    {
+        _activeDrag = null;
+        return Task.CompletedTask;
+    }
+
+    private void OnDropZoneDragOver(DragEventArgs _)
+    {
+    }
+
+    private async Task OnDropRequested(DesignerDropTarget target)
+    {
+        if (_activeDrag is null)
+        {
+            return;
+        }
+
+        var didMutate = false;
+
+        if (string.Equals(_activeDrag.Kind, "palette", StringComparison.Ordinal))
+        {
+            didMutate = AddFromPalette(target.Location, _activeDrag.Value);
+        }
+        else if (string.Equals(_activeDrag.Kind, "node", StringComparison.Ordinal))
+        {
+            didMutate = _commands.Execute(new MoveNodeCommand(0, _activeDrag.Value, target.Location));
+        }
+
+        _activeDrag = null;
+
+        if (didMutate)
+        {
+            await AutoSaveAsync();
+            StateHasChanged();
+        }
+    }
+
+    private bool AddFromPalette(DesignNodeLocation location, string componentType)
+    {
+        if (!_registry.TryGetDescriptor(componentType, out var descriptor))
+        {
+            return false;
+        }
+
+        var node = CreateNodeForDescriptor(descriptor);
+        var added = _commands.Execute(new AddNodeCommand(0, location, node));
+        if (added)
+        {
+            _selectedNodeId = node.Id;
+        }
+
+        return added;
+    }
+
+    private async Task OnSelectNode(string nodeId)
+    {
+        _selectedNodeId = nodeId;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void OnTreeChange(TreeEventArgs args)
+    {
+        if (args.Value is string nodeId)
+        {
+            _selectedNodeId = nodeId;
+        }
+    }
+
+    private async Task OnUndo()
+    {
+        if (_commands.Undo())
+        {
+            await AutoSaveAsync();
+            StateHasChanged();
+        }
+    }
+
+    private async Task OnRedo()
+    {
+        if (_commands.Redo())
+        {
+            await AutoSaveAsync();
+            StateHasChanged();
+        }
+    }
+
+    private async Task OnSaveDocument()
+    {
+        var name = _commands.Document.Name;
+        await JS.InvokeVoidAsync("designerInterop.setJson", LocalStoragePrefix + name, DesignDocumentSerializer.Serialize(_commands.Document));
+
+        if (!_savedDocumentNames.Contains(name, StringComparer.Ordinal))
+        {
+            _savedDocumentNames.Add(name);
+            _savedDocumentNames = _savedDocumentNames.OrderBy(static item => item, StringComparer.Ordinal).ToList();
+            await JS.InvokeVoidAsync("designerInterop.setJson", LocalStorageIndexKey, _savedDocumentNames);
+        }
+
+        _commands.MarkSaved();
+        StateHasChanged();
+    }
+
+    private async Task OnSavedSelectionChanged(object value)
+    {
+        var selected = value?.ToString();
+        if (string.IsNullOrWhiteSpace(selected))
+        {
+            return;
+        }
+
+        _selectedSavedName = selected;
+        var json = await JS.InvokeAsync<string>("designerInterop.getText", LocalStoragePrefix + selected);
+        if (string.IsNullOrWhiteSpace(json))
+        {
+            return;
+        }
+
+        var document = DesignDocumentSerializer.Deserialize(json);
+        _commands.ReplaceDocument(document, markSaved: true);
+        _selectedNodeId = null;
+        StateHasChanged();
+    }
+
+    private async Task OnNewDocument()
+    {
+        var name = $"Document-{DateTime.UtcNow:yyyyMMdd-HHmmss}";
+        _commands.ReplaceDocument(CreateNewDocument(name), markSaved: true);
+        _selectedNodeId = null;
+        await AutoSaveAsync();
+        StateHasChanged();
+    }
+
+    private Task OnCanvasThemeChanged(object value)
+    {
+        _canvasTheme = value?.ToString() ?? "plum-dark";
+        return Task.CompletedTask;
+    }
+
+    private void SetViewport(string viewport)
+    {
+        _viewport = _viewportWidths.ContainsKey(viewport) ? viewport : "desktop";
+    }
+
+    private async Task OnPageKeyDown(KeyboardEventArgs args)
+    {
+        if (args.CtrlKey && string.Equals(args.Key, "z", StringComparison.OrdinalIgnoreCase))
+        {
+            await OnUndo();
+            return;
+        }
+
+        if (args.CtrlKey && string.Equals(args.Key, "y", StringComparison.OrdinalIgnoreCase))
+        {
+            await OnRedo();
+            return;
+        }
+
+        if (string.Equals(args.Key, "Escape", StringComparison.OrdinalIgnoreCase))
+        {
+            _selectedNodeId = null;
+            return;
+        }
+
+        if (string.Equals(args.Key, "Delete", StringComparison.OrdinalIgnoreCase) && _selectedNodeId is not null)
+        {
+            if (_commands.Execute(new RemoveNodeCommand(0, _selectedNodeId)))
+            {
+                _selectedNodeId = null;
+                await AutoSaveAsync();
+                StateHasChanged();
+            }
+
+            return;
+        }
+
+        if (_selectedNodeId is null)
+        {
+            return;
+        }
+
+        if (args.CtrlKey && string.Equals(args.Key, "ArrowUp", StringComparison.OrdinalIgnoreCase))
+        {
+            if (_commands.Execute(new ReorderSiblingCommand(0, _selectedNodeId, -1)))
+            {
+                await AutoSaveAsync();
+                StateHasChanged();
+            }
+
+            return;
+        }
+
+        if (args.CtrlKey && string.Equals(args.Key, "ArrowDown", StringComparison.OrdinalIgnoreCase))
+        {
+            if (_commands.Execute(new ReorderSiblingCommand(0, _selectedNodeId, 1)))
+            {
+                await AutoSaveAsync();
+                StateHasChanged();
+            }
+
+            return;
+        }
+
+        if (string.Equals(args.Key, "ArrowUp", StringComparison.OrdinalIgnoreCase))
+        {
+            SelectSibling(-1);
+            return;
+        }
+
+        if (string.Equals(args.Key, "ArrowDown", StringComparison.OrdinalIgnoreCase))
+        {
+            SelectSibling(1);
+        }
+    }
+
+    [JSInvokable]
+    public Task HandleCanvasKey(string key)
+    {
+        if (string.Equals(key, "Escape", StringComparison.OrdinalIgnoreCase))
+        {
+            _selectedNodeId = null;
+            StateHasChanged();
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private void SelectSibling(int delta)
+    {
+        if (_selectedNodeId is null)
+        {
+            return;
+        }
+
+        if (!TryFindNode(_commands.Document.Pages[0].Nodes, _selectedNodeId, out _, out var container, out var index))
+        {
+            return;
+        }
+
+        var nextIndex = index + delta;
+        if (nextIndex < 0 || nextIndex >= container.Count)
+        {
+            return;
+        }
+
+        _selectedNodeId = container[nextIndex].Id;
+        StateHasChanged();
+    }
+
+    private async Task AutoSaveAsync()
+    {
+        await JS.InvokeVoidAsync("designerInterop.setJson", LocalStoragePrefix + _commands.Document.Name, DesignDocumentSerializer.Serialize(_commands.Document));
+    }
+
+    private bool DescriptorMatchesFilter(DesignerComponentDescriptor descriptor)
+    {
+        if (string.IsNullOrWhiteSpace(_paletteFilter))
+        {
+            return true;
+        }
+
+        return descriptor.DisplayName.Contains(_paletteFilter, StringComparison.OrdinalIgnoreCase)
+            || descriptor.ComponentType.Contains(_paletteFilter, StringComparison.OrdinalIgnoreCase)
+            || descriptor.Category.Contains(_paletteFilter, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static DesignDocument CreateNewDocument(string name)
+    {
+        var root = new DesignNode
+        {
+            ComponentType = "RadzenRow",
+            Parameters = new Dictionary<string, DesignParameterValue>(StringComparer.Ordinal)
+            {
+                ["Gap"] = DesignParameterValue.FromValue("1rem")
+            },
+            Children = new Dictionary<string, List<DesignNode>>(StringComparer.Ordinal)
+            {
+                ["ChildContent"] =
+                [
+                    new DesignNode
+                    {
+                        ComponentType = "RadzenColumn",
+                        Parameters = new Dictionary<string, DesignParameterValue>(StringComparer.Ordinal)
+                        {
+                            ["Size"] = DesignParameterValue.FromValue(12)
+                        },
+                        Children = new Dictionary<string, List<DesignNode>>(StringComparer.Ordinal)
+                        {
+                            ["ChildContent"] = []
+                        }
+                    }
+                ]
+            }
+        };
+
+        var document = new DesignDocument
+        {
+            Name = name,
+            Version = "1.0",
+            Pages =
+            [
+                new DesignPage
+                {
+                    Route = "/",
+                    Title = "Nieuw ontwerp",
+                    Nodes = [root]
+                }
+            ]
+        };
+
+        return DesignDocumentMigrator.Migrate(document);
+    }
+
+    private DesignNode CreateNodeForDescriptor(DesignerComponentDescriptor descriptor)
+    {
+        var node = new DesignNode
+        {
+            ComponentType = descriptor.ComponentType,
+            Parameters = new Dictionary<string, DesignParameterValue>(StringComparer.Ordinal),
+            Children = new Dictionary<string, List<DesignNode>>(StringComparer.Ordinal)
+        };
+
+        foreach (var slot in descriptor.Slots)
+        {
+            node.Children[slot] = [];
+        }
+
+        if (descriptor.Parameters.Any(static parameter => string.Equals(parameter.Name, "Label", StringComparison.Ordinal)))
+        {
+            node.Parameters["Label"] = DesignParameterValue.FromValue(descriptor.DisplayName);
+        }
+
+        if (descriptor.Parameters.Any(static parameter => string.Equals(parameter.Name, "AriaLabel", StringComparison.Ordinal)))
+        {
+            node.Parameters["AriaLabel"] = DesignParameterValue.FromValue(descriptor.DisplayName);
+        }
+
+        return DesignDocumentMigrator.Migrate(new DesignDocument
+        {
+            Pages = [new DesignPage { Route = "/", Title = "seed", Nodes = [node] }]
+        }).Pages[0].Nodes[0];
+    }
+
+    private string? BuildBreadcrumb(string? nodeId)
+    {
+        if (string.IsNullOrWhiteSpace(nodeId))
+        {
+            return null;
+        }
+
+        if (!TryFindNode(_commands.Document.Pages[0].Nodes, nodeId, out var path, out _, out _))
+        {
+            return null;
+        }
+
+        return string.Join(" > ", path.Select(static node => node.ComponentType));
+    }
+
+    private static IReadOnlyList<DesignerTreeNode> BuildTree(IReadOnlyList<DesignNode> nodes)
+        => nodes.Select(BuildTreeNode).ToArray();
+
+    private static DesignerTreeNode BuildTreeNode(DesignNode node)
+    {
+        var children = node.Children
+            .OrderBy(static pair => pair.Key, StringComparer.Ordinal)
+            .SelectMany(static pair => pair.Value)
+            .Select(BuildTreeNode)
+            .ToArray();
+
+        return new DesignerTreeNode(node.Id, node.ComponentType, children);
+    }
+
+    private static bool TryFindNode(
+        IReadOnlyList<DesignNode> nodes,
+        string targetId,
+        out List<DesignNode> path,
+        out List<DesignNode> container,
+        out int index)
+    {
+        var mutable = nodes as List<DesignNode> ?? nodes.ToList();
+        for (var i = 0; i < mutable.Count; i++)
+        {
+            if (TryFindNodeRecursive(mutable[i], mutable, i, targetId, [], out path, out container, out index))
+            {
+                return true;
+            }
+        }
+
+        path = [];
+        container = [];
+        index = -1;
+        return false;
+    }
+
+    private static bool TryFindNodeRecursive(
+        DesignNode node,
+        List<DesignNode> container,
+        int index,
+        string targetId,
+        List<DesignNode> ancestry,
+        out List<DesignNode> path,
+        out List<DesignNode> resultContainer,
+        out int resultIndex)
+    {
+        var nextAncestry = new List<DesignNode>(ancestry) { node };
+        if (string.Equals(node.Id, targetId, StringComparison.Ordinal))
+        {
+            path = nextAncestry;
+            resultContainer = container;
+            resultIndex = index;
+            return true;
+        }
+
+        foreach (var slot in node.Children.Values)
+        {
+            for (var childIndex = 0; childIndex < slot.Count; childIndex++)
+            {
+                if (TryFindNodeRecursive(slot[childIndex], slot, childIndex, targetId, nextAncestry, out path, out resultContainer, out resultIndex))
+                {
+                    return true;
+                }
+            }
+        }
+
+        path = [];
+        resultContainer = [];
+        resultIndex = -1;
+        return false;
+    }
+
+    private sealed record DesignerTreeNode(string Id, string Text, IReadOnlyList<DesignerTreeNode> Children)
+    {
+        public string Value => Id;
+    }
+}

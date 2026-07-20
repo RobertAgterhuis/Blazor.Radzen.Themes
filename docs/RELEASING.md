@@ -35,6 +35,15 @@ Two paths are supported:
 azure-pipelines.yml remains available for internal Azure DevOps package publishing.
 GitHub Actions is the public CI and release path for open-source distribution.
 
+## Static Web Apps Demo
+
+The demo site is deployed through Azure Static Web Apps from the standalone WebAssembly output in `samples/Agterhuis.Ui.Demo`.
+
+1. Create a Static Web App resource in Azure.
+2. Copy the deployment token from the resource and store it as the GitHub secret `AZURE_STATIC_WEB_APPS_API_TOKEN`.
+3. Leave the secret unset until the resource exists; the build still runs, but the deploy job is skipped.
+4. Push to a branch or open a pull request to get the preview deployment that SWA provides by default.
+
 ## Wiki Sync Caveat
 
 The optional wiki sync workflow (`.github/workflows/wiki.yml`) pushes markdown pages from `eng/wiki` to the GitHub wiki repository.

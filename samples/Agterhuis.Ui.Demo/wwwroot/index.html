@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="nl" data-agt-theme="plum-dark">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="/" />
+    <link rel="stylesheet" href="_content/Radzen.Blazor/css/material-base.css" />
+    <link rel="stylesheet" href="_content/Agterhuis.Ui/css/agt-theme.css" />
+    <link rel="stylesheet" href="_content/Agterhuis.Ui/css/agt-utilities.css" />
+    <link rel="stylesheet" href="app.css" />
+    <link rel="stylesheet" href="blog-showcase.css" />
+    <link rel="stylesheet" href="Agterhuis.Ui.Demo.styles.css" />
+    <script>
+        (() => {
+            const key = "agt-ui-theme";
+            const normalizeTheme = (value, fallback = "plum-dark") => {
+                const raw = (value || "").toString().trim().toLowerCase();
+                if (!raw) {
+                    return fallback;
+                }
+
+                if (raw === "dark") {
+                    return "plum-dark";
+                }
+
+                if (raw === "light") {
+                    return "plum-light";
+                }
+
+                return raw;
+            };
+
+            const applyTheme = (theme) => {
+                const normalized = normalizeTheme(theme);
+                document.documentElement.setAttribute("data-agt-theme", normalized);
+                if (document.body) {
+                    document.body.setAttribute("data-agt-theme", normalized);
+                }
+
+                return normalized;
+            };
+
+            const syncVisibility = () => {
+                const hidden = document.visibilityState === "hidden";
+                document.documentElement.toggleAttribute("data-agt-tab-hidden", hidden);
+                if (document.body) {
+                    document.body.toggleAttribute("data-agt-tab-hidden", hidden);
+                }
+            };
+
+            applyTheme(normalizeTheme(localStorage.getItem(key), "plum-dark"));
+            syncVisibility();
+            document.addEventListener("visibilitychange", syncVisibility, { passive: true });
+
+            if (!sessionStorage.getItem("agt-brand-sheen-seen")) {
+                document.documentElement.setAttribute("data-agt-brand-sheen", "ready");
+                sessionStorage.setItem("agt-brand-sheen-seen", "1");
+            }
+        })();
+    </script>
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <style>
+        #app {
+            min-height: 100vh;
+        }
+
+        .demo-boot-screen {
+            align-items: center;
+            background:
+                radial-gradient(circle at top left, var(--agt-alpha-primary-10) 0%, transparent 38%),
+                var(--agt-surface-0);
+            color: var(--agt-text-body);
+            display: grid;
+            gap: var(--agt-spacing-4);
+            justify-items: center;
+            min-height: 100vh;
+            padding: var(--agt-spacing-6);
+            text-align: center;
+        }
+
+        .demo-boot-screen__brand {
+            color: var(--agt-text-heading);
+            font-family: var(--agt-font-display);
+            font-size: clamp(1.5rem, 3vw, 2.25rem);
+            font-weight: 800;
+            letter-spacing: 0.02em;
+        }
+
+        .demo-boot-screen__mark {
+            align-items: center;
+            background: var(--agt-color-accent-500);
+            border-radius: 999px;
+            box-shadow: var(--agt-shadow-md);
+            color: var(--agt-on-accent);
+            display: inline-flex;
+            height: 4rem;
+            justify-content: center;
+            width: 4rem;
+        }
+
+        .demo-boot-screen__pulse {
+            border: 2px solid color-mix(in srgb, var(--agt-color-accent-500) 28%, transparent);
+            border-top-color: var(--agt-color-accent-500);
+            border-radius: 50%;
+            height: 2.25rem;
+            width: 2.25rem;
+            animation: demo-boot-spin 960ms linear infinite;
+        }
+
+        .demo-boot-screen__text {
+            color: var(--agt-text-muted);
+            margin: 0;
+            max-width: 26rem;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .demo-boot-screen__pulse {
+                animation: none;
+            }
+        }
+
+        @keyframes demo-boot-spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <div class="demo-boot-screen" role="status" aria-live="polite" aria-label="Agterhuis.Ui wordt geladen">
+            <div class="demo-boot-screen__mark" aria-hidden="true">A</div>
+            <div class="demo-boot-screen__brand">Agterhuis.Ui</div>
+            <div class="demo-boot-screen__pulse" aria-hidden="true"></div>
+            <p class="demo-boot-screen__text">De interface wordt geladen met de actieve theme en cultuurinstellingen.</p>
+        </div>
+    </div>
+    <script src="_content/Radzen.Blazor/Radzen.Blazor.min.js"></script>
+    <script src="_content/Agterhuis.Ui/theme-interop.js"></script>
+    <script src="designer-interop.js"></script>
+    <script src="blog-showcase.js"></script>
+    <script src="_framework/blazor.webassembly.js"></script>
+</body>
+
+</html>

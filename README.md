@@ -85,6 +85,12 @@ Theme colors live only inside `html[data-agt-theme="..."]` scopes, while `:root`
 
 ## Run the Demo
 
+### Live demo
+
+[![Live demo](https://img.shields.io/badge/live%20demo-azure%20static%20web%20apps-0F6CBD)](https://<your-swa-name>.azurestaticapps.net/)
+
+The public demo is intended to run from Azure Static Web Apps. The local sample still runs with `dotnet run`.
+
 ```bash
 dotnet run --project samples/Agterhuis.Ui.Demo
 ```

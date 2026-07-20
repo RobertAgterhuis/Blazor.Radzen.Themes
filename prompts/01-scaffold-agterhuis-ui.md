@@ -127,7 +127,7 @@ Also create `agt-utilities.css` with `.agt-page`, `.agt-stack`, `.agt-row`, `.ag
 
 ## Demo app
 
-Wire up `AddAgterhuisUi`, load CSS in this order in `Components/App.razor`: `_content/Radzen.Blazor/css/material-base.css` → `_content/Agterhuis.Ui/css/agt-theme.css` → `_content/Agterhuis.Ui/css/agt-utilities.css` → app styles; plus `_content/Radzen.Blazor/Radzen.Blazor.min.js` before `blazor.web.js` closes. Pages: `/components/buttons`, `/components/layout`, `/components/feedback` demonstrating default/disabled/busy states, plus a light/dark theme toggle that flips `data-agt-theme` on `<html>`.
+Wire up `AddAgterhuisUi`, load CSS in this order in `wwwroot/index.html` for the standalone WebAssembly host: `_content/Radzen.Blazor/css/material-base.css` → `_content/Agterhuis.Ui/css/agt-theme.css` → `_content/Agterhuis.Ui/css/agt-utilities.css` → app styles; plus `_content/Radzen.Blazor/Radzen.Blazor.min.js` before `blazor.webassembly.js` closes. Pages: `/components/buttons`, `/components/layout`, `/components/feedback` demonstrating default/disabled/busy states, plus a light/dark theme toggle that flips `data-agt-theme` on `<html>`.
 
 ## Tests
 

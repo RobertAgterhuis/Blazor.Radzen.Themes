@@ -66,9 +66,9 @@
     private BlogPromptItem? _selectedPrompt;
     private CancellationTokenSource? _searchCts;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        _allPrompts = BlogService.GetPrompts();
+        _allPrompts = await BlogService.GetPromptsAsync();
         _filteredPrompts = _allPrompts;
         _selectedPrompt = _filteredPrompts.FirstOrDefault();
     }

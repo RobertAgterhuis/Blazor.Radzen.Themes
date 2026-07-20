@@ -1,0 +1,508 @@
+{
+  "alpha/accent/10": {
+    "autotaalglas-light": "rgb(228 0 43 / 10%)"
+  },
+  "alpha/accent/20": {
+    "autotaalglas-light": "rgb(228 0 43 / 20%)"
+  },
+  "alpha/accent/40": {
+    "autotaalglas-light": "rgb(228 0 43 / 40%)"
+  },
+  "alpha/accent/5": {
+    "autotaalglas-light": "rgb(228 0 43 / 5%)"
+  },
+  "alpha/primary/10": {
+    "autotaalglas-light": "rgb(0 37 117 / 10%)"
+  },
+  "alpha/primary/20": {
+    "autotaalglas-light": "rgb(0 37 117 / 20%)"
+  },
+  "alpha/primary/4": {
+    "autotaalglas-light": "rgb(0 37 117 / 4%)",
+    "autotaalglas-dark": "rgb(77 143 224 / 4%)"
+  },
+  "alpha/primary/40": {
+    "autotaalglas-light": "rgb(0 37 117 / 40%)"
+  },
+  "alpha/primary/5": {
+    "autotaalglas-light": "rgb(0 37 117 / 5%)"
+  },
+  "btn/base/fill": {
+    "autotaalglas-light": "#eaf0fb",
+    "autotaalglas-dark": "#223764"
+  },
+  "btn/danger/fill": {
+    "autotaalglas-light": "#b3001f",
+    "autotaalglas-dark": "#b3001f"
+  },
+  "btn/dark/fill": {
+    "autotaalglas-light": "#0d1b3d",
+    "autotaalglas-dark": "#0a1228"
+  },
+  "btn/dark/ink": {
+    "autotaalglas-light": "#243147",
+    "autotaalglas-dark": "#d7e4ff"
+  },
+  "btn/info/fill": {
+    "autotaalglas-light": "#00b5e2",
+    "autotaalglas-dark": "#00b5e2"
+  },
+  "btn/light/fill": {
+    "autotaalglas-light": "#f8f9fa",
+    "autotaalglas-dark": "#f1f4fa"
+  },
+  "btn/light/ink": {
+    "autotaalglas-light": "#4d596f",
+    "autotaalglas-dark": "#d0d9ea"
+  },
+  "btn/primary/fill": {
+    "autotaalglas-light": "#002575",
+    "autotaalglas-dark": "#003b87"
+  },
+  "btn/secondary/border": {
+    "autotaalglas-light": "#e4002b",
+    "autotaalglas-dark": "#e4002b"
+  },
+  "btn/secondary/fill": {
+    "autotaalglas-light": "#e4002b",
+    "autotaalglas-dark": "#e4002b"
+  },
+  "btn/secondary/hover/bg": {
+    "autotaalglas-light": "var(--agt-alpha-primary-10)",
+    "autotaalglas-dark": "rgb(228 0 43 / 16%)"
+  },
+  "btn/secondary/hover/text": {
+    "autotaalglas-light": "#8f0019",
+    "autotaalglas-dark": "#edf3ff"
+  },
+  "btn/secondary/text": {
+    "autotaalglas-light": "#b3001f",
+    "autotaalglas-dark": "#ff9aae"
+  },
+  "btn/success/fill": {
+    "autotaalglas-light": "#3fb400",
+    "autotaalglas-dark": "#3fb400"
+  },
+  "btn/warning/fill": {
+    "autotaalglas-light": "#e8a13d",
+    "autotaalglas-dark": "#e8a13d"
+  },
+  "canvas/backdrop": {
+    "autotaalglas-light": "radial-gradient(circle at 12% 6%, rgb(0 59 135 / 6%) 0%, rgb(0 59 135 / 2%) 20%, transparent 52%)",
+    "autotaalglas-dark": "radial-gradient(circle at 16% 2%, rgb(77 143 224 / 8%) 0%, rgb(77 143 224 / 3%) 22%, transparent 50%)"
+  },
+  "chart/axis/text": {
+    "autotaalglas-light": "#59677f",
+    "autotaalglas-dark": "#94a5c5"
+  },
+  "chart/gridline": {
+    "autotaalglas-light": "#e6e6e6",
+    "autotaalglas-dark": "#304975"
+  },
+  "chart/series/1": {
+    "autotaalglas-light": "#002575",
+    "autotaalglas-dark": "#4d8fe0"
+  },
+  "chart/series/2": {
+    "autotaalglas-light": "#e4002b",
+    "autotaalglas-dark": "#e4002b"
+  },
+  "chart/series/3": {
+    "autotaalglas-light": "#00b5e2",
+    "autotaalglas-dark": "#00b5e2"
+  },
+  "chart/series/4": {
+    "autotaalglas-light": "#005fc5",
+    "autotaalglas-dark": "#8cb8ff"
+  },
+  "chart/series/5": {
+    "autotaalglas-light": "#3fb400",
+    "autotaalglas-dark": "#7dd15f"
+  },
+  "chart/series/6": {
+    "autotaalglas-light": "#e8a13d",
+    "autotaalglas-dark": "#f0bb66"
+  },
+  "chart/series/7": {
+    "autotaalglas-light": "#003b87",
+    "autotaalglas-dark": "#c6d6f2"
+  },
+  "chart/series/8": {
+    "autotaalglas-light": "#7f8eac",
+    "autotaalglas-dark": "#7f96bf"
+  },
+  "color/accent/300": {
+    "autotaalglas-light": "#ff6b84",
+    "autotaalglas-dark": "#ff6b84"
+  },
+  "color/accent/400": {
+    "autotaalglas-light": "#e4002b",
+    "autotaalglas-dark": "#e4002b"
+  },
+  "color/accent/500": {
+    "autotaalglas-light": "#c90027",
+    "autotaalglas-dark": "#c90027"
+  },
+  "color/accent/600": {
+    "autotaalglas-light": "#b3001f",
+    "autotaalglas-dark": "#b3001f"
+  },
+  "color/accent/700": {
+    "autotaalglas-light": "#8f0019",
+    "autotaalglas-dark": "#8f0019"
+  },
+  "color/accent/text": {
+    "autotaalglas-light": "#b3001f",
+    "autotaalglas-dark": "#ff9aae"
+  },
+  "color/danger": {
+    "autotaalglas-light": "#b3001f",
+    "autotaalglas-dark": "#b3001f"
+  },
+  "color/danger/text": {
+    "autotaalglas-light": "#b3001f",
+    "autotaalglas-dark": "#ffb4bf"
+  },
+  "color/gray/100": {
+    "autotaalglas-light": "#f2f4f8",
+    "autotaalglas-dark": "#d8e4f6"
+  },
+  "color/gray/200": {
+    "autotaalglas-light": "#e6e6e6",
+    "autotaalglas-dark": "#9fb3cf"
+  },
+  "color/gray/50": {
+    "autotaalglas-light": "#fafbfd",
+    "autotaalglas-dark": "#eef3fb"
+  },
+  "color/gray/500": {
+    "autotaalglas-light": "#6f7889",
+    "autotaalglas-dark": "#8094b3"
+  },
+  "color/gray/700": {
+    "autotaalglas-light": "#303949",
+    "autotaalglas-dark": "#4e6283"
+  },
+  "color/gray/900": {
+    "autotaalglas-light": "#161d29",
+    "autotaalglas-dark": "#0e1832"
+  },
+  "color/info": {
+    "autotaalglas-light": "#00b5e2",
+    "autotaalglas-dark": "#00b5e2"
+  },
+  "color/primary/100": {
+    "autotaalglas-light": "#c7d1f1"
+  },
+  "color/primary/200": {
+    "autotaalglas-light": "#a4b5e7"
+  },
+  "color/primary/300": {
+    "autotaalglas-light": "#7f98dc"
+  },
+  "color/primary/400": {
+    "autotaalglas-light": "#005fc5"
+  },
+  "color/primary/50": {
+    "autotaalglas-light": "#e9edfb"
+  },
+  "color/primary/500": {
+    "autotaalglas-light": "#002575",
+    "autotaalglas-dark": "#005fc5"
+  },
+  "color/primary/600": {
+    "autotaalglas-light": "#003b87",
+    "autotaalglas-dark": "#4d8fe0"
+  },
+  "color/primary/700": {
+    "autotaalglas-light": "#00306d",
+    "autotaalglas-dark": "#003b87"
+  },
+  "color/primary/800": {
+    "autotaalglas-light": "#002553"
+  },
+  "color/primary/900": {
+    "autotaalglas-light": "#1a2234"
+  },
+  "color/primary/950": {
+    "autotaalglas-light": "#0d1b3d"
+  },
+  "color/success": {
+    "autotaalglas-light": "#3fb400",
+    "autotaalglas-dark": "#3fb400"
+  },
+  "color/warning": {
+    "autotaalglas-light": "#e8a13d",
+    "autotaalglas-dark": "#e8a13d"
+  },
+  "color/white": {
+    "autotaalglas-light": "#ffffff",
+    "autotaalglas-dark": "#ffffff"
+  },
+  "control/disabled/bg": {
+    "autotaalglas-light": "#edf1f7",
+    "autotaalglas-dark": "#152449"
+  },
+  "focus/ring": {
+    "autotaalglas-light": "0 0 0 3px var(--agt-alpha-primary-20)",
+    "autotaalglas-dark": "0 0 0 3px var(--agt-alpha-accent-20)"
+  },
+  "focus/ring/style": {
+    "autotaalglas-light": "0 0 0 1px rgb(228 0 43 / 20%)",
+    "autotaalglas-dark": "0 0 0 1px rgb(140 184 255 / 24%)"
+  },
+  "font/body": {
+    "autotaalglas-light": "\u0022Segoe UI Variable\u0022, \u0022Segoe UI\u0022, -apple-system, BlinkMacSystemFont, sans-serif",
+    "autotaalglas-dark": "\u0022Segoe UI Variable\u0022, \u0022Segoe UI\u0022, -apple-system, BlinkMacSystemFont, sans-serif"
+  },
+  "font/display": {
+    "autotaalglas-light": "\u0022AgtSora\u0022, \u0022Segoe UI Variable\u0022, \u0022Segoe UI\u0022, -apple-system, BlinkMacSystemFont, sans-serif",
+    "autotaalglas-dark": "\u0022AgtSora\u0022, \u0022Segoe UI Variable\u0022, \u0022Segoe UI\u0022, -apple-system, BlinkMacSystemFont, sans-serif"
+  },
+  "glass/bg": {
+    "autotaalglas-light": "rgb(255 255 255 / 88%)",
+    "autotaalglas-dark": "rgb(14 24 50 / 78%)"
+  },
+  "glass/border": {
+    "autotaalglas-light": "1px solid var(--agt-glass-border-color)",
+    "autotaalglas-dark": "1px solid var(--agt-glass-border-color)"
+  },
+  "glass/border/color": {
+    "autotaalglas-light": "rgb(0 37 117 / 14%)",
+    "autotaalglas-dark": "rgb(77 143 224 / 34%)"
+  },
+  "glow/accent": {
+    "autotaalglas-light": "0 0 8px rgb(228 0 43 / 22%)",
+    "autotaalglas-dark": "0 0 10px rgb(228 0 43 / 34%)"
+  },
+  "glow/primary": {
+    "autotaalglas-light": "0 0 10px rgb(0 37 117 / 20%)",
+    "autotaalglas-dark": "0 0 12px rgb(77 143 224 / 34%)"
+  },
+  "glow/strength": {
+    "autotaalglas-light": "1.05",
+    "autotaalglas-dark": "1.12"
+  },
+  "gradient/accent": {
+    "autotaalglas-light": "linear-gradient(135deg, var(--agt-color-accent-300) 0%, var(--agt-color-accent-500) 100%)"
+  },
+  "gradient/hero": {
+    "autotaalglas-light": "radial-gradient(circle at 14% 8%, var(--agt-alpha-primary-4) 0%, transparent 54%), var(--agt-surface-0)",
+    "autotaalglas-dark": "radial-gradient(circle at 18% 4%, var(--agt-alpha-primary-4) 0%, transparent 52%), var(--agt-surface-0)"
+  },
+  "gradient/surface": {
+    "autotaalglas-light": "linear-gradient(145deg, #ffffff 0%, #f5f8fd 100%)",
+    "autotaalglas-dark": "linear-gradient(145deg, #132042 0%, #0b1328 100%)"
+  },
+  "grid/header/bg": {
+    "autotaalglas-light": "#ffffff",
+    "autotaalglas-dark": "#0e1832"
+  },
+  "grid/header/border": {
+    "autotaalglas-light": "#e6e6e6",
+    "autotaalglas-dark": "#3a4763"
+  },
+  "grid/header/text": {
+    "autotaalglas-light": "#0d1b3d",
+    "autotaalglas-dark": "#d7e4ff"
+  },
+  "grid/row/hover/bg": {
+    "autotaalglas-light": "#f3f7fd",
+    "autotaalglas-dark": "#1c2b56"
+  },
+  "grid/row/selected/bg": {
+    "autotaalglas-light": "rgb(0 37 117 / 8%)",
+    "autotaalglas-dark": "rgb(77 143 224 / 14%)"
+  },
+  "grid/row/selected/text": {
+    "autotaalglas-light": "#243147",
+    "autotaalglas-dark": "#edf3ff"
+  },
+  "heading/tracking": {
+    "autotaalglas-light": "-0.015em",
+    "autotaalglas-dark": "-0.01em"
+  },
+  "heading/weight": {
+    "autotaalglas-light": "700",
+    "autotaalglas-dark": "680"
+  },
+  "hover/tint": {
+    "autotaalglas-light": "rgb(0 37 117 / 10%)",
+    "autotaalglas-dark": "rgb(77 143 224 / 16%)"
+  },
+  "indicator/transition": {
+    "autotaalglas-light": "180ms cubic-bezier(0.22, 1, 0.36, 1)",
+    "autotaalglas-dark": "190ms cubic-bezier(0.2, 0.8, 0.2, 1)"
+  },
+  "input/border": {
+    "autotaalglas-light": "#7f8eac",
+    "autotaalglas-dark": "#506086"
+  },
+  "input/focus/border": {
+    "autotaalglas-light": "var(--agt-color-primary-600)",
+    "autotaalglas-dark": "#e4002b"
+  },
+  "input/focus/ring": {
+    "autotaalglas-light": "0 0 0 3px rgb(228 0 43 / 18%)",
+    "autotaalglas-dark": "0 0 0 3px rgb(228 0 43 / 36%)"
+  },
+  "lift/distance": {
+    "autotaalglas-light": "2px",
+    "autotaalglas-dark": "2px"
+  },
+  "link/color": {
+    "autotaalglas-light": "#003b87",
+    "autotaalglas-dark": "#4d8fe0"
+  },
+  "link/hover/color": {
+    "autotaalglas-light": "#005fc5",
+    "autotaalglas-dark": "#8cb8ff"
+  },
+  "nav/focus/outline": {
+    "autotaalglas-light": "#e4002b",
+    "autotaalglas-dark": "#e4002b"
+  },
+  "nav/group/text": {
+    "autotaalglas-light": "var(--agt-nav-item-text)",
+    "autotaalglas-dark": "var(--agt-nav-item-text)"
+  },
+  "nav/item/active/bg": {
+    "autotaalglas-light": "rgb(0 37 117 / 8%)",
+    "autotaalglas-dark": "rgb(77 143 224 / 14%)"
+  },
+  "nav/item/active/icon": {
+    "autotaalglas-light": "#e4002b",
+    "autotaalglas-dark": "#e4002b"
+  },
+  "nav/item/active/text": {
+    "autotaalglas-light": "#0d1b3d",
+    "autotaalglas-dark": "#edf3ff"
+  },
+  "nav/item/hover/bg": {
+    "autotaalglas-light": "#eef3fc",
+    "autotaalglas-dark": "#1c2b56"
+  },
+  "nav/item/hover/text": {
+    "autotaalglas-light": "#0d1b3d",
+    "autotaalglas-dark": "#edf3ff"
+  },
+  "nav/item/icon": {
+    "autotaalglas-light": "var(--agt-color-primary-600)",
+    "autotaalglas-dark": "#4d8fe0"
+  },
+  "nav/item/text": {
+    "autotaalglas-light": "#243147",
+    "autotaalglas-dark": "#d7e4ff"
+  },
+  "on/accent": {
+    "autotaalglas-light": "#ffffff"
+  },
+  "on/base": {
+    "autotaalglas-light": "#243147",
+    "autotaalglas-dark": "#edf3ff"
+  },
+  "on/danger": {
+    "autotaalglas-light": "#ffffff",
+    "autotaalglas-dark": "#ffffff"
+  },
+  "on/dark": {
+    "autotaalglas-light": "#ffffff",
+    "autotaalglas-dark": "#edf3ff"
+  },
+  "on/info": {
+    "autotaalglas-light": "#08202a",
+    "autotaalglas-dark": "#08202a"
+  },
+  "on/light": {
+    "autotaalglas-light": "#161d29",
+    "autotaalglas-dark": "#121a29"
+  },
+  "on/primary": {
+    "autotaalglas-light": "#ffffff",
+    "autotaalglas-dark": "#ffffff"
+  },
+  "on/secondary": {
+    "autotaalglas-light": "#ffffff",
+    "autotaalglas-dark": "#ffffff"
+  },
+  "on/success": {
+    "autotaalglas-light": "#102405",
+    "autotaalglas-dark": "#102405"
+  },
+  "on/warning": {
+    "autotaalglas-light": "#2f2006",
+    "autotaalglas-dark": "#2f2006"
+  },
+  "press/scale": {
+    "autotaalglas-light": "0.98",
+    "autotaalglas-dark": "0.98"
+  },
+  "radius/scale": {
+    "autotaalglas-light": "1",
+    "autotaalglas-dark": "1"
+  },
+  "selection/tint": {
+    "autotaalglas-light": "#eaf0fb",
+    "autotaalglas-dark": "#1c2b52"
+  },
+  "shadow/md": {
+    "autotaalglas-light": "0 3px 8px rgb(13 27 61 / 20%), 0 18px 36px rgb(0 37 117 / 16%)",
+    "autotaalglas-dark": "0 6px 14px rgb(0 0 0 / 38%), 0 24px 42px rgb(0 59 135 / 30%)"
+  },
+  "shadow/sm": {
+    "autotaalglas-light": "0 1px 2px rgb(13 27 61 / 18%), 0 10px 20px rgb(0 37 117 / 12%)",
+    "autotaalglas-dark": "0 2px 4px rgb(0 0 0 / 34%), 0 14px 26px rgb(0 59 135 / 24%)"
+  },
+  "surface/0": {
+    "autotaalglas-light": "#f8fafe",
+    "autotaalglas-dark": "#0a1228"
+  },
+  "surface/1": {
+    "autotaalglas-light": "#ffffff",
+    "autotaalglas-dark": "#0e1832"
+  },
+  "surface/2": {
+    "autotaalglas-light": "#fbfcff",
+    "autotaalglas-dark": "#132043"
+  },
+  "surface/3": {
+    "autotaalglas-light": "#f0f4fb",
+    "autotaalglas-dark": "#1c2b56"
+  },
+  "text/body": {
+    "autotaalglas-light": "#243147",
+    "autotaalglas-dark": "#e3ecff"
+  },
+  "text/disabled": {
+    "autotaalglas-light": "#7a879c",
+    "autotaalglas-dark": "#8294b7"
+  },
+  "text/heading": {
+    "autotaalglas-light": "#0d1b3d",
+    "autotaalglas-dark": "#edf3ff"
+  },
+  "text/muted": {
+    "autotaalglas-light": "var(--agt-nav-item-text)",
+    "autotaalglas-dark": "var(--agt-nav-item-text)"
+  },
+  "tooltip/text": {
+    "autotaalglas-light": "#243147",
+    "autotaalglas-dark": "#edf3ff"
+  },
+  "topbar/brand/accent": {
+    "autotaalglas-light": "#e4002b",
+    "autotaalglas-dark": "#e4002b"
+  },
+  "topbar/brand/color": {
+    "autotaalglas-light": "#0d1b3d",
+    "autotaalglas-dark": "#edf3ff"
+  },
+  "topbar/icon/color": {
+    "autotaalglas-light": "#59677f",
+    "autotaalglas-dark": "#d7e4ff"
+  },
+  "topbar/icon/hover/color": {
+    "autotaalglas-light": "#003b87",
+    "autotaalglas-dark": "#4d8fe0"
+  }
+}

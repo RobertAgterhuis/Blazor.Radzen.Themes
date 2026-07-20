@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Components;
 
 namespace Agterhuis.Ui.Designer.Rendering;
 
-internal static class DesignParameterBinder
+public static class DesignParameterBinder
 {
     private static readonly MethodInfo GenericNoOpEventCallbackMethod = typeof(DesignParameterBinder)
         .GetMethod(nameof(CreateNoOpEventCallbackCore), BindingFlags.Static | BindingFlags.NonPublic)

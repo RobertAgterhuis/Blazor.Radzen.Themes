@@ -4,8 +4,6 @@ using Agterhuis.Ui.Extensions;
 using Agterhuis.Ui.Services;
 using Bunit;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.DependencyInjection;
 using Radzen;
 
@@ -142,37 +140,9 @@ public sealed class BlogShowcaseSmokeTests
         ctx.Services.AddAgterhuisUi();
         ctx.JSInterop.Mode = JSRuntimeMode.Loose;
 
-        var root = GetRepositoryRoot();
-        ctx.Services.AddSingleton<IWebHostEnvironment>(new TestWebHostEnvironment(root));
         ctx.Services.AddScoped<BlogShowcaseService>();
 
         return ctx;
-    }
-
-    private static string GetRepositoryRoot()
-    {
-        var current = new DirectoryInfo(AppContext.BaseDirectory);
-        while (current is not null)
-        {
-            if (File.Exists(Path.Combine(current.FullName, "Agterhuis.Ui.sln")))
-            {
-                return current.FullName;
-            }
-
-            current = current.Parent;
-        }
-
-        throw new DirectoryNotFoundException("Repository root not found.");
-    }
-
-    private sealed class TestWebHostEnvironment(string contentRootPath) : IWebHostEnvironment
-    {
-        public string ApplicationName { get; set; } = "Agterhuis.Ui.Demo";
-        public IFileProvider WebRootFileProvider { get; set; } = new NullFileProvider();
-        public string WebRootPath { get; set; } = contentRootPath;
-        public string EnvironmentName { get; set; } = "Development";
-        public string ContentRootPath { get; set; } = contentRootPath;
-        public IFileProvider ContentRootFileProvider { get; set; } = new NullFileProvider();
     }
 
     private sealed class RecordingNotifier : IAgtNotificationService

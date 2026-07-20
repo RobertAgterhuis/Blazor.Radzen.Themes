@@ -1,0 +1,1028 @@
+{
+  "family": "autotaalglas",
+  "modes": [
+    "autotaalglas-light",
+    "autotaalglas-dark"
+  ],
+  "tokens": {
+    "alpha": {
+      "accent": {
+        "10": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "rgb(228 0 43 / 10%)"
+          }
+        },
+        "20": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "rgb(228 0 43 / 20%)"
+          }
+        },
+        "40": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "rgb(228 0 43 / 40%)"
+          }
+        },
+        "5": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "rgb(228 0 43 / 5%)"
+          }
+        }
+      },
+      "primary": {
+        "10": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "rgb(0 37 117 / 10%)"
+          }
+        },
+        "20": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "rgb(0 37 117 / 20%)"
+          }
+        },
+        "4": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "rgb(0 37 117 / 4%)",
+            "autotaalglas-dark": "rgb(77 143 224 / 4%)"
+          }
+        },
+        "40": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "rgb(0 37 117 / 40%)"
+          }
+        },
+        "5": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "rgb(0 37 117 / 5%)"
+          }
+        }
+      }
+    },
+    "btn": {
+      "base": {
+        "fill": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "#eaf0fb",
+            "autotaalglas-dark": "#223764"
+          }
+        }
+      },
+      "danger": {
+        "fill": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "#b3001f",
+            "autotaalglas-dark": "#b3001f"
+          }
+        }
+      },
+      "dark": {
+        "fill": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "#0d1b3d",
+            "autotaalglas-dark": "#0a1228"
+          }
+        },
+        "ink": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "#243147",
+            "autotaalglas-dark": "#d7e4ff"
+          }
+        }
+      },
+      "info": {
+        "fill": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "#00b5e2",
+            "autotaalglas-dark": "#00b5e2"
+          }
+        }
+      },
+      "light": {
+        "fill": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "#f8f9fa",
+            "autotaalglas-dark": "#f1f4fa"
+          }
+        },
+        "ink": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "#4d596f",
+            "autotaalglas-dark": "#d0d9ea"
+          }
+        }
+      },
+      "primary": {
+        "fill": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "#002575",
+            "autotaalglas-dark": "#003b87"
+          }
+        }
+      },
+      "secondary": {
+        "border": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "#e4002b",
+            "autotaalglas-dark": "#e4002b"
+          }
+        },
+        "fill": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "#e4002b",
+            "autotaalglas-dark": "#e4002b"
+          }
+        },
+        "hover": {
+          "bg": {
+            "$type": "color",
+            "$value": {
+              "autotaalglas-light": "var(--agt-alpha-primary-10)",
+              "autotaalglas-dark": "rgb(228 0 43 / 16%)"
+            }
+          },
+          "text": {
+            "$type": "color",
+            "$value": {
+              "autotaalglas-light": "#8f0019",
+              "autotaalglas-dark": "#edf3ff"
+            }
+          }
+        },
+        "text": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "#b3001f",
+            "autotaalglas-dark": "#ff9aae"
+          }
+        }
+      },
+      "success": {
+        "fill": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "#3fb400",
+            "autotaalglas-dark": "#3fb400"
+          }
+        }
+      },
+      "warning": {
+        "fill": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "#e8a13d",
+            "autotaalglas-dark": "#e8a13d"
+          }
+        }
+      }
+    },
+    "canvas": {
+      "backdrop": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-light": "radial-gradient(circle at 12% 6%, rgb(0 59 135 / 6%) 0%, rgb(0 59 135 / 2%) 20%, transparent 52%)",
+          "autotaalglas-dark": "radial-gradient(circle at 16% 2%, rgb(77 143 224 / 8%) 0%, rgb(77 143 224 / 3%) 22%, transparent 50%)"
+        }
+      }
+    },
+    "chart": {
+      "axis": {
+        "text": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "#59677f",
+            "autotaalglas-dark": "#94a5c5"
+          }
+        }
+      },
+      "gridline": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-light": "#e6e6e6",
+          "autotaalglas-dark": "#304975"
+        }
+      },
+      "series": {
+        "1": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "#002575",
+            "autotaalglas-dark": "#4d8fe0"
+          }
+        },
+        "2": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "#e4002b",
+            "autotaalglas-dark": "#e4002b"
+          }
+        },
+        "3": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "#00b5e2",
+            "autotaalglas-dark": "#00b5e2"
+          }
+        },
+        "4": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "#005fc5",
+            "autotaalglas-dark": "#8cb8ff"
+          }
+        },
+        "5": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "#3fb400",
+            "autotaalglas-dark": "#7dd15f"
+          }
+        },
+        "6": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "#e8a13d",
+            "autotaalglas-dark": "#f0bb66"
+          }
+        },
+        "7": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "#003b87",
+            "autotaalglas-dark": "#c6d6f2"
+          }
+        },
+        "8": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "#7f8eac",
+            "autotaalglas-dark": "#7f96bf"
+          }
+        }
+      }
+    },
+    "color": {
+      "accent": {
+        "300": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "#ff6b84",
+            "autotaalglas-dark": "#ff6b84"
+          }
+        },
+        "400": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "#e4002b",
+            "autotaalglas-dark": "#e4002b"
+          }
+        },
+        "500": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "#c90027",
+            "autotaalglas-dark": "#c90027"
+          }
+        },
+        "600": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "#b3001f",
+            "autotaalglas-dark": "#b3001f"
+          }
+        },
+        "700": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "#8f0019",
+            "autotaalglas-dark": "#8f0019"
+          }
+        },
+        "text": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "#b3001f",
+            "autotaalglas-dark": "#ff9aae"
+          }
+        }
+      },
+      "danger": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-light": "#b3001f",
+          "autotaalglas-dark": "#b3001f"
+        },
+        "text": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "#b3001f",
+            "autotaalglas-dark": "#ffb4bf"
+          }
+        }
+      },
+      "gray": {
+        "100": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "#f2f4f8",
+            "autotaalglas-dark": "#d8e4f6"
+          }
+        },
+        "200": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "#e6e6e6",
+            "autotaalglas-dark": "#9fb3cf"
+          }
+        },
+        "50": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "#fafbfd",
+            "autotaalglas-dark": "#eef3fb"
+          }
+        },
+        "500": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "#6f7889",
+            "autotaalglas-dark": "#8094b3"
+          }
+        },
+        "700": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "#303949",
+            "autotaalglas-dark": "#4e6283"
+          }
+        },
+        "900": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "#161d29",
+            "autotaalglas-dark": "#0e1832"
+          }
+        }
+      },
+      "info": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-light": "#00b5e2",
+          "autotaalglas-dark": "#00b5e2"
+        }
+      },
+      "primary": {
+        "100": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "#c7d1f1"
+          }
+        },
+        "200": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "#a4b5e7"
+          }
+        },
+        "300": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "#7f98dc"
+          }
+        },
+        "400": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "#005fc5"
+          }
+        },
+        "50": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "#e9edfb"
+          }
+        },
+        "500": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "#002575",
+            "autotaalglas-dark": "#005fc5"
+          }
+        },
+        "600": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "#003b87",
+            "autotaalglas-dark": "#4d8fe0"
+          }
+        },
+        "700": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "#00306d",
+            "autotaalglas-dark": "#003b87"
+          }
+        },
+        "800": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "#002553"
+          }
+        },
+        "900": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "#1a2234"
+          }
+        },
+        "950": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "#0d1b3d"
+          }
+        }
+      },
+      "success": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-light": "#3fb400",
+          "autotaalglas-dark": "#3fb400"
+        }
+      },
+      "warning": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-light": "#e8a13d",
+          "autotaalglas-dark": "#e8a13d"
+        }
+      },
+      "white": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-light": "#ffffff",
+          "autotaalglas-dark": "#ffffff"
+        }
+      }
+    },
+    "control": {
+      "disabled": {
+        "bg": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "#edf1f7",
+            "autotaalglas-dark": "#152449"
+          }
+        }
+      }
+    },
+    "focus": {
+      "ring": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-light": "0 0 0 3px var(--agt-alpha-primary-20)",
+          "autotaalglas-dark": "0 0 0 3px var(--agt-alpha-accent-20)"
+        },
+        "style": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "0 0 0 1px rgb(228 0 43 / 20%)",
+            "autotaalglas-dark": "0 0 0 1px rgb(140 184 255 / 24%)"
+          }
+        }
+      }
+    },
+    "font": {
+      "body": {
+        "$type": "typography",
+        "$value": {
+          "autotaalglas-light": "\u0022Segoe UI Variable\u0022, \u0022Segoe UI\u0022, -apple-system, BlinkMacSystemFont, sans-serif",
+          "autotaalglas-dark": "\u0022Segoe UI Variable\u0022, \u0022Segoe UI\u0022, -apple-system, BlinkMacSystemFont, sans-serif"
+        }
+      },
+      "display": {
+        "$type": "typography",
+        "$value": {
+          "autotaalglas-light": "\u0022AgtSora\u0022, \u0022Segoe UI Variable\u0022, \u0022Segoe UI\u0022, -apple-system, BlinkMacSystemFont, sans-serif",
+          "autotaalglas-dark": "\u0022AgtSora\u0022, \u0022Segoe UI Variable\u0022, \u0022Segoe UI\u0022, -apple-system, BlinkMacSystemFont, sans-serif"
+        }
+      }
+    },
+    "glass": {
+      "bg": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-light": "rgb(255 255 255 / 88%)",
+          "autotaalglas-dark": "rgb(14 24 50 / 78%)"
+        }
+      },
+      "border": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-light": "1px solid var(--agt-glass-border-color)",
+          "autotaalglas-dark": "1px solid var(--agt-glass-border-color)"
+        },
+        "color": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "rgb(0 37 117 / 14%)",
+            "autotaalglas-dark": "rgb(77 143 224 / 34%)"
+          }
+        }
+      }
+    },
+    "glow": {
+      "accent": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-light": "0 0 8px rgb(228 0 43 / 22%)",
+          "autotaalglas-dark": "0 0 10px rgb(228 0 43 / 34%)"
+        }
+      },
+      "primary": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-light": "0 0 10px rgb(0 37 117 / 20%)",
+          "autotaalglas-dark": "0 0 12px rgb(77 143 224 / 34%)"
+        }
+      },
+      "strength": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-light": "1.05",
+          "autotaalglas-dark": "1.12"
+        }
+      }
+    },
+    "gradient": {
+      "accent": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-light": "linear-gradient(135deg, var(--agt-color-accent-300) 0%, var(--agt-color-accent-500) 100%)"
+        }
+      },
+      "hero": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-light": "radial-gradient(circle at 14% 8%, var(--agt-alpha-primary-4) 0%, transparent 54%), var(--agt-surface-0)",
+          "autotaalglas-dark": "radial-gradient(circle at 18% 4%, var(--agt-alpha-primary-4) 0%, transparent 52%), var(--agt-surface-0)"
+        }
+      },
+      "surface": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-light": "linear-gradient(145deg, #ffffff 0%, #f5f8fd 100%)",
+          "autotaalglas-dark": "linear-gradient(145deg, #132042 0%, #0b1328 100%)"
+        }
+      }
+    },
+    "grid": {
+      "header": {
+        "bg": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "#ffffff",
+            "autotaalglas-dark": "#0e1832"
+          }
+        },
+        "border": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "#e6e6e6",
+            "autotaalglas-dark": "#3a4763"
+          }
+        },
+        "text": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "#0d1b3d",
+            "autotaalglas-dark": "#d7e4ff"
+          }
+        }
+      },
+      "row": {
+        "hover": {
+          "bg": {
+            "$type": "color",
+            "$value": {
+              "autotaalglas-light": "#f3f7fd",
+              "autotaalglas-dark": "#1c2b56"
+            }
+          }
+        },
+        "selected": {
+          "bg": {
+            "$type": "color",
+            "$value": {
+              "autotaalglas-light": "rgb(0 37 117 / 8%)",
+              "autotaalglas-dark": "rgb(77 143 224 / 14%)"
+            }
+          },
+          "text": {
+            "$type": "color",
+            "$value": {
+              "autotaalglas-light": "#243147",
+              "autotaalglas-dark": "#edf3ff"
+            }
+          }
+        }
+      }
+    },
+    "heading": {
+      "tracking": {
+        "$type": "typography",
+        "$value": {
+          "autotaalglas-light": "-0.015em",
+          "autotaalglas-dark": "-0.01em"
+        }
+      },
+      "weight": {
+        "$type": "typography",
+        "$value": {
+          "autotaalglas-light": "700",
+          "autotaalglas-dark": "680"
+        }
+      }
+    },
+    "hover": {
+      "tint": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-light": "rgb(0 37 117 / 10%)",
+          "autotaalglas-dark": "rgb(77 143 224 / 16%)"
+        }
+      }
+    },
+    "indicator": {
+      "transition": {
+        "$type": "duration",
+        "$value": {
+          "autotaalglas-light": "180ms cubic-bezier(0.22, 1, 0.36, 1)",
+          "autotaalglas-dark": "190ms cubic-bezier(0.2, 0.8, 0.2, 1)"
+        }
+      }
+    },
+    "input": {
+      "border": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-light": "#7f8eac",
+          "autotaalglas-dark": "#506086"
+        }
+      },
+      "focus": {
+        "border": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "var(--agt-color-primary-600)",
+            "autotaalglas-dark": "#e4002b"
+          }
+        },
+        "ring": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "0 0 0 3px rgb(228 0 43 / 18%)",
+            "autotaalglas-dark": "0 0 0 3px rgb(228 0 43 / 36%)"
+          }
+        }
+      }
+    },
+    "lift": {
+      "distance": {
+        "$type": "string",
+        "$value": {
+          "autotaalglas-light": "2px",
+          "autotaalglas-dark": "2px"
+        }
+      }
+    },
+    "link": {
+      "color": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-light": "#003b87",
+          "autotaalglas-dark": "#4d8fe0"
+        }
+      },
+      "hover": {
+        "color": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "#005fc5",
+            "autotaalglas-dark": "#8cb8ff"
+          }
+        }
+      }
+    },
+    "nav": {
+      "focus": {
+        "outline": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "#e4002b",
+            "autotaalglas-dark": "#e4002b"
+          }
+        }
+      },
+      "group": {
+        "text": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "var(--agt-nav-item-text)",
+            "autotaalglas-dark": "var(--agt-nav-item-text)"
+          }
+        }
+      },
+      "item": {
+        "active": {
+          "bg": {
+            "$type": "color",
+            "$value": {
+              "autotaalglas-light": "rgb(0 37 117 / 8%)",
+              "autotaalglas-dark": "rgb(77 143 224 / 14%)"
+            }
+          },
+          "icon": {
+            "$type": "color",
+            "$value": {
+              "autotaalglas-light": "#e4002b",
+              "autotaalglas-dark": "#e4002b"
+            }
+          },
+          "text": {
+            "$type": "color",
+            "$value": {
+              "autotaalglas-light": "#0d1b3d",
+              "autotaalglas-dark": "#edf3ff"
+            }
+          }
+        },
+        "hover": {
+          "bg": {
+            "$type": "color",
+            "$value": {
+              "autotaalglas-light": "#eef3fc",
+              "autotaalglas-dark": "#1c2b56"
+            }
+          },
+          "text": {
+            "$type": "color",
+            "$value": {
+              "autotaalglas-light": "#0d1b3d",
+              "autotaalglas-dark": "#edf3ff"
+            }
+          }
+        },
+        "icon": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "var(--agt-color-primary-600)",
+            "autotaalglas-dark": "#4d8fe0"
+          }
+        },
+        "text": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "#243147",
+            "autotaalglas-dark": "#d7e4ff"
+          }
+        }
+      }
+    },
+    "on": {
+      "accent": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-light": "#ffffff"
+        }
+      },
+      "base": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-light": "#243147",
+          "autotaalglas-dark": "#edf3ff"
+        }
+      },
+      "danger": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-light": "#ffffff",
+          "autotaalglas-dark": "#ffffff"
+        }
+      },
+      "dark": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-light": "#ffffff",
+          "autotaalglas-dark": "#edf3ff"
+        }
+      },
+      "info": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-light": "#08202a",
+          "autotaalglas-dark": "#08202a"
+        }
+      },
+      "light": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-light": "#161d29",
+          "autotaalglas-dark": "#121a29"
+        }
+      },
+      "primary": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-light": "#ffffff",
+          "autotaalglas-dark": "#ffffff"
+        }
+      },
+      "secondary": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-light": "#ffffff",
+          "autotaalglas-dark": "#ffffff"
+        }
+      },
+      "success": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-light": "#102405",
+          "autotaalglas-dark": "#102405"
+        }
+      },
+      "warning": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-light": "#2f2006",
+          "autotaalglas-dark": "#2f2006"
+        }
+      }
+    },
+    "press": {
+      "scale": {
+        "$type": "string",
+        "$value": {
+          "autotaalglas-light": "0.98",
+          "autotaalglas-dark": "0.98"
+        }
+      }
+    },
+    "radius": {
+      "scale": {
+        "$type": "dimension",
+        "$value": {
+          "autotaalglas-light": "1",
+          "autotaalglas-dark": "1"
+        }
+      }
+    },
+    "selection": {
+      "tint": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-light": "#eaf0fb",
+          "autotaalglas-dark": "#1c2b52"
+        }
+      }
+    },
+    "shadow": {
+      "md": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-light": "0 3px 8px rgb(13 27 61 / 20%), 0 18px 36px rgb(0 37 117 / 16%)",
+          "autotaalglas-dark": "0 6px 14px rgb(0 0 0 / 38%), 0 24px 42px rgb(0 59 135 / 30%)"
+        }
+      },
+      "sm": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-light": "0 1px 2px rgb(13 27 61 / 18%), 0 10px 20px rgb(0 37 117 / 12%)",
+          "autotaalglas-dark": "0 2px 4px rgb(0 0 0 / 34%), 0 14px 26px rgb(0 59 135 / 24%)"
+        }
+      }
+    },
+    "surface": {
+      "0": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-light": "#f8fafe",
+          "autotaalglas-dark": "#0a1228"
+        }
+      },
+      "1": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-light": "#ffffff",
+          "autotaalglas-dark": "#0e1832"
+        }
+      },
+      "2": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-light": "#fbfcff",
+          "autotaalglas-dark": "#132043"
+        }
+      },
+      "3": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-light": "#f0f4fb",
+          "autotaalglas-dark": "#1c2b56"
+        }
+      }
+    },
+    "text": {
+      "body": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-light": "#243147",
+          "autotaalglas-dark": "#e3ecff"
+        }
+      },
+      "disabled": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-light": "#7a879c",
+          "autotaalglas-dark": "#8294b7"
+        }
+      },
+      "heading": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-light": "#0d1b3d",
+          "autotaalglas-dark": "#edf3ff"
+        }
+      },
+      "muted": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-light": "var(--agt-nav-item-text)",
+          "autotaalglas-dark": "var(--agt-nav-item-text)"
+        }
+      }
+    },
+    "tooltip": {
+      "text": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-light": "#243147",
+          "autotaalglas-dark": "#edf3ff"
+        }
+      }
+    },
+    "topbar": {
+      "brand": {
+        "accent": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "#e4002b",
+            "autotaalglas-dark": "#e4002b"
+          }
+        },
+        "color": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "#0d1b3d",
+            "autotaalglas-dark": "#edf3ff"
+          }
+        }
+      },
+      "icon": {
+        "color": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-light": "#59677f",
+            "autotaalglas-dark": "#d7e4ff"
+          }
+        },
+        "hover": {
+          "color": {
+            "$type": "color",
+            "$value": {
+              "autotaalglas-light": "#003b87",
+              "autotaalglas-dark": "#4d8fe0"
+            }
+          }
+        }
+      }
+    }
+  }
+}

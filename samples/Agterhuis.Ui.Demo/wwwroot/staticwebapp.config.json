@@ -1,0 +1,45 @@
+{
+  "navigationFallback": {
+    "rewrite": "/index.html",
+    "exclude": [
+      "/_framework/*",
+      "/_content/*",
+      "/*.css",
+      "/*.js",
+      "/*.json",
+      "/*.png",
+      "/*.jpg",
+      "/*.jpeg",
+      "/*.gif",
+      "/*.svg",
+      "/*.ico",
+      "/*.map",
+      "/*.woff",
+      "/*.woff2",
+      "/*.wasm"
+    ]
+  },
+  "routes": [
+    {
+      "route": "/not-found",
+      "rewrite": "/index.html",
+      "statusCode": 404
+    },
+    {
+      "route": "/_framework/*",
+      "headers": {
+        "Cache-Control": "public, max-age=31536000, immutable"
+      }
+    },
+    {
+      "route": "/_content/*",
+      "headers": {
+        "Cache-Control": "public, max-age=31536000, immutable"
+      }
+    }
+  ],
+  "mimeTypes": {
+    ".wasm": "application/wasm",
+    ".woff2": "font/woff2"
+  }
+}

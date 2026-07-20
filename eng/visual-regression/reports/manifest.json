@@ -1,5 +1,5 @@
 {
-  "generatedAtUtc": "2026-07-20T08:46:00.140Z",
+  "generatedAtUtc": "2026-07-20T14:52:10.907Z",
   "mode": "test",
   "threshold": 0.04,
   "results": [
@@ -56,7 +56,7 @@
     {
       "fileName": "werkorders.desktop.hoth-light.png",
       "status": "ok",
-      "diffRatio": 0.013372222222222223
+      "diffRatio": 0.013372916666666667
     },
     {
       "fileName": "blog.desktop.hoth-light.png",
@@ -146,7 +146,7 @@
     {
       "fileName": "werkorders.desktop.volt-dark.png",
       "status": "ok",
-      "diffRatio": 0.01572152777777778
+      "diffRatio": 0.01572222222222222
     },
     {
       "fileName": "blog.desktop.volt-dark.png",

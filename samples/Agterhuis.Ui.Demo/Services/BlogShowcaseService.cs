@@ -1,9 +1,11 @@
+using System.Reflection;
 using System.Text.RegularExpressions;
 
 namespace Agterhuis.Ui.Demo.Services;
 
-public sealed class BlogShowcaseService(IWebHostEnvironment environment)
+public sealed class BlogShowcaseService
 {
+    private static readonly Assembly Assembly = typeof(BlogShowcaseService).Assembly;
     private static readonly Regex PromptNumberRegex = new("^(?<number>\\d+)-", RegexOptions.Compiled);
     private static readonly Regex PromptHeadingRegex = new("^#\\s+(?<title>.+)$", RegexOptions.Multiline | RegexOptions.Compiled);
 
@@ -93,18 +95,30 @@ public sealed class BlogShowcaseService(IWebHostEnvironment environment)
 
     public IReadOnlyList<BlogPromptItem> GetPrompts()
     {
+        return GetPromptsAsync().GetAwaiter().GetResult();
+    }
+
+    public Task<IReadOnlyList<BlogPromptItem>> GetPromptsAsync()
+    {
         if (_cachedPrompts is not null)
         {
-            return _cachedPrompts;
+            return Task.FromResult(_cachedPrompts);
         }
 
-        var promptFiles = ResolvePromptFiles();
+        var promptResources = ResolvePromptResources();
         var items = new List<BlogPromptItem>();
 
-        foreach (var filePath in promptFiles)
+        foreach (var resourceName in promptResources)
         {
-            var fileName = Path.GetFileName(filePath);
-            var content = File.ReadAllText(filePath);
+            using var stream = Assembly.GetManifestResourceStream(resourceName);
+            if (stream is null)
+            {
+                continue;
+            }
+
+            using var reader = new StreamReader(stream);
+            var fileName = Path.GetFileName(resourceName);
+            var content = reader.ReadToEnd();
             var number = ParsePromptNumber(fileName);
             var title = ParsePromptTitle(fileName, content);
             var summary = ParseSummary(content);
@@ -117,34 +131,14 @@ public sealed class BlogShowcaseService(IWebHostEnvironment environment)
             .OrderBy(item => item.Number)
             .ToList();
 
-        return _cachedPrompts;
+        return Task.FromResult(_cachedPrompts);
     }
 
-    private IEnumerable<string> ResolvePromptFiles()
+    private static IEnumerable<string> ResolvePromptResources()
     {
-        var candidateDirectories = new[]
-        {
-            Path.Combine(environment.ContentRootPath, "prompts"),
-            Path.Combine(environment.ContentRootPath, "blog-prompts"),
-            Path.Combine(AppContext.BaseDirectory, "blog-prompts"),
-            Path.GetFullPath(Path.Combine(environment.ContentRootPath, "..", "..", "prompts"))
-        };
-
-        foreach (var directory in candidateDirectories)
-        {
-            if (!Directory.Exists(directory))
-            {
-                continue;
-            }
-
-            var files = Directory.EnumerateFiles(directory, "*.md", SearchOption.TopDirectoryOnly).ToList();
-            if (files.Count > 0)
-            {
-                return files;
-            }
-        }
-
-        return [];
+        return Assembly.GetManifestResourceNames()
+            .Where(name => name.Contains("blog-prompts/", StringComparison.OrdinalIgnoreCase) && name.EndsWith(".md", StringComparison.OrdinalIgnoreCase))
+            .OrderBy(name => name, StringComparer.OrdinalIgnoreCase);
     }
 
     private static int ParsePromptNumber(string fileName)

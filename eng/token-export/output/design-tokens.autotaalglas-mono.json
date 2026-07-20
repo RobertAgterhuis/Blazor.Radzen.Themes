@@ -1,0 +1,1022 @@
+{
+  "family": "autotaalglas-mono",
+  "modes": [
+    "autotaalglas-mono-light",
+    "autotaalglas-mono-dark"
+  ],
+  "tokens": {
+    "alpha": {
+      "accent": {
+        "10": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "rgb(0 59 135 / 10%)"
+          }
+        },
+        "20": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "rgb(0 59 135 / 20%)"
+          }
+        },
+        "40": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "rgb(0 59 135 / 40%)"
+          }
+        },
+        "5": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "rgb(0 59 135 / 5%)"
+          }
+        }
+      },
+      "primary": {
+        "10": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "rgb(0 37 117 / 10%)"
+          }
+        },
+        "20": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "rgb(0 37 117 / 20%)"
+          }
+        },
+        "4": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "rgb(0 37 117 / 4%)"
+          }
+        },
+        "40": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "rgb(0 37 117 / 40%)"
+          }
+        },
+        "5": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "rgb(0 37 117 / 5%)"
+          }
+        }
+      }
+    },
+    "btn": {
+      "base": {
+        "fill": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "#e8eef8",
+            "autotaalglas-mono-dark": "#23365d"
+          }
+        }
+      },
+      "danger": {
+        "fill": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "#b3001f",
+            "autotaalglas-mono-dark": "#b3001f"
+          }
+        }
+      },
+      "dark": {
+        "fill": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "#0d1b3d",
+            "autotaalglas-mono-dark": "#0a1228"
+          }
+        },
+        "ink": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "#d7e0ee",
+            "autotaalglas-mono-dark": "#d7e0ee"
+          }
+        }
+      },
+      "info": {
+        "fill": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "#7aa7d2",
+            "autotaalglas-mono-dark": "#7aa7d2"
+          }
+        }
+      },
+      "light": {
+        "fill": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "#ffffff",
+            "autotaalglas-mono-dark": "#f5f8fc"
+          }
+        },
+        "ink": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "#4d596f",
+            "autotaalglas-mono-dark": "#334259"
+          }
+        }
+      },
+      "primary": {
+        "fill": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "#002575",
+            "autotaalglas-mono-dark": "#003b87"
+          }
+        }
+      },
+      "secondary": {
+        "border": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "#003b87",
+            "autotaalglas-mono-dark": "#4d8fe0"
+          }
+        },
+        "fill": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "#003b87",
+            "autotaalglas-mono-dark": "#4d8fe0"
+          }
+        },
+        "hover": {
+          "bg": {
+            "$type": "color",
+            "$value": {
+              "autotaalglas-mono-light": "rgb(0 59 135 / 10%)",
+              "autotaalglas-mono-dark": "rgb(77 143 224 / 14%)"
+            }
+          },
+          "text": {
+            "$type": "color",
+            "$value": {
+              "autotaalglas-mono-light": "#002f69",
+              "autotaalglas-mono-dark": "#eef3fb"
+            }
+          }
+        },
+        "text": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "#003b87",
+            "autotaalglas-mono-dark": "#8cb8ff"
+          }
+        }
+      },
+      "success": {
+        "fill": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "#5d9878",
+            "autotaalglas-mono-dark": "#5d9878"
+          }
+        }
+      },
+      "warning": {
+        "fill": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "#b79a55",
+            "autotaalglas-mono-dark": "#b79a55"
+          }
+        }
+      }
+    },
+    "canvas": {
+      "backdrop": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-mono-light": "none",
+          "autotaalglas-mono-dark": "none"
+        }
+      }
+    },
+    "chart": {
+      "axis": {
+        "text": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "#5f6d83",
+            "autotaalglas-mono-dark": "#a4b1c5"
+          }
+        }
+      },
+      "gridline": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-mono-light": "#d9e3ef",
+          "autotaalglas-mono-dark": "#32486e"
+        }
+      },
+      "series": {
+        "1": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "#002575",
+            "autotaalglas-mono-dark": "#4d8fe0"
+          }
+        },
+        "2": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "#003b87",
+            "autotaalglas-mono-dark": "#8cb8ff"
+          }
+        },
+        "3": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "#7aa7d2",
+            "autotaalglas-mono-dark": "#7aa7d2"
+          }
+        },
+        "4": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "#8ea3bd",
+            "autotaalglas-mono-dark": "#8ea3bd"
+          }
+        },
+        "5": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "#5f6d83",
+            "autotaalglas-mono-dark": "#a4b1c5"
+          }
+        },
+        "6": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "#5d9878",
+            "autotaalglas-mono-dark": "#7aa58a"
+          }
+        },
+        "7": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "#b79a55",
+            "autotaalglas-mono-dark": "#cfb67a"
+          }
+        },
+        "8": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "#b3001f",
+            "autotaalglas-mono-dark": "#ff7e94"
+          }
+        }
+      }
+    },
+    "color": {
+      "accent": {
+        "300": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "#7f96bf",
+            "autotaalglas-mono-dark": "#8ea3bd"
+          }
+        },
+        "400": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "#003b87",
+            "autotaalglas-mono-dark": "#4d8fe0"
+          }
+        },
+        "500": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "#002f69",
+            "autotaalglas-mono-dark": "#003b87"
+          }
+        },
+        "600": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "#002553",
+            "autotaalglas-mono-dark": "#002f69"
+          }
+        },
+        "700": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "#1a2234",
+            "autotaalglas-mono-dark": "#002553"
+          }
+        },
+        "text": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "#002f69",
+            "autotaalglas-mono-dark": "#8cb8ff"
+          }
+        }
+      },
+      "danger": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-mono-light": "#b3001f",
+          "autotaalglas-mono-dark": "#b3001f"
+        },
+        "text": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "#b3001f",
+            "autotaalglas-mono-dark": "#ffb4bf"
+          }
+        }
+      },
+      "gray": {
+        "100": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "#eef2f7",
+            "autotaalglas-mono-dark": "#d7e0ee"
+          }
+        },
+        "200": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "#e6e6e6",
+            "autotaalglas-mono-dark": "#a4b1c5"
+          }
+        },
+        "50": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "#f7f9fc",
+            "autotaalglas-mono-dark": "#eef3fb"
+          }
+        },
+        "500": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "#6f7889",
+            "autotaalglas-mono-dark": "#7d8da8"
+          }
+        },
+        "700": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "#46536a",
+            "autotaalglas-mono-dark": "#4a5c78"
+          }
+        },
+        "900": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "#1b2230",
+            "autotaalglas-mono-dark": "#0e1832"
+          }
+        }
+      },
+      "info": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-mono-light": "#7aa7d2",
+          "autotaalglas-mono-dark": "#7aa7d2"
+        }
+      },
+      "primary": {
+        "100": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "#dde7f4"
+          }
+        },
+        "200": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "#c9d6ea"
+          }
+        },
+        "300": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "#a8bbd8"
+          }
+        },
+        "400": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "#7f96bf"
+          }
+        },
+        "50": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "#eef3fb"
+          }
+        },
+        "500": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "#002575",
+            "autotaalglas-mono-dark": "#003b87"
+          }
+        },
+        "600": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "#003b87",
+            "autotaalglas-mono-dark": "#4d8fe0"
+          }
+        },
+        "700": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "#2f4c73",
+            "autotaalglas-mono-dark": "#002575"
+          }
+        },
+        "800": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "#223754"
+          }
+        },
+        "900": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "#1a2234"
+          }
+        },
+        "950": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "#0d1b3d"
+          }
+        }
+      },
+      "success": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-mono-light": "#5d9878",
+          "autotaalglas-mono-dark": "#5d9878"
+        }
+      },
+      "warning": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-mono-light": "#b79a55",
+          "autotaalglas-mono-dark": "#b79a55"
+        }
+      },
+      "white": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-mono-light": "#ffffff",
+          "autotaalglas-mono-dark": "#ffffff"
+        }
+      }
+    },
+    "control": {
+      "disabled": {
+        "bg": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "#eef2f7",
+            "autotaalglas-mono-dark": "#152140"
+          }
+        }
+      }
+    },
+    "focus": {
+      "ring": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-mono-light": "0 0 0 3px var(--agt-alpha-accent-20)",
+          "autotaalglas-mono-dark": "0 0 0 3px rgb(77 143 224 / 24%)"
+        },
+        "style": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "0 0 0 1px rgb(0 59 135 / 20%)",
+            "autotaalglas-mono-dark": "0 0 0 1px rgb(77 143 224 / 22%)"
+          }
+        }
+      }
+    },
+    "font": {
+      "body": {
+        "$type": "typography",
+        "$value": {
+          "autotaalglas-mono-light": "\u0022Segoe UI Variable\u0022, \u0022Segoe UI\u0022, -apple-system, BlinkMacSystemFont, sans-serif",
+          "autotaalglas-mono-dark": "\u0022Segoe UI Variable\u0022, \u0022Segoe UI\u0022, -apple-system, BlinkMacSystemFont, sans-serif"
+        }
+      },
+      "display": {
+        "$type": "typography",
+        "$value": {
+          "autotaalglas-mono-light": "\u0022AgtBarlowCondensed\u0022, \u0022Arial Narrow\u0022, sans-serif",
+          "autotaalglas-mono-dark": "\u0022AgtBarlowCondensed\u0022, \u0022Arial Narrow\u0022, sans-serif"
+        }
+      }
+    },
+    "glass": {
+      "bg": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-mono-light": "rgb(255 255 255 / 88%)",
+          "autotaalglas-mono-dark": "rgb(14 24 50 / 82%)"
+        }
+      },
+      "border": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-mono-light": "1px solid var(--agt-glass-border-color)",
+          "autotaalglas-mono-dark": "1px solid var(--agt-glass-border-color)"
+        },
+        "color": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "rgb(0 37 117 / 14%)",
+            "autotaalglas-mono-dark": "rgb(77 143 224 / 20%)"
+          }
+        }
+      }
+    },
+    "glow": {
+      "accent": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-mono-light": "0 0 0 transparent",
+          "autotaalglas-mono-dark": "0 0 0 transparent"
+        }
+      },
+      "primary": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-mono-light": "0 0 0 transparent",
+          "autotaalglas-mono-dark": "0 0 0 transparent"
+        }
+      },
+      "strength": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-mono-light": "1",
+          "autotaalglas-mono-dark": "1"
+        }
+      }
+    },
+    "gradient": {
+      "accent": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-mono-light": "linear-gradient(135deg, var(--agt-color-accent-300) 0%, var(--agt-color-accent-500) 100%)"
+        }
+      },
+      "hero": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-mono-light": "linear-gradient(180deg, #f8fafe 0%, #f8fafe 100%)",
+          "autotaalglas-mono-dark": "linear-gradient(180deg, #0a1228 0%, #0a1228 100%)"
+        }
+      },
+      "surface": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-mono-light": "linear-gradient(145deg, #ffffff 0%, #f2f5fa 100%)",
+          "autotaalglas-mono-dark": "linear-gradient(145deg, #0e1832 0%, #0a1228 100%)"
+        }
+      }
+    },
+    "grid": {
+      "header": {
+        "bg": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "#ffffff",
+            "autotaalglas-mono-dark": "#0e1832"
+          }
+        },
+        "border": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "#8ea3bd",
+            "autotaalglas-mono-dark": "#4a5e80"
+          }
+        },
+        "text": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "#0d1b3d",
+            "autotaalglas-mono-dark": "#eef3fb"
+          }
+        }
+      },
+      "row": {
+        "hover": {
+          "bg": {
+            "$type": "color",
+            "$value": {
+              "autotaalglas-mono-light": "#edf2f8",
+              "autotaalglas-mono-dark": "#1b294a"
+            }
+          }
+        },
+        "selected": {
+          "bg": {
+            "$type": "color",
+            "$value": {
+              "autotaalglas-mono-light": "#e8eef8",
+              "autotaalglas-mono-dark": "#23365d"
+            }
+          },
+          "text": {
+            "$type": "color",
+            "$value": {
+              "autotaalglas-mono-light": "#243147",
+              "autotaalglas-mono-dark": "#eef3fb"
+            }
+          }
+        }
+      }
+    },
+    "heading": {
+      "tracking": {
+        "$type": "typography",
+        "$value": {
+          "autotaalglas-mono-light": "0.05em",
+          "autotaalglas-mono-dark": "0.05em"
+        }
+      },
+      "weight": {
+        "$type": "typography",
+        "$value": {
+          "autotaalglas-mono-light": "700",
+          "autotaalglas-mono-dark": "700"
+        }
+      }
+    },
+    "hover": {
+      "tint": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-mono-light": "rgb(0 37 117 / 10%)",
+          "autotaalglas-mono-dark": "rgb(77 143 224 / 12%)"
+        }
+      }
+    },
+    "indicator": {
+      "transition": {
+        "$type": "duration",
+        "$value": {
+          "autotaalglas-mono-light": "160ms cubic-bezier(0.22, 1, 0.36, 1)",
+          "autotaalglas-mono-dark": "160ms cubic-bezier(0.22, 1, 0.36, 1)"
+        }
+      }
+    },
+    "input": {
+      "border": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-mono-light": "#7f8eac",
+          "autotaalglas-mono-dark": "#506080"
+        }
+      },
+      "focus": {
+        "border": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "#003b87",
+            "autotaalglas-mono-dark": "#4d8fe0"
+          }
+        },
+        "ring": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "0 0 0 3px rgb(0 59 135 / 18%)",
+            "autotaalglas-mono-dark": "0 0 0 3px rgb(77 143 224 / 26%)"
+          }
+        }
+      }
+    },
+    "lift": {
+      "distance": {
+        "$type": "string",
+        "$value": {
+          "autotaalglas-mono-light": "1px",
+          "autotaalglas-mono-dark": "1px"
+        }
+      }
+    },
+    "link": {
+      "color": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-mono-light": "#003b87",
+          "autotaalglas-mono-dark": "#4d8fe0"
+        }
+      },
+      "hover": {
+        "color": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "#002575",
+            "autotaalglas-mono-dark": "#8cb8ff"
+          }
+        }
+      }
+    },
+    "nav": {
+      "focus": {
+        "outline": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "#003b87",
+            "autotaalglas-mono-dark": "#4d8fe0"
+          }
+        }
+      },
+      "group": {
+        "text": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "var(--agt-nav-item-text)",
+            "autotaalglas-mono-dark": "var(--agt-nav-item-text)"
+          }
+        }
+      },
+      "item": {
+        "active": {
+          "bg": {
+            "$type": "color",
+            "$value": {
+              "autotaalglas-mono-light": "#e8eef8",
+              "autotaalglas-mono-dark": "#23365d"
+            }
+          },
+          "icon": {
+            "$type": "color",
+            "$value": {
+              "autotaalglas-mono-light": "#003b87",
+              "autotaalglas-mono-dark": "#4d8fe0"
+            }
+          },
+          "text": {
+            "$type": "color",
+            "$value": {
+              "autotaalglas-mono-light": "#0d1b3d",
+              "autotaalglas-mono-dark": "#eef3fb"
+            }
+          }
+        },
+        "hover": {
+          "bg": {
+            "$type": "color",
+            "$value": {
+              "autotaalglas-mono-light": "#edf2f8",
+              "autotaalglas-mono-dark": "#1b294a"
+            }
+          },
+          "text": {
+            "$type": "color",
+            "$value": {
+              "autotaalglas-mono-light": "#0d1b3d",
+              "autotaalglas-mono-dark": "#eef3fb"
+            }
+          }
+        },
+        "icon": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "#003b87",
+            "autotaalglas-mono-dark": "#4d8fe0"
+          }
+        },
+        "text": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "#243147",
+            "autotaalglas-mono-dark": "#e2ebfa"
+          }
+        }
+      }
+    },
+    "on": {
+      "accent": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-mono-light": "#ffffff"
+        }
+      },
+      "base": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-mono-light": "#243147",
+          "autotaalglas-mono-dark": "#eef3fb"
+        }
+      },
+      "danger": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-mono-light": "#ffffff"
+        }
+      },
+      "dark": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-mono-light": "#ffffff",
+          "autotaalglas-mono-dark": "#eef3fb"
+        }
+      },
+      "info": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-mono-light": "#08202a",
+          "autotaalglas-mono-dark": "#08202a"
+        }
+      },
+      "light": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-mono-light": "#1b2230",
+          "autotaalglas-mono-dark": "#1b2230"
+        }
+      },
+      "primary": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-mono-light": "#ffffff"
+        }
+      },
+      "secondary": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-mono-light": "#ffffff"
+        }
+      },
+      "success": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-mono-light": "#102405"
+        }
+      },
+      "warning": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-mono-light": "#2f2006"
+        }
+      }
+    },
+    "press": {
+      "scale": {
+        "$type": "string",
+        "$value": {
+          "autotaalglas-mono-light": "0.985",
+          "autotaalglas-mono-dark": "0.985"
+        }
+      }
+    },
+    "radius": {
+      "scale": {
+        "$type": "dimension",
+        "$value": {
+          "autotaalglas-mono-light": "0.5",
+          "autotaalglas-mono-dark": "0.5"
+        }
+      }
+    },
+    "selection": {
+      "tint": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-mono-light": "#e8eef8",
+          "autotaalglas-mono-dark": "#23365d"
+        }
+      }
+    },
+    "shadow": {
+      "md": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-mono-light": "0 4px 8px rgb(13 27 61 / 24%), 0 16px 28px rgb(26 34 52 / 12%)",
+          "autotaalglas-mono-dark": "0 6px 12px rgb(0 0 0 / 40%), 0 22px 38px rgb(0 37 117 / 22%)"
+        }
+      },
+      "sm": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-mono-light": "0 1px 2px rgb(13 27 61 / 20%), 0 10px 20px rgb(26 34 52 / 10%)",
+          "autotaalglas-mono-dark": "0 2px 4px rgb(0 0 0 / 36%), 0 12px 22px rgb(0 37 117 / 18%)"
+        }
+      }
+    },
+    "surface": {
+      "0": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-mono-light": "#f8fafe",
+          "autotaalglas-mono-dark": "#0a1228"
+        }
+      },
+      "1": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-mono-light": "#ffffff",
+          "autotaalglas-mono-dark": "#0e1832"
+        }
+      },
+      "2": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-mono-light": "#fbfcff",
+          "autotaalglas-mono-dark": "#132043"
+        }
+      },
+      "3": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-mono-light": "#edf2f8",
+          "autotaalglas-mono-dark": "#1b294a"
+        }
+      }
+    },
+    "text": {
+      "body": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-mono-light": "#243147",
+          "autotaalglas-mono-dark": "#e2ebfa"
+        }
+      },
+      "disabled": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-mono-light": "#7c889a",
+          "autotaalglas-mono-dark": "#7d8da8"
+        }
+      },
+      "heading": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-mono-light": "#0d1b3d",
+          "autotaalglas-mono-dark": "#eef3fb"
+        }
+      },
+      "muted": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-mono-light": "var(--agt-nav-item-text)",
+          "autotaalglas-mono-dark": "var(--agt-nav-item-text)"
+        }
+      }
+    },
+    "tooltip": {
+      "text": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-mono-light": "#243147",
+          "autotaalglas-mono-dark": "#eef3fb"
+        }
+      }
+    },
+    "topbar": {
+      "brand": {
+        "accent": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "#003b87",
+            "autotaalglas-mono-dark": "#4d8fe0"
+          }
+        },
+        "color": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "#0d1b3d",
+            "autotaalglas-mono-dark": "#eef3fb"
+          }
+        }
+      },
+      "icon": {
+        "color": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-mono-light": "#5f6d83",
+            "autotaalglas-mono-dark": "#d5deeb"
+          }
+        },
+        "hover": {
+          "color": {
+            "$type": "color",
+            "$value": {
+              "autotaalglas-mono-light": "#003b87",
+              "autotaalglas-mono-dark": "#4d8fe0"
+            }
+          }
+        }
+      }
+    }
+  }
+}

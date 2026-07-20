@@ -1,0 +1,15 @@
+.designer-layout-root {
+    background:
+        radial-gradient(circle at top right, var(--agt-alpha-primary-10) 0%, transparent 34%),
+        radial-gradient(circle at bottom left, var(--agt-alpha-accent-10) 0%, transparent 42%),
+        var(--agt-surface-0);
+    color: var(--agt-text-body);
+    min-height: 100vh;
+    padding: var(--agt-spacing-3);
+}
+
+@media (max-width: 900px) {
+    .designer-layout-root {
+        padding: var(--agt-spacing-2);
+    }
+}

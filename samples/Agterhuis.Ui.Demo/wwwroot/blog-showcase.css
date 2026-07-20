@@ -9,6 +9,7 @@
 }
 
 .blog-header {
+    -webkit-backdrop-filter: blur(8px);
     backdrop-filter: blur(8px);
     background: color-mix(in srgb, var(--agt-surface-1) 86%, transparent);
     border-bottom: 1px solid var(--agt-input-border);
@@ -308,6 +309,7 @@
 
 .blog-reel__track.is-dragging {
     cursor: grabbing;
+    -webkit-user-select: none;
     user-select: none;
 }
 

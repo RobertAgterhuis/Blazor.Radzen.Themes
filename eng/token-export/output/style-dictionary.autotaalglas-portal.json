@@ -1,0 +1,511 @@
+{
+  "alpha/accent/10": {
+    "autotaalglas-portal-light": "rgb(228 0 43 / 10%)",
+    "autotaalglas-portal-dark": "rgb(228 0 43 / 10%)"
+  },
+  "alpha/accent/20": {
+    "autotaalglas-portal-light": "rgb(228 0 43 / 20%)",
+    "autotaalglas-portal-dark": "rgb(228 0 43 / 20%)"
+  },
+  "alpha/accent/40": {
+    "autotaalglas-portal-light": "rgb(228 0 43 / 40%)",
+    "autotaalglas-portal-dark": "rgb(228 0 43 / 40%)"
+  },
+  "alpha/accent/5": {
+    "autotaalglas-portal-light": "rgb(228 0 43 / 5%)",
+    "autotaalglas-portal-dark": "rgb(228 0 43 / 5%)"
+  },
+  "alpha/primary/10": {
+    "autotaalglas-portal-light": "rgb(0 95 197 / 10%)",
+    "autotaalglas-portal-dark": "rgb(46 144 232 / 10%)"
+  },
+  "alpha/primary/20": {
+    "autotaalglas-portal-light": "rgb(0 95 197 / 20%)",
+    "autotaalglas-portal-dark": "rgb(46 144 232 / 20%)"
+  },
+  "alpha/primary/4": {
+    "autotaalglas-portal-light": "rgb(0 95 197 / 4%)",
+    "autotaalglas-portal-dark": "rgb(46 144 232 / 4%)"
+  },
+  "alpha/primary/40": {
+    "autotaalglas-portal-light": "rgb(0 95 197 / 40%)",
+    "autotaalglas-portal-dark": "rgb(46 144 232 / 40%)"
+  },
+  "alpha/primary/5": {
+    "autotaalglas-portal-light": "rgb(0 95 197 / 5%)",
+    "autotaalglas-portal-dark": "rgb(46 144 232 / 5%)"
+  },
+  "btn/base/fill": {
+    "autotaalglas-portal-light": "#def4fb",
+    "autotaalglas-portal-dark": "#183754"
+  },
+  "btn/danger/fill": {
+    "autotaalglas-portal-light": "#b3001f",
+    "autotaalglas-portal-dark": "#b3001f"
+  },
+  "btn/dark/fill": {
+    "autotaalglas-portal-light": "#002575",
+    "autotaalglas-portal-dark": "#0a1428"
+  },
+  "btn/dark/ink": {
+    "autotaalglas-portal-light": "#d7e8ff",
+    "autotaalglas-portal-dark": "#d8eaff"
+  },
+  "btn/info/fill": {
+    "autotaalglas-portal-light": "#3d6f9c",
+    "autotaalglas-portal-dark": "#3d6f9c"
+  },
+  "btn/light/fill": {
+    "autotaalglas-portal-light": "#ffffff",
+    "autotaalglas-portal-dark": "#f4f8fc"
+  },
+  "btn/light/ink": {
+    "autotaalglas-portal-light": "#495d77",
+    "autotaalglas-portal-dark": "#334259"
+  },
+  "btn/primary/fill": {
+    "autotaalglas-portal-light": "#005fc5",
+    "autotaalglas-portal-dark": "#005fc5"
+  },
+  "btn/secondary/border": {
+    "autotaalglas-portal-light": "#e4002b",
+    "autotaalglas-portal-dark": "#e4002b"
+  },
+  "btn/secondary/fill": {
+    "autotaalglas-portal-light": "#e4002b",
+    "autotaalglas-portal-dark": "#e4002b"
+  },
+  "btn/secondary/hover/bg": {
+    "autotaalglas-portal-light": "rgb(228 0 43 / 10%)",
+    "autotaalglas-portal-dark": "rgb(228 0 43 / 14%)"
+  },
+  "btn/secondary/hover/text": {
+    "autotaalglas-portal-light": "#8f0019",
+    "autotaalglas-portal-dark": "#eef5ff"
+  },
+  "btn/secondary/text": {
+    "autotaalglas-portal-light": "#b3001f",
+    "autotaalglas-portal-dark": "#ff9fb1"
+  },
+  "btn/success/fill": {
+    "autotaalglas-portal-light": "#3fb400",
+    "autotaalglas-portal-dark": "#3fb400"
+  },
+  "btn/warning/fill": {
+    "autotaalglas-portal-light": "#e8a13d",
+    "autotaalglas-portal-dark": "#e8a13d"
+  },
+  "canvas/backdrop": {
+    "autotaalglas-portal-light": "radial-gradient(circle at 12% 6%, rgb(0 181 226 / 5%) 0%, transparent 30%), radial-gradient(circle at 78% 10%, rgb(0 95 197 / 4%) 0%, transparent 34%)",
+    "autotaalglas-portal-dark": "radial-gradient(circle at 16% 4%, rgb(0 181 226 / 7%) 0%, transparent 32%), radial-gradient(circle at 76% 10%, rgb(46 144 232 / 5%) 0%, transparent 30%)"
+  },
+  "chart/axis/text": {
+    "autotaalglas-portal-light": "#5a6f89",
+    "autotaalglas-portal-dark": "#a8bbd8"
+  },
+  "chart/gridline": {
+    "autotaalglas-portal-light": "#d9e6f0",
+    "autotaalglas-portal-dark": "#3a5275"
+  },
+  "chart/series/1": {
+    "autotaalglas-portal-light": "#005fc5",
+    "autotaalglas-portal-dark": "#6cc4f0"
+  },
+  "chart/series/2": {
+    "autotaalglas-portal-light": "#e4002b",
+    "autotaalglas-portal-dark": "#e4002b"
+  },
+  "chart/series/3": {
+    "autotaalglas-portal-light": "#00b5e2",
+    "autotaalglas-portal-dark": "#00b5e2"
+  },
+  "chart/series/4": {
+    "autotaalglas-portal-light": "#3d6f9c",
+    "autotaalglas-portal-dark": "#bfd7eb"
+  },
+  "chart/series/5": {
+    "autotaalglas-portal-light": "#3fb400",
+    "autotaalglas-portal-dark": "#7ddd59"
+  },
+  "chart/series/6": {
+    "autotaalglas-portal-light": "#e8a13d",
+    "autotaalglas-portal-dark": "#f0bd66"
+  },
+  "chart/series/7": {
+    "autotaalglas-portal-light": "#002575",
+    "autotaalglas-portal-dark": "#8cb8ff"
+  },
+  "chart/series/8": {
+    "autotaalglas-portal-light": "#8ea3bd",
+    "autotaalglas-portal-dark": "#7f96bf"
+  },
+  "color/accent/300": {
+    "autotaalglas-portal-light": "#ff6b84",
+    "autotaalglas-portal-dark": "#ff6b84"
+  },
+  "color/accent/400": {
+    "autotaalglas-portal-light": "#e4002b",
+    "autotaalglas-portal-dark": "#e4002b"
+  },
+  "color/accent/500": {
+    "autotaalglas-portal-light": "#c90027",
+    "autotaalglas-portal-dark": "#c90027"
+  },
+  "color/accent/600": {
+    "autotaalglas-portal-light": "#b3001f",
+    "autotaalglas-portal-dark": "#b3001f"
+  },
+  "color/accent/700": {
+    "autotaalglas-portal-light": "#8f0019",
+    "autotaalglas-portal-dark": "#8f0019"
+  },
+  "color/accent/text": {
+    "autotaalglas-portal-light": "#b3001f",
+    "autotaalglas-portal-dark": "#ff9fb1"
+  },
+  "color/danger": {
+    "autotaalglas-portal-light": "#b3001f",
+    "autotaalglas-portal-dark": "#b3001f"
+  },
+  "color/danger/text": {
+    "autotaalglas-portal-light": "#b3001f",
+    "autotaalglas-portal-dark": "#ffb4bf"
+  },
+  "color/gray/100": {
+    "autotaalglas-portal-light": "#edf5fb",
+    "autotaalglas-portal-dark": "#d7e4ff"
+  },
+  "color/gray/200": {
+    "autotaalglas-portal-light": "#d9e6f0",
+    "autotaalglas-portal-dark": "#9cb4d5"
+  },
+  "color/gray/50": {
+    "autotaalglas-portal-light": "#f7fbff",
+    "autotaalglas-portal-dark": "#eef5ff"
+  },
+  "color/gray/500": {
+    "autotaalglas-portal-light": "#6c7b92",
+    "autotaalglas-portal-dark": "#8098bb"
+  },
+  "color/gray/700": {
+    "autotaalglas-portal-light": "#334259",
+    "autotaalglas-portal-dark": "#49607f"
+  },
+  "color/gray/900": {
+    "autotaalglas-portal-light": "#172334",
+    "autotaalglas-portal-dark": "#0f1830"
+  },
+  "color/info": {
+    "autotaalglas-portal-light": "#3d6f9c",
+    "autotaalglas-portal-dark": "#3d6f9c"
+  },
+  "color/primary/100": {
+    "autotaalglas-portal-light": "#d1e5fb"
+  },
+  "color/primary/200": {
+    "autotaalglas-portal-light": "#aed2f4"
+  },
+  "color/primary/300": {
+    "autotaalglas-portal-light": "#7eb8eb"
+  },
+  "color/primary/400": {
+    "autotaalglas-portal-light": "#2e90e8"
+  },
+  "color/primary/50": {
+    "autotaalglas-portal-light": "#ebf4ff"
+  },
+  "color/primary/500": {
+    "autotaalglas-portal-light": "#005fc5",
+    "autotaalglas-portal-dark": "#2e90e8"
+  },
+  "color/primary/600": {
+    "autotaalglas-portal-light": "#003b87",
+    "autotaalglas-portal-dark": "#6cc4f0"
+  },
+  "color/primary/700": {
+    "autotaalglas-portal-light": "#002575",
+    "autotaalglas-portal-dark": "#005fc5"
+  },
+  "color/primary/800": {
+    "autotaalglas-portal-light": "#1a2234"
+  },
+  "color/primary/900": {
+    "autotaalglas-portal-light": "#0d1b3d"
+  },
+  "color/primary/950": {
+    "autotaalglas-portal-light": "#09122a"
+  },
+  "color/success": {
+    "autotaalglas-portal-light": "#3fb400",
+    "autotaalglas-portal-dark": "#3fb400"
+  },
+  "color/warning": {
+    "autotaalglas-portal-light": "#e8a13d",
+    "autotaalglas-portal-dark": "#e8a13d"
+  },
+  "color/white": {
+    "autotaalglas-portal-light": "#ffffff",
+    "autotaalglas-portal-dark": "#ffffff"
+  },
+  "control/disabled/bg": {
+    "autotaalglas-portal-light": "#edf3f8",
+    "autotaalglas-portal-dark": "#172544"
+  },
+  "focus/ring": {
+    "autotaalglas-portal-light": "0 0 0 3px rgb(228 0 43 / 20%)",
+    "autotaalglas-portal-dark": "0 0 0 3px rgb(228 0 43 / 26%)"
+  },
+  "focus/ring/style": {
+    "autotaalglas-portal-light": "0 0 0 1px rgb(0 181 226 / 18%)",
+    "autotaalglas-portal-dark": "0 0 0 1px rgb(0 181 226 / 24%)"
+  },
+  "font/body": {
+    "autotaalglas-portal-light": "\u0022Segoe UI Variable\u0022, \u0022Segoe UI\u0022, -apple-system, BlinkMacSystemFont, sans-serif",
+    "autotaalglas-portal-dark": "\u0022Segoe UI Variable\u0022, \u0022Segoe UI\u0022, -apple-system, BlinkMacSystemFont, sans-serif"
+  },
+  "font/display": {
+    "autotaalglas-portal-light": "\u0022AgtBitter\u0022, Cambria, Georgia, serif",
+    "autotaalglas-portal-dark": "\u0022AgtBitter\u0022, Cambria, Georgia, serif"
+  },
+  "glass/bg": {
+    "autotaalglas-portal-light": "rgb(255 255 255 / 88%)",
+    "autotaalglas-portal-dark": "rgb(15 24 48 / 80%)"
+  },
+  "glass/border": {
+    "autotaalglas-portal-light": "1px solid var(--agt-glass-border-color)",
+    "autotaalglas-portal-dark": "1px solid var(--agt-glass-border-color)"
+  },
+  "glass/border/color": {
+    "autotaalglas-portal-light": "rgb(0 181 226 / 16%)",
+    "autotaalglas-portal-dark": "rgb(0 181 226 / 24%)"
+  },
+  "glow/accent": {
+    "autotaalglas-portal-light": "0 0 10px rgb(0 181 226 / 18%)",
+    "autotaalglas-portal-dark": "0 0 12px rgb(0 181 226 / 22%)"
+  },
+  "glow/primary": {
+    "autotaalglas-portal-light": "0 0 12px rgb(0 95 197 / 18%)",
+    "autotaalglas-portal-dark": "0 0 14px rgb(108 196 240 / 26%)"
+  },
+  "glow/strength": {
+    "autotaalglas-portal-light": "1.08",
+    "autotaalglas-portal-dark": "1.1"
+  },
+  "gradient/accent": {
+    "autotaalglas-portal-light": "linear-gradient(135deg, var(--agt-color-accent-300) 0%, var(--agt-color-accent-500) 100%)"
+  },
+  "gradient/hero": {
+    "autotaalglas-portal-light": "radial-gradient(circle at 16% 8%, rgb(0 181 226 / 8%) 0%, transparent 48%), radial-gradient(circle at 76% 12%, rgb(46 144 232 / 7%) 0%, transparent 42%), var(--agt-surface-0)",
+    "autotaalglas-portal-dark": "radial-gradient(circle at 18% 4%, rgb(0 181 226 / 10%) 0%, transparent 44%), radial-gradient(circle at 80% 10%, rgb(46 144 232 / 8%) 0%, transparent 38%), var(--agt-surface-0)"
+  },
+  "gradient/surface": {
+    "autotaalglas-portal-light": "linear-gradient(145deg, #ffffff 0%, #f2fbff 100%)",
+    "autotaalglas-portal-dark": "linear-gradient(145deg, #102040 0%, #0a1428 100%)"
+  },
+  "grid/header/bg": {
+    "autotaalglas-portal-light": "#ffffff",
+    "autotaalglas-portal-dark": "#0f1830"
+  },
+  "grid/header/border": {
+    "autotaalglas-portal-light": "#d9e6f0",
+    "autotaalglas-portal-dark": "#3a5275"
+  },
+  "grid/header/text": {
+    "autotaalglas-portal-light": "#002575",
+    "autotaalglas-portal-dark": "#eef5ff"
+  },
+  "grid/row/hover/bg": {
+    "autotaalglas-portal-light": "#f0f9ff",
+    "autotaalglas-portal-dark": "#1b2d55"
+  },
+  "grid/row/selected/bg": {
+    "autotaalglas-portal-light": "#def4fb",
+    "autotaalglas-portal-dark": "#183754"
+  },
+  "grid/row/selected/text": {
+    "autotaalglas-portal-light": "#243147",
+    "autotaalglas-portal-dark": "#eef5ff"
+  },
+  "heading/tracking": {
+    "autotaalglas-portal-light": "-0.01em",
+    "autotaalglas-portal-dark": "-0.01em"
+  },
+  "heading/weight": {
+    "autotaalglas-portal-light": "700",
+    "autotaalglas-portal-dark": "700"
+  },
+  "hover/tint": {
+    "autotaalglas-portal-light": "rgb(0 181 226 / 12%)",
+    "autotaalglas-portal-dark": "rgb(0 181 226 / 14%)"
+  },
+  "indicator/transition": {
+    "autotaalglas-portal-light": "180ms cubic-bezier(0.22, 1, 0.36, 1)",
+    "autotaalglas-portal-dark": "180ms cubic-bezier(0.22, 1, 0.36, 1)"
+  },
+  "input/border": {
+    "autotaalglas-portal-light": "#8ea3bd",
+    "autotaalglas-portal-dark": "#4e6689"
+  },
+  "input/focus/border": {
+    "autotaalglas-portal-light": "#005fc5",
+    "autotaalglas-portal-dark": "#6cc4f0"
+  },
+  "input/focus/ring": {
+    "autotaalglas-portal-light": "0 0 0 3px rgb(0 181 226 / 20%)",
+    "autotaalglas-portal-dark": "0 0 0 3px rgb(0 181 226 / 28%)"
+  },
+  "lift/distance": {
+    "autotaalglas-portal-light": "2px",
+    "autotaalglas-portal-dark": "2px"
+  },
+  "link/color": {
+    "autotaalglas-portal-light": "#005fc5",
+    "autotaalglas-portal-dark": "#6cc4f0"
+  },
+  "link/hover/color": {
+    "autotaalglas-portal-light": "#003b87",
+    "autotaalglas-portal-dark": "#9ce8ff"
+  },
+  "nav/focus/outline": {
+    "autotaalglas-portal-light": "#e4002b",
+    "autotaalglas-portal-dark": "#e4002b"
+  },
+  "nav/group/text": {
+    "autotaalglas-portal-light": "var(--agt-nav-item-text)",
+    "autotaalglas-portal-dark": "var(--agt-nav-item-text)"
+  },
+  "nav/item/active/bg": {
+    "autotaalglas-portal-light": "#def4fb",
+    "autotaalglas-portal-dark": "#183754"
+  },
+  "nav/item/active/icon": {
+    "autotaalglas-portal-light": "#e4002b",
+    "autotaalglas-portal-dark": "#e4002b"
+  },
+  "nav/item/active/text": {
+    "autotaalglas-portal-light": "#002575",
+    "autotaalglas-portal-dark": "#eef5ff"
+  },
+  "nav/item/hover/bg": {
+    "autotaalglas-portal-light": "#eaf6ff",
+    "autotaalglas-portal-dark": "#1b2d55"
+  },
+  "nav/item/hover/text": {
+    "autotaalglas-portal-light": "#002575",
+    "autotaalglas-portal-dark": "#eef5ff"
+  },
+  "nav/item/icon": {
+    "autotaalglas-portal-light": "#005fc5",
+    "autotaalglas-portal-dark": "#6cc4f0"
+  },
+  "nav/item/text": {
+    "autotaalglas-portal-light": "#243147",
+    "autotaalglas-portal-dark": "#e3efff"
+  },
+  "on/accent": {
+    "autotaalglas-portal-light": "#ffffff"
+  },
+  "on/base": {
+    "autotaalglas-portal-light": "#243147",
+    "autotaalglas-portal-dark": "#eef5ff"
+  },
+  "on/danger": {
+    "autotaalglas-portal-light": "#ffffff"
+  },
+  "on/dark": {
+    "autotaalglas-portal-light": "#ffffff",
+    "autotaalglas-portal-dark": "#eef5ff"
+  },
+  "on/info": {
+    "autotaalglas-portal-light": "#ffffff",
+    "autotaalglas-portal-dark": "#ffffff"
+  },
+  "on/light": {
+    "autotaalglas-portal-light": "#172334",
+    "autotaalglas-portal-dark": "#172334"
+  },
+  "on/primary": {
+    "autotaalglas-portal-light": "#ffffff"
+  },
+  "on/secondary": {
+    "autotaalglas-portal-light": "#ffffff"
+  },
+  "on/success": {
+    "autotaalglas-portal-light": "#102405"
+  },
+  "on/warning": {
+    "autotaalglas-portal-light": "#2f2006"
+  },
+  "press/scale": {
+    "autotaalglas-portal-light": "0.98",
+    "autotaalglas-portal-dark": "0.98"
+  },
+  "radius/scale": {
+    "autotaalglas-portal-light": "1.45",
+    "autotaalglas-portal-dark": "1.45"
+  },
+  "selection/tint": {
+    "autotaalglas-portal-light": "#def4fb",
+    "autotaalglas-portal-dark": "#17344c"
+  },
+  "shadow/md": {
+    "autotaalglas-portal-light": "0 8px 20px rgb(12 34 64 / 14%), 0 24px 48px rgb(0 181 226 / 12%)",
+    "autotaalglas-portal-dark": "0 8px 18px rgb(0 0 0 / 34%), 0 26px 48px rgb(0 181 226 / 12%)"
+  },
+  "shadow/sm": {
+    "autotaalglas-portal-light": "0 2px 6px rgb(12 34 64 / 12%), 0 14px 30px rgb(0 181 226 / 10%)",
+    "autotaalglas-portal-dark": "0 3px 8px rgb(0 0 0 / 28%), 0 16px 34px rgb(0 181 226 / 10%)"
+  },
+  "surface/0": {
+    "autotaalglas-portal-light": "#f7fbff",
+    "autotaalglas-portal-dark": "#0a1428"
+  },
+  "surface/1": {
+    "autotaalglas-portal-light": "#ffffff",
+    "autotaalglas-portal-dark": "#0f1830"
+  },
+  "surface/2": {
+    "autotaalglas-portal-light": "#fbfdff",
+    "autotaalglas-portal-dark": "#142142"
+  },
+  "surface/3": {
+    "autotaalglas-portal-light": "#eaf6ff",
+    "autotaalglas-portal-dark": "#1b2d55"
+  },
+  "text/body": {
+    "autotaalglas-portal-light": "#243147",
+    "autotaalglas-portal-dark": "#e3efff"
+  },
+  "text/disabled": {
+    "autotaalglas-portal-light": "#7a8ca1",
+    "autotaalglas-portal-dark": "#8095b5"
+  },
+  "text/heading": {
+    "autotaalglas-portal-light": "#002575",
+    "autotaalglas-portal-dark": "#eef5ff"
+  },
+  "text/muted": {
+    "autotaalglas-portal-light": "var(--agt-nav-item-text)",
+    "autotaalglas-portal-dark": "var(--agt-nav-item-text)"
+  },
+  "tooltip/text": {
+    "autotaalglas-portal-light": "#243147",
+    "autotaalglas-portal-dark": "#eef5ff"
+  },
+  "topbar/brand/accent": {
+    "autotaalglas-portal-light": "#00b5e2",
+    "autotaalglas-portal-dark": "#00b5e2"
+  },
+  "topbar/brand/color": {
+    "autotaalglas-portal-light": "#002575",
+    "autotaalglas-portal-dark": "#eef5ff"
+  },
+  "topbar/icon/color": {
+    "autotaalglas-portal-light": "#5a6f89",
+    "autotaalglas-portal-dark": "#d3e4ff"
+  },
+  "topbar/icon/hover/color": {
+    "autotaalglas-portal-light": "#005fc5",
+    "autotaalglas-portal-dark": "#6cc4f0"
+  }
+}

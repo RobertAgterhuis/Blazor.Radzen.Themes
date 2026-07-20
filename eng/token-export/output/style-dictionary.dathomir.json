@@ -1,0 +1,526 @@
+{
+  "alpha/accent/10": {
+    "dathomir-dark": "rgb(255 59 48 / 10%)",
+    "dathomir-light": "rgb(255 59 48 / 10%)"
+  },
+  "alpha/accent/20": {
+    "dathomir-dark": "rgb(255 59 48 / 20%)",
+    "dathomir-light": "rgb(255 59 48 / 20%)"
+  },
+  "alpha/accent/40": {
+    "dathomir-dark": "rgb(255 59 48 / 40%)",
+    "dathomir-light": "rgb(255 59 48 / 40%)"
+  },
+  "alpha/accent/5": {
+    "dathomir-dark": "rgb(255 59 48 / 5%)",
+    "dathomir-light": "rgb(255 59 48 / 5%)"
+  },
+  "alpha/primary/10": {
+    "dathomir-dark": "rgb(168 33 28 / 10%)",
+    "dathomir-light": "rgb(168 33 28 / 10%)"
+  },
+  "alpha/primary/20": {
+    "dathomir-dark": "rgb(168 33 28 / 20%)",
+    "dathomir-light": "rgb(168 33 28 / 20%)"
+  },
+  "alpha/primary/4": {
+    "dathomir-dark": "rgb(168 33 28 / 4%)",
+    "dathomir-light": "rgb(168 33 28 / 4%)"
+  },
+  "alpha/primary/40": {
+    "dathomir-dark": "rgb(168 33 28 / 40%)",
+    "dathomir-light": "rgb(168 33 28 / 40%)"
+  },
+  "alpha/primary/5": {
+    "dathomir-dark": "rgb(168 33 28 / 5%)",
+    "dathomir-light": "rgb(168 33 28 / 5%)"
+  },
+  "btn/base/fill": {
+    "dathomir-dark": "#271818",
+    "dathomir-light": "#f4dfdc"
+  },
+  "btn/danger/fill": {
+    "dathomir-dark": "#cc5f3d",
+    "dathomir-light": "#c14a2c"
+  },
+  "btn/dark/fill": {
+    "dathomir-dark": "#120c0c",
+    "dathomir-light": "#3a1512"
+  },
+  "btn/dark/ink": {
+    "dathomir-dark": "#d3c2c2",
+    "dathomir-light": "#5c4140"
+  },
+  "btn/info/fill": {
+    "dathomir-dark": "#3f6f86",
+    "dathomir-light": "#3f6f86"
+  },
+  "btn/light/fill": {
+    "dathomir-dark": "#f5eceb",
+    "dathomir-light": "#fbf4f3"
+  },
+  "btn/light/ink": {
+    "dathomir-dark": "#4a3232",
+    "dathomir-light": "#5c4140"
+  },
+  "btn/primary/fill": {
+    "dathomir-dark": "var(--agt-color-primary-500)",
+    "dathomir-light": "var(--agt-color-primary-600)"
+  },
+  "btn/secondary/border": {
+    "dathomir-dark": "var(--agt-color-accent-400)",
+    "dathomir-light": "#c02a24"
+  },
+  "btn/secondary/fill": {
+    "dathomir-dark": "var(--agt-color-accent-400)",
+    "dathomir-light": "var(--agt-color-accent-400)"
+  },
+  "btn/secondary/hover/bg": {
+    "dathomir-dark": "rgb(255 59 48 / 14%)",
+    "dathomir-light": "var(--agt-alpha-primary-10)"
+  },
+  "btn/secondary/hover/text": {
+    "dathomir-dark": "#f4eded",
+    "dathomir-light": "#a8211c"
+  },
+  "btn/secondary/text": {
+    "dathomir-dark": "var(--agt-color-accent-400)",
+    "dathomir-light": "#c02a24"
+  },
+  "btn/success/fill": {
+    "dathomir-dark": "#2f7f50",
+    "dathomir-light": "#1e7f46"
+  },
+  "btn/warning/fill": {
+    "dathomir-dark": "#c58f2e",
+    "dathomir-light": "#d9851f"
+  },
+  "canvas/backdrop": {
+    "dathomir-dark": "radial-gradient(circle at 50% 90%, rgb(255 59 48 / 5%) 0%, transparent 36%), radial-gradient(circle at 50% 50%, transparent 0%, rgb(0 0 0 / 26%) 78%)",
+    "dathomir-light": "radial-gradient(circle at 50% 92%, rgb(255 59 48 / 4%) 0%, transparent 34%), radial-gradient(circle at 50% 50%, transparent 0%, rgb(102 17 16 / 10%) 84%)"
+  },
+  "chart/axis/text": {
+    "dathomir-dark": "#d3c2c2",
+    "dathomir-light": "#6e5351"
+  },
+  "chart/gridline": {
+    "dathomir-dark": "#302020",
+    "dathomir-light": "#e4d2d0"
+  },
+  "chart/series/1": {
+    "dathomir-dark": "#a8211c",
+    "dathomir-light": "#a8211c"
+  },
+  "chart/series/2": {
+    "dathomir-dark": "#ff3b30",
+    "dathomir-light": "#ff3b30"
+  },
+  "chart/series/3": {
+    "dathomir-dark": "#aeb6bd",
+    "dathomir-light": "#aeb6bd"
+  },
+  "chart/series/4": {
+    "dathomir-dark": "#7c1714",
+    "dathomir-light": "#7c1714"
+  },
+  "chart/series/5": {
+    "dathomir-dark": "#d3c2c2",
+    "dathomir-light": "#d8c1be"
+  },
+  "chart/series/6": {
+    "dathomir-dark": "#5b8fa8",
+    "dathomir-light": "#5b8fa8"
+  },
+  "chart/series/7": {
+    "dathomir-dark": "#ff8a5c",
+    "dathomir-light": "#c14a2c"
+  },
+  "chart/series/8": {
+    "dathomir-dark": "#c8b0ad",
+    "dathomir-light": "#8a726f"
+  },
+  "color/accent/300": {
+    "dathomir-dark": "#ff8d86",
+    "dathomir-light": "#ffb0aa"
+  },
+  "color/accent/400": {
+    "dathomir-dark": "#ff3b30",
+    "dathomir-light": "#ff3b30"
+  },
+  "color/accent/500": {
+    "dathomir-dark": "#d4362c",
+    "dathomir-light": "#d4362c"
+  },
+  "color/accent/600": {
+    "dathomir-dark": "#b62b23",
+    "dathomir-light": "#b62b23"
+  },
+  "color/accent/700": {
+    "dathomir-dark": "#8f1f1b",
+    "dathomir-light": "#8f1f1b"
+  },
+  "color/accent/text": {
+    "dathomir-dark": "#ff8d86",
+    "dathomir-light": "#b3271f"
+  },
+  "color/danger": {
+    "dathomir-dark": "#ff8a5c",
+    "dathomir-light": "#ff8a5c"
+  },
+  "color/danger/text": {
+    "dathomir-dark": "#ffb198",
+    "dathomir-light": "#c14a2c"
+  },
+  "color/gray/100": {
+    "dathomir-dark": "#e4d2d0",
+    "dathomir-light": "#eee0de"
+  },
+  "color/gray/200": {
+    "dathomir-dark": "#c8b0ad",
+    "dathomir-light": "#d8c1be"
+  },
+  "color/gray/50": {
+    "dathomir-dark": "#f5eceb",
+    "dathomir-light": "#fbf4f3"
+  },
+  "color/gray/500": {
+    "dathomir-dark": "#96807f",
+    "dathomir-light": "#8a726f"
+  },
+  "color/gray/700": {
+    "dathomir-dark": "#4a3232",
+    "dathomir-light": "#5c4140"
+  },
+  "color/gray/900": {
+    "dathomir-dark": "#1d1414",
+    "dathomir-light": "#261616"
+  },
+  "color/info": {
+    "dathomir-dark": "#5b8fa8",
+    "dathomir-light": "#5b8fa8"
+  },
+  "color/primary/100": {
+    "dathomir-dark": "#efb4ae",
+    "dathomir-light": "#f5ccc8"
+  },
+  "color/primary/200": {
+    "dathomir-dark": "#e58b83",
+    "dathomir-light": "#edaaa4"
+  },
+  "color/primary/300": {
+    "dathomir-dark": "#db6158",
+    "dathomir-light": "#e27f76"
+  },
+  "color/primary/400": {
+    "dathomir-dark": "#cc3f36",
+    "dathomir-light": "#d35448"
+  },
+  "color/primary/50": {
+    "dathomir-dark": "#f7d9d5",
+    "dathomir-light": "#fbe7e5"
+  },
+  "color/primary/500": {
+    "dathomir-dark": "#a8211c",
+    "dathomir-light": "#a8211c"
+  },
+  "color/primary/600": {
+    "dathomir-dark": "#8f1d19",
+    "dathomir-light": "#8f1d19"
+  },
+  "color/primary/700": {
+    "dathomir-dark": "#7c1714",
+    "dathomir-light": "#7c1714"
+  },
+  "color/primary/800": {
+    "dathomir-dark": "#661110",
+    "dathomir-light": "#661110"
+  },
+  "color/primary/900": {
+    "dathomir-dark": "#4f0d0c",
+    "dathomir-light": "#4f0d0c"
+  },
+  "color/primary/950": {
+    "dathomir-dark": "#340807",
+    "dathomir-light": "#340807"
+  },
+  "color/success": {
+    "dathomir-dark": "#3fa66a",
+    "dathomir-light": "#3fa66a"
+  },
+  "color/warning": {
+    "dathomir-dark": "#d9a13b",
+    "dathomir-light": "#d9a13b"
+  },
+  "color/white": {
+    "dathomir-dark": "#ffffff",
+    "dathomir-light": "#ffffff"
+  },
+  "control/disabled/bg": {
+    "dathomir-dark": "#221717",
+    "dathomir-light": "#f3eceb"
+  },
+  "focus/ring": {
+    "dathomir-dark": "0 0 0 3px var(--agt-alpha-accent-20)",
+    "dathomir-light": "0 0 0 3px var(--agt-alpha-primary-20)"
+  },
+  "focus/ring/style": {
+    "dathomir-dark": "0 0 0 1px rgb(255 59 48 / 24%)",
+    "dathomir-light": "0 0 0 1px rgb(168 33 28 / 20%)"
+  },
+  "font/body": {
+    "dathomir-dark": "\u0022Segoe UI Variable\u0022, \u0022Segoe UI\u0022, -apple-system, BlinkMacSystemFont, sans-serif",
+    "dathomir-light": "\u0022Segoe UI Variable\u0022, \u0022Segoe UI\u0022, -apple-system, BlinkMacSystemFont, sans-serif"
+  },
+  "font/display": {
+    "dathomir-dark": "\u0022AgtBarlowCondensed\u0022, \u0022Arial Narrow\u0022, sans-serif",
+    "dathomir-light": "\u0022AgtBarlowCondensed\u0022, \u0022Arial Narrow\u0022, sans-serif"
+  },
+  "glass/bg": {
+    "dathomir-dark": "rgb(23 16 16 / 82%)",
+    "dathomir-light": "rgb(255 255 255 / 88%)"
+  },
+  "glass/border": {
+    "dathomir-dark": "1px solid var(--agt-glass-border-color)",
+    "dathomir-light": "1px solid var(--agt-glass-border-color)"
+  },
+  "glass/border/color": {
+    "dathomir-dark": "rgb(77 43 43 / 44%)",
+    "dathomir-light": "rgb(166 65 58 / 14%)"
+  },
+  "glow/accent": {
+    "dathomir-dark": "0 0 10px rgb(255 59 48 / 36%)",
+    "dathomir-light": "0 0 8px rgb(255 59 48 / 24%)"
+  },
+  "glow/primary": {
+    "dathomir-dark": "0 0 12px rgb(168 33 28 / 34%)",
+    "dathomir-light": "0 0 10px rgb(168 33 28 / 18%)"
+  },
+  "glow/strength": {
+    "dathomir-dark": "1.16",
+    "dathomir-light": "1.08"
+  },
+  "gradient/accent": {
+    "dathomir-dark": "linear-gradient(135deg, var(--agt-color-accent-300) 0%, var(--agt-color-accent-400) 100%)",
+    "dathomir-light": "linear-gradient(135deg, var(--agt-color-accent-300) 0%, var(--agt-color-accent-500) 100%)"
+  },
+  "gradient/hero": {
+    "dathomir-dark": "radial-gradient(circle at 18% 4%, var(--agt-alpha-primary-4) 0%, transparent 52%), var(--agt-surface-0)",
+    "dathomir-light": "radial-gradient(circle at 18% 8%, var(--agt-alpha-primary-10) 0%, transparent 54%), var(--agt-surface-0)"
+  },
+  "gradient/surface": {
+    "dathomir-dark": "linear-gradient(145deg, #171010 0%, #120c0c 100%)",
+    "dathomir-light": "linear-gradient(145deg, #ffffff 0%, #fff0ee 100%)"
+  },
+  "grid/header/bg": {
+    "dathomir-dark": "#171010",
+    "dathomir-light": "#ffffff"
+  },
+  "grid/header/border": {
+    "dathomir-dark": "rgb(255 59 48 / 24%)",
+    "dathomir-light": "rgb(168 33 28 / 18%)"
+  },
+  "grid/header/text": {
+    "dathomir-dark": "#f4eded",
+    "dathomir-light": "#3a1512"
+  },
+  "grid/row/hover/bg": {
+    "dathomir-dark": "#2a1a1a",
+    "dathomir-light": "#fbe7e5"
+  },
+  "grid/row/selected/bg": {
+    "dathomir-dark": "#271818",
+    "dathomir-light": "#f4dfdc"
+  },
+  "grid/row/selected/text": {
+    "dathomir-dark": "#f4eded",
+    "dathomir-light": "#2d1412"
+  },
+  "heading/tracking": {
+    "dathomir-dark": "0.03em",
+    "dathomir-light": "0.018em"
+  },
+  "heading/weight": {
+    "dathomir-dark": "700",
+    "dathomir-light": "700"
+  },
+  "hover/tint": {
+    "dathomir-dark": "rgb(255 59 48 / 12%)",
+    "dathomir-light": "rgb(168 33 28 / 12%)"
+  },
+  "indicator/transition": {
+    "dathomir-dark": "160ms cubic-bezier(0.4, 0, 0.2, 1)",
+    "dathomir-light": "170ms cubic-bezier(0.4, 0, 0.2, 1)"
+  },
+  "input/border": {
+    "dathomir-dark": "#8a5b57",
+    "dathomir-light": "#d8c1be"
+  },
+  "input/focus/border": {
+    "dathomir-dark": "var(--agt-color-accent-400)",
+    "dathomir-light": "var(--agt-color-primary-600)"
+  },
+  "input/focus/ring": {
+    "dathomir-dark": "0 0 0 3px rgb(255 59 48 / 34%)",
+    "dathomir-light": "0 0 0 3px rgb(168 33 28 / 16%)"
+  },
+  "lift/distance": {
+    "dathomir-dark": "1px",
+    "dathomir-light": "1px"
+  },
+  "link/color": {
+    "dathomir-dark": "#ff8d86",
+    "dathomir-light": "#a8211c"
+  },
+  "link/hover/color": {
+    "dathomir-dark": "#ffb1ab",
+    "dathomir-light": "#c02a24"
+  },
+  "nav/focus/outline": {
+    "dathomir-dark": "var(--agt-color-accent-400)",
+    "dathomir-light": "#c02a24"
+  },
+  "nav/group/text": {
+    "dathomir-dark": "var(--agt-nav-item-text)",
+    "dathomir-light": "var(--agt-nav-item-text)"
+  },
+  "nav/item/active/bg": {
+    "dathomir-dark": "#2a1a1a",
+    "dathomir-light": "#f4dfdc"
+  },
+  "nav/item/active/icon": {
+    "dathomir-dark": "#ff3b30",
+    "dathomir-light": "#ff3b30"
+  },
+  "nav/item/active/text": {
+    "dathomir-dark": "#f4eded",
+    "dathomir-light": "#2d1412"
+  },
+  "nav/item/hover/bg": {
+    "dathomir-dark": "#2a1a1a",
+    "dathomir-light": "#f4dfdc"
+  },
+  "nav/item/hover/text": {
+    "dathomir-dark": "#f4eded",
+    "dathomir-light": "#2d1412"
+  },
+  "nav/item/icon": {
+    "dathomir-dark": "var(--agt-color-accent-400)",
+    "dathomir-light": "var(--agt-color-primary-600)"
+  },
+  "nav/item/text": {
+    "dathomir-dark": "#f4eded",
+    "dathomir-light": "#2d1412"
+  },
+  "on/accent": {
+    "dathomir-dark": "#1c0605",
+    "dathomir-light": "#1c0605"
+  },
+  "on/base": {
+    "dathomir-dark": "#f4eded",
+    "dathomir-light": "#2d1412"
+  },
+  "on/danger": {
+    "dathomir-dark": "#1d1414",
+    "dathomir-light": "#ffffff"
+  },
+  "on/dark": {
+    "dathomir-dark": "#f4eded",
+    "dathomir-light": "#ffffff"
+  },
+  "on/info": {
+    "dathomir-dark": "#ffffff",
+    "dathomir-light": "#ffffff"
+  },
+  "on/light": {
+    "dathomir-dark": "#1d1414",
+    "dathomir-light": "#261616"
+  },
+  "on/primary": {
+    "dathomir-dark": "#f4eded",
+    "dathomir-light": "#ffffff"
+  },
+  "on/secondary": {
+    "dathomir-dark": "var(--agt-on-accent)",
+    "dathomir-light": "var(--agt-on-accent)"
+  },
+  "on/success": {
+    "dathomir-dark": "#ffffff",
+    "dathomir-light": "#ffffff"
+  },
+  "on/warning": {
+    "dathomir-dark": "#1d1414",
+    "dathomir-light": "#1c0605"
+  },
+  "press/scale": {
+    "dathomir-dark": "0.98",
+    "dathomir-light": "0.98"
+  },
+  "radius/scale": {
+    "dathomir-dark": "0.38",
+    "dathomir-light": "0.44"
+  },
+  "selection/tint": {
+    "dathomir-dark": "#271818",
+    "dathomir-light": "#f4dfdc"
+  },
+  "shadow/md": {
+    "dathomir-dark": "0 6px 14px rgb(0 0 0 / 42%), 0 24px 42px rgb(94 21 17 / 30%)",
+    "dathomir-light": "0 3px 8px rgb(70 20 18 / 20%), 0 18px 34px rgb(150 44 38 / 16%)"
+  },
+  "shadow/sm": {
+    "dathomir-dark": "0 2px 4px rgb(0 0 0 / 36%), 0 14px 26px rgb(94 21 17 / 24%)",
+    "dathomir-light": "0 1px 2px rgb(70 20 18 / 18%), 0 10px 20px rgb(150 44 38 / 12%)"
+  },
+  "surface/0": {
+    "dathomir-dark": "#120c0c",
+    "dathomir-light": "#faf6f5"
+  },
+  "surface/1": {
+    "dathomir-dark": "#171010",
+    "dathomir-light": "#ffffff"
+  },
+  "surface/2": {
+    "dathomir-dark": "#1c1313",
+    "dathomir-light": "#fff8f7"
+  },
+  "surface/3": {
+    "dathomir-dark": "#2a1a1a",
+    "dathomir-light": "#f4dfdc"
+  },
+  "text/body": {
+    "dathomir-dark": "#f4eded",
+    "dathomir-light": "#2d1412"
+  },
+  "text/disabled": {
+    "dathomir-dark": "#96807f",
+    "dathomir-light": "#8a726f"
+  },
+  "text/heading": {
+    "dathomir-dark": "#f4eded",
+    "dathomir-light": "#3a1512"
+  },
+  "text/muted": {
+    "dathomir-dark": "var(--agt-nav-item-text)",
+    "dathomir-light": "var(--agt-nav-item-text)"
+  },
+  "tooltip/text": {
+    "dathomir-dark": "#f4eded",
+    "dathomir-light": "#2d1412"
+  },
+  "topbar/brand/accent": {
+    "dathomir-dark": "#aeb6bd",
+    "dathomir-light": "var(--agt-color-primary-400)"
+  },
+  "topbar/brand/color": {
+    "dathomir-dark": "#f4eded",
+    "dathomir-light": "#3a1512"
+  },
+  "topbar/icon/color": {
+    "dathomir-dark": "#d3c2c2",
+    "dathomir-light": "#6e5351"
+  },
+  "topbar/icon/hover/color": {
+    "dathomir-dark": "#ff3b30",
+    "dathomir-light": "#c02a24"
+  }
+}

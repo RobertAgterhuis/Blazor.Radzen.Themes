@@ -1,0 +1,1031 @@
+{
+  "family": "autotaalglas-portal",
+  "modes": [
+    "autotaalglas-portal-light",
+    "autotaalglas-portal-dark"
+  ],
+  "tokens": {
+    "alpha": {
+      "accent": {
+        "10": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "rgb(228 0 43 / 10%)",
+            "autotaalglas-portal-dark": "rgb(228 0 43 / 10%)"
+          }
+        },
+        "20": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "rgb(228 0 43 / 20%)",
+            "autotaalglas-portal-dark": "rgb(228 0 43 / 20%)"
+          }
+        },
+        "40": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "rgb(228 0 43 / 40%)",
+            "autotaalglas-portal-dark": "rgb(228 0 43 / 40%)"
+          }
+        },
+        "5": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "rgb(228 0 43 / 5%)",
+            "autotaalglas-portal-dark": "rgb(228 0 43 / 5%)"
+          }
+        }
+      },
+      "primary": {
+        "10": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "rgb(0 95 197 / 10%)",
+            "autotaalglas-portal-dark": "rgb(46 144 232 / 10%)"
+          }
+        },
+        "20": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "rgb(0 95 197 / 20%)",
+            "autotaalglas-portal-dark": "rgb(46 144 232 / 20%)"
+          }
+        },
+        "4": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "rgb(0 95 197 / 4%)",
+            "autotaalglas-portal-dark": "rgb(46 144 232 / 4%)"
+          }
+        },
+        "40": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "rgb(0 95 197 / 40%)",
+            "autotaalglas-portal-dark": "rgb(46 144 232 / 40%)"
+          }
+        },
+        "5": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "rgb(0 95 197 / 5%)",
+            "autotaalglas-portal-dark": "rgb(46 144 232 / 5%)"
+          }
+        }
+      }
+    },
+    "btn": {
+      "base": {
+        "fill": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "#def4fb",
+            "autotaalglas-portal-dark": "#183754"
+          }
+        }
+      },
+      "danger": {
+        "fill": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "#b3001f",
+            "autotaalglas-portal-dark": "#b3001f"
+          }
+        }
+      },
+      "dark": {
+        "fill": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "#002575",
+            "autotaalglas-portal-dark": "#0a1428"
+          }
+        },
+        "ink": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "#d7e8ff",
+            "autotaalglas-portal-dark": "#d8eaff"
+          }
+        }
+      },
+      "info": {
+        "fill": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "#3d6f9c",
+            "autotaalglas-portal-dark": "#3d6f9c"
+          }
+        }
+      },
+      "light": {
+        "fill": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "#ffffff",
+            "autotaalglas-portal-dark": "#f4f8fc"
+          }
+        },
+        "ink": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "#495d77",
+            "autotaalglas-portal-dark": "#334259"
+          }
+        }
+      },
+      "primary": {
+        "fill": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "#005fc5",
+            "autotaalglas-portal-dark": "#005fc5"
+          }
+        }
+      },
+      "secondary": {
+        "border": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "#e4002b",
+            "autotaalglas-portal-dark": "#e4002b"
+          }
+        },
+        "fill": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "#e4002b",
+            "autotaalglas-portal-dark": "#e4002b"
+          }
+        },
+        "hover": {
+          "bg": {
+            "$type": "color",
+            "$value": {
+              "autotaalglas-portal-light": "rgb(228 0 43 / 10%)",
+              "autotaalglas-portal-dark": "rgb(228 0 43 / 14%)"
+            }
+          },
+          "text": {
+            "$type": "color",
+            "$value": {
+              "autotaalglas-portal-light": "#8f0019",
+              "autotaalglas-portal-dark": "#eef5ff"
+            }
+          }
+        },
+        "text": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "#b3001f",
+            "autotaalglas-portal-dark": "#ff9fb1"
+          }
+        }
+      },
+      "success": {
+        "fill": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "#3fb400",
+            "autotaalglas-portal-dark": "#3fb400"
+          }
+        }
+      },
+      "warning": {
+        "fill": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "#e8a13d",
+            "autotaalglas-portal-dark": "#e8a13d"
+          }
+        }
+      }
+    },
+    "canvas": {
+      "backdrop": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-portal-light": "radial-gradient(circle at 12% 6%, rgb(0 181 226 / 5%) 0%, transparent 30%), radial-gradient(circle at 78% 10%, rgb(0 95 197 / 4%) 0%, transparent 34%)",
+          "autotaalglas-portal-dark": "radial-gradient(circle at 16% 4%, rgb(0 181 226 / 7%) 0%, transparent 32%), radial-gradient(circle at 76% 10%, rgb(46 144 232 / 5%) 0%, transparent 30%)"
+        }
+      }
+    },
+    "chart": {
+      "axis": {
+        "text": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "#5a6f89",
+            "autotaalglas-portal-dark": "#a8bbd8"
+          }
+        }
+      },
+      "gridline": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-portal-light": "#d9e6f0",
+          "autotaalglas-portal-dark": "#3a5275"
+        }
+      },
+      "series": {
+        "1": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "#005fc5",
+            "autotaalglas-portal-dark": "#6cc4f0"
+          }
+        },
+        "2": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "#e4002b",
+            "autotaalglas-portal-dark": "#e4002b"
+          }
+        },
+        "3": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "#00b5e2",
+            "autotaalglas-portal-dark": "#00b5e2"
+          }
+        },
+        "4": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "#3d6f9c",
+            "autotaalglas-portal-dark": "#bfd7eb"
+          }
+        },
+        "5": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "#3fb400",
+            "autotaalglas-portal-dark": "#7ddd59"
+          }
+        },
+        "6": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "#e8a13d",
+            "autotaalglas-portal-dark": "#f0bd66"
+          }
+        },
+        "7": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "#002575",
+            "autotaalglas-portal-dark": "#8cb8ff"
+          }
+        },
+        "8": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "#8ea3bd",
+            "autotaalglas-portal-dark": "#7f96bf"
+          }
+        }
+      }
+    },
+    "color": {
+      "accent": {
+        "300": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "#ff6b84",
+            "autotaalglas-portal-dark": "#ff6b84"
+          }
+        },
+        "400": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "#e4002b",
+            "autotaalglas-portal-dark": "#e4002b"
+          }
+        },
+        "500": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "#c90027",
+            "autotaalglas-portal-dark": "#c90027"
+          }
+        },
+        "600": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "#b3001f",
+            "autotaalglas-portal-dark": "#b3001f"
+          }
+        },
+        "700": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "#8f0019",
+            "autotaalglas-portal-dark": "#8f0019"
+          }
+        },
+        "text": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "#b3001f",
+            "autotaalglas-portal-dark": "#ff9fb1"
+          }
+        }
+      },
+      "danger": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-portal-light": "#b3001f",
+          "autotaalglas-portal-dark": "#b3001f"
+        },
+        "text": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "#b3001f",
+            "autotaalglas-portal-dark": "#ffb4bf"
+          }
+        }
+      },
+      "gray": {
+        "100": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "#edf5fb",
+            "autotaalglas-portal-dark": "#d7e4ff"
+          }
+        },
+        "200": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "#d9e6f0",
+            "autotaalglas-portal-dark": "#9cb4d5"
+          }
+        },
+        "50": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "#f7fbff",
+            "autotaalglas-portal-dark": "#eef5ff"
+          }
+        },
+        "500": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "#6c7b92",
+            "autotaalglas-portal-dark": "#8098bb"
+          }
+        },
+        "700": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "#334259",
+            "autotaalglas-portal-dark": "#49607f"
+          }
+        },
+        "900": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "#172334",
+            "autotaalglas-portal-dark": "#0f1830"
+          }
+        }
+      },
+      "info": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-portal-light": "#3d6f9c",
+          "autotaalglas-portal-dark": "#3d6f9c"
+        }
+      },
+      "primary": {
+        "100": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "#d1e5fb"
+          }
+        },
+        "200": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "#aed2f4"
+          }
+        },
+        "300": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "#7eb8eb"
+          }
+        },
+        "400": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "#2e90e8"
+          }
+        },
+        "50": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "#ebf4ff"
+          }
+        },
+        "500": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "#005fc5",
+            "autotaalglas-portal-dark": "#2e90e8"
+          }
+        },
+        "600": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "#003b87",
+            "autotaalglas-portal-dark": "#6cc4f0"
+          }
+        },
+        "700": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "#002575",
+            "autotaalglas-portal-dark": "#005fc5"
+          }
+        },
+        "800": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "#1a2234"
+          }
+        },
+        "900": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "#0d1b3d"
+          }
+        },
+        "950": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "#09122a"
+          }
+        }
+      },
+      "success": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-portal-light": "#3fb400",
+          "autotaalglas-portal-dark": "#3fb400"
+        }
+      },
+      "warning": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-portal-light": "#e8a13d",
+          "autotaalglas-portal-dark": "#e8a13d"
+        }
+      },
+      "white": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-portal-light": "#ffffff",
+          "autotaalglas-portal-dark": "#ffffff"
+        }
+      }
+    },
+    "control": {
+      "disabled": {
+        "bg": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "#edf3f8",
+            "autotaalglas-portal-dark": "#172544"
+          }
+        }
+      }
+    },
+    "focus": {
+      "ring": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-portal-light": "0 0 0 3px rgb(228 0 43 / 20%)",
+          "autotaalglas-portal-dark": "0 0 0 3px rgb(228 0 43 / 26%)"
+        },
+        "style": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "0 0 0 1px rgb(0 181 226 / 18%)",
+            "autotaalglas-portal-dark": "0 0 0 1px rgb(0 181 226 / 24%)"
+          }
+        }
+      }
+    },
+    "font": {
+      "body": {
+        "$type": "typography",
+        "$value": {
+          "autotaalglas-portal-light": "\u0022Segoe UI Variable\u0022, \u0022Segoe UI\u0022, -apple-system, BlinkMacSystemFont, sans-serif",
+          "autotaalglas-portal-dark": "\u0022Segoe UI Variable\u0022, \u0022Segoe UI\u0022, -apple-system, BlinkMacSystemFont, sans-serif"
+        }
+      },
+      "display": {
+        "$type": "typography",
+        "$value": {
+          "autotaalglas-portal-light": "\u0022AgtBitter\u0022, Cambria, Georgia, serif",
+          "autotaalglas-portal-dark": "\u0022AgtBitter\u0022, Cambria, Georgia, serif"
+        }
+      }
+    },
+    "glass": {
+      "bg": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-portal-light": "rgb(255 255 255 / 88%)",
+          "autotaalglas-portal-dark": "rgb(15 24 48 / 80%)"
+        }
+      },
+      "border": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-portal-light": "1px solid var(--agt-glass-border-color)",
+          "autotaalglas-portal-dark": "1px solid var(--agt-glass-border-color)"
+        },
+        "color": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "rgb(0 181 226 / 16%)",
+            "autotaalglas-portal-dark": "rgb(0 181 226 / 24%)"
+          }
+        }
+      }
+    },
+    "glow": {
+      "accent": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-portal-light": "0 0 10px rgb(0 181 226 / 18%)",
+          "autotaalglas-portal-dark": "0 0 12px rgb(0 181 226 / 22%)"
+        }
+      },
+      "primary": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-portal-light": "0 0 12px rgb(0 95 197 / 18%)",
+          "autotaalglas-portal-dark": "0 0 14px rgb(108 196 240 / 26%)"
+        }
+      },
+      "strength": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-portal-light": "1.08",
+          "autotaalglas-portal-dark": "1.1"
+        }
+      }
+    },
+    "gradient": {
+      "accent": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-portal-light": "linear-gradient(135deg, var(--agt-color-accent-300) 0%, var(--agt-color-accent-500) 100%)"
+        }
+      },
+      "hero": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-portal-light": "radial-gradient(circle at 16% 8%, rgb(0 181 226 / 8%) 0%, transparent 48%), radial-gradient(circle at 76% 12%, rgb(46 144 232 / 7%) 0%, transparent 42%), var(--agt-surface-0)",
+          "autotaalglas-portal-dark": "radial-gradient(circle at 18% 4%, rgb(0 181 226 / 10%) 0%, transparent 44%), radial-gradient(circle at 80% 10%, rgb(46 144 232 / 8%) 0%, transparent 38%), var(--agt-surface-0)"
+        }
+      },
+      "surface": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-portal-light": "linear-gradient(145deg, #ffffff 0%, #f2fbff 100%)",
+          "autotaalglas-portal-dark": "linear-gradient(145deg, #102040 0%, #0a1428 100%)"
+        }
+      }
+    },
+    "grid": {
+      "header": {
+        "bg": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "#ffffff",
+            "autotaalglas-portal-dark": "#0f1830"
+          }
+        },
+        "border": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "#d9e6f0",
+            "autotaalglas-portal-dark": "#3a5275"
+          }
+        },
+        "text": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "#002575",
+            "autotaalglas-portal-dark": "#eef5ff"
+          }
+        }
+      },
+      "row": {
+        "hover": {
+          "bg": {
+            "$type": "color",
+            "$value": {
+              "autotaalglas-portal-light": "#f0f9ff",
+              "autotaalglas-portal-dark": "#1b2d55"
+            }
+          }
+        },
+        "selected": {
+          "bg": {
+            "$type": "color",
+            "$value": {
+              "autotaalglas-portal-light": "#def4fb",
+              "autotaalglas-portal-dark": "#183754"
+            }
+          },
+          "text": {
+            "$type": "color",
+            "$value": {
+              "autotaalglas-portal-light": "#243147",
+              "autotaalglas-portal-dark": "#eef5ff"
+            }
+          }
+        }
+      }
+    },
+    "heading": {
+      "tracking": {
+        "$type": "typography",
+        "$value": {
+          "autotaalglas-portal-light": "-0.01em",
+          "autotaalglas-portal-dark": "-0.01em"
+        }
+      },
+      "weight": {
+        "$type": "typography",
+        "$value": {
+          "autotaalglas-portal-light": "700",
+          "autotaalglas-portal-dark": "700"
+        }
+      }
+    },
+    "hover": {
+      "tint": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-portal-light": "rgb(0 181 226 / 12%)",
+          "autotaalglas-portal-dark": "rgb(0 181 226 / 14%)"
+        }
+      }
+    },
+    "indicator": {
+      "transition": {
+        "$type": "duration",
+        "$value": {
+          "autotaalglas-portal-light": "180ms cubic-bezier(0.22, 1, 0.36, 1)",
+          "autotaalglas-portal-dark": "180ms cubic-bezier(0.22, 1, 0.36, 1)"
+        }
+      }
+    },
+    "input": {
+      "border": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-portal-light": "#8ea3bd",
+          "autotaalglas-portal-dark": "#4e6689"
+        }
+      },
+      "focus": {
+        "border": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "#005fc5",
+            "autotaalglas-portal-dark": "#6cc4f0"
+          }
+        },
+        "ring": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "0 0 0 3px rgb(0 181 226 / 20%)",
+            "autotaalglas-portal-dark": "0 0 0 3px rgb(0 181 226 / 28%)"
+          }
+        }
+      }
+    },
+    "lift": {
+      "distance": {
+        "$type": "string",
+        "$value": {
+          "autotaalglas-portal-light": "2px",
+          "autotaalglas-portal-dark": "2px"
+        }
+      }
+    },
+    "link": {
+      "color": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-portal-light": "#005fc5",
+          "autotaalglas-portal-dark": "#6cc4f0"
+        }
+      },
+      "hover": {
+        "color": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "#003b87",
+            "autotaalglas-portal-dark": "#9ce8ff"
+          }
+        }
+      }
+    },
+    "nav": {
+      "focus": {
+        "outline": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "#e4002b",
+            "autotaalglas-portal-dark": "#e4002b"
+          }
+        }
+      },
+      "group": {
+        "text": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "var(--agt-nav-item-text)",
+            "autotaalglas-portal-dark": "var(--agt-nav-item-text)"
+          }
+        }
+      },
+      "item": {
+        "active": {
+          "bg": {
+            "$type": "color",
+            "$value": {
+              "autotaalglas-portal-light": "#def4fb",
+              "autotaalglas-portal-dark": "#183754"
+            }
+          },
+          "icon": {
+            "$type": "color",
+            "$value": {
+              "autotaalglas-portal-light": "#e4002b",
+              "autotaalglas-portal-dark": "#e4002b"
+            }
+          },
+          "text": {
+            "$type": "color",
+            "$value": {
+              "autotaalglas-portal-light": "#002575",
+              "autotaalglas-portal-dark": "#eef5ff"
+            }
+          }
+        },
+        "hover": {
+          "bg": {
+            "$type": "color",
+            "$value": {
+              "autotaalglas-portal-light": "#eaf6ff",
+              "autotaalglas-portal-dark": "#1b2d55"
+            }
+          },
+          "text": {
+            "$type": "color",
+            "$value": {
+              "autotaalglas-portal-light": "#002575",
+              "autotaalglas-portal-dark": "#eef5ff"
+            }
+          }
+        },
+        "icon": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "#005fc5",
+            "autotaalglas-portal-dark": "#6cc4f0"
+          }
+        },
+        "text": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "#243147",
+            "autotaalglas-portal-dark": "#e3efff"
+          }
+        }
+      }
+    },
+    "on": {
+      "accent": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-portal-light": "#ffffff"
+        }
+      },
+      "base": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-portal-light": "#243147",
+          "autotaalglas-portal-dark": "#eef5ff"
+        }
+      },
+      "danger": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-portal-light": "#ffffff"
+        }
+      },
+      "dark": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-portal-light": "#ffffff",
+          "autotaalglas-portal-dark": "#eef5ff"
+        }
+      },
+      "info": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-portal-light": "#ffffff",
+          "autotaalglas-portal-dark": "#ffffff"
+        }
+      },
+      "light": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-portal-light": "#172334",
+          "autotaalglas-portal-dark": "#172334"
+        }
+      },
+      "primary": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-portal-light": "#ffffff"
+        }
+      },
+      "secondary": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-portal-light": "#ffffff"
+        }
+      },
+      "success": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-portal-light": "#102405"
+        }
+      },
+      "warning": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-portal-light": "#2f2006"
+        }
+      }
+    },
+    "press": {
+      "scale": {
+        "$type": "string",
+        "$value": {
+          "autotaalglas-portal-light": "0.98",
+          "autotaalglas-portal-dark": "0.98"
+        }
+      }
+    },
+    "radius": {
+      "scale": {
+        "$type": "dimension",
+        "$value": {
+          "autotaalglas-portal-light": "1.45",
+          "autotaalglas-portal-dark": "1.45"
+        }
+      }
+    },
+    "selection": {
+      "tint": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-portal-light": "#def4fb",
+          "autotaalglas-portal-dark": "#17344c"
+        }
+      }
+    },
+    "shadow": {
+      "md": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-portal-light": "0 8px 20px rgb(12 34 64 / 14%), 0 24px 48px rgb(0 181 226 / 12%)",
+          "autotaalglas-portal-dark": "0 8px 18px rgb(0 0 0 / 34%), 0 26px 48px rgb(0 181 226 / 12%)"
+        }
+      },
+      "sm": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-portal-light": "0 2px 6px rgb(12 34 64 / 12%), 0 14px 30px rgb(0 181 226 / 10%)",
+          "autotaalglas-portal-dark": "0 3px 8px rgb(0 0 0 / 28%), 0 16px 34px rgb(0 181 226 / 10%)"
+        }
+      }
+    },
+    "surface": {
+      "0": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-portal-light": "#f7fbff",
+          "autotaalglas-portal-dark": "#0a1428"
+        }
+      },
+      "1": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-portal-light": "#ffffff",
+          "autotaalglas-portal-dark": "#0f1830"
+        }
+      },
+      "2": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-portal-light": "#fbfdff",
+          "autotaalglas-portal-dark": "#142142"
+        }
+      },
+      "3": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-portal-light": "#eaf6ff",
+          "autotaalglas-portal-dark": "#1b2d55"
+        }
+      }
+    },
+    "text": {
+      "body": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-portal-light": "#243147",
+          "autotaalglas-portal-dark": "#e3efff"
+        }
+      },
+      "disabled": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-portal-light": "#7a8ca1",
+          "autotaalglas-portal-dark": "#8095b5"
+        }
+      },
+      "heading": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-portal-light": "#002575",
+          "autotaalglas-portal-dark": "#eef5ff"
+        }
+      },
+      "muted": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-portal-light": "var(--agt-nav-item-text)",
+          "autotaalglas-portal-dark": "var(--agt-nav-item-text)"
+        }
+      }
+    },
+    "tooltip": {
+      "text": {
+        "$type": "color",
+        "$value": {
+          "autotaalglas-portal-light": "#243147",
+          "autotaalglas-portal-dark": "#eef5ff"
+        }
+      }
+    },
+    "topbar": {
+      "brand": {
+        "accent": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "#00b5e2",
+            "autotaalglas-portal-dark": "#00b5e2"
+          }
+        },
+        "color": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "#002575",
+            "autotaalglas-portal-dark": "#eef5ff"
+          }
+        }
+      },
+      "icon": {
+        "color": {
+          "$type": "color",
+          "$value": {
+            "autotaalglas-portal-light": "#5a6f89",
+            "autotaalglas-portal-dark": "#d3e4ff"
+          }
+        },
+        "hover": {
+          "color": {
+            "$type": "color",
+            "$value": {
+              "autotaalglas-portal-light": "#005fc5",
+              "autotaalglas-portal-dark": "#6cc4f0"
+            }
+          }
+        }
+      }
+    }
+  }
+}
