@@ -1,0 +1,39 @@
+@page "/blog/projecten"
+@layout BlogLayout
+
+@inject BlogShowcaseService BlogService
+@inject IJSRuntime JS
+
+<PageTitle>Signal Journal - Projecten</PageTitle>
+
+<section data-blog-reveal>
+    <p class="blog-kicker">Projecten</p>
+    <h1 class="blog-title">Projectreel</h1>
+    <p class="blog-intro">Desktop gebruikt een horizontale reel met scroll-snap; mobiel houdt de flow verticaal en scanbaar.</p>
+</section>
+
+<section class="blog-reel" aria-label="Projecten overzicht">
+    <p class="blog-reel__hint">Sleep of scroll horizontaal op desktop voor snelle vergelijking van initiatieven.</p>
+    <div class="blog-reel__track" data-blog-reveal data-blog-reel>
+        @foreach (var project in BlogService.Projects)
+        {
+            <a class="blog-project-card"
+               href="@ProjectHref(project.Slug)"
+               @onclick="() => NavigateWithTransitionAsync(ProjectHref(project.Slug))"
+               @onclick:preventDefault="true">
+                <div class="blog-project-card__meta">@project.Category · @project.Year · @project.ReadMinutes min</div>
+                <h2 class="blog-project-card__title">@project.Title</h2>
+                <p class="blog-project-card__excerpt">@project.Excerpt</p>
+            </a>
+        }
+    </div>
+</section>
+
+@code {
+    private static string ProjectHref(string slug) => $"/blog/projecten/{slug}";
+
+    private async Task NavigateWithTransitionAsync(string url)
+    {
+        await JS.InvokeVoidAsync("blogShowcase.navigateWithTransition", url);
+    }
+}

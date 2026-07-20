@@ -23,7 +23,7 @@ public sealed class HomePageTests
         {
             EnableAnimations = true,
             EnableAmbientEffects = false,
-            AvailableThemes = [AgtTheme.Plum, AgtTheme.Ocean, AgtTheme.Dagobah, AgtTheme.Dathomir, AgtTheme.Hoth, AgtTheme.Tatooine, AgtTheme.Imperial, AgtTheme.Autotaalglas, AgtTheme.AutotaalglasContrast, AgtTheme.AutotaalglasPortal, AgtTheme.AutotaalglasMono]
+            AvailableThemes = [AgtTheme.Plum, AgtTheme.Ocean, AgtTheme.Dagobah, AgtTheme.Dathomir, AgtTheme.Hoth, AgtTheme.Tatooine, AgtTheme.Imperial, AgtTheme.Azure, AgtTheme.Ms365, AgtTheme.Autotaalglas, AgtTheme.AutotaalglasContrast, AgtTheme.AutotaalglasPortal, AgtTheme.AutotaalglasMono]
         });
 
         ctx.Services.AddSingleton<IOptions<AgtUiOptions>>(options);
@@ -45,12 +45,13 @@ public sealed class HomePageTests
         var metricValues = cut.FindAll(".agt-home-metric__value").Select(element => element.TextContent.Trim()).ToArray();
 
         cut.WaitForAssertion(() => Assert.DoesNotContain("agt-home-hero__ambient", cut.Markup));
-        Assert.Equal(["19", "11", "86", "25"], metricValues);
+        Assert.Equal(["19", "12", "86", "25"], metricValues);
     }
 
     [Theory]
     [InlineData("hoth-dark", "Hoth")]
     [InlineData("tatooine-dark", "Tatooine")]
+    [InlineData("ms365-dark", "MS365")]
     public void HeroShowsTheActiveThemeFamily(string initialTheme, string expectedFamily)
     {
         using var ctx = new BunitContext();
@@ -62,7 +63,7 @@ public sealed class HomePageTests
         {
             DefaultTheme = initialTheme,
             EnableAnimations = false,
-            AvailableThemes = [AgtTheme.Plum, AgtTheme.Ocean, AgtTheme.Dagobah, AgtTheme.Dathomir, AgtTheme.Hoth, AgtTheme.Tatooine, AgtTheme.Imperial, AgtTheme.Autotaalglas, AgtTheme.AutotaalglasContrast, AgtTheme.AutotaalglasPortal, AgtTheme.AutotaalglasMono]
+            AvailableThemes = [AgtTheme.Plum, AgtTheme.Ocean, AgtTheme.Dagobah, AgtTheme.Dathomir, AgtTheme.Hoth, AgtTheme.Tatooine, AgtTheme.Imperial, AgtTheme.Azure, AgtTheme.Ms365, AgtTheme.Autotaalglas, AgtTheme.AutotaalglasContrast, AgtTheme.AutotaalglasPortal, AgtTheme.AutotaalglasMono]
         });
 
         ctx.Services.AddSingleton<IOptions<AgtUiOptions>>(options);
@@ -97,7 +98,7 @@ public sealed class HomePageTests
         {
             DefaultTheme = "dagobah-dark",
             EnableAnimations = false,
-            AvailableThemes = [AgtTheme.Plum, AgtTheme.Ocean, AgtTheme.Dagobah, AgtTheme.Dathomir, AgtTheme.Hoth, AgtTheme.Tatooine, AgtTheme.Imperial, AgtTheme.Autotaalglas, AgtTheme.AutotaalglasContrast, AgtTheme.AutotaalglasPortal, AgtTheme.AutotaalglasMono]
+            AvailableThemes = [AgtTheme.Plum, AgtTheme.Ocean, AgtTheme.Dagobah, AgtTheme.Dathomir, AgtTheme.Hoth, AgtTheme.Tatooine, AgtTheme.Imperial, AgtTheme.Azure, AgtTheme.Ms365, AgtTheme.Autotaalglas, AgtTheme.AutotaalglasContrast, AgtTheme.AutotaalglasPortal, AgtTheme.AutotaalglasMono]
         });
 
         ctx.Services.AddSingleton<IOptions<AgtUiOptions>>(options);

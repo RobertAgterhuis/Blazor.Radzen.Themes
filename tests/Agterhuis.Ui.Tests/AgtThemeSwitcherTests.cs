@@ -35,6 +35,7 @@ public sealed class AgtThemeSwitcherTests
         Assert.Contains("agt-theme-family", cut.Markup);
         Assert.Contains("agt-theme-value__separator", cut.Markup);
         Assert.Contains("·", cut.Markup);
+        Assert.Contains("MS365", cut.Markup);
         Assert.Contains("AAA / hoge contrast", cut.Markup);
     }
 
@@ -162,7 +163,7 @@ public sealed class AgtThemeSwitcherTests
         var options = Microsoft.Extensions.Options.Options.Create(new AgtUiOptions
         {
             DefaultTheme = defaultTheme,
-            AvailableThemes = [AgtTheme.Plum, AgtTheme.Ocean, AgtTheme.Dagobah, AgtTheme.Dathomir, AgtTheme.Hoth, AgtTheme.Tatooine, AgtTheme.Imperial, AgtTheme.Autotaalglas, AgtTheme.AutotaalglasContrast, AgtTheme.AutotaalglasPortal, AgtTheme.AutotaalglasMono]
+            AvailableThemes = [AgtTheme.Plum, AgtTheme.Ocean, AgtTheme.Dagobah, AgtTheme.Dathomir, AgtTheme.Hoth, AgtTheme.Tatooine, AgtTheme.Imperial, AgtTheme.Azure, AgtTheme.Ms365, AgtTheme.Autotaalglas, AgtTheme.AutotaalglasContrast, AgtTheme.AutotaalglasPortal, AgtTheme.AutotaalglasMono]
         });
 
         return new AgtThemeState(options);

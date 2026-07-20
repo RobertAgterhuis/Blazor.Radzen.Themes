@@ -1,0 +1,139 @@
+@page "/blog/prompts"
+@layout BlogLayout
+@implements IDisposable
+
+@inject BlogShowcaseService BlogService
+@inject IAgtNotificationService Notifications
+@inject IJSRuntime JS
+
+<PageTitle>Signal Journal - Prompts</PageTitle>
+
+<section data-blog-reveal>
+    <p class="blog-kicker">Prompts</p>
+    <h1 class="blog-title">Dogfood prompt library</h1>
+    <p class="blog-intro">Ingeladen uit de echte repo-map met promptbestanden, filterbaar op titel/tags en direct kopieerbaar.</p>
+</section>
+
+<section class="blog-prompts-layout" aria-label="Prompt bibliotheek">
+    <div class="blog-prompt-list" data-blog-reveal>
+        <label class="agt-sr-only" for="blog-prompt-search">Zoek prompt</label>
+        <input id="blog-prompt-search"
+               class="blog-search"
+               type="search"
+               placeholder="Zoek op titel of tag"
+               @oninput="OnSearchInput" />
+
+        <RadzenStack Gap="0.55rem" style="margin-top:0.75rem;">
+            @foreach (var prompt in _filteredPrompts)
+            {
+                <button type="button"
+                        class="blog-prompt-card"
+                        @onclick="() => SelectPrompt(prompt)">
+                    <div class="blog-project-card__meta">Prompt @prompt.Number · @prompt.FileName</div>
+                    <h2 class="blog-prompt-card__title">@prompt.Title</h2>
+                    <p class="blog-project-card__excerpt">@prompt.Summary</p>
+                    <p class="blog-prompt-card__tags">@prompt.TagList</p>
+                </button>
+            }
+        </RadzenStack>
+    </div>
+
+    <article class="blog-prompt-detail" data-blog-reveal>
+        @if (_selectedPrompt is null)
+        {
+            <p>Selecteer een prompt om details te zien.</p>
+        }
+        else
+        {
+            <div class="blog-project-card__meta">Prompt @_selectedPrompt.Number</div>
+            <h2 class="blog-project-card__title" style="font-size:1.45rem;">@_selectedPrompt.Title</h2>
+            <p class="blog-prompt-card__tags">@_selectedPrompt.TagList</p>
+            <RadzenButton Icon="content_copy"
+                          Text="Kopieer prompt"
+                          Variant="Variant.Outlined"
+                          ButtonStyle="ButtonStyle.Secondary"
+                          Click="CopySelectedPromptAsync" />
+            <div class="blog-prompt-detail__content" style="margin-top:0.75rem;">
+                <RadzenMarkdown Value="@_selectedPrompt.Content" />
+            </div>
+        }
+    </article>
+</section>
+
+@code {
+    private IReadOnlyList<BlogPromptItem> _allPrompts = [];
+    private IReadOnlyList<BlogPromptItem> _filteredPrompts = [];
+    private BlogPromptItem? _selectedPrompt;
+    private CancellationTokenSource? _searchCts;
+
+    protected override void OnInitialized()
+    {
+        _allPrompts = BlogService.GetPrompts();
+        _filteredPrompts = _allPrompts;
+        _selectedPrompt = _filteredPrompts.FirstOrDefault();
+    }
+
+    private void SelectPrompt(BlogPromptItem prompt)
+    {
+        _selectedPrompt = prompt;
+    }
+
+    private async Task OnSearchInput(ChangeEventArgs args)
+    {
+        var query = args.Value?.ToString()?.Trim() ?? string.Empty;
+
+        _searchCts?.Cancel();
+        _searchCts?.Dispose();
+        _searchCts = new CancellationTokenSource();
+
+        try
+        {
+            await Task.Delay(220, _searchCts.Token);
+        }
+        catch (TaskCanceledException)
+        {
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(query))
+        {
+            _filteredPrompts = _allPrompts;
+        }
+        else
+        {
+            _filteredPrompts = _allPrompts
+                .Where(prompt =>
+                    prompt.Title.Contains(query, StringComparison.OrdinalIgnoreCase)
+                    || prompt.TagList.Contains(query, StringComparison.OrdinalIgnoreCase)
+                    || prompt.FileName.Contains(query, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+
+        _selectedPrompt = _filteredPrompts.FirstOrDefault();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task CopySelectedPromptAsync(MouseEventArgs _)
+    {
+        if (_selectedPrompt is null)
+        {
+            return;
+        }
+
+        var copied = await JS.InvokeAsync<bool>("blogShowcase.copyText", _selectedPrompt.Content);
+        if (copied)
+        {
+            Notifications.Success("Prompt gekopieerd", _selectedPrompt.FileName);
+        }
+        else
+        {
+            Notifications.Warning("Kopieren mislukt", "Controleer clipboard-rechten van de browser.");
+        }
+    }
+
+    public void Dispose()
+    {
+        _searchCts?.Cancel();
+        _searchCts?.Dispose();
+    }
+}

@@ -37,6 +37,10 @@ These fonts are licensed under OFL-1.1. The canonical license text is available 
 
 ## Runtime Dependency
 
+## System Font Usage
+
+The `azure` theme uses the local system stack `"Segoe UI Variable", "Segoe UI", -apple-system, sans-serif` for portal fidelity. No Segoe files are bundled, copied, or redistributed by this repository.
+
 ### Radzen.Blazor
 
 - Package: `Radzen.Blazor`

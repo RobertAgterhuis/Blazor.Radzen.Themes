@@ -146,6 +146,18 @@
     height: 3.75rem;
 }
 
+html[data-agt-theme="azure-light"] .demo-topbar,
+html[data-agt-theme="azure-dark"] .demo-topbar {
+    background: linear-gradient(180deg, var(--agt-color-gray-900), var(--agt-color-gray-900));
+    border-bottom-color: var(--agt-color-gray-700);
+}
+
+html[data-agt-theme="ms365-light"] .demo-topbar,
+html[data-agt-theme="ms365-dark"] .demo-topbar {
+    background: linear-gradient(180deg, var(--agt-color-primary-600), var(--agt-color-primary-700));
+    border-bottom-color: var(--agt-color-primary-800);
+}
+
 .demo-topbar-inner {
     align-items: center;
     display: grid;
@@ -192,6 +204,16 @@
 
 .demo-topbar .agt-theme-switcher-label {
     color: var(--rz-text-secondary-color);
+}
+
+html[data-agt-theme="azure-light"] .demo-topbar .agt-theme-switcher-label,
+html[data-agt-theme="azure-dark"] .demo-topbar .agt-theme-switcher-label {
+    color: var(--agt-topbar-icon-color);
+}
+
+html[data-agt-theme="ms365-light"] .demo-topbar .agt-theme-switcher-label,
+html[data-agt-theme="ms365-dark"] .demo-topbar .agt-theme-switcher-label {
+    color: var(--agt-topbar-icon-color);
 }
 
 .demo-topbar .agt-theme-switcher-dropdown {

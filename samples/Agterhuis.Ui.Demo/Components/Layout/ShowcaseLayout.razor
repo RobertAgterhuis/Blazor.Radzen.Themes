@@ -147,7 +147,7 @@
                         </div>
 
                         <nav class="showcase-panel-menu" aria-label="Werkorders navigatie" @ref="_showcaseNavRootRef" @onkeydown="OnShowcaseMenuKeyDown">
-                            <RadzenPanelMenu Multiple="false" DisplayStyle="MenuItemDisplayStyle.Text">
+                            <RadzenPanelMenu Multiple="false" DisplayStyle="MenuItemDisplayStyle.IconAndText">
                                 @foreach (var item in FilteredShowcaseNavItems)
                                 {
                                     <RadzenPanelMenuItem Text="@item.Text" Icon="@item.Icon" Path="@item.Path" Match="@item.Match" />
@@ -169,7 +169,7 @@
                                 <span>Planning desk</span>
                             </div>
                         </div>
-                        <div class="showcase-sidebar__footer-version">Agterhuis.Ui v@PackageVersion</div>
+                        <div class="showcase-sidebar__footer-version">@AgtVersionInfo.ProductVersionLabel</div>
                         <a href="https://github.com/RobertAgterhuis/Blazor.Radzen.Themes" target="_blank" rel="noreferrer">GitHub repository</a>
                         <a href="/">Terug naar componentbibliotheek</a>
                     </div>

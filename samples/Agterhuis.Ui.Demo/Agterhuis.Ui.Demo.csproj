@@ -9,4 +9,8 @@
     <ProjectReference Include="..\..\src\Agterhuis.Ui\Agterhuis.Ui.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Include="..\..\prompts\*.md" Link="blog-prompts\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>

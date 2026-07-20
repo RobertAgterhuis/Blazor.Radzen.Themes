@@ -29,6 +29,12 @@ public sealed class AgtThemeStateTests
     [InlineData("hoth-light", "hoth-light")]
     [InlineData("tatooine", "tatooine-dark")]
     [InlineData("tatooine-light", "tatooine-light")]
+    [InlineData("azure", "azure-dark")]
+    [InlineData("azure-light", "azure-light")]
+    [InlineData("ms365", "ms365-dark")]
+    [InlineData("ms365-light", "ms365-light")]
+    [InlineData("volt", "volt-dark")]
+    [InlineData("volt-light", "volt-light")]
     [InlineData("autotaalglas", "autotaalglas-light")]
     [InlineData("autotaalglas-light", "autotaalglas-light")]
     [InlineData("autotaalglas-contrast", "autotaalglas-contrast-light")]
@@ -69,7 +75,7 @@ public sealed class AgtThemeStateTests
         var options = Microsoft.Extensions.Options.Options.Create(new AgtUiOptions
         {
             DefaultTheme = defaultTheme,
-            AvailableThemes = [AgtTheme.Plum, AgtTheme.Ocean, AgtTheme.Dagobah, AgtTheme.Dathomir, AgtTheme.Hoth, AgtTheme.Tatooine, AgtTheme.Imperial, AgtTheme.Autotaalglas, AgtTheme.AutotaalglasContrast, AgtTheme.AutotaalglasPortal, AgtTheme.AutotaalglasMono]
+            AvailableThemes = [AgtTheme.Plum, AgtTheme.Ocean, AgtTheme.Dagobah, AgtTheme.Dathomir, AgtTheme.Hoth, AgtTheme.Tatooine, AgtTheme.Imperial, AgtTheme.Azure, AgtTheme.Ms365, AgtTheme.Volt, AgtTheme.Autotaalglas, AgtTheme.AutotaalglasContrast, AgtTheme.AutotaalglasPortal, AgtTheme.AutotaalglasMono]
         });
 
         return new AgtThemeState(options);

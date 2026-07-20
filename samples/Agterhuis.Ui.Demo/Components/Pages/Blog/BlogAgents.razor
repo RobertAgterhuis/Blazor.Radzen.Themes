@@ -1,0 +1,28 @@
+@page "/blog/agents"
+@layout BlogLayout
+
+@inject BlogShowcaseService BlogService
+
+<PageTitle>Signal Journal - Agents</PageTitle>
+
+<section data-blog-reveal>
+    <p class="blog-kicker">AI Agents</p>
+    <h1 class="blog-title">Agent cards met terminal flow</h1>
+    <p class="blog-intro">Elke kaart toont een korte prompt/response-flow. De typing start eenmalig zodra de kaart in beeld komt.</p>
+</section>
+
+<section class="blog-agent-grid" aria-label="Agent catalogus">
+    @foreach (var agent in BlogService.Agents)
+    {
+        <article class="blog-agent-card" data-blog-reveal>
+            <p class="blog-project-card__meta">@agent.Group</p>
+            <h2 class="blog-project-card__title" style="font-size:1.35rem;">@agent.Name</h2>
+            <p class="blog-project-card__excerpt">@agent.Subtitle</p>
+            <div class="blog-terminal"
+                 data-blog-terminal
+                 data-terminal-script="$ @agent.PromptLine&#10;@agent.ResponseLine"
+                 aria-hidden="true"></div>
+            <p class="agt-sr-only">$ @agent.PromptLine @agent.ResponseLine</p>
+        </article>
+    }
+</section>

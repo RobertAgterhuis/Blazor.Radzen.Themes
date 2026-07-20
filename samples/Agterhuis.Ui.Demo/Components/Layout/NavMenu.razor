@@ -24,7 +24,7 @@
         </div>
 
         <div class="demo-panel-nav__scroll" @ref="_menuRootRef" @onkeydown="OnMenuKeyDown">
-            <RadzenPanelMenu class="demo-panel-menu" Multiple="true" DisplayStyle="MenuItemDisplayStyle.Text">
+            <RadzenPanelMenu class="demo-panel-menu" Multiple="true" DisplayStyle="MenuItemDisplayStyle.IconAndText">
                 @if (FilteredGettingStarted.Count > 0)
                 {
                     <RadzenPanelMenuItem Text="Getting started" Icon="rocket_launch" Expanded="true" Class="demo-panel-menu__group demo-panel-menu__group--main">
@@ -74,7 +74,7 @@
         </div>
 
         <footer class="demo-panel-nav__footer" aria-label="Navigatie footer">
-            <div class="demo-panel-nav__version">Agterhuis.Ui v@PackageVersion</div>
+            <div class="demo-panel-nav__version">@AgtVersionInfo.ProductVersionLabel</div>
             <a href="https://github.com/RobertAgterhuis/Blazor.Radzen.Themes" target="_blank" rel="noreferrer">GitHub repository</a>
         </footer>
     </div>
@@ -91,6 +91,7 @@
     [
         new("Home", "home", "/", NavLinkMatch.All),
         new("Voorbeeldapplicatie", "rocket_launch", "/app"),
+        new("Blog-showcase", "newsmode", "/blog"),
         new("Theme", "palette", "/components/theme")
     ];
 
@@ -162,8 +163,6 @@
     private string FilterText { get; set; } = string.Empty;
     private ElementReference _filterInputRef;
     private ElementReference _menuRootRef;
-
-    private static string PackageVersion => typeof(Agterhuis.Ui.Theming.AgtThemeState).Assembly.GetName().Version?.ToString(3) ?? "dev";
 
     private bool HasFilter => !string.IsNullOrWhiteSpace(FilterText);
 

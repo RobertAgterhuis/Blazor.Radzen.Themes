@@ -13,7 +13,7 @@ public sealed class AgtThemeState
     {
         _themes = options.Value.AvailableThemes.Count > 0
             ? [.. options.Value.AvailableThemes]
-            : [AgtTheme.Plum, AgtTheme.Ocean, AgtTheme.Dagobah, AgtTheme.Dathomir, AgtTheme.Hoth, AgtTheme.Tatooine, AgtTheme.Imperial, AgtTheme.Autotaalglas, AgtTheme.AutotaalglasContrast, AgtTheme.AutotaalglasPortal, AgtTheme.AutotaalglasMono];
+            : [.. AgtTheme.All];
         _theme = NormalizeTheme(options.Value.DefaultTheme, _themes);
     }
 

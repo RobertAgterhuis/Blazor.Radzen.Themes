@@ -80,7 +80,7 @@ $$
 | RadzenSlider | /app/instellingen | Reistijd- en grensinstellingen |
 | RadzenSecurityCode | /app/instellingen | 2FA invoer |
 | RadzenCompareValidator | /app/instellingen | Wachtwoordherhaling |
-| RadzenToggleButton | /app/werkorders, /app/instellingen | Dichtheid/compact mode schakelen |
+| RadzenToggleButton | /app/werkorders | Dichtheid/compact mode schakelen |
 | RadzenPassword | /app/instellingen | Beveiligingsinstellingen |
 | RadzenCardGroup | /app/projecten | Projectsamenvattingen |
 | RadzenChipList | /app/assets | Asset-tags |

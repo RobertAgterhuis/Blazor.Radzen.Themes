@@ -71,8 +71,6 @@ public partial class ShowcaseLayout : IDisposable
             ? "position:fixed;left:0;top:3.75rem;height:calc(100vh - 3.75rem);width:min(22rem,calc(100vw - 1.5rem));max-width:min(22rem,calc(100vw - 1.5rem));z-index:1100;transform:translateX(0);visibility:visible;pointer-events:auto;"
             : "position:fixed;left:0;top:3.75rem;height:calc(100vh - 3.75rem);width:4.5rem;max-width:4.5rem;z-index:1100;transform:translateX(0);visibility:visible;pointer-events:auto;");
 
-    private static string PackageVersion => typeof(AgtThemeState).Assembly.GetName().Version?.ToString(3) ?? "dev";
-
     private bool HasNavFilter => !string.IsNullOrWhiteSpace(NavFilterText);
 
     private List<NavEntry> FilteredShowcaseNavItems =>

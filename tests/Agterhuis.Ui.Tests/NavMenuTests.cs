@@ -2,6 +2,7 @@ using Agterhuis.Ui.Demo.Components.Layout;
 using Bunit;
 using Microsoft.Extensions.DependencyInjection;
 using Radzen;
+using System.Text.RegularExpressions;
 
 namespace Agterhuis.Ui.Tests;
 
@@ -63,5 +64,9 @@ public sealed class NavMenuTests
 
         var versionText = cut.Find(".demo-panel-nav__version").TextContent;
         Assert.StartsWith("Agterhuis.Ui v", versionText, StringComparison.Ordinal);
+        Assert.DoesNotContain("@", versionText, StringComparison.Ordinal);
+
+        var semverRegex = new Regex(@"^Agterhuis\.Ui v\d+\.\d+\.\d+(?:-[0-9A-Za-z\.-]+)?$", RegexOptions.CultureInvariant);
+        Assert.Matches(semverRegex, versionText);
     }
 }

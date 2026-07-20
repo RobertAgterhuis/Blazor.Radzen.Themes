@@ -1,0 +1,37 @@
+@page "/blog/skills"
+@layout BlogLayout
+
+@inject BlogShowcaseService BlogService
+
+<PageTitle>Signal Journal - Skills</PageTitle>
+
+<section data-blog-reveal>
+    <p class="blog-kicker">Skills</p>
+    <h1 class="blog-title">Skill matrix</h1>
+    <p class="blog-intro">De matrix groeit per groep in beeld, met éénmalige progress-animatie per sessie.</p>
+</section>
+
+<section class="blog-skills-grid" aria-label="Skill matrix">
+    @foreach (var group in BlogService.SkillGroups)
+    {
+        <article class="blog-skill-group" data-blog-reveal>
+            <h2 class="blog-project-card__title" style="font-size:1.25rem;">@group.Group</h2>
+            <RadzenStack Gap="0.55rem">
+                @for (var index = 0; index < group.Skills.Count; index++)
+                {
+                    var skill = group.Skills[index];
+                    <div class="blog-skill-item">
+                        <div class="blog-skill-item__row">
+                            <span>@skill.Label</span>
+                            <strong>@skill.Score%</strong>
+                        </div>
+                        <div class="blog-skill-meter">
+                            <span class="blog-skill-meter__fill"
+                                  style="--skill-index:@index; --skill-fill:@(skill.Score / 100d);"></span>
+                        </div>
+                    </div>
+                }
+            </RadzenStack>
+        </article>
+    }
+</section>

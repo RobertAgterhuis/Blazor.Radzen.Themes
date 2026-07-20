@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Radzen;
+using System.Text.RegularExpressions;
 
 namespace Agterhuis.Ui.Tests;
 
@@ -80,7 +81,15 @@ public sealed class ShowcaseLayoutBehaviorTests
         var cut = ctx.Render<ShowcaseLayout>(p =>
             p.Add(x => x.Body, body => body.AddMarkupContent(0, "<p>Body</p>")));
 
-        cut.WaitForAssertion(() => Assert.Contains("Agterhuis.Ui v", cut.Find(".showcase-sidebar__footer-version").TextContent));
+        cut.WaitForAssertion(() =>
+        {
+            var versionText = cut.Find(".showcase-sidebar__footer-version").TextContent;
+            Assert.StartsWith("Agterhuis.Ui v", versionText, StringComparison.Ordinal);
+            Assert.DoesNotContain("@", versionText, StringComparison.Ordinal);
+
+            var semverRegex = new Regex(@"^Agterhuis\.Ui v\d+\.\d+\.\d+(?:-[0-9A-Za-z\.-]+)?$", RegexOptions.CultureInvariant);
+            Assert.Matches(semverRegex, versionText);
+        });
     }
 
     private static BunitContext CreateContext(

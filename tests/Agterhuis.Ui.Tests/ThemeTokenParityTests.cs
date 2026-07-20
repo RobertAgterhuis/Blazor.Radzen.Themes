@@ -13,6 +13,9 @@ public sealed class ThemeTokenParityTests
         ["agt-theme.hoth.css"],
         ["agt-theme.tatooine.css"],
         ["agt-theme.imperial.css"],
+        ["agt-theme.azure.css"],
+        ["agt-theme.ms365.css"],
+        ["agt-theme.volt.css"],
         ["agt-theme.autotaalglas.css"],
         ["agt-theme.autotaalglas-contrast.css"],
         ["agt-theme.autotaalglas-portal.css"],
@@ -53,6 +56,9 @@ public sealed class ThemeTokenParityTests
     [InlineData("agt-theme.hoth.css", "html[data-agt-theme=\"hoth-light\"]")]
     [InlineData("agt-theme.tatooine.css", "html[data-agt-theme=\"tatooine-light\"]")]
     [InlineData("agt-theme.imperial.css", "html[data-agt-theme=\"imperial-light\"]")]
+    [InlineData("agt-theme.azure.css", "html[data-agt-theme=\"azure-light\"]")]
+    [InlineData("agt-theme.ms365.css", "html[data-agt-theme=\"ms365-light\"]")]
+    [InlineData("agt-theme.volt.css", "html[data-agt-theme=\"volt-light\"]")]
     [InlineData("agt-theme.autotaalglas.css", "html[data-agt-theme=\"autotaalglas-light\"]")]
     [InlineData("agt-theme.autotaalglas-contrast.css", "html[data-agt-theme=\"autotaalglas-contrast-light\"]")]
     [InlineData("agt-theme.autotaalglas-portal.css", "html[data-agt-theme=\"autotaalglas-portal-light\"]")]

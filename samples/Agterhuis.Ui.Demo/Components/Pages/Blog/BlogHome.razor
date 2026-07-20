@@ -1,0 +1,62 @@
+@page "/blog"
+@layout BlogLayout
+
+@inject BlogShowcaseService BlogService
+@inject IJSRuntime JS
+
+<PageTitle>Signal Journal</PageTitle>
+
+<section class="blog-hero is-visible" data-blog-reveal data-blog-reveal-once="true">
+    <p class="blog-kicker">Editorial showcase</p>
+    <h1 class="blog-title">
+        <span class="blog-title-word" style="--word-index:0;">Projecten</span>
+        <span class="blog-title-word" style="--word-index:1;">die</span>
+        <span class="blog-title-word blog-title-word--accent" style="--word-index:2;">werken</span>
+        <span class="blog-title-word" style="--word-index:3;">in</span>
+        <span class="blog-title-word" style="--word-index:4;">de</span>
+        <span class="blog-title-word" style="--word-index:5;">praktijk</span>
+    </h1>
+    <p class="blog-intro">
+        Signal Journal bundelt professionele projecten, agent-architecturen, prompts en skills in een mobiel-eerste leeservaring.
+    </p>
+    <p class="blog-scroll-cue" aria-hidden="true">
+        <RadzenIcon Icon="south" /> Scroll voor featured projecten
+    </p>
+</section>
+
+<section class="blog-bento" aria-label="Featured projecten">
+    @foreach (var project in FeaturedProjects)
+    {
+        <a class="blog-project-card @(project == FeaturedProjects[0] ? "blog-project-card--featured" : null)"
+           href="@ProjectHref(project.Slug)"
+           @onclick="() => NavigateWithTransitionAsync(ProjectHref(project.Slug))"
+           @onclick:preventDefault="true"
+           data-blog-reveal>
+            <div class="blog-project-card__meta">@project.Category · @project.Year · @project.ReadMinutes min</div>
+            <h2 class="blog-project-card__title">@project.Title</h2>
+            <p class="blog-project-card__excerpt">@project.Excerpt</p>
+        </a>
+    }
+</section>
+
+<section class="blog-over-grid" style="margin-top:1rem;" aria-label="Artikelen" data-blog-reveal>
+    @foreach (var article in BlogService.Articles)
+    {
+        <a class="blog-over-card" href="@($"/blog/artikel/{article.Slug}")">
+            <p class="blog-project-card__meta">Artikel · @article.EstimatedReadMinutes min</p>
+            <h2 class="blog-project-card__title" style="font-size:1.25rem;">@article.Title</h2>
+            <p class="blog-project-card__excerpt">@article.Intro</p>
+        </a>
+    }
+</section>
+
+@code {
+    private IReadOnlyList<BlogProjectCard> FeaturedProjects => BlogService.Projects.Take(5).ToList();
+
+    private static string ProjectHref(string slug) => $"/blog/projecten/{slug}";
+
+    private async Task NavigateWithTransitionAsync(string url)
+    {
+        await JS.InvokeVoidAsync("blogShowcase.navigateWithTransition", url);
+    }
+}

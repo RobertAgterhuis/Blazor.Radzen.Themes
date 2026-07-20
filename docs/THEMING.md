@@ -13,6 +13,9 @@ Agterhuis.Ui components only consume `--agt-*` design tokens. To add a custom th
 - `hoth`: `hoth-light`, `hoth-dark`
 - `tatooine`: `tatooine-light`, `tatooine-dark`
 - `imperial`: `imperial-light`, `imperial-dark`
+- `azure`: `azure-light`, `azure-dark`
+- `ms365`: `ms365-light`, `ms365-dark`
+- `volt`: `volt-light`, `volt-dark`
 - `autotaalglas`: `autotaalglas-light`, `autotaalglas-dark`
 - `autotaalglas-contrast`: `autotaalglas-contrast-light`, `autotaalglas-contrast-dark`
 - `autotaalglas-portal`: `autotaalglas-portal-light`, `autotaalglas-portal-dark`
@@ -70,6 +73,9 @@ builder.Services.AddAgterhuisUi(options =>
         AgtTheme.Hoth,
         AgtTheme.Tatooine,
       AgtTheme.Imperial,
+        AgtTheme.Azure,
+        AgtTheme.Ms365,
+      AgtTheme.Volt,
       AgtTheme.Autotaalglas,
       new AgtTheme("forest", "Forest", "forest-light", "forest-dark")
     ];
@@ -82,6 +88,23 @@ builder.Services.AddAgterhuisUi(options =>
 - `AgtThemeToggle` remains available for variant flip within the current family.
 - Theme preference is stored in `localStorage` key `agt-ui-theme`.
 - To avoid FOUC, apply the stored theme in a small inline `<head>` script before Blazor boots.
+
+## Azure notes
+
+- `azure-light` is the hero variant for the family; it keeps the light blade canvas while the header chrome stays dark in both variants.
+- This family uses a system Segoe stack only; no Microsoft font files are bundled or redistributed.
+- The closest Azure Portal feel is `azure-*` plus compact density, but density stays a separate runtime axis.
+
+## MS365 notes
+
+- `ms365-light` is the hero variant for the family; it uses a white card canvas, Fluent 2 blue chrome, and softer radius/shadow treatment than `azure-*`.
+- The family keeps the same no-bundled-font rule as the other Microsoft-inspired themes, relying on the system Segoe stack only.
+- `ms365-*` should stay visually distinct from `azure-*`: blue chrome, rounder cards, and a friendlier admin-center composition.
+
+## Volt notes
+
+- The editorial showcase under `/blog` applies `volt-dark` as the first-visit default (`volt-light` for article read mode), then respects user theme changes via the regular switcher.
+- Read mode preference is persisted per browser session and only auto-forces the variant when the active family is `volt`.
 
 ## Autotaalglas notes
 

@@ -1,18 +1,29 @@
-.rz-menu,
-.rz-panel-menu,
-.rz-context-menu,
 .rz-tabview-nav,
 .rz-steps,
 .rz-breadcrumb,
 .rz-accordion,
-.rz-paginator,
-.rz-profile-menu {
+.rz-paginator {
     border-radius: var(--agt-border-radius-lg);
+}
+
+.rz-menu,
+.rz-panel-menu,
+.rz-context-menu,
+.rz-profile-menu {
+    border-radius: var(--agt-nav-radius);
 }
 
 .rz-panel-menu {
     background: transparent;
     border: 0;
+    border-radius: var(--agt-nav-radius);
+}
+
+.rz-panel-menu .rz-navigation-item,
+.rz-panel-menu .rz-navigation-item-wrapper,
+.rz-panel-menu .rz-navigation-item-link,
+.rz-panel-menu .rz-menuitem-link {
+    border-radius: var(--agt-nav-radius);
 }
 
 .rz-panel-menu .rz-navigation-item,
@@ -24,13 +35,21 @@
     text-decoration: none;
 }
 
-.rz-panel-menu .rz-navigation-item-link,
-.rz-menuitem-link,
 .rz-breadcrumb-item,
 .rz-tabview-nav li a,
 .rz-accordion-header a,
 .rz-steps-item {
     border-radius: var(--agt-border-radius-md);
+    min-height: var(--agt-control-height-md);
+    min-width: 2.5rem;
+    padding: var(--agt-spacing-2) var(--agt-spacing-4);
+    position: relative;
+    transition: transform var(--agt-indicator-transition), opacity 150ms ease;
+}
+
+.rz-panel-menu .rz-navigation-item-link,
+.rz-menuitem-link {
+    border-radius: var(--agt-nav-radius);
     min-height: var(--agt-control-height-md);
     min-width: 2.5rem;
     padding: var(--agt-spacing-2) var(--agt-spacing-4);

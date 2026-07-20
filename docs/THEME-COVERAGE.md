@@ -4,7 +4,7 @@
 
 Installed Radzen.Blazor version: `11.1.5`
 
-Built-in theme families: `plum`, `ocean`, `dagobah`, `dathomir`, `hoth`, `tatooine`, `imperial`, `autotaalglas`, `autotaalglas-contrast`, `autotaalglas-portal`, `autotaalglas-mono`.
+Built-in theme families: `plum`, `ocean`, `dagobah`, `dathomir`, `hoth`, `tatooine`, `imperial`, `azure`, `ms365`, `volt`, `autotaalglas`, `autotaalglas-contrast`, `autotaalglas-portal`, `autotaalglas-mono`.
 
 Catalog coverage routes used by the inventory mapping:
 

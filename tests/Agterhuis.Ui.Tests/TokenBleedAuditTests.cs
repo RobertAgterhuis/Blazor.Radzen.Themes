@@ -28,6 +28,32 @@ public sealed class TokenBleedAuditTests
         Assert.Empty(report.ParityViolations);
     }
 
+    [Fact]
+    public void LiteralAuditDetectsTemporaryFixtureWithHexLiteral()
+    {
+        var repoRoot = GetRepositoryRoot();
+        var fixtureFileName = $"TokenAuditFixture_{Guid.NewGuid():N}.razor.css";
+        var fixturePath = Path.Combine(repoRoot, "samples", "Agterhuis.Ui.Demo", "Components", "Pages", fixtureFileName);
+
+        try
+        {
+            File.WriteAllText(fixturePath, ".token-audit-fixture { border-color: #abc; }");
+
+            var report = TokenAuditEngine.Generate(repoRoot);
+
+            Assert.Contains(report.LiteralViolations, finding =>
+                string.Equals(Path.GetFullPath(finding.FilePath), Path.GetFullPath(fixturePath), StringComparison.OrdinalIgnoreCase)
+                && finding.Snippet.Contains("#abc", StringComparison.OrdinalIgnoreCase));
+        }
+        finally
+        {
+            if (File.Exists(fixturePath))
+            {
+                File.Delete(fixturePath);
+            }
+        }
+    }
+
     private static string GetRepositoryRoot()
     {
         var current = new DirectoryInfo(AppContext.BaseDirectory);

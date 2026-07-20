@@ -64,6 +64,7 @@ Default variant: `plum-dark`
 | `hoth` | `#35678f` `#ff8c42` | Cool blue slate with orange accent | `hoth-dark` |
 | `tatooine` | `#b0761d` `#e8622c` | Sand, amber, and desert orange | `tatooine-dark` |
 | `imperial` | `#1c2026` `#f43f5e` | High-contrast neutral command look | `imperial-dark` |
+| `ms365` | `#0f6cbd` `#ebf3fc` | Fluent 2 admin-center blue with card-first canvas | `ms365-light` |
 | `autotaalglas` | `#123f71` `#df2e38` | Corporate brand baseline | `autotaalglas-light` |
 | `autotaalglas-contrast` | `#0d2f57` `#df2e38` | Accessibility-first variant | `autotaalglas-contrast-light` |
 | `autotaalglas-portal` | `#1d6ea4` `#00b5e2` | Customer journey emphasis | `autotaalglas-portal-light` |
@@ -95,3 +96,32 @@ dotnet restore --locked-mode
 dotnet build Agterhuis.Ui.sln -c Release
 dotnet test Agterhuis.Ui.sln -c Release
 ```
+
+## Smart Contrast Sweep
+
+The full contrast sweep is expensive. Use batched runs with checkpoint/resume:
+
+```bash
+# full run
+npm run contrast:sweep
+
+# resume interrupted run from checkpoint
+npm run contrast:sweep:resume
+
+# fast sample run (2 themes, 10 routes)
+npm run contrast:sweep:fast
+
+# one controlled batch directly via node
+node eng/contrast-sweep/contrast-sweep.mjs --max-themes=1 --max-routes=20 --stop-after=20 --checkpoint-every=2
+
+# shard runs (example: first quarter)
+node eng/contrast-sweep/contrast-sweep.mjs --shard=1/4 --checkpoint-every=2
+
+# auto-loop chunked runs until done (default chunk 25)
+npm run contrast:sweep:loop
+
+# auto-loop with custom chunk size and scoped filters
+npm run contrast:sweep:loop -- --chunk-size=10 --themes=plum,ocean --routes=/,/catalog/buttons
+```
+
+Checkpoint file: `eng/contrast-sweep/contrast-sweep.checkpoint.json`

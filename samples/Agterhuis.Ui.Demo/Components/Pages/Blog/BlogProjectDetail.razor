@@ -1,0 +1,54 @@
+@page "/blog/projecten/{Slug}"
+@layout BlogLayout
+
+@inject BlogShowcaseService BlogService
+
+<PageTitle>Signal Journal - Project</PageTitle>
+
+@if (_project is null)
+{
+    <section class="blog-over-card" data-blog-reveal>
+        <h1 class="blog-title">Project niet gevonden</h1>
+        <p class="blog-intro">Dit project bestaat niet in de showcase-data.</p>
+        <a href="/blog/projecten">Terug naar projecten</a>
+    </section>
+}
+else
+{
+    <article class="blog-article-card" data-blog-reveal>
+        <p class="blog-kicker">@_project.Category · @_project.Year</p>
+        <h1 class="blog-title">@_project.Title</h1>
+        <p class="blog-intro">@_project.Excerpt</p>
+
+        <div class="blog-over-grid" style="margin-top:0.85rem;">
+            <div class="blog-over-card">
+                <h2>Doel</h2>
+                <p>Een redactionele workflow die duidelijk laat zien hoe ontwerpkeuzes invloed hebben op productiviteit in echte teams.</p>
+            </div>
+            <div class="blog-over-card">
+                <h2>Aanpak</h2>
+                <p>Mobiel-eerste layout, rustige dataroutes, token-contracten en meetbare kwaliteitsrails in CI.</p>
+            </div>
+            <div class="blog-over-card">
+                <h2>Impact</h2>
+                <p>Snellere onboarding, minder UI-drift en een consequente leeservaring over meerdere journeys.</p>
+            </div>
+        </div>
+
+        <div class="blog-next-article">
+            <a href="/blog/projecten">← Terug naar alle projecten</a>
+        </div>
+    </article>
+}
+
+@code {
+    [Parameter]
+    public string Slug { get; set; } = string.Empty;
+
+    private BlogProjectCard? _project;
+
+    protected override void OnParametersSet()
+    {
+        _project = BlogService.GetProject(Slug);
+    }
+}

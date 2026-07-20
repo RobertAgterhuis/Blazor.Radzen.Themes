@@ -1,63 +1,110 @@
 @page "/app/instellingen"
 @layout ShowcaseLayout
+@implements IDisposable
 
 @inject ShowcaseDataService DataService
+@inject IServiceProvider Services
 
 <PageTitle>Werkorders - Instellingen</PageTitle>
 
 <AgtBreadcrumb CssClass="showcase-page__breadcrumbs" Items="Breadcrumbs" />
 <AgtPageHeader Kicker="Werkorders" Title="Instellingen" Description="Sla het operationele profiel lokaal op in de in-memory service." />
 
-<EditForm EditContext="@_editContext">
+<EditForm EditContext="@_editContext" class="showcase-settings">
     <DataAnnotationsValidator />
-    <RadzenSplitter Style="height: 24rem;">
-        <RadzenSplitterPane Size="55%">
-            <RadzenFieldset Text="Operatie">
-                <div class="showcase-page__settings-grid">
+
+    <div class="showcase-settings__grid">
+        <AgtCard CssClass="showcase-settings__card">
+            <Header>Operatie</Header>
+            <ChildContent>
+                <div class="showcase-page__settings-grid showcase-settings__form-grid">
                     <AgtTextField Label="Contact e-mail" Value="@_draft.ContactEmail" ValueChanged="OnEmailChanged" ValueExpression="@(() => _draft.ContactEmail)" ValidationMessage="@FieldMessage(() => _draft.ContactEmail)" />
                     <AgtTextField Label="Regio" Value="@_draft.DefaultRegion" ValueChanged="OnRegionChanged" ValueExpression="@(() => _draft.DefaultRegion)" />
                     <AgtDropdown TValue="string" Label="Planningvenster" Data="@PlanningWindows" Value="@_draft.PlanningWindow" ValueChanged="OnPlanningWindowChanged" ValueExpression="@(() => _draft.PlanningWindow)" TextProperty="Label" ValueProperty="Value" />
                     <AgtSwitch Label="Automatisch monteurs toewijzen" Value="@_draft.AutoAssignTechnicians" ValueChanged="OnAutoAssignChanged" />
                     <AgtCheckbox Label="Sms-meldingen" Value="@_draft.SmsAlerts" ValueChanged="OnSmsChanged" />
                     <AgtCheckbox Label="Omzet excl. btw tonen" Value="@_draft.ShowRevenueExclVat" ValueChanged="OnVatChanged" />
-                    <RadzenFormField Text="Standaard reistijd (minuten)" Variant="Variant.Outlined">
+
+                    <RadzenFormField Text="@TravelTimeLabel" Variant="Variant.Outlined" class="showcase-settings__field showcase-settings__field--full">
                         <RadzenSlider Min="10" Max="90" Step="5" @bind-Value="_draft.DefaultTravelMinutes" />
                     </RadzenFormField>
-                    <RadzenToggleButton @bind-Value="_draft.CompactGridDensity" Text="Compacte griddichtheid" />
+
+                    <div class="showcase-settings__density-row showcase-settings__field showcase-settings__field--full" role="group" aria-labelledby="showcase-density-label" aria-describedby="showcase-density-help">
+                        <div class="showcase-settings__density-copy">
+                            <strong id="showcase-density-label">Griddichtheid</strong>
+                            <p id="showcase-density-help">Comfortabel voor overzicht, compact voor meer rijen in beeld.</p>
+                        </div>
+                        <AgtSwitch Label="Compacte modus" AriaLabel="Schakel griddichtheid tussen comfortabel en compact" Value="@DensityState.IsCompact" ValueChanged="OnDensityChanged" />
+                    </div>
                 </div>
-            </RadzenFieldset>
-        </RadzenSplitterPane>
+            </ChildContent>
+        </AgtCard>
 
-        <RadzenSplitterPane>
-            <RadzenFieldset Text="Beveiliging (demo)">
-                <RadzenStack Gap="0.75rem">
-                    <RadzenPassword Name="pwd" @bind-Value="_password" Placeholder="Nieuw wachtwoord" />
-                    <RadzenPassword Name="pwdRepeat" @bind-Value="_passwordRepeat" Placeholder="Herhaal wachtwoord" />
-                    <RadzenCompareValidator Component="pwdRepeat" Value="@_password" Text="Wachtwoorden komen niet overeen" Popup="false" />
-                    <RadzenSecurityCode Name="twofa" Placeholder="2FA code" />
-                </RadzenStack>
-            </RadzenFieldset>
-        </RadzenSplitterPane>
-    </RadzenSplitter>
+        <AgtCard CssClass="showcase-settings__card">
+            <Header>Beveiliging (demo)</Header>
+            <ChildContent>
+                <RadzenFieldset Text="Verificatie" class="showcase-settings__fieldset showcase-settings__fieldset--security">
+                    <div class="showcase-settings__security-grid">
+                        <AgtPassword Name="pwd"
+                                     Label="Nieuw wachtwoord"
+                                     AriaLabel="Nieuw wachtwoord"
+                                     Placeholder="Nieuw wachtwoord"
+                                     Value="@_password"
+                                     ValueChanged="OnPasswordChanged" />
 
-    <AgtFormActions SaveText="Opslaan" CancelText="Herstellen" Save="Save" Cancel="Reset" />
+                        <AgtPassword Name="pwdRepeat"
+                                     Label="Herhaal wachtwoord"
+                                     AriaLabel="Herhaal wachtwoord"
+                                     Placeholder="Herhaal wachtwoord"
+                                     Value="@_passwordRepeat"
+                                     ValueChanged="OnPasswordRepeatChanged" />
+
+                        <RadzenCompareValidator Component="pwdRepeat" Value="@_password" Text="Wachtwoorden komen niet overeen" Popup="false" class="showcase-settings__password-validator" />
+
+                        <div class="showcase-settings__security-code">
+                            <label class="showcase-settings__security-code-label" for="twofa">Verificatiecode (demo)</label>
+                            <p id="twofa-help" class="showcase-settings__security-code-help">Voer de 4-cijferige code in - demo, geen echte 2FA.</p>
+                            <RadzenSecurityCode Name="twofa" Placeholder="0000" AriaLabel="Verificatiecode demo" />
+                        </div>
+                    </div>
+                </RadzenFieldset>
+            </ChildContent>
+        </AgtCard>
+    </div>
+
+    <AgtFormActions CssClass="showcase-settings__form-actions" SaveText="Opslaan" CancelText="Herstellen" Save="Save" Cancel="Reset" />
 </EditForm>
 
-<AgtCard>
+<AgtCard CssClass="showcase-settings__summary-card">
     <Header>Actieve instellingen</Header>
     <ChildContent>
-        <p><strong>Regio:</strong> @DataService.Settings.DefaultRegion</p>
-        <p><strong>Contact:</strong> @DataService.Settings.ContactEmail</p>
-        <p><strong>Planningvenster:</strong> @DataService.Settings.PlanningWindow</p>
-        <p><strong>Auto toewijzen:</strong> @(DataService.Settings.AutoAssignTechnicians ? "Ja" : "Nee")</p>
+        <dl class="showcase-settings__summary-list">
+            <dt>Regio</dt>
+            <dd>@DataService.Settings.DefaultRegion</dd>
+            <dt>Contact</dt>
+            <dd>@DataService.Settings.ContactEmail</dd>
+            <dt>Planningvenster</dt>
+            <dd>@DataService.Settings.PlanningWindow</dd>
+            <dt>Auto toewijzen</dt>
+            <dd>@(DataService.Settings.AutoAssignTechnicians ? "Ja" : "Nee")</dd>
+            <dt>Griddichtheid</dt>
+            <dd>@(DensityState.IsCompact ? "Compact" : "Comfortabel")</dd>
+            <dt>Standaard reistijd</dt>
+            <dd>@($"{_draft.DefaultTravelMinutes} min")</dd>
+        </dl>
     </ChildContent>
 </AgtCard>
 
 @code {
+    [CascadingParameter]
+    public AgtDensityState DensityState { get; set; } = default!;
+
     private ShowcaseSettings _draft = default!;
     private EditContext _editContext = default!;
     private string _password = string.Empty;
     private string _passwordRepeat = string.Empty;
+
+    private string TravelTimeLabel => $"Standaard reistijd ({_draft.DefaultTravelMinutes} min)";
 
     private IReadOnlyList<(string Text, string? Href)> Breadcrumbs =>
     [
@@ -74,8 +121,11 @@
 
     protected override void OnInitialized()
     {
+        DensityState ??= Services.GetRequiredService<AgtDensityState>();
         _draft = Clone(DataService.Settings);
+        _draft.CompactGridDensity = DensityState.IsCompact;
         _editContext = new EditContext(_draft);
+        DensityState.DensityChanged += HandleDensityChanged;
     }
 
     private Task OnEmailChanged(string? value)
@@ -114,6 +164,25 @@
         return Task.CompletedTask;
     }
 
+    private Task OnPasswordChanged(string? value)
+    {
+        _password = value ?? string.Empty;
+        return Task.CompletedTask;
+    }
+
+    private Task OnPasswordRepeatChanged(string? value)
+    {
+        _passwordRepeat = value ?? string.Empty;
+        return Task.CompletedTask;
+    }
+
+    private Task OnDensityChanged(bool isCompact)
+    {
+        DensityState.SetDensity(isCompact ? AgtDensityState.Compact : AgtDensityState.Comfortable);
+        _draft.CompactGridDensity = DensityState.IsCompact;
+        return Task.CompletedTask;
+    }
+
     private Task Save(MouseEventArgs _)
     {
         if (!_editContext.Validate())
@@ -121,6 +190,7 @@
             return Task.CompletedTask;
         }
 
+        _draft.CompactGridDensity = DensityState.IsCompact;
         DataService.UpdateSettings(Clone(_draft));
         return Task.CompletedTask;
     }
@@ -128,8 +198,19 @@
     private Task Reset(MouseEventArgs _)
     {
         _draft = Clone(DataService.Settings);
+        DensityState.SetDensity(_draft.CompactGridDensity ? AgtDensityState.Compact : AgtDensityState.Comfortable);
+        _draft.CompactGridDensity = DensityState.IsCompact;
         _editContext = new EditContext(_draft);
         return Task.CompletedTask;
+    }
+
+    private void HandleDensityChanged()
+    {
+        _ = InvokeAsync(() =>
+        {
+            _draft.CompactGridDensity = DensityState.IsCompact;
+            StateHasChanged();
+        });
     }
 
     private string? FieldMessage<TValue>(Expression<Func<TValue>> expression)
@@ -147,8 +228,15 @@
             ContactEmail = source.ContactEmail,
             AutoAssignTechnicians = source.AutoAssignTechnicians,
             SmsAlerts = source.SmsAlerts,
-            ShowRevenueExclVat = source.ShowRevenueExclVat
+            ShowRevenueExclVat = source.ShowRevenueExclVat,
+            DefaultTravelMinutes = source.DefaultTravelMinutes,
+            CompactGridDensity = source.CompactGridDensity
         };
+    }
+
+    public void Dispose()
+    {
+        DensityState?.DensityChanged -= HandleDensityChanged;
     }
 
     private sealed record PlanningWindowOption(string Value, string Label);

@@ -326,6 +326,24 @@
     animation: agt-aurora-drift 150s linear infinite reverse;
 }
 
+html[data-agt-theme="azure-light"] .agt-home-hero::before,
+html[data-agt-theme="azure-dark"] .agt-home-hero::before {
+    opacity: 0.18;
+}
+
+html[data-agt-theme="azure-light"] .agt-home-sparkline path,
+html[data-agt-theme="azure-dark"] .agt-home-sparkline path {
+    filter: none;
+}
+
+.agt-home-hero__ambient--azure {
+    display: none;
+}
+
+.agt-home-hero__ambient--ms365 {
+    display: none;
+}
+
 .agt-home-hero__heat {
     height: 100%;
     mix-blend-mode: screen;

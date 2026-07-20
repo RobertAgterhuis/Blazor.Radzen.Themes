@@ -1,0 +1,144 @@
+@page "/blog/artikel/{Slug}"
+@layout BlogLayout
+@implements IAsyncDisposable
+
+@inject BlogShowcaseService BlogService
+@inject IAgtNotificationService Notifications
+@inject IJSRuntime JS
+
+<PageTitle>Signal Journal - Artikel</PageTitle>
+
+@if (_article is null)
+{
+    <section class="blog-over-card" data-blog-reveal>
+        <h1 class="blog-title">Artikel niet gevonden</h1>
+        <a href="/blog">Terug naar home</a>
+    </section>
+}
+else
+{
+    <div class="blog-progress" data-blog-progress></div>
+
+    <article id="blog-article-root" class="blog-article-layout">
+        <div class="blog-article-content">
+            <p class="blog-kicker">Artikel</p>
+            <h1 class="blog-article-title">@_article.Title</h1>
+            <p class="blog-article-meta">Geschatte leestijd @_article.EstimatedReadMinutes min</p>
+            <p class="blog-intro">@_article.Intro</p>
+
+            @foreach (var section in _article.Sections)
+            {
+                <section id="@section.Id" class="blog-article-section" data-blog-reveal>
+                    <h2>@section.Title</h2>
+                    <p>@section.Body</p>
+                </section>
+            }
+
+            <blockquote class="blog-article-quote" data-blog-reveal>
+                @(_article.PullQuote)
+            </blockquote>
+
+            <section class="blog-article-section" data-blog-reveal>
+                <h2>Voorbeeld</h2>
+                <pre><code>@_article.CodeSnippet</code></pre>
+                <RadzenButton Icon="content_copy"
+                              Text="Kopieer code"
+                              Variant="Variant.Text"
+                              ButtonStyle="ButtonStyle.Secondary"
+                              Click="CopyCodeAsync" />
+            </section>
+
+            <div class="blog-next-article" data-blog-reveal>
+                @if (_nextArticle is not null)
+                {
+                    <a href="@($"/blog/artikel/{_nextArticle.Slug}")">Volgend artikel: @_nextArticle.Title →</a>
+                }
+                else
+                {
+                    <a href="/blog">Terug naar overzicht</a>
+                }
+            </div>
+        </div>
+
+        <aside class="blog-article-toc" aria-label="Inhoudsopgave">
+            <strong>Inhoud</strong>
+            @foreach (var section in _article.Sections)
+            {
+                <a href="@($"#{section.Id}")" data-blog-toc-link>@section.Title</a>
+            }
+        </aside>
+    </article>
+}
+
+@code {
+    [Parameter]
+    public string Slug { get; set; } = string.Empty;
+
+    private BlogArticle? _article;
+    private BlogArticle? _nextArticle;
+
+    protected override void OnParametersSet()
+    {
+        _article = BlogService.GetArticle(Slug);
+        if (_article is null)
+        {
+            _nextArticle = null;
+            return;
+        }
+
+        var all = BlogService.Articles;
+        var index = -1;
+        for (var itemIndex = 0; itemIndex < all.Count; itemIndex++)
+        {
+            if (string.Equals(all[itemIndex].Slug, _article.Slug, StringComparison.OrdinalIgnoreCase))
+            {
+                index = itemIndex;
+                break;
+            }
+        }
+
+        _nextArticle = index >= 0 && index < all.Count - 1 ? all[index + 1] : all.FirstOrDefault();
+        if (_nextArticle is not null && string.Equals(_nextArticle.Slug, _article.Slug, StringComparison.OrdinalIgnoreCase))
+        {
+            _nextArticle = null;
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && _article is not null)
+        {
+            await JS.InvokeVoidAsync("blogShowcase.initArticle", "#blog-article-root");
+        }
+    }
+
+    private async Task CopyCodeAsync(MouseEventArgs _)
+    {
+        if (_article is null)
+        {
+            return;
+        }
+
+        var copied = await JS.InvokeAsync<bool>("blogShowcase.copyText", _article.CodeSnippet);
+        if (copied)
+        {
+            Notifications.Success("Code gekopieerd", _article.Title);
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("blogShowcase.disposeArticle", "#blog-article-root");
+        }
+        catch (InvalidOperationException)
+        {
+            // During prerender teardown JS interop is unavailable; disposal remains best-effort.
+        }
+        catch (JSDisconnectedException)
+        {
+            // Circuit can disconnect during fast route changes in automation.
+        }
+    }
+}

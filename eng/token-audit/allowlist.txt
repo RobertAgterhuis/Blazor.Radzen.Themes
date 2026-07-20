@@ -1,3 +1,1 @@
-src/Agterhuis.Ui/Components/Layout/AgtThemeSwitcher.razor.css|||Intentional theme-family preview swatches use fixed reference colors.
-samples/Agterhuis.Ui.Demo/Components/Pages/Catalog/FormsAdvancedCatalog.razor|30|<RadzenColorPicker Name="color" Value="#680898" />|Intentional demo color picker seed.
-samples/Agterhuis.Ui.Demo/Components/Pages/Catalog/SelectionInputsCatalog.razor|13|<RadzenColorPicker Value="#680898" Name="cp" />|Intentional demo color picker seed.
+src/Agterhuis.Ui/Theming/AgtTheme.cs|#[0-9a-fA-F]{6,8}|Theme-family preview colors are canonical metadata for cross-theme switcher swatches.

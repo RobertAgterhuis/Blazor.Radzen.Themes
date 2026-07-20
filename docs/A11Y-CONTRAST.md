@@ -387,6 +387,8 @@ The personality backdrop token (`--agt-canvas-backdrop`) was measured at represe
 | Tatooine dark | `#f4efe4` | `#20170b` | 15.40 | 4.5 | Pass |
 | Imperial light | `#22282f` | `#f0f3f6` | 13.01 | 4.5 | Pass |
 | Imperial dark | `#c3cad2` | `#15191f` | 10.34 | 4.5 | Pass |
+| Azure light | `#201f1e` | `#f5f5f5` | 14.52 | 4.5 | Pass |
+| Azure dark | `#f3f2f1` | `#1b1a19` | 15.06 | 4.5 | Pass |
 | Autotaalglas light | `#1f2c40` | `#eef3fc` | 11.65 | 4.5 | Pass |
 | Autotaalglas dark | `#e3ecff` | `#0e1832` | 12.78 | 4.5 | Pass |
 | Autotaalglas Contrast light | `#0d1b3d` | `#ffffff` | 16.92 | 7.0 | Pass |
@@ -395,6 +397,110 @@ The personality backdrop token (`--agt-canvas-backdrop`) was measured at represe
 | Autotaalglas Portal dark | `#e3efff` | `#0f1830` | 13.67 | 4.5 | Pass |
 | Autotaalglas Mono light | `#243147` | `#f8fafe` | 12.17 | 4.5 | Pass |
 | Autotaalglas Mono dark | `#e2ebfa` | `#0e1832` | 12.37 | 4.5 | Pass |
+
+## Text contrast matrix (Azure)
+
+| Pair | Foreground | Background | Ratio | AA target | Status | Decision |
+|---|---|---|---:|---:|---|---|
+| Body text (light) | `#201f1e` | `#f5f5f5` | 14.52 | 4.5 | Pass | Default body and heading tone |
+| Muted text (light) | `#605e5c` | `#f5f5f5` | 5.70 | 4.5 | Pass | Risk pair called out in the prompt; retained after measurement |
+| Link text (light) | `#0065b3` | `#ffffff` | 5.89 | 4.5 | Pass | Default portal-style link tone |
+| Accent fill | `#ffffff` | `#0078d4` | 4.53 | 4.5 | Pass | `--agt-on-accent` stays white |
+| Warning text on warning tint | `#986f0b` | `#fff4ce` | 4.54 | 4.5 | Pass | Amber text stays on pale warning surfaces only |
+| Body text (dark) | `#f3f2f1` | `#1b1a19` | 15.06 | 4.5 | Pass | Near-white portal copy on near-black canvas |
+| Secondary text (dark) | `#c8c6c4` | `#201f1e` | 9.35 | 4.5 | Pass | Secondary chrome copy |
+| Muted text (dark) | `#979593` | `#201f1e` | 5.15 | 4.5 | Pass | Low-key supporting text |
+| Link text (dark) | `#2899f5` | `#201f1e` | 5.84 | 4.5 | Pass | Brightened portal link tone |
+
+### Azure filled button matrix
+
+| Style | Foreground | Fill | Ratio | AA target | Status |
+|---|---|---|---:|---:|---|
+| Primary | `#ffffff` | `#0078d4` | 4.53 | 4.5 | Pass |
+| Secondary | `#ffffff` | `#0078d4` | 4.53 | 4.5 | Pass |
+| Warning | `#201f1e` | `#ffb900` | 8.60 | 4.5 | Pass |
+| Danger | `#ffffff` | `#d13438` | 4.53 | 4.5 | Pass |
+| Success | `#ffffff` | `#107c10` | 5.14 | 4.5 | Pass |
+
+### Azure non-text/UI checks (SC 1.4.11)
+
+| UI element | Pair | Ratio | Target | Status | Decision |
+|---|---|---:|---:|---|---|
+| Functional border (light) | `#8a8886` on `#ffffff` | 3.54 | 3.0 | Pass | Used for inputs and dense blades |
+| Hairline divider (light) | `#d2d0ce` on `#f5f5f5` | 1.42 | 3.0 | Fail | Reserved for decorative separators only |
+| Focus outline (light) | `#0078d4` on `#ffffff` | 4.53 | 3.0 | Pass | Primary focus ring |
+| Functional border (dark) | `#979593` on `#201f1e` | 5.15 | 3.0 | Pass | Elevated from separator gray for form controls |
+| Focus outline (dark) | `#2899f5` on `#201f1e` | 5.84 | 3.0 | Pass | Brightened portal focus ring |
+
+### Azure chart order
+
+- Azure blue `#0078d4`
+- Deep portal blue `#00188f`
+- Info cyan `#00bcf2`
+- Success green `#107c10`
+- Warning amber `#986f0b`
+- Danger red `#a4262c`
+
+The order leads with the portal blue pair, keeps cyan separate from the base interaction lane, and delays the red-green pairing until later positions for better color-blind scanning.
+
+## Text contrast matrix (MS365)
+
+### MS365 palette table
+
+| Brand color | Role | Final token usage |
+|---|---|---|
+| `#0f6cbd` | Primary interactive base | `--agt-color-primary-500`, `--agt-btn-primary-fill` |
+| `#115ea3` | Deep blue interaction step | `--agt-color-primary-600`, hover support |
+| `#479ef5` | Bright dark-mode link step | `--agt-link-color` in dark mode |
+| `#0e700e` | Success fill | `--agt-color-success`, `--agt-btn-success-fill` |
+| `#8a6116` | Warning text/fill | `--agt-color-warning`, `--agt-btn-warning-fill` |
+| `#b10e1c` | Danger fill | `--agt-color-danger`, `--agt-btn-danger-fill` |
+| `#e0e0e0` | Subtle divider anchor | `--agt-color-gray-200`, `--agt-grid-header-border` |
+| `#ffffff` | Canvas/surface + on-accent ink | `--agt-color-white`, `--agt-surface-1`, `--agt-on-accent` |
+
+| Pair | Foreground | Background | Ratio | AA target | Status |
+|---|---|---|---:|---:|---|
+| On accent | `#ffffff` | `#0f6cbd` | 5.38 | 4.5 | Pass |
+| Body (light) | `#242424` | `#fafafa` | 14.87 | 4.5 | Pass |
+| Muted body (light) | `#424242` | `#ffffff` | 10.05 | 4.5 | Pass |
+| Link (light) | `#0f6cbd` | `#ffffff` | 5.38 | 4.5 | Pass |
+| Body (dark) | `#ffffff` | `#1a1a1a` | 17.40 | 4.5 | Pass |
+| Muted body (dark) | `#d6d6d6` | `#242424` | 10.68 | 4.5 | Pass |
+| Link (dark) | `#479ef5` | `#1a1a1a` | 6.20 | 4.5 | Pass |
+
+### MS365 filled button matrix
+
+| Style | Foreground | Fill | Ratio | AA target | Status |
+|---|---|---|---:|---:|---|
+| Primary | `#ffffff` | `#0f6cbd` | 5.38 | 4.5 | Pass |
+| Secondary | `#ffffff` | `#0f6cbd` | 5.38 | 4.5 | Pass |
+| Base | `#242424` | `#f5f5f5` | 14.23 | 4.5 | Pass |
+| Light | `#242424` | `#ffffff` | 15.14 | 4.5 | Pass |
+| Dark | `#ffffff` | `#242424` | 15.14 | 4.5 | Pass |
+| Info | `#ffffff` | `#0f6cbd` | 5.38 | 4.5 | Pass |
+| Success | `#ffffff` | `#0e700e` | 6.09 | 4.5 | Pass |
+| Warning | `#1f1f1f` | `#d6a72c` | 7.40 | 4.5 | Pass |
+| Danger | `#ffffff` | `#c50f1f` | 6.07 | 4.5 | Pass |
+
+### MS365 non-text/UI checks (SC 1.4.11)
+
+| UI element | Pair | Ratio | Target | Status |
+|---|---|---:|---:|---|
+| Focus outline (light) | `#0f6cbd` on `#ffffff` | 5.38 | 3.0 | Pass |
+| Focus outline (dark) | `#479ef5` on `#1a1a1a` | 6.20 | 3.0 | Pass |
+| Input border (light) | `#8f8f8f` on `#ffffff` | 3.19 | 3.0 | Pass |
+| Input border (dark) | `#666666` on `#242424` | 3.52 | 3.0 | Pass |
+
+### MS365 chart order
+
+- Fluent blue `#0f6cbd`
+- Success green `#0e700e`
+- Warning amber `#8a6116`
+- Suite purple `#5b2d90`
+- Danger red `#b10e1c`
+- Neutral gray `#616161`
+
+This order keeps the brand-blue lane first, then separates semantic colors with green and amber before moving into purple/red/neutral for safer color-blind scanning.
 
 ## Text contrast matrix (Autotaalglas)
 

@@ -15,11 +15,11 @@
                     Change="@OnThemeFamilyChanged"
                     AriaLabel="Kies themafamilie">
         <Template Context="theme">
-            <span class="agt-theme-option @GetOptionClass(theme) @GetPreviewClass(theme)">
+            <span class="agt-theme-option @GetOptionClass(theme)">
                 <span class="agt-theme-option__swatches" aria-hidden="true">
-                    <span class="agt-theme-option__swatch agt-theme-option__swatch--canvas"></span>
-                    <span class="agt-theme-option__swatch agt-theme-option__swatch--primary"></span>
-                    <span class="agt-theme-option__swatch agt-theme-option__swatch--accent"></span>
+                    <span class="agt-theme-option__swatch agt-theme-option__swatch--canvas" style="@GetSwatchStyle(theme.PreviewCanvas)"></span>
+                    <span class="agt-theme-option__swatch agt-theme-option__swatch--primary" style="@GetSwatchStyle(theme.PreviewPrimary)"></span>
+                    <span class="agt-theme-option__swatch agt-theme-option__swatch--accent" style="@GetSwatchStyle(theme.PreviewAccent)"></span>
                 </span>
                 <span class="agt-theme-option__text">
                     <span class="agt-theme-option__name">@theme.DisplayName</span>
@@ -98,15 +98,15 @@
             : string.Empty;
     }
 
-    private static string GetPreviewClass(AgtTheme theme)
-    {
-        return $"agt-theme-option--{theme.Name}";
-    }
+    private static string GetSwatchStyle(string color) => $"background:{color};";
 
     private static string GetOptionHint(AgtTheme theme)
     {
         return theme.Name switch
         {
+            "azure" => "Portal-dicht, compact en zakelijk",
+            "ms365" => "Kaartwit met Fluent-blauw en zachtere kantoorruimtes",
+            "volt" => "Warm grafiet met elektrische lime-accenten",
             "autotaalglas-contrast" => "AAA / hoge contrast",
             "autotaalglas-portal" => "Klantgerichte cyaanregister",
             "autotaalglas-mono" => "Monochroom rapportagebeeld",

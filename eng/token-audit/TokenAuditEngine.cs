@@ -6,10 +6,14 @@ namespace TokenAudit;
 public static class TokenAuditEngine
 {
     private static readonly Regex CustomPropertyRegex = new(@"(?<name>--[a-z0-9-]+)\s*:\s*(?<value>[^;{}]+);", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-    private static readonly Regex HexColorRegex = new(@"(?<![A-Za-z0-9_])#(?:[0-9a-fA-F]{3,8})\b", RegexOptions.Compiled);
-    private static readonly Regex RgbColorRegex = new(@"\b(?:rgb|rgba|hsl|hsla|oklch|oklab)\s*\(", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-    private static readonly Regex NamedColorRegex = new(@"(?<![A-Za-z0-9_-])(black|white|red|green|blue|yellow|orange|purple|pink|gray|grey|silver|maroon|navy|teal|olive|lime|aqua|fuchsia)\b(?!-)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-    private static readonly Regex AllowedLiteralRegex = new(@"transparent|currentColor|inherit|none", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    private static readonly Regex HexColorRegex = new(@"(?<![A-Za-z0-9_])#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})\b", RegexOptions.Compiled);
+    private static readonly Regex FunctionalColorRegex = new(@"\b(?:rgb|rgba|hsl|hsla|oklch|oklab)\s*\(", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    private static readonly Regex GradientRegex = new(@"\b(?:linear|radial|conic)-gradient\s*\((?<value>[^)]*)\)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    private static readonly Regex BoxShadowRegex = new(@"\bbox-shadow\s*:\s*(?<value>[^;]+)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    private static readonly Regex StringLiteralRegex = new("@\"(?<value>(?:[^\"]|\"\")*)\"|\"(?<value>(?:[^\"\\\\]|\\\\.)*)\"|'(?<value>(?:[^'\\\\]|\\\\.)*)'", RegexOptions.Compiled);
+    private static readonly Regex RazorColorAttributeRegex = new("\\b(?:style|fill|stroke|color)\\s*=\\s*(?:\"(?<value>[^\"\\r\\n]*)\"|'(?<value>[^'\\r\\n]*)')", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    private static readonly Regex AllowedLiteralRegex = new(@"\b(?:transparent|currentColor|inherit|none)\b", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    private static readonly Regex NamedColorRegex = BuildNamedColorRegex();
 
     private static readonly string[] ThemeFileNames =
     [
@@ -20,6 +24,9 @@ public static class TokenAuditEngine
         "agt-theme.hoth.css",
         "agt-theme.tatooine.css",
         "agt-theme.imperial.css",
+        "agt-theme.azure.css",
+        "agt-theme.ms365.css",
+        "agt-theme.volt.css",
         "agt-theme.autotaalglas.css",
         "agt-theme.autotaalglas-contrast.css",
         "agt-theme.autotaalglas-portal.css",
@@ -47,6 +54,13 @@ public static class TokenAuditEngine
         return report;
     }
 
+    private static Regex BuildNamedColorRegex()
+    {
+        const string colorNames =
+            "aliceblue|antiquewhite|aqua|aquamarine|azure|beige|bisque|black|blanchedalmond|blue|blueviolet|brown|burlywood|cadetblue|chartreuse|chocolate|coral|cornflowerblue|cornsilk|crimson|cyan|darkblue|darkcyan|darkgoldenrod|darkgray|darkgreen|darkgrey|darkkhaki|darkmagenta|darkolivegreen|darkorange|darkorchid|darkred|darksalmon|darkseagreen|darkslateblue|darkslategray|darkslategrey|darkturquoise|darkviolet|deeppink|deepskyblue|dimgray|dimgrey|dodgerblue|firebrick|floralwhite|forestgreen|fuchsia|gainsboro|ghostwhite|gold|goldenrod|gray|green|greenyellow|grey|honeydew|hotpink|indianred|indigo|ivory|khaki|lavender|lavenderblush|lawngreen|lemonchiffon|lightblue|lightcoral|lightcyan|lightgoldenrodyellow|lightgray|lightgreen|lightgrey|lightpink|lightsalmon|lightseagreen|lightskyblue|lightslategray|lightslategrey|lightsteelblue|lightyellow|lime|limegreen|linen|magenta|maroon|mediumaquamarine|mediumblue|mediumorchid|mediumpurple|mediumseagreen|mediumslateblue|mediumspringgreen|mediumturquoise|mediumvioletred|midnightblue|mintcream|mistyrose|moccasin|navajowhite|navy|oldlace|olive|olivedrab|orange|orangered|orchid|palegoldenrod|palegreen|paleturquoise|palevioletred|papayawhip|peachpuff|peru|pink|plum|powderblue|purple|rebeccapurple|red|rosybrown|royalblue|saddlebrown|salmon|sandybrown|seagreen|seashell|sienna|silver|skyblue|slateblue|slategray|slategrey|snow|springgreen|steelblue|tan|teal|thistle|tomato|turquoise|violet|wheat|white|whitesmoke|yellow|yellowgreen";
+        return new Regex($@"(?<![A-Za-z0-9_-])(?:{colorNames})\b(?!-)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    }
+
     private static IEnumerable<string> EnumerateAuditFiles(string repoRoot)
     {
         var roots = new[]
@@ -70,7 +84,7 @@ public static class TokenAuditEngine
                 }
 
                 var extension = Path.GetExtension(file);
-                if (extension is ".css" or ".razor" or ".cs")
+                if (extension is ".css" or ".razor" or ".cs" or ".js")
                 {
                     yield return file;
                 }
@@ -87,7 +101,8 @@ public static class TokenAuditEngine
             || normalized.Contains("/TestResults/", StringComparison.OrdinalIgnoreCase)
             || normalized.EndsWith(".g.cs", StringComparison.OrdinalIgnoreCase)
             || normalized.EndsWith(".razor.g.cs", StringComparison.OrdinalIgnoreCase)
-            || normalized.EndsWith(".styles.css", StringComparison.OrdinalIgnoreCase);
+            || normalized.EndsWith(".styles.css", StringComparison.OrdinalIgnoreCase)
+            || normalized.EndsWith(".min.js", StringComparison.OrdinalIgnoreCase);
     }
 
     private static void ScanScopeAudit(TokenAuditReport report, string filePath, string css)
@@ -125,27 +140,61 @@ public static class TokenAuditEngine
         }
 
         var lines = content.Split('\n');
+        var extension = Path.GetExtension(filePath);
         for (var index = 0; index < lines.Length; index++)
         {
             var line = lines[index];
-            if (!ContainsColorLiteral(line))
+            foreach (var candidate in GetAuditCandidates(extension, line))
             {
-                continue;
-            }
+                if (!ContainsColorLiteral(candidate.Text, candidate.AllowNamedColors))
+                {
+                    continue;
+                }
 
-            if (allowlist.IsAllowed(normalized, index + 1, line))
+                if (allowlist.IsAllowed(normalized, line, candidate.Text))
+                {
+                    report.AllowlistedLiterals.Add(new TokenFinding("allowlist", filePath, index + 1, string.Empty, "Allowed literal.", candidate.Text.Trim()));
+                    continue;
+                }
+
+                report.LiteralViolations.Add(new TokenFinding(
+                    "literal",
+                    filePath,
+                    index + 1,
+                    string.Empty,
+                    "Raw color literal found outside theme token files.",
+                    candidate.Text.Trim()));
+            }
+        }
+    }
+
+    private static IEnumerable<AuditCandidate> GetAuditCandidates(string extension, string line)
+    {
+        if (extension.Equals(".css", StringComparison.OrdinalIgnoreCase))
+        {
+            yield return new AuditCandidate(line, AllowNamedColors: true);
+            yield break;
+        }
+
+        if (extension.Equals(".razor", StringComparison.OrdinalIgnoreCase))
+        {
+            foreach (Match attribute in RazorColorAttributeRegex.Matches(line))
             {
-                report.AllowlistedLiterals.Add(new TokenFinding("allowlist", filePath, index + 1, string.Empty, "Allowed literal.", line.Trim()));
-                continue;
+                var value = attribute.Groups["value"].Value;
+                if (!string.IsNullOrWhiteSpace(value))
+                {
+                    yield return new AuditCandidate(value, AllowNamedColors: true);
+                }
             }
+        }
 
-            report.LiteralViolations.Add(new TokenFinding(
-                "literal",
-                filePath,
-                index + 1,
-                string.Empty,
-                "Raw color literal found outside theme token files.",
-                line.Trim()));
+        foreach (Match literal in StringLiteralRegex.Matches(line))
+        {
+            var value = literal.Groups["value"].Value;
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                yield return new AuditCandidate(value, AllowNamedColors: false);
+            }
         }
     }
 
@@ -185,34 +234,89 @@ public static class TokenAuditEngine
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
     }
 
-    private static bool ContainsColorLiteral(string line)
+    private static bool ContainsColorLiteral(string line, bool allowNamedColors)
     {
         var normalized = StripTokenReferences(line);
-
-        if (AllowedLiteralRegex.IsMatch(normalized) && !HexColorRegex.IsMatch(normalized) && !RgbColorRegex.IsMatch(normalized))
-        {
-            return false;
-        }
-
-        return HexColorRegex.IsMatch(normalized) || RgbColorRegex.IsMatch(normalized) || NamedColorRegex.IsMatch(normalized);
+        return ContainsDirectColorValue(normalized, allowNamedColors)
+            || ContainsGradientLiteral(normalized, allowNamedColors)
+            || ContainsBoxShadowLiteral(normalized, allowNamedColors);
     }
 
     private static bool IsColorBearingValue(string value)
     {
         var normalized = StripTokenReferences(value);
+        return ContainsDirectColorValue(normalized, allowNamedColors: true)
+            || ContainsGradientLiteral(normalized, allowNamedColors: true)
+            || ContainsBoxShadowLiteral(normalized, allowNamedColors: true);
+    }
 
-        if (AllowedLiteralRegex.IsMatch(normalized) && !HexColorRegex.IsMatch(normalized) && !RgbColorRegex.IsMatch(normalized))
+    private static bool ContainsDirectColorValue(string text, bool allowNamedColors)
+    {
+        if (HexColorRegex.IsMatch(text) || FunctionalColorRegex.IsMatch(text))
+        {
+            return true;
+        }
+
+        if (!allowNamedColors)
         {
             return false;
         }
 
-        return HexColorRegex.IsMatch(normalized) || RgbColorRegex.IsMatch(normalized) || NamedColorRegex.IsMatch(normalized);
+        var withoutAllowedLiterals = AllowedLiteralRegex.Replace(text, string.Empty);
+        return ContainsNamedColorLiteral(withoutAllowedLiterals);
+    }
+
+    private static bool ContainsNamedColorLiteral(string text)
+    {
+        foreach (Match match in NamedColorRegex.Matches(text))
+        {
+            var before = match.Index > 0 ? text[match.Index - 1] : '\0';
+            var afterIndex = match.Index + match.Length;
+            var after = afterIndex < text.Length ? text[afterIndex] : '\0';
+
+            if (before is '.' or '/' or '_' || after is '.' or '/' or '_')
+            {
+                continue;
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    private static bool ContainsGradientLiteral(string text, bool allowNamedColors)
+    {
+        foreach (Match gradient in GradientRegex.Matches(text))
+        {
+            if (ContainsDirectColorValue(gradient.Value, allowNamedColors))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool ContainsBoxShadowLiteral(string text, bool allowNamedColors)
+    {
+        foreach (Match boxShadow in BoxShadowRegex.Matches(text))
+        {
+            if (ContainsDirectColorValue(boxShadow.Groups["value"].Value, allowNamedColors))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static string StripTokenReferences(string text)
     {
-        return Regex.Replace(text, @"var\(--(?:agt|rz)-[^)]+\)", "var()", RegexOptions.IgnoreCase);
+        return Regex.Replace(text, @"var\(--[a-z0-9-]+\)", "var()", RegexOptions.IgnoreCase);
     }
+
+    private readonly record struct AuditCandidate(string Text, bool AllowNamedColors);
 }
 
 public sealed class TokenAuditReport
@@ -293,32 +397,41 @@ internal sealed class TokenAuditAllowlist
         return new TokenAuditAllowlist(entries);
     }
 
-    public bool IsAllowed(string normalizedFilePath, int lineNumber, string lineText)
+    public bool IsAllowed(string normalizedFilePath, string lineText, string candidate)
     {
-        return _entries.Any(entry => entry.Matches(normalizedFilePath, lineNumber, lineText));
+        return _entries.Any(entry => entry.Matches(normalizedFilePath, lineText, candidate));
     }
 }
 
-internal sealed record TokenAuditAllowlistEntry(string FilePattern, int? LineNumber, string Snippet, string Reason)
+internal sealed record TokenAuditAllowlistEntry(string FilePattern, string Pattern, string Reason)
 {
     public static TokenAuditAllowlistEntry Parse(string line)
     {
-        var parts = line.Split('|', 4);
-        if (parts.Length != 4)
+        var parts = line.Split('|', 3);
+        if (parts.Length != 3)
         {
-            throw new InvalidOperationException($"Allowlist entry must have 4 pipe-delimited parts: {line}");
+            throw new InvalidOperationException($"Allowlist entry must have 3 pipe-delimited parts (path|pattern|reason): {line}");
         }
 
-        return new TokenAuditAllowlistEntry(parts[0], string.IsNullOrWhiteSpace(parts[1]) ? null : int.Parse(parts[1]), parts[2], parts[3]);
+        return new TokenAuditAllowlistEntry(parts[0], parts[1], parts[2]);
     }
 
-    public bool Matches(string normalizedFilePath, int lineNumber, string lineText)
+    public bool Matches(string normalizedFilePath, string lineText, string candidate)
     {
         var filePattern = FilePattern.Replace('\\', '/');
         var fileMatch = normalizedFilePath.Contains(filePattern, StringComparison.OrdinalIgnoreCase);
-        var lineMatch = LineNumber is null || LineNumber == lineNumber;
-        var snippetMatch = string.IsNullOrWhiteSpace(Snippet) || lineText.Contains(Snippet, StringComparison.OrdinalIgnoreCase);
-        return fileMatch && lineMatch && snippetMatch;
+        if (!fileMatch)
+        {
+            return false;
+        }
+
+        if (string.IsNullOrWhiteSpace(Pattern))
+        {
+            return true;
+        }
+
+        return Regex.IsMatch(candidate, Pattern, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)
+            || Regex.IsMatch(lineText, Pattern, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
     }
 }
 

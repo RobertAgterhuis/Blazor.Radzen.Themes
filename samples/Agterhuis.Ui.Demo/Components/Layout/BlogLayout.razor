@@ -1,0 +1,62 @@
+@inherits LayoutComponentBase
+
+<CascadingValue Value="ThemeState" IsFixed="true">
+<CascadingValue Value="DensityState" IsFixed="true">
+    <div id="blog-shell" class="blog-shell" data-blog-read="@IsReadMode.ToString().ToLowerInvariant()">
+        <AgtSkipLink Text="Naar hoofdinhoud" TargetId="blog-main" />
+
+        <header class="blog-header" role="banner">
+            <div class="blog-header__inner">
+                <a class="blog-wordmark" href="/blog">Signal Journal</a>
+
+                <nav class="blog-nav" aria-label="Blog primaire navigatie">
+                    <a class="@DesktopLinkClass("/blog/projecten")" href="/blog/projecten">Projecten</a>
+                    <a class="@DesktopLinkClass("/blog/agents")" href="/blog/agents">Agents</a>
+                    <a class="@DesktopLinkClass("/blog/prompts")" href="/blog/prompts">Prompts</a>
+                    <a class="@DesktopLinkClass("/blog/skills")" href="/blog/skills">Skills</a>
+                </nav>
+
+                <div class="blog-header__actions">
+                    <AgtThemeSwitcher />
+                    <RadzenButton class="blog-read-toggle"
+                                  Icon="menu_book"
+                                  Text="@(IsReadMode ? "Leesmodus aan" : "Leesmodus uit")"
+                                  Variant="Variant.Text"
+                                  ButtonStyle="ButtonStyle.Secondary"
+                                  Click="OnReadModeToggle"
+                                  AriaLabel="Leesmodus wisselen" />
+                    <button type="button" class="blog-menu-toggle" @onclick="ToggleMobileMenu" aria-label="Open menu" aria-expanded="@_mobileMenuOpen">
+                        <RadzenIcon Icon="menu" />
+                    </button>
+                </div>
+            </div>
+
+            @if (_mobileMenuOpen)
+            {
+                <nav class="blog-mobile-menu" aria-label="Blog mobiel menu">
+                    <a class="@MobileLinkClass("/blog", true)" href="/blog">Home</a>
+                    <a class="@MobileLinkClass("/blog/projecten")" href="/blog/projecten">Projecten</a>
+                    <a class="@MobileLinkClass("/blog/agents")" href="/blog/agents">Agents</a>
+                    <a class="@MobileLinkClass("/blog/prompts")" href="/blog/prompts">Prompts</a>
+                    <a class="@MobileLinkClass("/blog/skills")" href="/blog/skills">Skills</a>
+                    <a class="@MobileLinkClass("/blog/over")" href="/blog/over">Over</a>
+                </nav>
+            }
+        </header>
+
+        <main id="blog-main" class="blog-main" tabindex="-1">
+            @Body
+        </main>
+
+        <nav class="blog-tabbar" aria-label="Blog tabnavigatie">
+            <a class="@TabLinkClass("/blog", true)" href="/blog" aria-current="@AriaCurrent("/blog", true)">Home</a>
+            <a class="@TabLinkClass("/blog/projecten")" href="/blog/projecten" aria-current="@AriaCurrent("/blog/projecten")">Projecten</a>
+            <a class="@TabLinkClass("/blog/agents")" href="/blog/agents" aria-current="@AriaCurrent("/blog/agents")">Agents</a>
+            <a class="@TabLinkClass("/blog/prompts")" href="/blog/prompts" aria-current="@AriaCurrent("/blog/prompts")">Prompts</a>
+            <a class="@TabLinkClass("/blog/skills")" href="/blog/skills" aria-current="@AriaCurrent("/blog/skills")">Skills</a>
+        </nav>
+
+        <RadzenComponents />
+    </div>
+</CascadingValue>
+</CascadingValue>

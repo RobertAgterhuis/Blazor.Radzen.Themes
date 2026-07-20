@@ -31,6 +31,7 @@ dotnet run --project samples/Agterhuis.Ui.Demo
 ## Non-Negotiable Rules
 
 - Colors must be token-driven: no hard-coded colors outside theme token files.
+- The only code-level exception is `AgtTheme` preview metadata (`PreviewCanvas`, `PreviewPrimary`, `PreviewAccent`) used by the theme switcher swatches.
 - Color tokens must be scoped per theme variant on html[data-agt-theme="..."] only.
 - New tokens must be added for every theme family variant (token parity is mandatory).
 - Any fill that can contain text or icons must have a matching `--agt-on-*` foreground token in every theme family before it is used.
