@@ -192,6 +192,7 @@
     transition: all 160ms ease;
     user-select: none;
     position: relative;
+    touch-action: none;
 }
 
 .designer-palette-item:hover {
@@ -202,25 +203,25 @@
 }
 
 .designer-palette-item:active {
-    cursor: grabbing;
-    background: var(--agt-alpha-primary-10);
+    cursor: grabbing !important;
+    background: var(--agt-alpha-primary-15);
     border-color: var(--agt-color-primary-500);
     transform: translateX(0);
+    box-shadow: 0 4px 12px var(--agt-alpha-primary-20);
 }
 
 .designer-palette-item::before {
-    content: "⋮⋮";
+    content: "≡";
     position: absolute;
     left: var(--agt-spacing-1);
     color: var(--agt-text-muted);
-    font-size: 0.6rem;
-    letter-spacing: -2px;
+    font-size: 1.2rem;
     opacity: 0;
-    transition: opacity 160ms ease;
+    transition: opacity 120ms ease;
 }
 
 .designer-palette-item:hover::before {
-    opacity: 1;
+    opacity: 0.6;
 }
 
 .designer-palette-item::after {
@@ -229,15 +230,15 @@
     left: 0;
     top: 0;
     bottom: 0;
-    width: 2px;
+    width: 3px;
     background: var(--agt-color-primary-500);
     border-radius: var(--agt-border-radius-sm) 0 0 var(--agt-border-radius-sm);
     opacity: 0;
-    transition: opacity 160ms ease;
+    transition: opacity 120ms ease;
 }
 
 .designer-palette-item:hover::after {
-    opacity: 0.3;
+    opacity: 0.4;
 }
 
 .designer-palette-item:active::after {
@@ -313,12 +314,21 @@
 .designer-dropzone {
     border-radius: var(--agt-border-radius-sm);
     min-height: 0.8rem;
-    transition: background-color 160ms ease;
+    transition: background-color 160ms ease, box-shadow 120ms ease;
+    border: 2px dashed transparent;
+    position: relative;
 }
 
 .designer-dropzone:hover {
     background: var(--agt-alpha-accent-20);
     border-color: var(--agt-color-primary-500);
+    box-shadow: 0 0 0 3px var(--agt-alpha-accent-10);
+}
+
+.designer-dropzone--drag-over {
+    background: var(--agt-alpha-accent-30) !important;
+    border-color: var(--agt-color-accent) !important;
+    box-shadow: 0 0 0 4px var(--agt-alpha-accent-15) !important;
 }
 
 .designer-dropzone--root {

@@ -281,6 +281,7 @@
     private void OnPaletteDragStart(string componentType)
     {
         _activeDrag = DesignerDragPayload.Palette(componentType);
+        Console.WriteLine($"🎯 Drag started: {componentType}");
     }
 
     private Task OnDragStart(DesignerDragPayload payload)
@@ -291,30 +292,39 @@
 
     private Task OnDragEnd()
     {
+        Console.WriteLine("❌ Drag ended");
         _activeDrag = null;
         return Task.CompletedTask;
     }
 
-    private void OnDropZoneDragOver(DragEventArgs _)
+    private void OnDropZoneDragOver(DragEventArgs args)
     {
+        // Allow drops by preventing default behavior
+        // In Blazor, this is automatically handled, but we log for diagnostics
+        Console.WriteLine($"📍 Dragover detected. Has active drag: {_activeDrag != null}");
     }
 
     private async Task OnDropRequested(DesignerDropTarget target)
     {
         if (_activeDrag is null)
         {
+            Console.WriteLine("⚠️ Drop attempted but no active drag!");
             return;
         }
 
+        Console.WriteLine($"✅ Drop received: {_activeDrag.Kind} = {_activeDrag.Value} at location {target.Location}");
+        
         var didMutate = false;
 
         if (string.Equals(_activeDrag.Kind, "palette", StringComparison.Ordinal))
         {
             didMutate = AddFromPalette(target.Location, _activeDrag.Value);
+            Console.WriteLine($"  → Add from palette result: {didMutate}");
         }
         else if (string.Equals(_activeDrag.Kind, "node", StringComparison.Ordinal))
         {
             didMutate = _commands.Execute(new MoveNodeCommand(0, _activeDrag.Value, target.Location));
+            Console.WriteLine($"  → Move node result: {didMutate}");
         }
 
         _activeDrag = null;
@@ -323,6 +333,7 @@
         {
             await AutoSaveAsync();
             StateHasChanged();
+            Console.WriteLine("  ✨ Component added successfully!");
         }
     }
 
