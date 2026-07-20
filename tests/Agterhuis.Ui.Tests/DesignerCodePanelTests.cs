@@ -53,4 +53,24 @@ public sealed class DesignerCodePanelTests
         Assert.Null(received);
         Assert.Contains("JSON-fout:", cut.Markup, StringComparison.Ordinal);
     }
+
+    [Fact]
+    public void CodeTab_HighlightsSelectedNodeBlock()
+    {
+        using var ctx = new BunitContext();
+        ctx.Services.AddRadzenComponents();
+        ctx.JSInterop.Mode = JSRuntimeMode.Loose;
+
+        var document = DesignDocumentTemplates.Create(DesignDocumentTemplateKind.FormPage, "Demo");
+        var selectedNodeId = document.Pages[0].Nodes[0].Id;
+
+        var cut = ctx.Render<DesignerCodePanel>(parameters => parameters
+            .Add(component => component.CurrentPage, document.Pages[0])
+            .Add(component => component.Document, document)
+            .Add(component => component.InitialTab, "code")
+            .Add(component => component.SelectedNodeId, selectedNodeId));
+
+        Assert.Contains("agt-code-line--highlight", cut.Markup, StringComparison.Ordinal);
+        Assert.Contains($"agt-node:{selectedNodeId}", cut.Markup, StringComparison.Ordinal);
+    }
 }

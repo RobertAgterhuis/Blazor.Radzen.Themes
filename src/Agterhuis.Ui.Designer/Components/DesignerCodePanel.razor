@@ -23,7 +23,12 @@
         @if (CurrentTab == "code")
         {
             <div class="agt-code-preview">
-                <pre><code>@GeneratedCode</code></pre>
+                <pre><code>
+@foreach (var line in PreviewLines)
+{
+<span class="@(line.IsHighlighted ? "agt-code-line agt-code-line--highlight" : "agt-code-line")">@line.Text</span>
+}
+</code></pre>
             </div>
         }
         else
@@ -67,6 +72,9 @@
     [Parameter]
     public string? InitialModelJson { get; set; }
 
+    [Parameter]
+    public string? SelectedNodeId { get; set; }
+
     private string CurrentTab { get; set; } = "code";
     private string GeneratedCode { get; set; } = string.Empty;
     private string ModelJson { get; set; } = string.Empty;
@@ -75,6 +83,7 @@
     private RazorCodeGenerator? _codeGenerator;
     private bool _tabInitialized;
     private string? _lastDocumentSnapshot;
+    private IReadOnlyList<PreviewLine> PreviewLines { get; set; } = [];
 
     protected override void OnInitialized()
     {
@@ -98,6 +107,7 @@
         if (CurrentPage is not null && Document is not null && _codeGenerator is not null)
         {
             GeneratedCode = _codeGenerator.GeneratePageCode(CurrentPage, Document);
+            PreviewLines = BuildPreviewLines(GeneratedCode, SelectedNodeId);
         }
 
         if (Document is not null)
@@ -184,4 +194,40 @@
     {
         ModelJson = args.Value?.ToString() ?? string.Empty;
     }
+
+    private static IReadOnlyList<PreviewLine> BuildPreviewLines(string code, string? selectedNodeId)
+    {
+        var lines = code.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+        var highlightedIndexes = new HashSet<int>();
+
+        if (!string.IsNullOrWhiteSpace(selectedNodeId))
+        {
+            for (var index = 0; index < lines.Length; index++)
+            {
+                if (!lines[index].Contains($"agt-node:{selectedNodeId}", StringComparison.Ordinal))
+                {
+                    continue;
+                }
+
+                highlightedIndexes.Add(index);
+                for (var next = index + 1; next < lines.Length; next++)
+                {
+                    if (lines[next].Contains("@* agt-node:", StringComparison.Ordinal))
+                    {
+                        break;
+                    }
+
+                    highlightedIndexes.Add(next);
+                }
+
+                break;
+            }
+        }
+
+        return lines
+            .Select((line, index) => new PreviewLine(line + Environment.NewLine, highlightedIndexes.Contains(index)))
+            .ToArray();
+    }
+
+    private sealed record PreviewLine(string Text, bool IsHighlighted);
 }

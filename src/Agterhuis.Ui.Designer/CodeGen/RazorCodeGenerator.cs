@@ -95,6 +95,7 @@ public sealed class RazorCodeGenerator
 
         var indent = string.Concat(Enumerable.Repeat(IndentUnit, indentLevel));
         var openingTag = new List<string> { node.ComponentType };
+        lines.Add($"{indent}@* agt-node:{node.Id} *@");
 
         // Add parameters, sorted deterministically
         var parameterLines = GenerateParameterLines(node, descriptor);
