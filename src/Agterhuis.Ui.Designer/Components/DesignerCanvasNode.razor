@@ -1,0 +1,215 @@
+@using System.Reflection
+@using Agterhuis.Ui.Designer.Model
+@using Agterhuis.Ui.Designer.Registry
+@using Agterhuis.Ui.Designer.Rendering
+@using Microsoft.AspNetCore.Components.Rendering
+
+<div class="designer-canvas-node @(IsSelected ? "designer-canvas-node--selected" : string.Empty)"
+     data-agt-design-node-id="@Node.Id"
+     data-agt-design-component="@Node.ComponentType">
+    <div class="designer-canvas-node__bar">
+        <button type="button"
+                class="designer-canvas-node__select"
+                draggable="true"
+                @ondragstart="OnDragStart"
+                @ondragend="OnDragEnd"
+                @onclick="OnSelectClicked"
+                aria-current="@(IsSelected ? "true" : "false")">
+            <RadzenIcon Icon="@DescriptorIcon" />
+            <span>@DescriptorLabel</span>
+        </button>
+    </div>
+
+    @if (_errorMessage is not null)
+    {
+        <div class="designer-canvas-node__error">@_errorMessage</div>
+    }
+    else if (_descriptor is not null)
+    {
+        <div class="designer-canvas-node__preview">
+            <ErrorBoundary>
+                <ChildContent>
+                    <DynamicComponent Type="@_descriptor.ClrType" Parameters="@_parameters" />
+                </ChildContent>
+                <ErrorContent Context="exception">
+                    <div class="designer-canvas-node__error">@exception.Message</div>
+                </ErrorContent>
+            </ErrorBoundary>
+        </div>
+    }
+</div>
+
+@code {
+    private static readonly MethodInfo TemplatedSlotMethod = typeof(DesignerCanvasNode)
+        .GetMethod(nameof(CreateTemplatedSlotCore), BindingFlags.Instance | BindingFlags.NonPublic)
+        ?? throw new InvalidOperationException("Templated slot factory not found.");
+
+    [Parameter, EditorRequired]
+    public DesignNode Node { get; set; } = default!;
+
+    [Parameter, EditorRequired]
+    public DesignerComponentRegistry Registry { get; set; } = default!;
+
+    [Parameter]
+    public string? SelectedNodeId { get; set; }
+
+    [Parameter]
+    public EventCallback<string> SelectNode { get; set; }
+
+    [Parameter]
+    public EventCallback<DesignerDropTarget> DropNode { get; set; }
+
+    [Parameter]
+    public EventCallback<DesignerDragPayload> StartDrag { get; set; }
+
+    [Parameter]
+    public EventCallback EndDrag { get; set; }
+
+    private DesignerComponentDescriptor? _descriptor;
+    private Dictionary<string, object?> _parameters = [];
+    private string? _errorMessage;
+
+    private bool IsSelected => string.Equals(Node.Id, SelectedNodeId, StringComparison.Ordinal);
+
+    private string DescriptorLabel => _descriptor?.DisplayName ?? Node.ComponentType;
+
+    private string DescriptorIcon => _descriptor?.Icon ?? "widgets";
+
+    protected override void OnParametersSet()
+    {
+        _parameters = [];
+        _descriptor = null;
+        _errorMessage = null;
+
+        if (!Registry.TryGetDescriptor(Node.ComponentType, out var descriptor))
+        {
+            _errorMessage = $"Onbekend componenttype '{Node.ComponentType}'.";
+            return;
+        }
+
+        _descriptor = descriptor;
+
+        try
+        {
+            _parameters = BuildParameterDictionary(descriptor);
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = ex.Message;
+        }
+    }
+
+    private async Task OnSelectClicked() => await SelectNode.InvokeAsync(Node.Id);
+
+    private Task OnDragStart() => StartDrag.InvokeAsync(DesignerDragPayload.Node(Node.Id));
+
+    private Task OnDragEnd() => EndDrag.InvokeAsync();
+
+    private Dictionary<string, object?> BuildParameterDictionary(DesignerComponentDescriptor descriptor)
+    {
+        var parameters = new Dictionary<string, object?>(StringComparer.Ordinal);
+
+        foreach (var parameter in descriptor.Parameters)
+        {
+            if (parameter.IsRenderFragment)
+            {
+                Node.Children.TryGetValue(parameter.Name, out var children);
+                children ??= [];
+                Node.Children[parameter.Name] = children;
+                parameters[parameter.Name] = CreateSlotValue(parameter.ParameterType, parameter.Name, children);
+                continue;
+            }
+
+            if (Node.Parameters.TryGetValue(parameter.Name, out var value))
+            {
+                parameters[parameter.Name] = DesignParameterBinder.Bind(value, parameter.ParameterType, this);
+            }
+        }
+
+        return parameters;
+    }
+
+    private object CreateSlotValue(Type slotType, string slotName, IReadOnlyList<DesignNode> children)
+    {
+        if (slotType == typeof(RenderFragment))
+        {
+            return CreateSlot(slotName, children);
+        }
+
+        if (slotType.IsGenericType && slotType.GetGenericTypeDefinition() == typeof(RenderFragment<>))
+        {
+            return TemplatedSlotMethod.MakeGenericMethod(slotType.GetGenericArguments()[0]).Invoke(this, [slotName, children])
+                ?? throw new InvalidOperationException($"Unable to create templated slot '{slotName}' for '{Node.ComponentType}'.");
+        }
+
+        throw new InvalidOperationException($"Unsupported slot type '{slotType.Name}' for '{Node.ComponentType}'.");
+    }
+
+    private RenderFragment CreateSlot(string slotName, IReadOnlyList<DesignNode> children)
+    {
+        return builder => RenderSlot(builder, slotName, children);
+    }
+
+    private RenderFragment<TContext> CreateTemplatedSlotCore<TContext>(string slotName, IReadOnlyList<DesignNode> children)
+    {
+        return _ => builder => RenderSlot(builder, slotName, children);
+    }
+
+    private void RenderSlot(RenderTreeBuilder builder, string slotName, IReadOnlyList<DesignNode> children)
+    {
+        var sequence = 0;
+
+        builder.OpenElement(sequence++, "div");
+        builder.AddAttribute(sequence++, "class", "designer-slot");
+        builder.AddAttribute(sequence++, "data-slot-name", slotName);
+
+        builder.OpenElement(sequence++, "div");
+        builder.AddAttribute(sequence++, "class", "designer-slot__hint");
+        builder.AddContent(sequence++, slotName);
+        builder.CloseElement();
+
+        builder.OpenElement(sequence++, "div");
+        builder.AddAttribute(sequence++, "class", "designer-dropzone");
+        builder.AddAttribute(sequence++, "title", "Drop hier om in te voegen");
+        builder.AddAttribute(sequence++, "ondragover", EventCallback.Factory.Create<DragEventArgs>(this, static _ => { }));
+        builder.AddEventPreventDefaultAttribute(sequence++, "ondragover", true);
+        builder.AddAttribute(sequence++, "ondrop", EventCallback.Factory.Create<DragEventArgs>(this, () => DropNode.InvokeAsync(new DesignerDropTarget(new Agterhuis.Ui.Designer.Commands.DesignNodeLocation(Node.Id, slotName, 0)))));
+        builder.AddEventPreventDefaultAttribute(sequence++, "ondrop", true);
+        builder.CloseElement();
+
+        if (children.Count == 0)
+        {
+            builder.OpenElement(sequence++, "div");
+            builder.AddAttribute(sequence++, "class", "designer-slot__empty");
+            builder.AddContent(sequence++, "Lege slot");
+            builder.CloseElement();
+        }
+
+        for (var index = 0; index < children.Count; index++)
+        {
+            var child = children[index];
+
+            builder.OpenComponent<DesignerCanvasNode>(sequence++);
+            builder.AddAttribute(sequence++, nameof(Node), child);
+            builder.AddAttribute(sequence++, nameof(Registry), Registry);
+            builder.AddAttribute(sequence++, nameof(SelectedNodeId), SelectedNodeId);
+            builder.AddAttribute(sequence++, nameof(SelectNode), SelectNode);
+            builder.AddAttribute(sequence++, nameof(DropNode), DropNode);
+            builder.AddAttribute(sequence++, nameof(StartDrag), StartDrag);
+            builder.AddAttribute(sequence++, nameof(EndDrag), EndDrag);
+            builder.CloseComponent();
+
+            var targetIndex = index + 1;
+            builder.OpenElement(sequence++, "div");
+            builder.AddAttribute(sequence++, "class", "designer-dropzone");
+            builder.AddAttribute(sequence++, "title", "Drop hier om in te voegen");
+            builder.AddAttribute(sequence++, "ondragover", EventCallback.Factory.Create<DragEventArgs>(this, static _ => { }));
+            builder.AddEventPreventDefaultAttribute(sequence++, "ondragover", true);
+            builder.AddAttribute(sequence++, "ondrop", EventCallback.Factory.Create<DragEventArgs>(this, () => DropNode.InvokeAsync(new DesignerDropTarget(new Agterhuis.Ui.Designer.Commands.DesignNodeLocation(Node.Id, slotName, targetIndex)))));
+            builder.AddEventPreventDefaultAttribute(sequence++, "ondrop", true);
+            builder.CloseElement();
+        }
+
+        builder.CloseElement();
+    }
+}

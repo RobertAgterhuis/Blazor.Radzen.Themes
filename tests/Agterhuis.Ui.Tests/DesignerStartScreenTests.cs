@@ -9,7 +9,7 @@ using Microsoft.JSInterop;
 
 namespace Agterhuis.Ui.Tests;
 
-public sealed class DesignerStartScreenTests
+public sealed class DesignerRouteRedirectTests
 {
     [Fact]
     public void AllTemplatesRemainValidDesignDocuments()
@@ -24,7 +24,7 @@ public sealed class DesignerStartScreenTests
     }
 
     [Fact]
-    public void StartScreen_TemplateButtonNavigatesToEditorWithQuery()
+    public void DesignerRoute_RedirectsDirectlyToEditor()
     {
         using var ctx = new BunitContext();
         ctx.Services.AddRadzenComponents();
@@ -37,9 +37,8 @@ public sealed class DesignerStartScreenTests
 
         var cut = ctx.Render<Agterhuis.Ui.Demo.Components.Pages.DesignerStart>();
 
-        cut.Find(".designer-startscreen__patterns button").Click();
-
-        Assert.Contains("/designer/edit?template=", navigation.Uri);
+        Assert.EndsWith("/designer/edit", navigation.Uri, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal(string.Empty, cut.Markup.Trim());
     }
 
     private sealed class TestNavigationManager : NavigationManager

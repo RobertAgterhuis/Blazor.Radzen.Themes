@@ -22,8 +22,8 @@
   "routes": [
     {
       "route": "/not-found",
-      "rewrite": "/index.html",
-      "statusCode": 404
+      "redirect": "/index.html",
+      "statusCode": 302
     },
     {
       "route": "/_framework/*",

@@ -25,7 +25,6 @@ Verwachte componenten in `Agterhuis.Ui.Designer.Components`:
 | `DesignerDataPanel` | Bestaat al — controleer locatie. |
 | `DesignerTreePanel` | Structuurboom met selectie-sync. |
 | `DesignerCodePanel` | Bestaat al in de Designer RCL — controleer of het compleet is. |
-| `DesignerStartScreen` | Startscherm met recente ontwerpen en patroonkeuze. |
 
 ## Fase 2 — Extraheer componenten
 
@@ -57,7 +56,6 @@ Verwachte componenten in `Agterhuis.Ui.Designer.Components`:
 }
 ```
 
-6. Doe hetzelfde voor het startscherm (`DesignerIndex.razor` → `<DesignerStartScreen>`).
 
 ## Fase 3 — DI-registratie en consumer-API
 

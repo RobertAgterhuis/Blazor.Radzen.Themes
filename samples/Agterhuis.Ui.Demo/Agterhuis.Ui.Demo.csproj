@@ -5,8 +5,7 @@
     <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
     <InvariantGlobalization>false</InvariantGlobalization>
     <BlazorWebAssemblyLoadAllGlobalizationData>true</BlazorWebAssemblyLoadAllGlobalizationData>
-    <PublishTrimmed>true</PublishTrimmed>
-    <TrimMode>link</TrimMode>
+    <PublishTrimmed>false</PublishTrimmed>
     <BlazorEnableCompression>true</BlazorEnableCompression>
   </PropertyGroup>
 
@@ -21,6 +20,11 @@
     <ProjectReference Include="..\..\src\Agterhuis.Ui\Agterhuis.Ui.csproj" />
     <ProjectReference Include="..\..\src\Agterhuis.Ui.Designer\Agterhuis.Ui.Designer.csproj" />
     <ProjectReference Include="..\..\eng\designer-introspection\Agterhuis.Ui.Designer.Introspection.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Remove="wwwroot\designer-interop.js" />
+    <Content Remove="wwwroot\designer-resize-interop.js" />
   </ItemGroup>
 
   <ItemGroup>

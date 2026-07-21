@@ -1,5 +1,6 @@
 using Agterhuis.Ui.Demo.Components;
 using Agterhuis.Ui.Extensions;
+using Agterhuis.Ui.Designer.Extensions;
 using Agterhuis.Ui.Options;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
@@ -11,7 +12,7 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
-builder.Services.AddAgterhuisUi();
+builder.Services.AddDesigner();
 builder.Services.AddScoped<Agterhuis.Ui.Demo.Services.ShowcaseDataService>();
 builder.Services.AddScoped<Agterhuis.Ui.Demo.Services.BlogShowcaseService>();
 builder.Services.AddScoped<Agterhuis.Ui.Demo.Services.LocalDesignStore>();

@@ -1,0 +1,21 @@
+@inherits LayoutComponentBase
+
+<AgtSkipLink Text="Naar hoofdinhoud" TargetId="main" />
+
+<AgtSidebarLayout>
+    <Logo>
+        <strong>Agterhuis.Ui</strong>
+    </Logo>
+    <HeaderActions>
+        <AgtDensityToggle />
+        <AgtThemeSwitcher />
+    </HeaderActions>
+    <Sidebar>
+        <NavMenu />
+    </Sidebar>
+    <ChildContent>
+        <main id="main" class="starter-main">
+            @Body
+        </main>
+    </ChildContent>
+</AgtSidebarLayout>

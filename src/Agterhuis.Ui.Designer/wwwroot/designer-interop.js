@@ -1,4 +1,5 @@
 window.designerInterop = (() => {
+    const designerAssetBaseUrl = new URL(".", document.currentScript?.src ?? document.baseURI).href;
     let monacoLoaderPromise;
     let requirePromise;
 
@@ -178,45 +179,32 @@ window.designerInterop = (() => {
 
     const setupDragAndDrop = (dotnetHelper) => {
         blazorRef = dotnetHelper;
-        
-        // Track active drag
         let activeDrag = null;
-
-        // Setup palette items for dragging
         const paletteItems = document.querySelectorAll('.designer-palette-item');
         paletteItems.forEach(item => {
             item.addEventListener('dragstart', (e) => {
-                const componentType = item.title; // title attribute holds component type
+                const componentType = item.title;
                 activeDrag = { type: 'palette', value: componentType };
                 e.dataTransfer.effectAllowed = 'copy';
                 e.dataTransfer.setData('text/plain', componentType);
-                
-                // Visual feedback
                 item.style.opacity = '0.6';
-                console.log(`🎯 Drag started: ${componentType}`);
             }, false);
 
-            item.addEventListener('dragend', (e) => {
+            item.addEventListener('dragend', () => {
                 item.style.opacity = '1';
                 activeDrag = null;
-                console.log(`❌ Drag ended`);
             }, false);
         });
 
-        // Setup dropzones for dropping
         const dropzones = document.querySelectorAll('.designer-dropzone');
         dropzones.forEach((dropzone, index) => {
             dropzone.addEventListener('dragover', (e) => {
                 e.preventDefault();
                 e.dataTransfer.dropEffect = 'copy';
-                
-                // Visual feedback
                 dropzone.classList.add('designer-dropzone--drag-over');
-                console.log(`📍 Dragover detected on zone ${index}`);
             }, false);
 
             dropzone.addEventListener('dragleave', (e) => {
-                // Only remove if actually leaving the element
                 if (e.target === dropzone) {
                     dropzone.classList.remove('designer-dropzone--drag-over');
                 }
@@ -226,20 +214,12 @@ window.designerInterop = (() => {
                 e.preventDefault();
                 e.stopPropagation();
                 dropzone.classList.remove('designer-dropzone--drag-over');
-                
                 const componentType = e.dataTransfer.getData('text/plain');
-                console.log(`✅ Drop received on zone ${index}: ${componentType}`);
-                
                 if (activeDrag && blazorRef) {
-                    // Call Blazor method to handle the drop
-                    dotnetHelper.invokeMethodAsync('OnJavaScriptDrop', componentType, index)
-                        .then(() => console.log(`✨ Blazor handler completed`))
-                        .catch(err => console.error(`❌ Blazor handler error:`, err));
+                    dotnetHelper.invokeMethodAsync('OnJavaScriptDrop', componentType, index);
                 }
             }, false);
         });
-
-        console.log(`✨ Drag & drop setup complete: ${paletteItems.length} palette items, ${dropzones.length} dropzones`);
     };
 
     let codeEditor = null;
@@ -248,12 +228,10 @@ window.designerInterop = (() => {
 
     const setupCodeEditors = async (dotnetRef, codeContainer, jsonContainer) => {
         const monaco = await ensureMonaco();
-        
-        // Create Razor code editor
         if (codeContainer) {
             codeEditor = monaco.editor.create(codeContainer, {
                 value: `<!-- Razor code will load here -->`,
-                language: 'html', // Use HTML for Razor syntax highlighting
+                language: 'html',
                 theme: 'vs',
                 minimap: { enabled: false },
                 scrollBeyondLastLine: false,
@@ -263,18 +241,15 @@ window.designerInterop = (() => {
                 readOnly: false
             });
 
-            // Debounced code change handler
             codeEditor.onDidChangeModelContent(() => {
                 clearTimeout(codeEditorChangeTimeout);
                 codeEditorChangeTimeout = setTimeout(() => {
                     const code = codeEditor.getValue();
-                    dotnetRef.invokeMethodAsync('OnCodeEditorChanged', code)
-                        .catch(err => console.error('❌ Code editor sync error:', err));
+                    dotnetRef.invokeMethodAsync('OnCodeEditorChanged', code);
                 }, 500);
             });
         }
 
-        // Create JSON model editor
         if (jsonContainer) {
             jsonEditor = monaco.editor.create(jsonContainer, {
                 value: `{}`,
@@ -288,13 +263,11 @@ window.designerInterop = (() => {
                 readOnly: false
             });
 
-            // JSON change handler
             jsonEditor.onDidChangeModelContent(() => {
                 clearTimeout(codeEditorChangeTimeout);
                 codeEditorChangeTimeout = setTimeout(() => {
                     const json = jsonEditor.getValue();
-                    dotnetRef.invokeMethodAsync('OnJsonEditorChanged', json)
-                        .catch(err => console.error('❌ JSON editor sync error:', err));
+                    dotnetRef.invokeMethodAsync('OnJsonEditorChanged', json);
                 }, 500);
             });
         }
@@ -331,15 +304,13 @@ window.designerInterop = (() => {
                 panel.style.display = panel.getAttribute('data-panel') === tabName ? 'flex' : 'none';
             });
 
-            // Trigger layout recalculation for Monaco editors
             if (codeEditor) codeEditor.layout();
             if (jsonEditor) jsonEditor.layout();
         }
     };
 
     const setupResizablePanels = async () => {
-        // Dynamic import of resize interop
-        const { setupResizablePanels: setupResize } = await import('./designer-resize-interop.js');
+        const { setupResizablePanels: setupResize } = await import(new URL('designer-resize-interop.js', designerAssetBaseUrl).href);
         return setupResize();
     };
 

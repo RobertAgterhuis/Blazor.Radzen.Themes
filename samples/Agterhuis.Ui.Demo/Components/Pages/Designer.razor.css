@@ -204,6 +204,7 @@
     text-align: left;
     width: 100%;
     transition: all 160ms ease;
+    -webkit-user-select: none;
     user-select: none;
     position: relative;
     touch-action: none;
@@ -370,6 +371,7 @@
     gap: var(--agt-spacing-1);
     padding: var(--agt-spacing-1) var(--agt-spacing-2);
     transition: all 120ms ease;
+    -webkit-user-select: none;
     user-select: none;
     position: relative;
     border-radius: var(--agt-border-radius-sm);

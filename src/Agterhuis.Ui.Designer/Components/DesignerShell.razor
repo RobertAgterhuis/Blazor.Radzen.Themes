@@ -1,0 +1,107 @@
+<div class="designer-page" @onkeydown="OnPageKeyDown" tabindex="0">
+    @if (_hasRecoveredDraft)
+    {
+        <div class="designer-recovery-banner" role="status" aria-live="polite">
+            Hersteld werk uit localStorage gevonden. Sla het bestand op om het definitief te bewaren.
+        </div>
+    }
+
+    <header class="designer-toolbar" aria-label="Designer toolbar">
+        <div class="designer-toolbar__group">
+            <RadzenDropDown TValue="DesignDocumentTemplateKind" Data="TemplateOptions" Value="@_selectedTemplateKind" Change="OnTemplateChanged" TextProperty="DisplayName" ValueProperty="Kind" />
+            <RadzenButton Text="Nieuw" Icon="add_box" ButtonStyle="ButtonStyle.Base" Variant="Variant.Flat" Click="OnNewDocument" />
+            <RadzenButton Text="Openen" Icon="folder_open" ButtonStyle="ButtonStyle.Base" Variant="Variant.Flat" Click="OnOpenDocument" />
+            <InputFile class="designer-file-input" accept=".agtdesign,.json,application/json" OnChange="OnDesignFileChanged" />
+            <RadzenDropDown TValue="string" Data="SavedDocumentNames" Value="@_selectedSavedName" Placeholder="Open uit localStorage" Change="OnSavedSelectionChanged" />
+            <RadzenButton Text="Opslaan" Icon="save" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Flat" Click="OnSaveDocument" />
+            <RadzenButton Text="Exporteren" Icon="download" ButtonStyle="ButtonStyle.Base" Variant="Variant.Flat" Click="OnExportDocument" />
+            <AgtCommandPalette />
+        </div>
+
+        <div class="designer-toolbar__group">
+            <RadzenButton Text="Undo" Icon="undo" Disabled="@(!_commands.CanUndo)" ButtonStyle="ButtonStyle.Base" Variant="Variant.Flat" Click="OnUndo" />
+            <RadzenButton Text="Redo" Icon="redo" Disabled="@(!_commands.CanRedo)" ButtonStyle="ButtonStyle.Base" Variant="Variant.Flat" Click="OnRedo" />
+            <span class="designer-toolbar__dirty" aria-live="polite">@(_commands.IsDirty ? "Wijzigingen niet opgeslagen" : "Alles opgeslagen")</span>
+        </div>
+
+        <div class="designer-toolbar__group">
+            <RadzenDropDown TValue="string" Data="CanvasThemeOptions" Value="@_canvasTheme" Change="OnCanvasThemeChanged" />
+            <div class="designer-toolbar__group">
+                <RadzenButton Text="Mobiel" ButtonStyle="ButtonStyle.Base" Variant="Variant.Flat" Click='@(() => SetViewport("mobile"))' />
+                <RadzenButton Text="Tablet" ButtonStyle="ButtonStyle.Base" Variant="Variant.Flat" Click='@(() => SetViewport("tablet"))' />
+                <RadzenButton Text="Desktop" ButtonStyle="ButtonStyle.Base" Variant="Variant.Flat" Click='@(() => SetViewport("desktop"))' />
+            </div>
+        </div>
+    </header>
+
+    <div class="designer-grid">
+        <aside class="designer-panel designer-panel--palette" aria-label="Componentenpalet">
+            <div class="designer-panel__header">
+                <h2>Palet</h2>
+                <input class="designer-filter" type="text" placeholder="Filter componenten..." value="@_paletteFilter" @oninput="OnPaletteFilterChanged" />
+            </div>
+
+            @foreach (var category in PaletteByCategory)
+            {
+                <section class="designer-category">
+                    <h3>@category.Key</h3>
+                    @foreach (var descriptor in category.Value)
+                    {
+                        <button type="button" class="designer-palette-item" draggable="true" @ondragstart="() => OnPaletteDragStart(descriptor.ComponentType)" @ondragend="OnDragEnd" title="@descriptor.ComponentType">
+                            <RadzenIcon Icon="@descriptor.Icon" />
+                            <span>@descriptor.DisplayName</span>
+                        </button>
+                    }
+                </section>
+            }
+        </aside>
+
+        <div class="designer-divider designer-divider--vertical" data-divider="palette-canvas" aria-label="Resize palette"></div>
+
+        <section class="designer-panel designer-panel--canvas" aria-label="Canvas">
+            <div class="designer-breadcrumb" aria-live="polite">@SelectionBreadcrumb</div>
+            <div class="designer-canvas-frame" style="@CanvasFrameStyle">
+                <div class="designer-canvas" data-agt-theme="@_canvasTheme" @ref="_canvasRef">
+                    @if (_commands.Document.Pages[0].Nodes.Count == 0)
+                    {
+                        <div class="designer-canvas--empty">
+                            <AgtEmptyState Title="Begin met ontwerpen" Description="Sleep componenten uit het palet of kies een patroon als startpunt." Icon="widgets" />
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="designer-dropzone designer-dropzone--root" @ondragover="OnDropZoneDragOver" @ondrop="() => OnDropRequested(new DesignerDropTarget(DesignNodeLocation.Root(_commands.Document.Pages[0].Nodes.Count)))" title="Drop op canvas"></div>
+                        @for (var index = 0; index < _commands.Document.Pages[0].Nodes.Count; index++)
+                        {
+                            var node = _commands.Document.Pages[0].Nodes[index];
+                            <DesignerCanvasNode Node="node" Registry="@Registry" SelectedNodeId="@_selectedNodeId" SelectNode="OnSelectNode" StartDrag="OnDragStart" EndDrag="OnDragEnd" DropNode="OnDropRequested" />
+                            <div class="designer-dropzone designer-dropzone--root" @ondragover="OnDropZoneDragOver" @ondrop="() => OnDropRequested(new DesignerDropTarget(DesignNodeLocation.Root(index + 1)))" title="Drop op canvas"></div>
+                        }
+                    }
+                </div>
+            </div>
+        </section>
+
+        <div class="designer-divider designer-divider--vertical" data-divider="canvas-property" aria-label="Resize properties"></div>
+
+        <aside class="designer-panel designer-panel--properties" aria-label="Properties panel">
+            <PropertyPanel Page="@_commands.Document.Pages[0]" CanvasTheme="@_canvasTheme" ThemeOptions="CanvasThemeOptions" SelectedNode="SelectedNode" SelectedDescriptor="SelectedDescriptor" SetPageRoute="OnPageRouteChanged" SetPageTitle="OnPageTitleChanged" SetCanvasTheme="OnCanvasThemeChanged" SetNodeParameter="OnNodeParameterChanged" SetNodeLayoutSlot="OnNodeLayoutSlotChanged" AddColumnNode="OnAddColumnNode" RemoveColumnNode="OnRemoveColumnNode" />
+        </aside>
+
+        <aside class="designer-panel designer-panel--data" aria-label="Data panel">
+            <DesignerDataPanel DataModel="@_commands.Document.DataModel" SelectedEntityName="@_selectedEntityName" SelectedEntityNameChanged="OnSelectedEntityChanged" GenerateFormRequested="OnGenerateFormRequested" />
+        </aside>
+
+        <aside class="designer-panel designer-panel--tree" aria-label="Structuurboom">
+            <h2>Structuur</h2>
+            <RadzenTree Data="TreeRoots" TextProperty="Text" ChildrenProperty="Children" Change="OnTreeChange" />
+        </aside>
+    </div>
+
+    <div class="designer-divider designer-divider--horizontal" data-divider="canvas-code" aria-label="Resize code panel"></div>
+
+    <section class="designer-panel designer-panel--code" aria-label="Code en model">
+        <DesignerCodePanel CurrentPage="@_commands.Document.Pages[0]" Document="@_commands.Document" SelectedNodeId="@_selectedNodeId" OnDocumentChanged="OnDocumentChanged" />
+    </section>
+</div>
+

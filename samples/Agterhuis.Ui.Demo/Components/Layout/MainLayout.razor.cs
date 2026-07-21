@@ -116,6 +116,10 @@ public partial class MainLayout : IDisposable
 
     private bool HasContextLink => ShowWrapperToCatalogLink || IsCatalogRoute;
 
+    public MainLayout()
+    {
+    }
+
     protected override void OnInitialized()
     {
         DensityState.DensityChanged += HandleDensityChanged;

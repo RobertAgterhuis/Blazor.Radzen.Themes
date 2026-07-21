@@ -64,6 +64,7 @@
     font-size: var(--agt-font-size-xs);
     gap: var(--agt-spacing-1);
     padding: 0;
+    -webkit-user-select: none;
     user-select: none;
     transition: color 160ms ease;
 }
