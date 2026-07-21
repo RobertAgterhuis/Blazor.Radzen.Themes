@@ -62318,7 +62318,24 @@ public sealed partial class DesignerComponentRegistry
         bool isDeprecated,
         IReadOnlyList<string> slots,
         IReadOnlyList<ComponentParameterDescriptor> parameters)
-        => new(componentType, clrType, displayName, category, icon, allowedInPalette, isWrapper, isDeprecated, slots, parameters);
+    {
+        var designerInfo = DesignerComponentDisplayMap.Resolve(componentType);
+        return new DesignerComponentDescriptor(
+            componentType,
+            clrType,
+            displayName,
+            category,
+            icon,
+            allowedInPalette,
+            isWrapper,
+            isDeprecated,
+            slots,
+            parameters,
+            designerInfo?.DisplayName,
+            designerInfo?.Category,
+            designerInfo?.Description,
+            designerInfo?.Icon);
+    }
 
     private static ComponentParameterDescriptor CreateParameter(
         string name,

@@ -10,4 +10,8 @@ public sealed record DesignerComponentDescriptor(
     bool IsWrapper,
     bool IsDeprecated,
     IReadOnlyList<string> Slots,
-    IReadOnlyList<ComponentParameterDescriptor> Parameters);
+    IReadOnlyList<ComponentParameterDescriptor> Parameters,
+    string? DesignerDisplayName = null,
+    string? DesignerCategory = null,
+    string? DesignerDescription = null,
+    string? DesignerIcon = null);

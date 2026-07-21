@@ -12,6 +12,7 @@ using System.Text.Json.Nodes;
 using System.Text.Json;
 using System.Threading;
 using System.Text;
+using System.Net;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Components.Rendering;
@@ -27,6 +28,7 @@ public partial class DesignerShell : IDisposable
     private const string LocalStorageDraftPrefix = "agt-designer-draft-";
     private const string LocalStorageDraftMetaPrefix = "agt-designer-draft-meta-";
     private const string LocalStorageLayoutKey = "agt-designer-layout";
+    private const string LocalStorageOnboardedKey = "agt-designer-onboarded";
     private const string CommandScope = "designer";
 
     private readonly ProjectExporter _projectExporter = new();
@@ -80,10 +82,15 @@ public partial class DesignerShell : IDisposable
     private bool _fileMenuOpen;
     private bool _settingsMenuOpen;
     private bool _showNewDocumentDialog;
+    private bool _showStartScreen;
+    private bool _previewMode;
+    private bool _showOnboardingOverlay;
+    private bool _showExportDialog;
     private int? _pageMenuIndex;
     private string? _hoverDropzoneId;
     private string? _uiFeedback;
     private string _liveAnnouncement = "Designer geladen.";
+    private string _selectedRowLayout = "12";
 
     public DesignerShell()
     {
@@ -133,7 +140,17 @@ public partial class DesignerShell : IDisposable
     private IReadOnlyList<string> SavedDocumentNames => _savedDocuments.Select(static item => item.Name).ToArray();
     private IReadOnlyList<string> CanvasThemeOptions => AgtTheme.All.SelectMany(static theme => new[] { theme.LightVariantId, theme.DarkVariantId }).OrderBy(static id => id, StringComparer.Ordinal).ToArray();
     private IReadOnlyList<DesignDocumentTemplates.TemplateDefinition> TemplateOptions => DesignDocumentTemplates.DefinitionsList;
-    private IReadOnlyDictionary<string, IReadOnlyList<DesignerComponentDescriptor>> PaletteByCategory => Registry.Components.Where(static descriptor => descriptor.AllowedInPalette).Where(DescriptorMatchesFilter).GroupBy(static descriptor => descriptor.Category, StringComparer.Ordinal).OrderBy(static group => group.Key, StringComparer.Ordinal).ToDictionary(static group => group.Key, static group => (IReadOnlyList<DesignerComponentDescriptor>)group.OrderBy(static descriptor => descriptor.DisplayName, StringComparer.Ordinal).ToArray(), StringComparer.Ordinal);
+    private IReadOnlyDictionary<string, IReadOnlyList<DesignerComponentDescriptor>> PaletteByCategory => Registry.Components
+        .Where(static descriptor => descriptor.AllowedInPalette)
+        .Where(static descriptor => !DesignerComponentDisplayMap.IsHiddenFromPalette(descriptor.ComponentType))
+        .Where(static descriptor => !string.IsNullOrWhiteSpace(descriptor.DesignerCategory ?? descriptor.Category))
+        .Where(DescriptorMatchesFilter)
+        .GroupBy(static descriptor => descriptor.DesignerCategory ?? descriptor.Category, StringComparer.Ordinal)
+        .OrderBy(static group => group.Key, StringComparer.Ordinal)
+        .ToDictionary(
+            static group => group.Key,
+            static group => (IReadOnlyList<DesignerComponentDescriptor>)group.OrderBy(static descriptor => descriptor.DesignerDisplayName ?? descriptor.DisplayName, StringComparer.Ordinal).ToArray(),
+            StringComparer.Ordinal);
     private DesignPage ActivePage => _commands.Document.Pages.Count == 0 ? new DesignPage { Route = "/", Title = "Nieuwe pagina" } : _commands.Document.Pages[Math.Clamp(_selectedPageIndex, 0, _commands.Document.Pages.Count - 1)];
     private int ActivePageIndex => _commands.Document.Pages.Count == 0 ? 0 : Math.Clamp(_selectedPageIndex, 0, _commands.Document.Pages.Count - 1);
     private IReadOnlyList<DesignerTreeNode> TreeRoots => BuildTree(ActivePage.Nodes);
@@ -158,6 +175,19 @@ public partial class DesignerShell : IDisposable
     private int InfoCount => _validationIssues.Count(static issue => issue.Severity == DesignValidationSeverity.Info);
     private bool HasErrorIssues => ErrorCount > 0;
     private bool HasWarningIssues => WarningCount > 0;
+    private bool CanShowStartScreen => string.IsNullOrWhiteSpace(NameQuery)
+        && string.IsNullOrWhiteSpace(TemplateQuery)
+        && !_commands.IsDirty
+        && string.Equals(_commands.Document.Name, "Untitled", StringComparison.Ordinal)
+        && _commands.Document.Pages.Count == 1
+        && _commands.Document.Pages[0].Nodes.Count > 0
+        && _commands.Document.Pages[0].Nodes.All(static node => string.Equals(node.ComponentType, "RadzenRow", StringComparison.Ordinal));
+    private int TotalComponentCount => _commands.Document.Pages.Sum(static page => CountNodes(page.Nodes));
+    private IReadOnlyList<string> UsedEntities => _commands.Document.DataModel.Entities
+        .Where(static entity => !string.IsNullOrWhiteSpace(entity.Name))
+        .Select(static entity => entity.Name)
+        .OrderBy(static name => name, StringComparer.Ordinal)
+        .ToArray();
     private IReadOnlyList<TokenOption> HardcodedColorTokenOptions =>
     [
         new TokenOption("Primair 500", "var(--agt-color-primary-500)"),
@@ -177,6 +207,8 @@ public partial class DesignerShell : IDisposable
         RefreshValidationIssues();
         await EvaluateStoreAvailabilityAsync();
         await EvaluateDraftRecoveryAsync();
+        await EvaluateOnboardingAsync();
+        UpdateStartScreenState();
         await JS.InvokeVoidAsync("designerInterop.setupResizablePanels");
         await InvokeAsync(StateHasChanged);
     }
@@ -198,10 +230,19 @@ public partial class DesignerShell : IDisposable
             .OrderByDescending(static item => item.LastModified)
             .ThenBy(static item => item.Name, StringComparer.Ordinal)
             .ToList();
+            UpdateStartScreenState();
     }
 
     private void OnPaletteFilterChanged(ChangeEventArgs args) => _paletteFilter = args.Value?.ToString() ?? string.Empty;
-    private void OnPaletteDragStart(string componentType) => _activeDrag = DesignerDragPayload.Palette(componentType);
+
+    private async Task OnPaletteDragStart(DragEventArgs args, DesignerComponentDescriptor descriptor)
+    {
+        _activeDrag = DesignerDragPayload.Palette(descriptor.ComponentType);
+        await JS.InvokeVoidAsync(
+            "designerInterop.setPaletteDragImage",
+            descriptor.DesignerIcon ?? descriptor.Icon,
+            descriptor.DesignerDisplayName ?? descriptor.DisplayName);
+    }
     private Task OnDragStart(DesignerDragPayload payload)
     {
         _activeDrag = payload;
@@ -256,6 +297,7 @@ public partial class DesignerShell : IDisposable
         if (didMutate)
         {
             _liveAnnouncement = "Component geplaatst op canvas.";
+            await JS.InvokeVoidAsync("designerInterop.flashNode", _selectedNodeId);
             await AutoSaveAsync();
             await InvokeAsync(StateHasChanged);
         }
@@ -326,6 +368,7 @@ public partial class DesignerShell : IDisposable
 
         _uiFeedback = "Component toegevoegd.";
         _liveAnnouncement = "Component toegevoegd via klik.";
+        await JS.InvokeVoidAsync("designerInterop.flashNode", _selectedNodeId);
         await AutoSaveAsync();
         await InvokeAsync(StateHasChanged);
     }
@@ -389,6 +432,12 @@ public partial class DesignerShell : IDisposable
 
     private async Task OnExportDocument()
     {
+        _showExportDialog = true;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task ConfirmExportAsync()
+    {
         if (HasErrorIssues)
         {
             return;
@@ -414,6 +463,32 @@ public partial class DesignerShell : IDisposable
 
         var result = _projectExporter.ExportProject(_commands.Document, _commands.Document.Name, _canvasTheme.Split('-')[0]);
         await JS.InvokeVoidAsync("designerInterop.saveBytesFile", $"{_commands.Document.Name}.zip", "application/zip", result.ZipData);
+        _showExportDialog = false;
+    }
+
+    private async Task ExportDesignSpecAsync()
+    {
+        var html = BuildDesignSpecHtml();
+        var bytes = Encoding.UTF8.GetBytes(html);
+        await JS.InvokeVoidAsync("designerInterop.saveBytesFile", $"{_commands.Document.Name}-design-spec.html", "text/html;charset=utf-8", bytes);
+    }
+
+    private void CloseExportDialog()
+    {
+        _showExportDialog = false;
+    }
+
+    private void TogglePreviewMode()
+    {
+        _previewMode = !_previewMode;
+        _liveAnnouncement = _previewMode ? "Preview modus actief." : "Bewerkmodus actief.";
+    }
+
+    private async Task DismissOnboardingAsync()
+    {
+        _showOnboardingOverlay = false;
+        await JS.InvokeVoidAsync("designerInterop.setJson", LocalStorageOnboardedKey, new { onboarded = true, updatedUtc = DateTimeOffset.UtcNow });
+        await InvokeAsync(StateHasChanged);
     }
 
     private async Task OnOpenDocument()
@@ -437,6 +512,7 @@ public partial class DesignerShell : IDisposable
         using var reader = new StreamReader(stream, System.Text.Encoding.UTF8);
         var json = await reader.ReadToEndAsync();
         ApplyLoadedDocument(json, markSaved: true);
+        UpdateStartScreenState();
     }
 
     private async Task OnSavedSelectionChanged(object value)
@@ -455,8 +531,43 @@ public partial class DesignerShell : IDisposable
             _currentETag = envelope.ETag;
             _currentVersion = envelope.Version;
             await EvaluateDraftRecoveryAsync();
+            UpdateStartScreenState();
         }
     }
+
+    private async Task OnTemplateStartSelected(DesignDocumentTemplateKind kind)
+    {
+        _selectedTemplateKind = kind;
+        var name = $"Document-{DateTime.UtcNow:yyyyMMdd-HHmmss}";
+        _commands.ReplaceDocument(CreateNewDocument(name, kind), markSaved: false);
+        _selectedEntityName = _commands.Document.DataModel.Entities.FirstOrDefault()?.Name;
+        _selectedNodeId = null;
+        _selectedPageIndex = 0;
+        _showStartScreen = false;
+        _hasRecoveredDraft = true;
+        await AutoSaveAsync();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task OpenSavedFromStartAsync(string name)
+    {
+        _selectedSavedName = name;
+        var envelope = await Store.LoadAsync(name);
+        if (envelope is null)
+        {
+            return;
+        }
+
+        ApplyLoadedDocument(DesignDocumentSerializer.Serialize(envelope.Document), markSaved: true);
+        _currentETag = envelope.ETag;
+        _currentVersion = envelope.Version;
+        _showStartScreen = false;
+        await EvaluateDraftRecoveryAsync();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private Task OnStartScreenImportRequested(InputFileChangeEventArgs args)
+        => OnDesignFileChanged(args);
 
     private Task OnSelectedEntityChanged(string value) => SelectedEntityNameChanged.InvokeAsync(value);
 
@@ -515,6 +626,7 @@ public partial class DesignerShell : IDisposable
         _selectedNodeId = null;
         _selectedPageIndex = 0;
         _hasRecoveredDraft = false;
+        _showStartScreen = false;
         await AutoSaveAsync();
         await InvokeAsync(StateHasChanged);
     }
@@ -546,6 +658,7 @@ public partial class DesignerShell : IDisposable
                 ApplyLoadedDocument(DesignDocumentSerializer.Serialize(envelope.Document), markSaved: true);
                 _currentETag = envelope.ETag;
                 _currentVersion = envelope.Version;
+                UpdateStartScreenState();
                 return;
             }
         }
@@ -558,6 +671,7 @@ public partial class DesignerShell : IDisposable
             _selectedNodeId = null;
             _selectedPageIndex = 0;
             _hasRecoveredDraft = false;
+            UpdateStartScreenState();
         }
     }
 
@@ -572,6 +686,7 @@ public partial class DesignerShell : IDisposable
         _editingPageTitle = null;
         _hasRecoveredDraft = false;
         EnsureSelectedPageIndex();
+        UpdateStartScreenState();
         StateHasChanged();
     }
 
@@ -817,6 +932,44 @@ public partial class DesignerShell : IDisposable
         }
     }
 
+    private async Task OnSplitColumnNode()
+    {
+        if (SelectedNode is null
+            || _selectedNodeId is null
+            || !string.Equals(SelectedNode.ComponentType, "RadzenColumn", StringComparison.Ordinal)
+            || !TryFindNode(ActivePage.Nodes, _selectedNodeId, out _, out var container, out var index))
+        {
+            return;
+        }
+
+        var currentSize = 12;
+        if (SelectedNode.Parameters.TryGetValue("Size", out var currentSizeValue)
+            && currentSizeValue?.Literal is not null
+            && currentSizeValue.Literal is JsonValue sizeValue
+            && sizeValue.TryGetValue<int>(out var parsedSize))
+        {
+            currentSize = Math.Max(1, parsedSize);
+        }
+
+        var left = Math.Max(1, currentSize / 2);
+        var right = Math.Max(1, currentSize - left);
+
+        _commands.Execute(new SetNodeParameterCommand(ActivePageIndex, _selectedNodeId, "Size", DesignParameterValue.FromValue(left)));
+
+        var clone = DesignNodeDeepClone(SelectedNode);
+        clone.Id = Guid.NewGuid().ToString("n");
+        clone.Parameters["Size"] = DesignParameterValue.FromValue(right);
+        clone.Children["ChildContent"] = [];
+
+        if (_commands.Execute(new AddNodeCommand(ActivePageIndex, DesignNodeLocation.Root(index + 1), clone)))
+        {
+            _hasRecoveredDraft = true;
+            _selectedNodeId = clone.Id;
+            await AutoSaveAsync();
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
     private async Task OnRemoveColumnNode(string nodeId)
     {
         if (string.IsNullOrWhiteSpace(nodeId))
@@ -945,6 +1098,13 @@ public partial class DesignerShell : IDisposable
 
     private async Task OnPageKeyDown(KeyboardEventArgs args)
     {
+        if (args.CtrlKey && string.Equals(args.Key, "p", StringComparison.OrdinalIgnoreCase))
+        {
+            TogglePreviewMode();
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
         if (args.CtrlKey && string.Equals(args.Key, "z", StringComparison.OrdinalIgnoreCase))
         {
             await OnUndo();
@@ -1141,9 +1301,10 @@ public partial class DesignerShell : IDisposable
             return true;
         }
 
-        return descriptor.DisplayName.Contains(_paletteFilter, StringComparison.OrdinalIgnoreCase)
+        return (descriptor.DesignerDisplayName ?? descriptor.DisplayName).Contains(_paletteFilter, StringComparison.OrdinalIgnoreCase)
             || descriptor.ComponentType.Contains(_paletteFilter, StringComparison.OrdinalIgnoreCase)
-            || descriptor.Category.Contains(_paletteFilter, StringComparison.OrdinalIgnoreCase);
+            || (descriptor.DesignerCategory ?? descriptor.Category).Contains(_paletteFilter, StringComparison.OrdinalIgnoreCase)
+            || (!string.IsNullOrWhiteSpace(descriptor.DesignerDescription) && descriptor.DesignerDescription.Contains(_paletteFilter, StringComparison.OrdinalIgnoreCase));
     }
 
     private static DesignDocument CreateNewDocument(string name, DesignDocumentTemplateKind templateKind)
@@ -1223,8 +1384,19 @@ public partial class DesignerShell : IDisposable
             {
                 Description = "Maak de laatste ontwerpwijziging ongedaan.",
                 ShortcutHint = "Ctrl+Z"
+            },
+            new AgtCommandItem("designer-preview", "Preview modus", "Designer", TogglePreviewCommandAsync)
+            {
+                Description = "Wissel tussen bewerken en preview.",
+                ShortcutHint = "Ctrl+P"
             }
         });
+    }
+
+    private Task TogglePreviewCommandAsync()
+    {
+        TogglePreviewMode();
+        return InvokeAsync(StateHasChanged);
     }
 
     private async Task OnAddPageAsync()
@@ -1403,12 +1575,12 @@ public partial class DesignerShell : IDisposable
 
         if (descriptor.Parameters.Any(static parameter => string.Equals(parameter.Name, "Label", StringComparison.Ordinal)))
         {
-            node.Parameters["Label"] = DesignParameterValue.FromValue(descriptor.DisplayName);
+            node.Parameters["Label"] = DesignParameterValue.FromValue(descriptor.DesignerDisplayName ?? descriptor.DisplayName);
         }
 
         if (descriptor.Parameters.Any(static parameter => string.Equals(parameter.Name, "AriaLabel", StringComparison.Ordinal)))
         {
-            node.Parameters["AriaLabel"] = DesignParameterValue.FromValue(descriptor.DisplayName);
+            node.Parameters["AriaLabel"] = DesignParameterValue.FromValue(descriptor.DesignerDisplayName ?? descriptor.DisplayName);
         }
 
         var document = DesignDocumentMigrator.Migrate(new DesignDocument
@@ -1821,6 +1993,41 @@ public partial class DesignerShell : IDisposable
         await InvokeAsync(StateHasChanged);
     }
 
+    private Task OnRowLayoutChanged(ChangeEventArgs args)
+    {
+        _selectedRowLayout = args.Value?.ToString() ?? "12";
+        return Task.CompletedTask;
+    }
+
+    private async Task AddRowLayoutAsync()
+    {
+        var segments = _selectedRowLayout.Split('+', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+        var row = CreateNodeForDescriptor(Registry.GetDescriptor("RadzenRow"));
+        row.Children["ChildContent"] = [];
+
+        foreach (var segment in segments)
+        {
+            if (!int.TryParse(segment, out var size))
+            {
+                continue;
+            }
+
+            var column = CreateNodeForDescriptor(Registry.GetDescriptor("RadzenColumn"));
+            column.Parameters["Size"] = DesignParameterValue.FromValue(size);
+            column.Children["ChildContent"] = [];
+            row.Children["ChildContent"].Add(column);
+        }
+
+        if (_commands.Execute(new AddNodeCommand(ActivePageIndex, DesignNodeLocation.Root(ActivePage.Nodes.Count), row)))
+        {
+            _selectedNodeId = row.Id;
+            _hasRecoveredDraft = true;
+            _uiFeedback = "Nieuwe rij toegevoegd.";
+            await AutoSaveAsync();
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
     private string GetRootDropzoneClass(int index)
     {
         var id = $"root-{index}";
@@ -2080,5 +2287,177 @@ public partial class DesignerShell : IDisposable
     private sealed class DraftMeta
     {
         public DateTimeOffset UpdatedUtc { get; set; }
+    }
+
+    private static int CountNodes(IReadOnlyList<DesignNode> nodes)
+    {
+        var total = 0;
+        foreach (var node in nodes)
+        {
+            total++;
+            foreach (var slot in node.Children.Values)
+            {
+                total += CountNodes(slot);
+            }
+        }
+
+        return total;
+    }
+
+    private static DesignNode DesignNodeDeepClone(DesignNode source)
+    {
+        return new DesignNode
+        {
+            Id = source.Id,
+            ComponentType = source.ComponentType,
+            Parameters = source.Parameters.ToDictionary(static pair => pair.Key, static pair => pair.Value is null
+                ? null!
+                : new DesignParameterValue
+                {
+                    Literal = pair.Value.Literal is null ? null : JsonNode.Parse(pair.Value.Literal.ToJsonString()),
+                    Expression = pair.Value.Expression
+                }, StringComparer.Ordinal),
+            Children = source.Children.ToDictionary(
+                static pair => pair.Key,
+                static pair => pair.Value.Select(DesignNodeDeepClone).ToList(),
+                StringComparer.Ordinal),
+            LayoutSlot = source.LayoutSlot
+        };
+    }
+
+    private string BuildDesignSpecHtml()
+    {
+        var title = string.IsNullOrWhiteSpace(_commands.Document.Name) ? "Design spec" : _commands.Document.Name;
+        var now = DateTimeOffset.Now.ToString("yyyy-MM-dd HH:mm");
+        var sb = new StringBuilder();
+        sb.AppendLine("<!doctype html>");
+        sb.AppendLine("<html lang=\"nl\">");
+        sb.AppendLine("<head>");
+        sb.AppendLine("<meta charset=\"utf-8\" />");
+        sb.AppendLine("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />");
+        sb.AppendLine($"<title>{WebUtility.HtmlEncode(title)} - Design spec</title>");
+        sb.AppendLine("<style>");
+        sb.AppendLine("body{font-family:Segoe UI,Arial,sans-serif;margin:24px;color:#1f2937;background:#f8fafc}");
+        sb.AppendLine("h1,h2,h3{margin:0 0 8px}");
+        sb.AppendLine("section{background:#fff;border:1px solid #d1d5db;border-radius:10px;padding:16px;margin:0 0 16px}");
+        sb.AppendLine("table{width:100%;border-collapse:collapse;margin-top:8px}");
+        sb.AppendLine("th,td{border:1px solid #e5e7eb;padding:8px;vertical-align:top;text-align:left}");
+        sb.AppendLine("th{background:#f3f4f6}");
+        sb.AppendLine("code{background:#f3f4f6;padding:2px 6px;border-radius:6px}");
+        sb.AppendLine(".meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px}");
+        sb.AppendLine(".muted{color:#6b7280}");
+        sb.AppendLine("ul{margin:8px 0 0 20px}");
+        sb.AppendLine("</style>");
+        sb.AppendLine("</head>");
+        sb.AppendLine("<body>");
+        sb.AppendLine($"<h1>Design spec - {WebUtility.HtmlEncode(title)}</h1>");
+        sb.AppendLine("<section>");
+        sb.AppendLine("<h2>Samenvatting</h2>");
+        sb.AppendLine("<div class=\"meta\">");
+        sb.AppendLine($"<div><strong>Gegenereerd:</strong> {WebUtility.HtmlEncode(now)}</div>");
+        sb.AppendLine($"<div><strong>Thema:</strong> {WebUtility.HtmlEncode(_canvasTheme)}</div>");
+        sb.AppendLine($"<div><strong>Pagina's:</strong> {_commands.Document.Pages.Count}</div>");
+        sb.AppendLine($"<div><strong>Componenten:</strong> {TotalComponentCount}</div>");
+        sb.AppendLine($"<div><strong>Entiteiten:</strong> {(UsedEntities.Count == 0 ? "Geen" : WebUtility.HtmlEncode(string.Join(", ", UsedEntities)))}</div>");
+        sb.AppendLine("</div>");
+        sb.AppendLine("</section>");
+
+        for (var pageIndex = 0; pageIndex < _commands.Document.Pages.Count; pageIndex++)
+        {
+            var page = _commands.Document.Pages[pageIndex];
+            sb.AppendLine("<section>");
+            sb.AppendLine($"<h2>Pagina {pageIndex + 1}: {WebUtility.HtmlEncode(GetPageLabel(page))}</h2>");
+            sb.AppendLine($"<p><strong>Route:</strong> <code>{WebUtility.HtmlEncode(page.Route)}</code></p>");
+
+            sb.AppendLine("<h3>Componenten</h3>");
+            sb.AppendLine("<table>");
+            sb.AppendLine("<thead><tr><th>Pad</th><th>Type</th><th>Properties</th><th>Databinding</th></tr></thead>");
+            sb.AppendLine("<tbody>");
+            WriteNodeRows(sb, page.Nodes, "Root");
+            sb.AppendLine("</tbody>");
+            sb.AppendLine("</table>");
+            sb.AppendLine("</section>");
+        }
+
+        sb.AppendLine("<section>");
+        sb.AppendLine("<h2>Datamodel</h2>");
+        if (_commands.Document.DataModel.Entities.Count == 0)
+        {
+            sb.AppendLine("<p class=\"muted\">Geen entiteiten beschikbaar.</p>");
+        }
+        else
+        {
+            foreach (var entity in _commands.Document.DataModel.Entities)
+            {
+                sb.AppendLine($"<h3>{WebUtility.HtmlEncode(entity.Name)}</h3>");
+                sb.AppendLine("<ul>");
+                foreach (var field in entity.Fields)
+                {
+                    sb.AppendLine($"<li><strong>{WebUtility.HtmlEncode(field.Name)}</strong> <span class=\"muted\">({WebUtility.HtmlEncode(field.Type.ToString())})</span></li>");
+                }
+                sb.AppendLine("</ul>");
+            }
+        }
+        sb.AppendLine("</section>");
+
+        sb.AppendLine("</body>");
+        sb.AppendLine("</html>");
+        return sb.ToString();
+    }
+
+    private static void WriteNodeRows(StringBuilder sb, IReadOnlyList<DesignNode> nodes, string parentPath)
+    {
+        for (var index = 0; index < nodes.Count; index++)
+        {
+            var node = nodes[index];
+            var path = $"{parentPath}/{index + 1}";
+            var properties = node.Parameters.Count == 0
+                ? "-"
+                : string.Join("<br />", node.Parameters.Select(static pair =>
+                {
+                    var literal = pair.Value?.Literal?.ToJsonString() ?? "";
+                    var expr = pair.Value?.Expression;
+                    var value = !string.IsNullOrWhiteSpace(expr) ? expr : literal;
+                    return $"<code>{WebUtility.HtmlEncode(pair.Key)}</code>: {WebUtility.HtmlEncode(value)}";
+                }));
+            var bindings = node.Parameters
+                .Where(static pair => !string.IsNullOrWhiteSpace(pair.Value?.Expression))
+                .Select(static pair => $"{pair.Key} = {pair.Value!.Expression}")
+                .ToArray();
+
+            sb.AppendLine("<tr>");
+            sb.AppendLine($"<td>{WebUtility.HtmlEncode(path)}</td>");
+            sb.AppendLine($"<td>{WebUtility.HtmlEncode(node.ComponentType)}</td>");
+            sb.AppendLine($"<td>{properties}</td>");
+            sb.AppendLine($"<td>{(bindings.Length == 0 ? "-" : WebUtility.HtmlEncode(string.Join("; ", bindings)))}</td>");
+            sb.AppendLine("</tr>");
+
+            foreach (var slot in node.Children)
+            {
+                WriteNodeRows(sb, slot.Value, $"{path}/{slot.Key}");
+            }
+        }
+    }
+
+    private void UpdateStartScreenState()
+    {
+        _showStartScreen = CanShowStartScreen;
+    }
+
+    private async Task EvaluateOnboardingAsync()
+    {
+        JsonObject? payload = null;
+        try
+        {
+            payload = await JS.InvokeAsync<JsonObject?>("designerInterop.getJson", LocalStorageOnboardedKey);
+        }
+        catch
+        {
+            payload = null;
+        }
+
+        var onboarded = payload?.TryGetPropertyValue("onboarded", out var onboardedNode) == true
+            && onboardedNode?.GetValue<bool>() == true;
+        _showOnboardingOverlay = !onboarded;
     }
 }

@@ -294,6 +294,37 @@ window.designerInterop = (() => {
         window.setTimeout(() => target.classList.remove('designer-properties__field--highlight'), 900);
     };
 
+    const setPaletteDragImage = (icon, label) => {
+        window.addEventListener('dragstart', (event) => {
+            const target = event.target;
+            if (!(target instanceof HTMLElement) || !target.classList.contains('designer-palette-item')) {
+                return;
+            }
+
+            const ghost = document.createElement('div');
+            ghost.className = 'designer-drag-ghost';
+            ghost.innerHTML = `<span class="rzi" aria-hidden="true">${icon ?? 'widgets'}</span><span>${label ?? 'Component'}</span>`;
+            document.body.appendChild(ghost);
+            event.dataTransfer?.setDragImage(ghost, 14, 14);
+            window.setTimeout(() => ghost.remove(), 0);
+        }, { once: true });
+    };
+
+    const flashNode = (nodeId) => {
+        if (!nodeId) {
+            return;
+        }
+
+        const node = document.querySelector(`[data-agt-design-node-id="${nodeId}"]`);
+        if (!(node instanceof HTMLElement)) {
+            return;
+        }
+
+        node.classList.add('designer-canvas-node--flash');
+        node.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        window.setTimeout(() => node.classList.remove('designer-canvas-node--flash'), 320);
+    };
+
     return {
         createMonacoEditor,
         getJson,
@@ -303,8 +334,10 @@ window.designerInterop = (() => {
         pickDesignDocument,
         saveBytesFile,
         saveDesignDocument,
+        setPaletteDragImage,
         setEditorTheme,
         scrollToPropertyParameter,
+        flashNode,
         setMonacoTheme,
         setJson,
         setupCodeEditors,

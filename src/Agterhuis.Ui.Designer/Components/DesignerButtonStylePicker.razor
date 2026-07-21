@@ -1,0 +1,32 @@
+<div class="designer-choice-picker" role="group" aria-label="Buttonstijl keuze">
+    @foreach (var option in Options)
+    {
+        <button type="button"
+                class="designer-choice-picker__item @(string.Equals(option.Value, Value, StringComparison.OrdinalIgnoreCase) ? "designer-choice-picker__item--selected" : string.Empty)"
+                @onclick="() => OnValueChanged(option.Value)">
+            <span class="designer-choice-picker__swatch @option.CssClass"></span>
+            <span>@option.Label</span>
+        </button>
+    }
+</div>
+
+@code {
+    private static readonly IReadOnlyList<ButtonStyleOption> Options =
+    [
+        new("Primair", "Primary", "designer-choice-picker__swatch--primary"),
+        new("Secundair", "Secondary", "designer-choice-picker__swatch--secondary"),
+        new("Gevaar", "Danger", "designer-choice-picker__swatch--danger"),
+        new("Succes", "Success", "designer-choice-picker__swatch--success")
+    ];
+
+    [Parameter]
+    public string? Value { get; set; }
+
+    [Parameter]
+    public EventCallback<string?> ValueChanged { get; set; }
+
+    private Task OnValueChanged(string value)
+        => ValueChanged.InvokeAsync(value);
+
+    private sealed record ButtonStyleOption(string Label, string Value, string CssClass);
+}

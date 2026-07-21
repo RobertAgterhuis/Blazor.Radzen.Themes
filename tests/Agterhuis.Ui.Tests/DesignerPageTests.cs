@@ -26,6 +26,15 @@ public sealed class DesignerPageTests
         ctx.Services.AddSingleton<IAgtConfirmDialog>(new AlwaysConfirmDialog());
     }
 
+    private static void EnterEditorFromStartScreen(IRenderedComponent<Agterhuis.Ui.Demo.Components.Pages.Designer> cut)
+    {
+        var templateCards = cut.FindAll(".designer-template-card");
+        if (templateCards.Count > 0)
+        {
+            templateCards[0].Click();
+        }
+    }
+
     [Fact]
     public void PaletteFilter_FiltersComponentList()
     {
@@ -34,6 +43,7 @@ public sealed class DesignerPageTests
         RegisterDesignerServices(ctx, jsRuntime);
 
         var cut = ctx.Render<Agterhuis.Ui.Demo.Components.Pages.Designer>();
+        EnterEditorFromStartScreen(cut);
         cut.Find(".designer-filter").Input("Accordion");
 
         cut.WaitForAssertion(() =>
@@ -51,6 +61,7 @@ public sealed class DesignerPageTests
         RegisterDesignerServices(ctx, jsRuntime);
 
         var cut = ctx.Render<Agterhuis.Ui.Demo.Components.Pages.Designer>();
+        EnterEditorFromStartScreen(cut);
         cut.Find(".designer-canvas-node__select").Click();
 
         cut.WaitForAssertion(() => Assert.DoesNotContain("Selecteer een node", cut.Find(".designer-breadcrumb").TextContent, StringComparison.Ordinal));
@@ -66,6 +77,8 @@ public sealed class DesignerPageTests
 
         var cut = ctx.Render<Agterhuis.Ui.Demo.Components.Pages.Designer>();
 
+        Assert.Contains("Wat wil je ontwerpen?", cut.Markup, StringComparison.Ordinal);
+        EnterEditorFromStartScreen(cut);
         Assert.Contains("Hersteld werk uit localStorage gevonden", cut.Markup, StringComparison.Ordinal);
         cut.FindAll(".designer-menu-toggle")
             .First(button => button.TextContent.Contains("Instellingen", StringComparison.Ordinal))
@@ -86,6 +99,7 @@ public sealed class DesignerPageTests
         RegisterDesignerServices(ctx, jsRuntime);
 
         var cut = ctx.Render<Agterhuis.Ui.Demo.Components.Pages.Designer>();
+        EnterEditorFromStartScreen(cut);
 
         cut.Find(".designer-panel--data .designer-panel__toggle").Click();
         cut.Find(".designer-data-panel .rz-button").Click();
@@ -105,6 +119,7 @@ public sealed class DesignerPageTests
         RegisterDesignerServices(ctx, jsRuntime);
 
         var cut = ctx.Render<Agterhuis.Ui.Demo.Components.Pages.Designer>();
+        EnterEditorFromStartScreen(cut);
 
         cut.Find(".designer-panel--code .designer-panel__toggle").Click();
 
@@ -120,6 +135,7 @@ public sealed class DesignerPageTests
         RegisterDesignerServices(ctx, jsRuntime);
 
         var cut = ctx.Render<Agterhuis.Ui.Demo.Components.Pages.Designer>();
+        EnterEditorFromStartScreen(cut);
         cut.Find(".designer-canvas-node__select").Click();
 
         cut.Find(".designer-page").KeyDown(new KeyboardEventArgs { Key = "Escape" });
@@ -135,6 +151,7 @@ public sealed class DesignerPageTests
         RegisterDesignerServices(ctx, jsRuntime);
 
         var cut = ctx.Render<Agterhuis.Ui.Demo.Components.Pages.Designer>();
+        EnterEditorFromStartScreen(cut);
         cut.Find(".designer-canvas-node__select").Click();
 
         var nodesBefore = cut.FindAll(".designer-canvas-node").Count;
@@ -167,6 +184,7 @@ public sealed class DesignerPageTests
         navigation.NavigateTo(navigation.GetUriWithQueryParameter("name", document.Name));
 
         var cut = ctx.Render<Agterhuis.Ui.Demo.Components.Pages.Designer>();
+        EnterEditorFromStartScreen(cut);
         cut.FindAll(".designer-canvas-node__select")[0].Click();
         var firstBreadcrumb = cut.Find(".designer-breadcrumb").TextContent;
 
@@ -208,6 +226,7 @@ public sealed class DesignerPageTests
         navigation.NavigateTo(navigation.GetUriWithQueryParameter("name", document.Name));
 
         var cut = ctx.Render<Agterhuis.Ui.Demo.Components.Pages.Designer>();
+        EnterEditorFromStartScreen(cut);
         cut.FindAll(".designer-page-tab__button")[1].Click();
 
         cut.WaitForAssertion(() =>

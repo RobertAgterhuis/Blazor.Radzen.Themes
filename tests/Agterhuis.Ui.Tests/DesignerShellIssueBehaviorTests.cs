@@ -70,6 +70,12 @@ public sealed class DesignerShellIssueBehaviorTests
         var cut = ctx.Render<DesignerShell>(parameters => parameters
             .Add(component => component.Store, store));
 
+        var templateCards = cut.FindAll(".designer-template-card");
+        if (templateCards.Count > 0)
+        {
+            templateCards[0].Click();
+        }
+
         cut.Find(".designer-panel--tree .designer-panel__toggle").Click();
 
         Assert.Contains("Issues", cut.Markup, StringComparison.Ordinal);

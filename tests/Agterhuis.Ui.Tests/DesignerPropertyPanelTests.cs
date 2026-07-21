@@ -14,12 +14,11 @@ public sealed class DesignerPropertyPanelTests
         {
             var data = new TheoryData<string, string, string>();
             data.Add("Title", "string", "String");
-            data.Add("Size", "int", "Numeric");
-            data.Add("Visible", "bool", "Boolean");
-            data.Add("Variant", "Variant", "Enum");
-            data.Add("Date", "DateTime", "DateTime");
-            data.Add("BackgroundColor", "string", "ColorToken");
-            data.Add("Click", "EventCallback", "EventCallback");
+            data.Add("Value", "int", "Numeric");
+            data.Add("Value", "bool", "Boolean");
+            data.Add("ButtonStyle", "Variant", "Enum");
+            data.Add("Value", "DateTime", "DateTime");
+            data.Add("Placeholder", "string", "String");
             return data;
         }
     }
@@ -59,6 +58,35 @@ public sealed class DesignerPropertyPanelTests
 
         var editor = cut.Find($"[data-agt-designer-param='{parameterName}']");
         Assert.Equal(expectedEditor, editor.GetAttribute("data-agt-designer-editor-kind"));
+    }
+
+    [Fact]
+    public void PropertyPanel_HidesEventCallbackParameters()
+    {
+        using var ctx = new BunitContext();
+        ctx.Services.AddRadzenComponents();
+        ctx.JSInterop.Mode = JSRuntimeMode.Loose;
+
+        var descriptor = CreateDescriptor([CreateParameter("Click", "EventCallback")]);
+        var node = new DesignNode
+        {
+            Id = "node-1",
+            ComponentType = "AgtTest",
+            Parameters = new Dictionary<string, DesignParameterValue>(StringComparer.Ordinal)
+            {
+                ["Click"] = DesignParameterValue.FromValue("noop")
+            }
+        };
+
+        var cut = ctx.Render<PropertyPanel>(parameters => parameters
+            .Add(component => component.Page, new DesignPage { Route = "/", Title = "Page" })
+            .Add(component => component.CanvasTheme, "plum-dark")
+            .Add(component => component.ThemeOptions, new[] { "plum-dark" })
+            .Add(component => component.DataModel, DesignDataModelSeeder.CreateDefault())
+            .Add(component => component.SelectedNode, node)
+            .Add(component => component.SelectedDescriptor, descriptor));
+
+        Assert.Empty(cut.FindAll("[data-agt-designer-param='Click']"));
     }
 
     [Fact]

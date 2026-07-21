@@ -22,7 +22,10 @@ else if (SelectedDescriptor is null)
 else
 {
     <section class="designer-properties">
-        <h2>@SelectedDescriptor.DisplayName eigenschappen</h2>
+        <div class="designer-properties__field-head">
+            <h2>@(SelectedDescriptor.DesignerDisplayName ?? SelectedDescriptor.DisplayName) eigenschappen</h2>
+            <AgtSwitch Label="Geavanceerd" AriaLabel="Geavanceerde eigenschappen" Value="@(!_simpleMode)" ValueChanged="OnAdvancedModeChanged" />
+        </div>
 
         @if (_missingAccessibilityParameters.Count > 0)
         {
@@ -121,6 +124,16 @@ else
             </section>
         }
 
+        @if (IsRadzenColumnNode)
+        {
+            <section class="designer-properties__group">
+                <h3>Kolom</h3>
+                <div class="designer-modal__actions">
+                    <RadzenButton Text="Splits kolom" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Click="OnSplitColumnRequested" />
+                </div>
+            </section>
+        }
+
         @foreach (var group in GroupedParameters)
         {
             <section class="designer-properties__group">
@@ -132,7 +145,7 @@ else
                     var hasCustomValue = HasCustomValue(parameter);
                     <div class="designer-properties__field" data-agt-designer-editor-kind="@editorKind" data-agt-designer-param="@parameter.Name">
                         <div class="designer-properties__field-head">
-                            <span class="designer-properties__field-label">@parameter.Name</span>
+                            <span class="designer-properties__field-label">@GetParameterLabel(parameter.Name)</span>
                             @if (parameter.IsBindable)
                             {
                                 <span class="designer-properties__modified" title="Kan aan demo-data worden gekoppeld">Bindbaar</span>
@@ -180,24 +193,42 @@ else
                         @switch (editorKind)
                         {
                             case EditorKind.String:
-                                <AgtTextField Label="@parameter.Name" AriaLabel="@parameter.Name" Value="@uiState.TextValue" ValueChanged="@(value => OnStringChanged(parameter, value))" ValidationMessage="@uiState.ValidationMessage" />
+                                @if (string.Equals(parameter.Name, "Icon", StringComparison.Ordinal))
+                                {
+                                    <DesignerIconPicker Value="@uiState.TextValue" ValueChanged="@(value => OnStringChanged(parameter, value))" />
+                                }
+                                else
+                                {
+                                    <AgtTextField Label="@GetParameterLabel(parameter.Name)" AriaLabel="@GetParameterLabel(parameter.Name)" Value="@uiState.TextValue" ValueChanged="@(value => OnStringChanged(parameter, value))" ValidationMessage="@uiState.ValidationMessage" />
+                                }
                                 break;
                             case EditorKind.Numeric:
-                                <AgtNumericField Label="@parameter.Name" AriaLabel="@parameter.Name" Value="@uiState.NumericValue" ValueChanged="@(value => OnNumericChanged(parameter, value))" ValidationMessage="@uiState.ValidationMessage" />
+                                <AgtNumericField Label="@GetParameterLabel(parameter.Name)" AriaLabel="@GetParameterLabel(parameter.Name)" Value="@uiState.NumericValue" ValueChanged="@(value => OnNumericChanged(parameter, value))" ValidationMessage="@uiState.ValidationMessage" />
                                 break;
                             case EditorKind.Boolean:
-                                <AgtSwitch Label="@parameter.Name" AriaLabel="@parameter.Name" Value="@(uiState.BoolValue ?? false)" ValueChanged="@(value => OnBoolChanged(parameter, value))" />
+                                <AgtSwitch Label="@GetParameterLabel(parameter.Name)" AriaLabel="@GetParameterLabel(parameter.Name)" Value="@(uiState.BoolValue ?? false)" ValueChanged="@(value => OnBoolChanged(parameter, value))" />
                                 break;
                             case EditorKind.Enum:
-                                <AgtDropdown TValue="string" Label="@parameter.Name" AriaLabel="@parameter.Name" Data="GetEnumOptions(parameter)" Value="@uiState.TextValue" ValueChanged="@(value => OnEnumChanged(parameter, value))" TextProperty="Label" ValueProperty="Value" ValidationMessage="@uiState.ValidationMessage" />
+                                @if (string.Equals(parameter.Name, "ButtonStyle", StringComparison.Ordinal))
+                                {
+                                    <DesignerButtonStylePicker Value="@uiState.TextValue" ValueChanged="@(value => OnEnumChanged(parameter, value))" />
+                                }
+                                else if (string.Equals(parameter.Name, "Intent", StringComparison.Ordinal))
+                                {
+                                    <DesignerIntentPicker Value="@uiState.TextValue" ValueChanged="@(value => OnEnumChanged(parameter, value))" />
+                                }
+                                else
+                                {
+                                    <AgtDropdown TValue="string" Label="@GetParameterLabel(parameter.Name)" AriaLabel="@GetParameterLabel(parameter.Name)" Data="GetEnumOptions(parameter)" Value="@uiState.TextValue" ValueChanged="@(value => OnEnumChanged(parameter, value))" TextProperty="Label" ValueProperty="Value" ValidationMessage="@uiState.ValidationMessage" />
+                                }
                                 break;
                             case EditorKind.DateTime:
-                                <AgtDatePicker Label="@parameter.Name" AriaLabel="@parameter.Name" Value="@uiState.DateValue" ValueChanged="@(value => OnDateChanged(parameter, value))" ValidationMessage="@uiState.ValidationMessage" />
+                                <AgtDatePicker Label="@GetParameterLabel(parameter.Name)" AriaLabel="@GetParameterLabel(parameter.Name)" Value="@uiState.DateValue" ValueChanged="@(value => OnDateChanged(parameter, value))" ValidationMessage="@uiState.ValidationMessage" />
                                 break;
                             case EditorKind.ColorToken:
                                 <div class="designer-properties__color-grid">
-                                    <AgtDropdown TValue="string" Label="@($"{parameter.Name} token")" AriaLabel="@($"{parameter.Name} token")" Data="ColorTokenOptions" Value="@uiState.TextValue" ValueChanged="@(value => OnStringChanged(parameter, value))" TextProperty="Label" ValueProperty="Value" />
-                                    <AgtTextField Label="@($"{parameter.Name} vrije waarde")" AriaLabel="@($"{parameter.Name} vrije waarde")" Value="@uiState.TextValue" ValueChanged="@(value => OnStringChanged(parameter, value))" ValidationMessage="@uiState.ValidationMessage" />
+                                    <AgtDropdown TValue="string" Label="@($"{GetParameterLabel(parameter.Name)} token")" AriaLabel="@($"{GetParameterLabel(parameter.Name)} token")" Data="ColorTokenOptions" Value="@uiState.TextValue" ValueChanged="@(value => OnStringChanged(parameter, value))" TextProperty="Label" ValueProperty="Value" />
+                                    <AgtTextField Label="@($"{GetParameterLabel(parameter.Name)} vrije waarde")" AriaLabel="@($"{GetParameterLabel(parameter.Name)} vrije waarde")" Value="@uiState.TextValue" ValueChanged="@(value => OnStringChanged(parameter, value))" ValidationMessage="@uiState.ValidationMessage" />
                                 </div>
                                 <div class="designer-properties__hint">Vrije hex-waarden kunnen token-bleed veroorzaken bij export.</div>
                                 break;
@@ -259,6 +290,9 @@ else
     public EventCallback<string> RemoveColumnNode { get; set; }
 
     [Parameter]
+    public EventCallback SplitColumnNode { get; set; }
+
+    [Parameter]
     public EventCallback<IReadOnlyList<DataGridColumnConfig>> UpsertColumnNodes { get; set; }
 
     [Parameter]
@@ -272,6 +306,7 @@ else
 
     private string? _pageRouteValidation;
     private string? _pageTitleValidation;
+    private bool _simpleMode = true;
     private IReadOnlyList<string> _missingAccessibilityParameters = [];
     private readonly HashSet<string> _manualBindingParameters = new(StringComparer.Ordinal);
     private List<DataGridColumnConfig> DataGridColumns { get; set; } = [];
@@ -281,7 +316,12 @@ else
 
     private IReadOnlyDictionary<string, IReadOnlyList<ComponentParameterDescriptor>> GroupedParameters => SelectedDescriptor is null
         ? new Dictionary<string, IReadOnlyList<ComponentParameterDescriptor>>(StringComparer.Ordinal)
-        : SelectedDescriptor.Parameters.Where(static parameter => !parameter.IsRenderFragment).OrderBy(static parameter => parameter.Name, StringComparer.Ordinal).ToArray()
+        : SelectedDescriptor.Parameters
+            .Where(static parameter => !parameter.IsRenderFragment)
+            .Where(static parameter => !parameter.IsEventCallback)
+            .Where(parameter => !_simpleMode || IsSimpleParameter(parameter.Name))
+            .OrderBy(static parameter => parameter.Name, StringComparer.Ordinal)
+            .ToArray()
             .GroupBy(ResolveCategory, StringComparer.Ordinal)
             .ToDictionary(group => group.Key, group => (IReadOnlyList<ComponentParameterDescriptor>)group.ToArray(), StringComparer.Ordinal);
 
@@ -292,6 +332,7 @@ else
     private bool SupportsColumnsSlot => SelectedDescriptor?.Slots.Contains("Columns", StringComparer.Ordinal) == true;
     private bool IsDataGridNode => string.Equals(SelectedNode?.ComponentType, "RadzenDataGrid", StringComparison.Ordinal);
     private IReadOnlyList<DesignNode> ColumnNodes => SelectedNode?.Children.TryGetValue("Columns", out var columns) == true ? columns : [];
+    private bool IsRadzenColumnNode => string.Equals(SelectedNode?.ComponentType, "RadzenColumn", StringComparison.Ordinal);
 
     private DesignEntity? BoundGridEntity
     {
@@ -455,6 +496,12 @@ else
     private Task OnCanvasThemeChanged(string theme) => SetCanvasTheme.InvokeAsync(theme);
     private Task OnAddColumnRequested() => AddColumnNode.InvokeAsync();
     private Task OnRemoveColumnRequested(string nodeId) => RemoveColumnNode.InvokeAsync(nodeId);
+    private Task OnSplitColumnRequested() => SplitColumnNode.InvokeAsync();
+    private Task OnAdvancedModeChanged(bool value)
+    {
+        _simpleMode = !value;
+        return Task.CompletedTask;
+    }
 
     private async Task OnStringChanged(ComponentParameterDescriptor parameter, string? value)
     {
@@ -591,6 +638,26 @@ else
 
     private bool IsAccessibilityParameter(ComponentParameterDescriptor parameter)
         => parameter.Name is "Label" or "AriaLabel" or "Title" or "Placeholder";
+
+    private static bool IsSimpleParameter(string parameterName)
+        => parameterName is "Label" or "Placeholder" or "Value" or "Text" or "Icon" or "ButtonStyle" or "Title" or "Description" or "Data" or "AllowPaging" or "PageSize" or "Intent";
+
+    private static string GetParameterLabel(string parameterName)
+        => parameterName switch
+        {
+            "Label" => "Labeltekst",
+            "Placeholder" => "Voorbeeldtekst",
+            "Value" => "Waarde",
+            "Text" => "Tekst",
+            "Title" => "Titel",
+            "Description" => "Omschrijving",
+            "Icon" => "Icoon",
+            "AriaLabel" => "Toegankelijkheidslabel",
+            "Disabled" => "Uitgeschakeld",
+            "Visible" => "Zichtbaar",
+            "Required" => "Verplicht",
+            _ => parameterName
+        };
 
     private string? ValidateString(ComponentParameterDescriptor parameter, string? value)
         => parameter.IsEditorRequired && string.IsNullOrWhiteSpace(value) ? $"{parameter.Name} is verplicht." : null;

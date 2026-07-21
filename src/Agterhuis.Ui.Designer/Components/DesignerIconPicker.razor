@@ -1,0 +1,44 @@
+<div class="designer-icon-picker">
+    <AgtTextField Label="Zoek icoon" AriaLabel="Zoek icoon" Value="@_search" ValueChanged="OnSearchChanged" Placeholder="Bijv. search, home, edit" />
+    <div class="designer-icon-picker__grid">
+        @foreach (var icon in FilteredIcons)
+        {
+            <button type="button"
+                    class="designer-icon-picker__item @(string.Equals(icon, Value, StringComparison.Ordinal) ? "designer-icon-picker__item--selected" : string.Empty)"
+                    @onclick="() => OnValueChanged(icon)">
+                <RadzenIcon Icon="@icon" />
+                <span>@icon</span>
+            </button>
+        }
+    </div>
+</div>
+
+@code {
+    private static readonly IReadOnlyList<string> MaterialIcons =
+    [
+        "info", "warning", "error", "check_circle", "save", "edit", "search", "manage_search", "inbox", "upload_file",
+        "table_chart", "dashboard", "view_sidebar", "assistant", "calendar_today", "arrow_drop_down_circle", "toggle_on",
+        "check_box", "text_fields", "pin", "menu_open", "crop_portrait", "trending_up", "hourglass_empty", "fiber_manual_record"
+    ];
+
+    private string _search = string.Empty;
+
+    [Parameter]
+    public string? Value { get; set; }
+
+    [Parameter]
+    public EventCallback<string?> ValueChanged { get; set; }
+
+    private IReadOnlyList<string> FilteredIcons => string.IsNullOrWhiteSpace(_search)
+        ? MaterialIcons
+        : MaterialIcons.Where(icon => icon.Contains(_search, StringComparison.OrdinalIgnoreCase)).ToArray();
+
+    private Task OnSearchChanged(string? value)
+    {
+        _search = value ?? string.Empty;
+        return Task.CompletedTask;
+    }
+
+    private Task OnValueChanged(string icon)
+        => ValueChanged.InvokeAsync(icon);
+}

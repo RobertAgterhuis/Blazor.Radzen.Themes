@@ -1,0 +1,129 @@
+@using Agterhuis.Ui.Designer.Model
+
+<section class="designer-startscreen" aria-label="Designer startscherm">
+    <header class="designer-startscreen__hero">
+        <h1>Wat wil je ontwerpen?</h1>
+        <p>Kies een doelgericht startpunt en bouw daarna verder in de editor.</p>
+    </header>
+
+    <section class="designer-startscreen__templates" aria-label="Templates">
+        @foreach (var option in ResolvedOptions)
+        {
+            <button type="button" class="designer-template-card" @onclick="() => OnTemplateSelected.InvokeAsync(option.Kind)">
+                <div class="designer-template-card__head">
+                    <RadzenIcon Icon="@option.Icon" />
+                    <h2>@option.Title</h2>
+                </div>
+                <p>@option.Description</p>
+                <div class="designer-template-card__preview">
+                    <DesignRenderer Page="@option.PreviewPage" Registry="Registry" />
+                </div>
+            </button>
+        }
+    </section>
+
+    <section class="designer-startscreen__recent" aria-label="Recente ontwerpen">
+        <h2>Recente ontwerpen</h2>
+        @if (RecentDocuments.Count == 0)
+        {
+            <p>Er zijn nog geen opgeslagen ontwerpen.</p>
+        }
+        else
+        {
+            <ul>
+                @foreach (var document in RecentDocuments.OrderByDescending(static item => item.LastModified).Take(8))
+                {
+                    <li>
+                        <div>
+                            <strong>@document.Name</strong>
+                            <span>@document.LastModified.ToLocalTime().ToString("g")</span>
+                        </div>
+                        <RadzenButton Text="Open" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Click="() => OnDocumentSelected.InvokeAsync(document.Name)" />
+                    </li>
+                }
+            </ul>
+        }
+    </section>
+
+    <section class="designer-startscreen__import" aria-label="Importeren">
+        <h2>Bestand importeren</h2>
+        <p>Importeer een bestaand .agtdesign-bestand.</p>
+        <label class="designer-startscreen__import-button">
+            <span>Bestand importeren</span>
+            <InputFile class="designer-file-input" accept=".agtdesign,.json,application/json" OnChange="OnImportRequested" />
+        </label>
+    </section>
+</section>
+
+@code {
+    [Parameter, EditorRequired]
+    public IReadOnlyList<DesignDocumentTemplates.TemplateDefinition> TemplateOptions { get; set; } = [];
+
+    [Parameter, EditorRequired]
+    public IReadOnlyList<DesignListItem> RecentDocuments { get; set; } = [];
+
+    [Parameter, EditorRequired]
+    public EventCallback<DesignDocumentTemplateKind> OnTemplateSelected { get; set; }
+
+    [Parameter, EditorRequired]
+    public EventCallback<string> OnDocumentSelected { get; set; }
+
+    [Parameter, EditorRequired]
+    public EventCallback<InputFileChangeEventArgs> OnImportRequested { get; set; }
+
+    [Parameter]
+    public Agterhuis.Ui.Designer.Registry.DesignerComponentRegistry? Registry { get; set; }
+
+    private IReadOnlyList<TemplateOption> ResolvedOptions => TemplateOptions
+        .Select(static definition =>
+        {
+            var previewDocument = DesignDocumentTemplates.Create(definition.Kind, "Preview");
+            return new TemplateOption(
+                definition.Kind,
+                GetIcon(definition.Kind),
+                GetTitle(definition.Kind),
+                GetDescription(definition.Kind, definition.Description),
+                previewDocument.Pages.First());
+        })
+        .ToArray();
+
+    private static string GetIcon(DesignDocumentTemplateKind kind) => kind switch
+    {
+        DesignDocumentTemplateKind.Blank => "draft",
+        DesignDocumentTemplateKind.FormPage => "edit_note",
+        DesignDocumentTemplateKind.ListCrud => "table_rows",
+        DesignDocumentTemplateKind.MasterDetail => "view_sidebar",
+        DesignDocumentTemplateKind.Wizard => "assistant",
+        DesignDocumentTemplateKind.Dashboard => "dashboard",
+        _ => "widgets"
+    };
+
+    private static string GetTitle(DesignDocumentTemplateKind kind) => kind switch
+    {
+        DesignDocumentTemplateKind.Blank => "Leeg canvas",
+        DesignDocumentTemplateKind.FormPage => "Invulformulier",
+        DesignDocumentTemplateKind.ListCrud => "Overzichtstabel",
+        DesignDocumentTemplateKind.MasterDetail => "Overzicht + detail",
+        DesignDocumentTemplateKind.Wizard => "Stappenwizard",
+        DesignDocumentTemplateKind.Dashboard => "Dashboard",
+        _ => "Template"
+    };
+
+    private static string GetDescription(DesignDocumentTemplateKind kind, string fallback) => kind switch
+    {
+        DesignDocumentTemplateKind.Blank => "Begin helemaal opnieuw",
+        DesignDocumentTemplateKind.FormPage => "Velden, validatie en opslaan",
+        DesignDocumentTemplateKind.ListCrud => "Zoeken, filteren en bewerken",
+        DesignDocumentTemplateKind.MasterDetail => "Lijst links, detail rechts",
+        DesignDocumentTemplateKind.Wizard => "Gebruiker door stappen leiden",
+        DesignDocumentTemplateKind.Dashboard => "KPI's, grafieken en samenvatting",
+        _ => fallback
+    };
+
+    private sealed record TemplateOption(
+        DesignDocumentTemplateKind Kind,
+        string Icon,
+        string Title,
+        string Description,
+        DesignPage PreviewPage);
+}

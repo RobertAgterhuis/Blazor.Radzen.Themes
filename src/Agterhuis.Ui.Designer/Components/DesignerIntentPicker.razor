@@ -1,0 +1,32 @@
+<div class="designer-choice-picker" role="group" aria-label="Intent keuze">
+    @foreach (var option in Options)
+    {
+        <button type="button"
+                class="designer-choice-picker__item @(string.Equals(option.Value, Value, StringComparison.OrdinalIgnoreCase) ? "designer-choice-picker__item--selected" : string.Empty)"
+                @onclick="() => OnValueChanged(option.Value)">
+            <RadzenIcon Icon="@option.Icon" />
+            <span>@option.Label</span>
+        </button>
+    }
+</div>
+
+@code {
+    private static readonly IReadOnlyList<IntentOption> Options =
+    [
+        new("Info", "Info", "info"),
+        new("Waarschuwing", "Warning", "warning"),
+        new("Fout", "Danger", "error"),
+        new("Succes", "Success", "check_circle")
+    ];
+
+    [Parameter]
+    public string? Value { get; set; }
+
+    [Parameter]
+    public EventCallback<string?> ValueChanged { get; set; }
+
+    private Task OnValueChanged(string value)
+        => ValueChanged.InvokeAsync(value);
+
+    private sealed record IntentOption(string Label, string Value, string Icon);
+}

@@ -4,6 +4,7 @@ using Agterhuis.Ui.Designer.Model;
 using Agterhuis.Ui.Designer.Persistence;
 using Agterhuis.Ui.Services;
 using Agterhuis.Ui.Components.Feedback;
+using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Agterhuis.Ui.Tests;
@@ -20,6 +21,9 @@ public sealed class DesignerShellPersistenceUiTests
         ctx.Services.AddSingleton<IAgtCommandRegistry>(new AgtCommandRegistry());
 
         var store = new StaticDesignStore();
+        var navigation = ctx.Services.GetRequiredService<NavigationManager>();
+        navigation.NavigateTo(navigation.GetUriWithQueryParameter("name", "Demo"));
+
         var cut = ctx.Render<DesignerShell>(parameters => parameters
             .Add(component => component.Store, store));
 
