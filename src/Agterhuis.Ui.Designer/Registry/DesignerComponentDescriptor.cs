@@ -8,5 +8,6 @@ public sealed record DesignerComponentDescriptor(
     string Icon,
     bool AllowedInPalette,
     bool IsWrapper,
+    bool IsDeprecated,
     IReadOnlyList<string> Slots,
     IReadOnlyList<ComponentParameterDescriptor> Parameters);

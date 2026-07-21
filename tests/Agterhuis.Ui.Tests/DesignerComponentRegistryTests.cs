@@ -193,6 +193,7 @@ public sealed class DesignerComponentRegistryTests
                 ResolveIcon(key, isWrapper),
                 isWrapper || PaletteRawComponents.Contains(key),
                 isWrapper,
+                false,
                 descriptorParameters.Where(static parameter => parameter.IsRenderFragment)
                     .Select(static parameter => parameter.Name)
                     .OrderBy(static slot => slot, StringComparer.Ordinal)

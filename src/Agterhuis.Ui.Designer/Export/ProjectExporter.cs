@@ -70,9 +70,13 @@ public sealed class ProjectExporter
         }
 
         var validationErrors = DesignDocumentValidator.Validate(document);
-        if (validationErrors.Count > 0)
+        var blockingErrors = validationErrors
+            .Where(static error => error.Severity == DesignValidationSeverity.Error)
+            .ToArray();
+
+        if (blockingErrors.Length > 0)
         {
-            throw new InvalidOperationException(string.Join("; ", validationErrors.Select(error => $"{error.Path}: {error.Message}")));
+            throw new InvalidOperationException(string.Join("; ", blockingErrors.Select(error => $"{error.Path}: {error.Message}")));
         }
 
         var projectFiles = new Dictionary<string, string>(StringComparer.Ordinal);

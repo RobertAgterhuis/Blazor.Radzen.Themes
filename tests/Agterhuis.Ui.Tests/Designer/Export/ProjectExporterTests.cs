@@ -30,7 +30,7 @@ public class ProjectExporterTests
                 {
                     Route = "/",
                     Title = "Home",
-                    Nodes = []
+                    Nodes = [CreateValidNode("home-node")]
                 }
             ]
         };
@@ -90,6 +90,7 @@ public class ProjectExporterTests
                     [
                         new DesignNode
                         {
+                            Id = "invalid-accessibility-node",
                             ComponentType = "AgtTextField",
                             Parameters = new Dictionary<string, DesignParameterValue>(StringComparer.Ordinal)
                         }
@@ -99,7 +100,7 @@ public class ProjectExporterTests
         };
 
         var ex = Assert.Throws<InvalidOperationException>(() => _exporter.ExportProject(document, "MyProject", "plum"));
-        Assert.Contains("Label or AriaLabel", ex.Message, StringComparison.Ordinal);
+    Assert.Contains("Label of AriaLabel", ex.Message, StringComparison.Ordinal);
     }
 
     [Theory]
@@ -112,7 +113,19 @@ public class ProjectExporterTests
     public void ExportProject_WithValidThemes_Succeeds(string theme)
     {
         // Arrange
-        var document = new DesignDocument { Name = "Test", Pages = [] };
+        var document = new DesignDocument
+        {
+            Name = "Test",
+            Pages =
+            [
+                new DesignPage
+                {
+                    Route = "/",
+                    Title = "Home",
+                    Nodes = [CreateValidNode("theme-node")]
+                }
+            ]
+        };
 
         // Act
         var result = _exporter.ExportProject(document, "MyProject", theme);
@@ -134,7 +147,8 @@ public class ProjectExporterTests
                 new DesignPage
                 {
                     Route = "/test",
-                    Title = "Test Page"
+                    Title = "Test Page",
+                    Nodes = [CreateValidNode("doc-node")]
                 }
             ]
         };
@@ -215,10 +229,12 @@ public class ProjectExporterTests
             Pages =
             [
                 new DesignPage { Route = "/", Title = "Home" },
-                new DesignPage { Route = "/about", Title = "About" },
-                new DesignPage { Route = "/contact", Title = "Contact" }
+                new DesignPage { Route = "/about", Title = "About", Nodes = [CreateValidNode("about-node")] },
+                new DesignPage { Route = "/contact", Title = "Contact", Nodes = [CreateValidNode("contact-node")] }
             ]
         };
+
+        document.Pages[0].Nodes = [CreateValidNode("root-node")];
 
         var result = _exporter.ExportProject(document, "MyApp", "plum");
 
@@ -228,5 +244,19 @@ public class ProjectExporterTests
         Assert.Contains(archive.Entries, entry => entry.FullName == "MyApp/Components/Pages/.razor");
         Assert.Contains(archive.Entries, entry => entry.FullName == "MyApp/Components/Pages/About.razor");
         Assert.Contains(archive.Entries, entry => entry.FullName == "MyApp/Components/Pages/Contact.razor");
+    }
+
+    private static DesignNode CreateValidNode(string id)
+    {
+        return new DesignNode
+        {
+            Id = id,
+            ComponentType = "AgtTextField",
+            Parameters = new Dictionary<string, DesignParameterValue>(StringComparer.Ordinal)
+            {
+                ["Label"] = DesignParameterValue.FromValue("Naam"),
+                ["AriaLabel"] = DesignParameterValue.FromValue("Naam")
+            }
+        };
     }
 }

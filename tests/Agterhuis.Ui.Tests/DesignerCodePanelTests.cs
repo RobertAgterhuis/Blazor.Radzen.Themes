@@ -28,7 +28,7 @@ public sealed class DesignerCodePanelTests
         await cut.InvokeAsync(() => cut.Instance.ApplyModelAsync());
 
         Assert.Null(received);
-        Assert.Contains("Page title is required", cut.Markup, StringComparison.Ordinal);
+        Assert.Contains("Page title is verplicht", cut.Markup, StringComparison.Ordinal);
         Assert.Contains("<textarea", cut.Markup, StringComparison.Ordinal);
     }
 

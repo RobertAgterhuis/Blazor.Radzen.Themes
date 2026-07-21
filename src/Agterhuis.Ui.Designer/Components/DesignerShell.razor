@@ -14,7 +14,7 @@
             <InputFile class="designer-file-input" accept=".agtdesign,.json,application/json" OnChange="OnDesignFileChanged" />
             <RadzenDropDown TValue="string" Data="SavedDocumentNames" Value="@_selectedSavedName" Placeholder="Open uit localStorage" Change="OnSavedSelectionChanged" />
             <RadzenButton Text="Opslaan" Icon="save" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Flat" Click="OnSaveDocument" />
-            <RadzenButton Text="Exporteren" Icon="download" ButtonStyle="ButtonStyle.Base" Variant="Variant.Flat" Click="OnExportDocument" />
+            <RadzenButton Text="Exporteren" Icon="download" ButtonStyle="ButtonStyle.Base" Variant="Variant.Flat" Click="OnExportDocument" Disabled="@HasErrorIssues" title="@(HasErrorIssues ? "Los eerst alle fouten op" : null)" />
             <AgtCommandPalette />
         </div>
 
@@ -129,6 +129,54 @@
         <aside class="designer-panel designer-panel--tree" aria-label="Structuurboom">
             <h2>Structuur</h2>
             <RadzenTree Data="TreeRoots" TextProperty="Text" ChildrenProperty="Children" Change="OnTreeChange" />
+
+            <section class="designer-issues" aria-label="Issues panel">
+                <button type="button" class="designer-issues__header" @onclick="() => _issuesExpanded = !_issuesExpanded" aria-expanded="@_issuesExpanded">
+                    <span>Issues</span>
+                    <span>@($"{ErrorCount} fouten · {WarningCount} waarschuwingen · {InfoCount} info")</span>
+                </button>
+
+                @if (_issuesExpanded)
+                {
+                    <div class="designer-issues__filters">
+                        <label><input type="checkbox" checked="@_showErrorIssues" @onchange="args => _showErrorIssues = args.Value as bool? ?? false" /> Fouten</label>
+                        <label><input type="checkbox" checked="@_showWarningIssues" @onchange="args => _showWarningIssues = args.Value as bool? ?? false" /> Waarschuwingen</label>
+                        <label><input type="checkbox" checked="@_showInfoIssues" @onchange="args => _showInfoIssues = args.Value as bool? ?? false" /> Info</label>
+                    </div>
+
+                    @if (FilteredIssues.Count == 0)
+                    {
+                        <div class="designer-issues__empty">Geen issues voor de huidige filters.</div>
+                    }
+                    else
+                    {
+                        <ul class="designer-issues__list">
+                            @foreach (var issue in FilteredIssues)
+                            {
+                                <li class="designer-issues__item designer-issues__item--@issue.Severity.ToString().ToLowerInvariant()">
+                                    <button type="button" class="designer-issues__jump" @onclick="() => OnIssueClicked(issue)">
+                                        <RadzenIcon Icon="@GetIssueIcon(issue.Severity)" />
+                                        <span class="designer-issues__title">@issue.Code</span>
+                                        <span class="designer-issues__severity">@GetSeverityLabel(issue.Severity)</span>
+                                    </button>
+                                    <div class="designer-issues__location">@GetIssueLocation(issue)</div>
+                                    <div class="designer-issues__message">@issue.Message</div>
+                                    @if (CanAutoFix(issue))
+                                    {
+                                        <div class="designer-issues__actions">
+                                            @if (issue.Code == "HardcodedColor")
+                                            {
+                                                <RadzenDropDown TValue="string" Data="HardcodedColorTokenOptions" TextProperty="Label" ValueProperty="Value" Value="@_hardcodedColorFixToken" Change="@(value => _hardcodedColorFixToken = value?.ToString() ?? _hardcodedColorFixToken)" />
+                                            }
+                                            <RadzenButton Text="Fix" Icon="build" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Click="() => ApplyIssueFixAsync(issue)" />
+                                        </div>
+                                    }
+                                </li>
+                            }
+                        </ul>
+                    }
+                }
+            </section>
         </aside>
     </div>
 

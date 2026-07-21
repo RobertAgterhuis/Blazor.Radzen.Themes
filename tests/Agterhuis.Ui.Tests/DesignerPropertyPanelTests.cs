@@ -186,6 +186,7 @@ public sealed class DesignerPropertyPanelTests
             "extension",
             true,
             true,
+            false,
             ["Columns"],
             []);
 
@@ -230,6 +231,7 @@ public sealed class DesignerPropertyPanelTests
             "extension",
             true,
             true,
+            false,
             [],
             parameters);
 

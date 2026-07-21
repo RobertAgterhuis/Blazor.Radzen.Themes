@@ -320,6 +320,22 @@ window.designerInterop = (() => {
         monaco.editor.setTheme(themeName);
     };
 
+    const scrollToPropertyParameter = (parameterName) => {
+        if (!parameterName) {
+            return;
+        }
+
+        const selector = `[data-agt-designer-param="${parameterName}"]`;
+        const target = document.querySelector(selector);
+        if (!target) {
+            return;
+        }
+
+        target.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        target.classList.add('designer-properties__field--highlight');
+        window.setTimeout(() => target.classList.remove('designer-properties__field--highlight'), 900);
+    };
+
     return {
         createMonacoEditor,
         getJson,
@@ -330,6 +346,7 @@ window.designerInterop = (() => {
         saveBytesFile,
         saveDesignDocument,
         setEditorTheme,
+        scrollToPropertyParameter,
         setMonacoTheme,
         setJson,
         setupDragAndDrop,

@@ -10,6 +10,8 @@ public sealed class DesignDocumentCommandStack
 
     private string _savedSnapshot;
 
+    public event EventHandler<DesignDocumentChangedEventArgs>? DocumentChanged;
+
     public DesignDocumentCommandStack(DesignDocument document)
     {
         ArgumentNullException.ThrowIfNull(document);
@@ -49,6 +51,7 @@ public sealed class DesignDocumentCommandStack
         Document = working;
         _undo.Add(new CommandHistoryEntry(command.Name, before, after));
         _redo.Clear();
+        OnDocumentChanged(new DesignDocumentChangedEventArgs(command.Name));
         return true;
     }
 
@@ -64,6 +67,7 @@ public sealed class DesignDocumentCommandStack
 
         Document = DesignDocumentSerializer.Deserialize(entry.BeforeSnapshot);
         _redo.Add(entry);
+        OnDocumentChanged(new DesignDocumentChangedEventArgs("Undo"));
         return true;
     }
 
@@ -79,6 +83,7 @@ public sealed class DesignDocumentCommandStack
 
         Document = DesignDocumentSerializer.Deserialize(entry.AfterSnapshot);
         _undo.Add(entry);
+        OnDocumentChanged(new DesignDocumentChangedEventArgs("Redo"));
         return true;
     }
 
@@ -99,7 +104,16 @@ public sealed class DesignDocumentCommandStack
         {
             _savedSnapshot = DesignDocumentSerializer.Serialize(Document);
         }
+
+        OnDocumentChanged(new DesignDocumentChangedEventArgs("ReplaceDocument"));
+    }
+
+    private void OnDocumentChanged(DesignDocumentChangedEventArgs args)
+    {
+        DocumentChanged?.Invoke(this, args);
     }
 
     private sealed record CommandHistoryEntry(string CommandName, string BeforeSnapshot, string AfterSnapshot);
 }
+
+public sealed record DesignDocumentChangedEventArgs(string Reason);

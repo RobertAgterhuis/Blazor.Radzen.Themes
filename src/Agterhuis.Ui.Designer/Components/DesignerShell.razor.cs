@@ -4,8 +4,12 @@ using Agterhuis.Ui.Designer.Model;
 using Agterhuis.Ui.Designer.Persistence;
 using Agterhuis.Ui.Designer.Registry;
 using Agterhuis.Ui.Designer.Serialization;
+using Agterhuis.Ui.Designer.Validation;
+using Agterhuis.Ui.Components.Feedback;
 using Agterhuis.Ui.Services;
 using Agterhuis.Ui.Theming;
+using System.Text.Json.Nodes;
+using System.Threading;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Components.Web;
@@ -45,12 +49,20 @@ public partial class DesignerShell : IDisposable
     private string? _editingPageTitle;
     private int? _editingPageIndex;
     private int? _draggedPageIndex;
+    private List<DesignValidationError> _validationIssues = [];
+    private bool _issuesExpanded;
+    private bool _showErrorIssues = true;
+    private bool _showWarningIssues = true;
+    private bool _showInfoIssues = true;
+    private CancellationTokenSource? _validationDebounceCts;
+    private string _hardcodedColorFixToken = "var(--agt-color-primary-500)";
 
     public DesignerShell()
     {
         _canvasTheme = DefaultCanvasTheme ?? "plum-dark";
         _viewport = string.IsNullOrWhiteSpace(DefaultViewport) || !_viewportWidths.ContainsKey(DefaultViewport) ? "desktop" : DefaultViewport;
         _commands = new DesignDocumentCommandStack(CreateNewDocument("Untitled", DesignDocumentTemplateKind.Blank));
+        _commands.DocumentChanged += OnCommandStackDocumentChanged;
         _selectedPageIndex = 0;
     }
 
@@ -71,6 +83,9 @@ public partial class DesignerShell : IDisposable
 
     [Parameter]
     public EventCallback<string> SelectedEntityNameChanged { get; set; }
+
+    [Parameter]
+    public EventCallback<IReadOnlyList<DesignValidationError>> ValidationIssuesChanged { get; set; }
 
     [Inject]
     public IJSRuntime JS { get; set; } = default!;
@@ -100,6 +115,28 @@ public partial class DesignerShell : IDisposable
     private string CanvasFrameStyle => _viewportWidths.TryGetValue(_viewport, out var width) ? $"max-width: {width}px;" : "max-width: 1200px;";
     private bool HasDuplicateActiveRoute => _commands.Document.Pages.Count(page => string.Equals(page.Route, ActivePage.Route, StringComparison.OrdinalIgnoreCase)) > 1;
     private string RoutePreview => string.Join(" | ", _commands.Document.Pages.Select(static page => string.IsNullOrWhiteSpace(page.Route) ? "/" : page.Route));
+    private IReadOnlyList<DesignValidationError> ValidationIssues => _validationIssues;
+    private IReadOnlyList<DesignValidationError> FilteredIssues => _validationIssues
+        .Where(issue => (issue.Severity != DesignValidationSeverity.Error || _showErrorIssues)
+            && (issue.Severity != DesignValidationSeverity.Warning || _showWarningIssues)
+            && (issue.Severity != DesignValidationSeverity.Info || _showInfoIssues))
+        .OrderBy(static issue => issue.Severity)
+        .ThenBy(static issue => issue.PageIndex ?? int.MaxValue)
+        .ThenBy(static issue => issue.Path, StringComparer.Ordinal)
+        .ToArray();
+    private int ErrorCount => _validationIssues.Count(static issue => issue.Severity == DesignValidationSeverity.Error);
+    private int WarningCount => _validationIssues.Count(static issue => issue.Severity == DesignValidationSeverity.Warning);
+    private int InfoCount => _validationIssues.Count(static issue => issue.Severity == DesignValidationSeverity.Info);
+    private bool HasErrorIssues => ErrorCount > 0;
+    private bool HasWarningIssues => WarningCount > 0;
+    private IReadOnlyList<TokenOption> HardcodedColorTokenOptions =>
+    [
+        new TokenOption("Primair 500", "var(--agt-color-primary-500)"),
+        new TokenOption("Accent 400", "var(--agt-color-accent-400)"),
+        new TokenOption("Text body", "var(--agt-text-body)"),
+        new TokenOption("Surface 1", "var(--agt-surface-1)"),
+        new TokenOption("Border", "var(--agt-input-border)")
+    ];
 
     protected override async Task OnInitializedAsync()
     {
@@ -107,6 +144,7 @@ public partial class DesignerShell : IDisposable
         await LoadInitialDocumentAsync();
         EnsureSelectedPageIndex();
         await RestoreDocumentsFromStorageAsync();
+        RefreshValidationIssues();
         _hasRecoveredDraft = !string.IsNullOrWhiteSpace(await JS.InvokeAsync<string>("designerInterop.getText", LocalStorageDraftPrefix + _commands.Document.Name));
         await JS.InvokeVoidAsync("designerInterop.setupResizablePanels");
         await InvokeAsync(StateHasChanged);
@@ -114,6 +152,9 @@ public partial class DesignerShell : IDisposable
 
     public void Dispose()
     {
+        _commands.DocumentChanged -= OnCommandStackDocumentChanged;
+        _validationDebounceCts?.Cancel();
+        _validationDebounceCts?.Dispose();
         CommandRegistry.RemoveScope(CommandScope);
     }
 
@@ -240,6 +281,29 @@ public partial class DesignerShell : IDisposable
 
     private async Task OnExportDocument()
     {
+        if (HasErrorIssues)
+        {
+            return;
+        }
+
+        if (HasWarningIssues)
+        {
+            var proceed = await ConfirmDialog.ConfirmAsync(
+                $"Er zijn {WarningCount} waarschuwingen. Toch exporteren?",
+                "Waarschuwingen gevonden",
+                new AgtConfirmOptions
+                {
+                    OkText = "Toch exporteren",
+                    CancelText = "Annuleren",
+                    Intent = AgtIntent.Secondary
+                });
+
+            if (!proceed)
+            {
+                return;
+            }
+        }
+
         var result = _projectExporter.ExportProject(_commands.Document, _commands.Document.Name, _canvasTheme.Split('-')[0]);
         await JS.InvokeVoidAsync("designerInterop.saveBytesFile", $"{_commands.Document.Name}.zip", "application/zip", result.ZipData);
     }
@@ -1083,8 +1147,245 @@ public partial class DesignerShell : IDisposable
         _draggedPageIndex = null;
     }
 
+    private void OnCommandStackDocumentChanged(object? sender, DesignDocumentChangedEventArgs args)
+    {
+        _ = DebounceValidationAsync();
+    }
+
+    private async Task DebounceValidationAsync()
+    {
+        _validationDebounceCts?.Cancel();
+        _validationDebounceCts?.Dispose();
+        _validationDebounceCts = new CancellationTokenSource();
+        var token = _validationDebounceCts.Token;
+
+        try
+        {
+            await Task.Delay(200, token);
+            if (token.IsCancellationRequested)
+            {
+                return;
+            }
+
+            await InvokeAsync(() =>
+            {
+                RefreshValidationIssues();
+                StateHasChanged();
+            });
+        }
+        catch (OperationCanceledException)
+        {
+            // Debounce was restarted; ignore.
+        }
+    }
+
+    private void RefreshValidationIssues()
+    {
+        _validationIssues = DesignDocumentValidator.Validate(_commands.Document, Registry).ToList();
+        if (_validationIssues.Count > 0)
+        {
+            _issuesExpanded = true;
+        }
+
+        _ = ValidationIssuesChanged.InvokeAsync(_validationIssues);
+    }
+
+    internal async Task RunValidationNowAsync()
+    {
+        RefreshValidationIssues();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task OnIssueClicked(DesignValidationError issue)
+    {
+        if (issue.PageIndex is int pageIndex && pageIndex >= 0 && pageIndex < _commands.Document.Pages.Count)
+        {
+            SelectPage(pageIndex);
+        }
+
+        if (!string.IsNullOrWhiteSpace(issue.NodeId))
+        {
+            _selectedNodeId = issue.NodeId;
+        }
+
+        await InvokeAsync(StateHasChanged);
+
+        if (!string.IsNullOrWhiteSpace(issue.ParameterName))
+        {
+            await JS.InvokeVoidAsync("designerInterop.scrollToPropertyParameter", issue.ParameterName);
+        }
+    }
+
+    private static string GetIssueIcon(DesignValidationSeverity severity) => severity switch
+    {
+        DesignValidationSeverity.Error => "error",
+        DesignValidationSeverity.Warning => "warning",
+        _ => "info"
+    };
+
+    private static string GetSeverityLabel(DesignValidationSeverity severity) => severity switch
+    {
+        DesignValidationSeverity.Error => "Fout",
+        DesignValidationSeverity.Warning => "Waarschuwing",
+        _ => "Info"
+    };
+
+    private string GetIssueLocation(DesignValidationError issue)
+    {
+        if (issue.PageIndex is not int pageIndex || pageIndex < 0 || pageIndex >= _commands.Document.Pages.Count)
+        {
+            return issue.Path;
+        }
+
+        var page = _commands.Document.Pages[pageIndex];
+        var pageLabel = GetPageLabel(page);
+
+        if (!string.IsNullOrWhiteSpace(issue.NodeId) && TryFindNode(page.Nodes, issue.NodeId, out var nodePath, out _, out _))
+        {
+            return $"{pageLabel} > {string.Join(" > ", nodePath.Select(static node => node.ComponentType))}";
+        }
+
+        return pageLabel;
+    }
+
+    private bool CanAutoFix(DesignValidationError issue)
+    {
+        return issue.Code is "MissingFormLabel" or "EmptyButtonText" or "DuplicateRoute" or "HardcodedColor";
+    }
+
+    private async Task ApplyIssueFixAsync(DesignValidationError issue)
+    {
+        var didMutate = false;
+
+        switch (issue.Code)
+        {
+            case "MissingFormLabel":
+                didMutate = await ApplyMissingFormLabelFixAsync(issue);
+                break;
+            case "EmptyButtonText":
+                didMutate = await ApplyEmptyButtonTextFixAsync(issue);
+                break;
+            case "DuplicateRoute":
+                didMutate = await ApplyDuplicateRouteFixAsync(issue);
+                break;
+            case "HardcodedColor":
+                didMutate = await ApplyHardcodedColorFixAsync(issue);
+                break;
+        }
+
+        if (didMutate)
+        {
+            _hasRecoveredDraft = true;
+            await AutoSaveAsync();
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private Task<bool> ApplyDuplicateRouteFixAsync(DesignValidationError issue)
+    {
+        if (issue.PageIndex is not int pageIndex || pageIndex < 0 || pageIndex >= _commands.Document.Pages.Count)
+        {
+            return Task.FromResult(false);
+        }
+
+        var sourceRoute = _commands.Document.Pages[pageIndex].Route;
+        var uniqueRoute = GenerateUniqueRouteFromRoute(sourceRoute);
+        var updated = _commands.Execute(new SetPagePropertyCommand(pageIndex, nameof(DesignPage.Route), uniqueRoute));
+        return Task.FromResult(updated);
+    }
+
+    private Task<bool> ApplyMissingFormLabelFixAsync(DesignValidationError issue)
+    {
+        if (!TryResolveIssueNode(issue, out var pageIndex, out var node))
+        {
+            return Task.FromResult(false);
+        }
+
+        var label = GetPreferredNodeLabel(node);
+        if (string.IsNullOrWhiteSpace(label))
+        {
+            label = node.ComponentType;
+        }
+
+        var changed = _commands.Execute(new SetNodeParameterCommand(pageIndex, node.Id, "Label", DesignParameterValue.FromValue(label)));
+        return Task.FromResult(changed);
+    }
+
+    private Task<bool> ApplyEmptyButtonTextFixAsync(DesignValidationError issue)
+    {
+        if (!TryResolveIssueNode(issue, out var pageIndex, out var node))
+        {
+            return Task.FromResult(false);
+        }
+
+        var text = GetPreferredNodeLabel(node);
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            text = node.ComponentType;
+        }
+
+        var changed = _commands.Execute(new SetNodeParameterCommand(pageIndex, node.Id, "Text", DesignParameterValue.FromValue(text)));
+        return Task.FromResult(changed);
+    }
+
+    private Task<bool> ApplyHardcodedColorFixAsync(DesignValidationError issue)
+    {
+        if (!TryResolveIssueNode(issue, out var pageIndex, out var node)
+            || string.IsNullOrWhiteSpace(issue.ParameterName)
+            || string.IsNullOrWhiteSpace(_hardcodedColorFixToken))
+        {
+            return Task.FromResult(false);
+        }
+
+        var changed = _commands.Execute(new SetNodeParameterCommand(pageIndex, node.Id, issue.ParameterName, DesignParameterValue.FromValue(_hardcodedColorFixToken)));
+        return Task.FromResult(changed);
+    }
+
+    private bool TryResolveIssueNode(DesignValidationError issue, out int pageIndex, out DesignNode node)
+    {
+        pageIndex = -1;
+        node = default!;
+
+        if (issue.PageIndex is not int resolvedPageIndex || string.IsNullOrWhiteSpace(issue.NodeId))
+        {
+            return false;
+        }
+
+        if (resolvedPageIndex < 0 || resolvedPageIndex >= _commands.Document.Pages.Count)
+        {
+            return false;
+        }
+
+        var page = _commands.Document.Pages[resolvedPageIndex];
+        if (!TryFindNode(page.Nodes, issue.NodeId, out _, out var container, out var index))
+        {
+            return false;
+        }
+
+        pageIndex = resolvedPageIndex;
+        node = container[index];
+        return true;
+    }
+
+    private static string GetPreferredNodeLabel(DesignNode node)
+    {
+        if (node.Parameters.TryGetValue("Label", out var labelValue) && labelValue?.Literal is JsonValue labelLiteral && labelLiteral.TryGetValue<string>(out var labelText) && !string.IsNullOrWhiteSpace(labelText))
+        {
+            return labelText;
+        }
+
+        if (node.Parameters.TryGetValue("Title", out var titleValue) && titleValue?.Literal is JsonValue titleLiteral && titleLiteral.TryGetValue<string>(out var titleText) && !string.IsNullOrWhiteSpace(titleText))
+        {
+            return titleText;
+        }
+
+        return node.ComponentType;
+    }
+
     private sealed record DesignerTreeNode(string Id, string Text, IReadOnlyList<DesignerTreeNode> Children)
     {
         public string Value => Id;
     }
+
+    private sealed record TokenOption(string Label, string Value);
 }
