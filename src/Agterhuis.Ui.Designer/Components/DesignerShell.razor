@@ -34,6 +34,40 @@
         </div>
     </header>
 
+    <section class="designer-page-tabs" aria-label="Pagina's">
+        <div class="designer-page-tabs__scroll">
+            @for (var pageIndex = 0; pageIndex < _commands.Document.Pages.Count; pageIndex++)
+            {
+                var page = _commands.Document.Pages[pageIndex];
+                var isActive = pageIndex == ActivePageIndex;
+                <div class="designer-page-tab @(isActive ? "designer-page-tab--active" : null)"
+                     draggable="true"
+                     @ondragstart="() => OnPageDragStart(pageIndex)"
+                     @ondragover="OnPageDragOver"
+                     @ondrop="() => OnPageDropAsync(pageIndex)"
+                     @ondragend="OnPageDragEnd">
+                    <button type="button" class="designer-page-tab__button" @onclick="() => SelectPage(pageIndex)">@GetPageLabel(page)</button>
+                    @if (_editingPageIndex == pageIndex)
+                    {
+                        <input class="designer-page-tab__rename"
+                               value="@_editingPageTitle"
+                               @oninput="args => _editingPageTitle = args.Value?.ToString()"
+                               @onkeydown="args => OnRenameKeyDown(args, pageIndex)"
+                               @onblur="() => SaveRenamePageAsync(pageIndex)" />
+                    }
+                    <button type="button" class="designer-page-tab__action" title="Hernoemen" @onclick="() => BeginRenamePage(pageIndex)">Naam</button>
+                    <button type="button" class="designer-page-tab__action" title="Dupliceren" @onclick="() => DuplicatePageAsync(pageIndex)">Dup</button>
+                    <button type="button" class="designer-page-tab__action" title="Omhoog" @onclick="() => MovePageByDeltaAsync(pageIndex, -1)" disabled="@(pageIndex == 0)">Omhoog</button>
+                    <button type="button" class="designer-page-tab__action" title="Omlaag" @onclick="() => MovePageByDeltaAsync(pageIndex, 1)" disabled="@(pageIndex >= _commands.Document.Pages.Count - 1)">Omlaag</button>
+                    <button type="button" class="designer-page-tab__action designer-page-tab__action--danger" title="Verwijderen" @onclick="() => RemovePageAsync(pageIndex)" disabled="@(_commands.Document.Pages.Count <= 1)">Weg</button>
+                </div>
+            }
+        </div>
+        <RadzenButton class="designer-page-tabs__add" Text="+" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Flat" Click="OnAddPageAsync" />
+    </section>
+
+    <div class="designer-route-preview" title="Routes in export">Routes: @RoutePreview</div>
+
     <div class="designer-grid">
         <aside class="designer-panel designer-panel--palette" aria-label="Componentenpalet">
             <div class="designer-panel__header">
@@ -62,7 +96,7 @@
             <div class="designer-breadcrumb" aria-live="polite">@SelectionBreadcrumb</div>
             <div class="designer-canvas-frame" style="@CanvasFrameStyle">
                 <div class="designer-canvas" data-agt-theme="@_canvasTheme" @ref="_canvasRef">
-                    @if (_commands.Document.Pages[0].Nodes.Count == 0)
+                    @if (ActivePage.Nodes.Count == 0)
                     {
                         <div class="designer-canvas--empty">
                             <AgtEmptyState Title="Begin met ontwerpen" Description="Sleep componenten uit het palet of kies een patroon als startpunt." Icon="widgets" />
@@ -70,10 +104,10 @@
                     }
                     else
                     {
-                        <div class="designer-dropzone designer-dropzone--root" @ondragover="OnDropZoneDragOver" @ondrop="() => OnDropRequested(new DesignerDropTarget(DesignNodeLocation.Root(_commands.Document.Pages[0].Nodes.Count)))" title="Drop op canvas"></div>
-                        @for (var index = 0; index < _commands.Document.Pages[0].Nodes.Count; index++)
+                        <div class="designer-dropzone designer-dropzone--root" @ondragover="OnDropZoneDragOver" @ondrop="() => OnDropRequested(new DesignerDropTarget(DesignNodeLocation.Root(ActivePage.Nodes.Count)))" title="Drop op canvas"></div>
+                        @for (var index = 0; index < ActivePage.Nodes.Count; index++)
                         {
-                            var node = _commands.Document.Pages[0].Nodes[index];
+                            var node = ActivePage.Nodes[index];
                             <DesignerCanvasNode Node="node" Registry="@Registry" SelectedNodeId="@_selectedNodeId" SelectNode="OnSelectNode" StartDrag="OnDragStart" EndDrag="OnDragEnd" DropNode="OnDropRequested" />
                             <div class="designer-dropzone designer-dropzone--root" @ondragover="OnDropZoneDragOver" @ondrop="() => OnDropRequested(new DesignerDropTarget(DesignNodeLocation.Root(index + 1)))" title="Drop op canvas"></div>
                         }
@@ -85,7 +119,7 @@
         <div class="designer-divider designer-divider--vertical" data-divider="canvas-property" aria-label="Resize properties"></div>
 
         <aside class="designer-panel designer-panel--properties" aria-label="Properties panel">
-            <PropertyPanel Page="@_commands.Document.Pages[0]" CanvasTheme="@_canvasTheme" ThemeOptions="CanvasThemeOptions" SelectedNode="SelectedNode" SelectedDescriptor="SelectedDescriptor" SetPageRoute="OnPageRouteChanged" SetPageTitle="OnPageTitleChanged" SetCanvasTheme="OnCanvasThemeChanged" SetNodeParameter="OnNodeParameterChanged" SetNodeLayoutSlot="OnNodeLayoutSlotChanged" AddColumnNode="OnAddColumnNode" RemoveColumnNode="OnRemoveColumnNode" />
+            <PropertyPanel Page="@ActivePage" HasDuplicateRoute="@HasDuplicateActiveRoute" CanvasTheme="@_canvasTheme" ThemeOptions="CanvasThemeOptions" SelectedNode="SelectedNode" SelectedDescriptor="SelectedDescriptor" SetPageRoute="OnPageRouteChanged" SetPageTitle="OnPageTitleChanged" SetCanvasTheme="OnCanvasThemeChanged" SetNodeParameter="OnNodeParameterChanged" SetNodeLayoutSlot="OnNodeLayoutSlotChanged" AddColumnNode="OnAddColumnNode" RemoveColumnNode="OnRemoveColumnNode" />
         </aside>
 
         <aside class="designer-panel designer-panel--data" aria-label="Data panel">
@@ -101,7 +135,7 @@
     <div class="designer-divider designer-divider--horizontal" data-divider="canvas-code" aria-label="Resize code panel"></div>
 
     <section class="designer-panel designer-panel--code" aria-label="Code en model">
-        <DesignerCodePanel CurrentPage="@_commands.Document.Pages[0]" Document="@_commands.Document" SelectedNodeId="@_selectedNodeId" OnDocumentChanged="OnDocumentChanged" />
+        <DesignerCodePanel CurrentPage="@ActivePage" ActivePageIndex="@ActivePageIndex" Document="@_commands.Document" SelectedNodeId="@_selectedNodeId" OnDocumentChanged="OnDocumentChanged" />
     </section>
 </div>
 

@@ -5,6 +5,7 @@ using Agterhuis.Ui.Services;
 using Agterhuis.Ui.Demo.Services;
 using Microsoft.JSInterop;
 using Agterhuis.Ui.Designer.Model;
+using Agterhuis.Ui.Designer.Registry;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components;
 
@@ -12,15 +13,22 @@ namespace Agterhuis.Ui.Tests;
 
 public sealed class DesignerPageTests
 {
+    private static void RegisterDesignerServices(BunitContext ctx, DesignerJsRuntimeStub jsRuntime)
+    {
+        ctx.Services.AddRadzenComponents();
+        ctx.Services.AddSingleton<IAgtCommandRegistry>(_ => new AgtCommandRegistry());
+        ctx.Services.AddSingleton<IJSRuntime>(jsRuntime);
+        ctx.Services.AddSingleton(new LocalDesignStore(jsRuntime));
+        ctx.Services.AddSingleton(DesignerComponentRegistry.Instance);
+        ctx.Services.AddSingleton<IAgtConfirmDialog>(new AlwaysConfirmDialog());
+    }
+
     [Fact]
     public void PaletteFilter_FiltersComponentList()
     {
         using var ctx = new BunitContext();
-        ctx.Services.AddRadzenComponents();
-        ctx.Services.AddSingleton<IAgtCommandRegistry>(_ => new AgtCommandRegistry());
         var jsRuntime = new DesignerJsRuntimeStub();
-        ctx.Services.AddSingleton<IJSRuntime>(jsRuntime);
-        ctx.Services.AddSingleton(new LocalDesignStore(jsRuntime));
+        RegisterDesignerServices(ctx, jsRuntime);
 
         var cut = ctx.Render<Agterhuis.Ui.Demo.Components.Pages.Designer>();
         cut.Find(".designer-filter").Input("Accordion");
@@ -36,11 +44,8 @@ public sealed class DesignerPageTests
     public void TreeSelection_SyncsToBreadcrumb()
     {
         using var ctx = new BunitContext();
-        ctx.Services.AddRadzenComponents();
-        ctx.Services.AddSingleton<IAgtCommandRegistry>(_ => new AgtCommandRegistry());
         var jsRuntime = new DesignerJsRuntimeStub();
-        ctx.Services.AddSingleton<IJSRuntime>(jsRuntime);
-        ctx.Services.AddSingleton(new LocalDesignStore(jsRuntime));
+        RegisterDesignerServices(ctx, jsRuntime);
 
         var cut = ctx.Render<Agterhuis.Ui.Demo.Components.Pages.Designer>();
         cut.Find(".designer-canvas-node__select").Click();
@@ -52,12 +57,9 @@ public sealed class DesignerPageTests
     public void DesignerPage_RendersRecoveryBannerAndCommandPalette()
     {
         using var ctx = new BunitContext();
-        ctx.Services.AddRadzenComponents();
-        ctx.Services.AddSingleton<IAgtCommandRegistry>(_ => new AgtCommandRegistry());
         var jsRuntime = new DesignerJsRuntimeStub();
         jsRuntime.SetResult("designerInterop.getText", "draft-json");
-        ctx.Services.AddSingleton<IJSRuntime>(jsRuntime);
-        ctx.Services.AddSingleton(new LocalDesignStore(jsRuntime));
+        RegisterDesignerServices(ctx, jsRuntime);
 
         var cut = ctx.Render<Agterhuis.Ui.Demo.Components.Pages.Designer>();
 
@@ -70,11 +72,8 @@ public sealed class DesignerPageTests
     public void DesignerPage_GeneratesEntityForm_FromDataPanelAction()
     {
         using var ctx = new BunitContext();
-        ctx.Services.AddRadzenComponents();
-        ctx.Services.AddSingleton<IAgtCommandRegistry>(_ => new AgtCommandRegistry());
         var jsRuntime = new DesignerJsRuntimeStub();
-        ctx.Services.AddSingleton<IJSRuntime>(jsRuntime);
-        ctx.Services.AddSingleton(new LocalDesignStore(jsRuntime));
+        RegisterDesignerServices(ctx, jsRuntime);
 
         var cut = ctx.Render<Agterhuis.Ui.Demo.Components.Pages.Designer>();
 
@@ -91,11 +90,8 @@ public sealed class DesignerPageTests
     public void DesignerPage_RendersCodeWorkbench()
     {
         using var ctx = new BunitContext();
-        ctx.Services.AddRadzenComponents();
-        ctx.Services.AddSingleton<IAgtCommandRegistry>(_ => new AgtCommandRegistry());
         var jsRuntime = new DesignerJsRuntimeStub();
-        ctx.Services.AddSingleton<IJSRuntime>(jsRuntime);
-        ctx.Services.AddSingleton(new LocalDesignStore(jsRuntime));
+        RegisterDesignerServices(ctx, jsRuntime);
 
         var cut = ctx.Render<Agterhuis.Ui.Demo.Components.Pages.Designer>();
 
@@ -107,11 +103,8 @@ public sealed class DesignerPageTests
     public void DesignerPage_EscapeClearsSelection()
     {
         using var ctx = new BunitContext();
-        ctx.Services.AddRadzenComponents();
-        ctx.Services.AddSingleton<IAgtCommandRegistry>(_ => new AgtCommandRegistry());
         var jsRuntime = new DesignerJsRuntimeStub();
-        ctx.Services.AddSingleton<IJSRuntime>(jsRuntime);
-        ctx.Services.AddSingleton(new LocalDesignStore(jsRuntime));
+        RegisterDesignerServices(ctx, jsRuntime);
 
         var cut = ctx.Render<Agterhuis.Ui.Demo.Components.Pages.Designer>();
         cut.Find(".designer-canvas-node__select").Click();
@@ -125,11 +118,8 @@ public sealed class DesignerPageTests
     public void DesignerPage_DeleteRemovesSelectedNode()
     {
         using var ctx = new BunitContext();
-        ctx.Services.AddRadzenComponents();
-        ctx.Services.AddSingleton<IAgtCommandRegistry>(_ => new AgtCommandRegistry());
         var jsRuntime = new DesignerJsRuntimeStub();
-        ctx.Services.AddSingleton<IJSRuntime>(jsRuntime);
-        ctx.Services.AddSingleton(new LocalDesignStore(jsRuntime));
+        RegisterDesignerServices(ctx, jsRuntime);
 
         var cut = ctx.Render<Agterhuis.Ui.Demo.Components.Pages.Designer>();
         cut.Find(".designer-canvas-node__select").Click();
@@ -144,11 +134,8 @@ public sealed class DesignerPageTests
     public void DesignerPage_ArrowDownSelectsNextSibling()
     {
         using var ctx = new BunitContext();
-        ctx.Services.AddRadzenComponents();
-        ctx.Services.AddSingleton<IAgtCommandRegistry>(_ => new AgtCommandRegistry());
         var jsRuntime = new DesignerJsRuntimeStub();
-        ctx.Services.AddSingleton<IJSRuntime>(jsRuntime);
-        ctx.Services.AddSingleton(new LocalDesignStore(jsRuntime));
+        RegisterDesignerServices(ctx, jsRuntime);
 
         var document = DesignDocumentTemplates.Create(DesignDocumentTemplateKind.FormPage, "Demo");
         document.Pages[0].Nodes.Add(new DesignNode
@@ -173,5 +160,56 @@ public sealed class DesignerPageTests
         cut.Find(".designer-page").KeyDown(new KeyboardEventArgs { Key = "ArrowDown" });
 
         cut.WaitForAssertion(() => Assert.NotEqual(firstBreadcrumb, cut.Find(".designer-breadcrumb").TextContent));
+    }
+
+    [Fact]
+    public void DesignerPage_PageTabsSwitchActivePageCanvasAndProperties()
+    {
+        using var ctx = new BunitContext();
+        var jsRuntime = new DesignerJsRuntimeStub();
+        RegisterDesignerServices(ctx, jsRuntime);
+
+        var document = DesignDocumentTemplates.Create(DesignDocumentTemplateKind.FormPage, "Multi");
+        document.Pages.Add(new DesignPage
+        {
+            Route = "/tweede",
+            Title = "Tweede",
+            Nodes =
+            [
+                new DesignNode
+                {
+                    ComponentType = "AgtEmptyState",
+                    Parameters = new Dictionary<string, DesignParameterValue>(StringComparer.Ordinal)
+                    {
+                        ["Title"] = DesignParameterValue.FromValue("Tweede pagina"),
+                        ["Description"] = DesignParameterValue.FromValue("Content")
+                    }
+                }
+            ]
+        });
+
+        var json = System.Text.Json.JsonSerializer.Serialize(document, Agterhuis.Ui.Designer.Serialization.DesignJsonOptions.Default);
+        jsRuntime.SetResult("designerInterop.getText", json);
+
+        var navigation = ctx.Services.GetRequiredService<NavigationManager>();
+        navigation.NavigateTo(navigation.GetUriWithQueryParameter("name", document.Name));
+
+        var cut = ctx.Render<Agterhuis.Ui.Demo.Components.Pages.Designer>();
+        cut.FindAll(".designer-page-tab__button")[1].Click();
+
+        cut.WaitForAssertion(() =>
+        {
+            Assert.Contains("Tweede pagina", cut.Markup, StringComparison.Ordinal);
+            Assert.Contains("/tweede", cut.Markup, StringComparison.Ordinal);
+        });
+    }
+
+    private sealed class AlwaysConfirmDialog : IAgtConfirmDialog
+    {
+        public Task<bool> ConfirmAsync(string message, string title = "Bevestiging", AgtConfirmOptions? options = null)
+            => Task.FromResult(true);
+
+        public Task<bool> ConfirmDeleteAsync(string itemName)
+            => Task.FromResult(true);
     }
 }

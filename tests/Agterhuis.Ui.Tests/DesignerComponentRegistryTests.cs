@@ -82,7 +82,7 @@ public sealed class DesignerComponentRegistryTests
                 parameter.Name,
                 parameter.TypeName,
                 parameter.ParameterType,
-                parameter.DefaultValue,
+                NormalizeDefaultValue(parameter.DefaultValue, parameter.ParameterType),
                 parameter.Description,
                 parameter.IsEditorRequired,
                 parameter.IsEventCallback,
@@ -95,7 +95,7 @@ public sealed class DesignerComponentRegistryTests
                 parameter.Name,
                 parameter.TypeName,
                 parameter.ParameterType,
-                parameter.DefaultValue,
+                NormalizeDefaultValue(parameter.DefaultValue, parameter.ParameterType),
                 parameter.Description,
                 parameter.IsEditorRequired,
                 parameter.IsEventCallback,
@@ -105,6 +105,9 @@ public sealed class DesignerComponentRegistryTests
 
         Assert.Equal(expectedParameters, actualParameters);
     }
+
+    private static string? NormalizeDefaultValue(string? defaultValue, Type parameterType)
+        => parameterType == typeof(DateTime) || parameterType == typeof(DateTime?) ? "<date>" : defaultValue;
 
     private static DesignerComponentRegistry BuildReflectionRegistry()
     {

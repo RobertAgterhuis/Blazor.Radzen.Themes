@@ -89,6 +89,57 @@ public sealed class DesignCommandStackTests
         Assert.False(stack.Document.Pages[0].Nodes[0].Parameters.ContainsKey("Label"));
     }
 
+    [Fact]
+    public void AddRemoveDuplicateRenameReorderPage_AreUndoable()
+    {
+        var stack = new DesignDocumentCommandStack(CreateDocument());
+
+        var addPage = new DesignPage
+        {
+            Route = "/page-2",
+            Title = "Page 2",
+            Nodes =
+            [
+                new DesignNode
+                {
+                    ComponentType = "AgtCard",
+                    Children = new Dictionary<string, List<DesignNode>>(StringComparer.Ordinal)
+                }
+            ]
+        };
+
+        Assert.True(stack.Execute(new AddPageCommand(addPage)));
+        Assert.Equal(2, stack.Document.Pages.Count);
+
+        Assert.True(stack.Execute(new RenamePageCommand(1, "Hernoemd")));
+        Assert.Equal("Hernoemd", stack.Document.Pages[1].Title);
+
+        Assert.True(stack.Execute(new DuplicatePageCommand(1, "/page-3", "Kopie")));
+        Assert.Equal(3, stack.Document.Pages.Count);
+        Assert.Equal("Kopie", stack.Document.Pages[2].Title);
+
+        Assert.True(stack.Execute(new ReorderPageCommand(2, 0)));
+        Assert.Equal("Kopie", stack.Document.Pages[0].Title);
+
+        Assert.True(stack.Execute(new RemovePageCommand(0)));
+        Assert.Equal(2, stack.Document.Pages.Count);
+
+        Assert.True(stack.Undo());
+        Assert.Equal(3, stack.Document.Pages.Count);
+
+        Assert.True(stack.Undo());
+        Assert.Equal("Test", stack.Document.Pages[0].Title);
+
+        Assert.True(stack.Undo());
+        Assert.Equal(2, stack.Document.Pages.Count);
+
+        Assert.True(stack.Undo());
+        Assert.Equal("Page 2", stack.Document.Pages[1].Title);
+
+        Assert.True(stack.Undo());
+        Assert.Single(stack.Document.Pages);
+    }
+
     private static DesignDocument CreateReorderDocument()
     {
         return DesignDocumentMigrator.Migrate(new DesignDocument

@@ -6,16 +6,30 @@ namespace Agterhuis.Ui.Designer.CodeGen;
 
 internal static partial class CodeGenerationGuard
 {
+    public static IReadOnlyList<DesignValidationError> ValidatePageForCodeGen(DesignPage page, DesignerComponentRegistry registry, int pageIndex)
+    {
+        if (pageIndex < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(pageIndex));
+        }
+
+        return ValidatePageForCodeGen(page, registry, $"Pages[{pageIndex}]");
+    }
+
     public static IReadOnlyList<DesignValidationError> ValidatePageForCodeGen(DesignPage page, DesignerComponentRegistry registry)
+        => ValidatePageForCodeGen(page, registry, "Page");
+
+    private static IReadOnlyList<DesignValidationError> ValidatePageForCodeGen(DesignPage page, DesignerComponentRegistry registry, string pagePath)
     {
         ArgumentNullException.ThrowIfNull(page);
         ArgumentNullException.ThrowIfNull(registry);
+        ArgumentException.ThrowIfNullOrWhiteSpace(pagePath);
 
         var errors = new List<DesignValidationError>();
 
         for (var nodeIndex = 0; nodeIndex < page.Nodes.Count; nodeIndex++)
         {
-            ValidateNode(page.Nodes[nodeIndex], $"Pages[0]/Nodes[{nodeIndex}]", registry, errors);
+            ValidateNode(page.Nodes[nodeIndex], $"{pagePath}/Nodes[{nodeIndex}]", registry, errors);
         }
 
         return errors;

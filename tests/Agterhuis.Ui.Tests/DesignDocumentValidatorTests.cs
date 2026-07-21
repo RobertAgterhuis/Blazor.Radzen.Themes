@@ -42,4 +42,31 @@ public sealed class DesignDocumentValidatorTests
         Assert.Contains(errors, static error => error.Code == "MissingAccessibleLabel" && error.Path == "Pages[0]/Nodes[0]");
         Assert.Contains(errors, static error => error.Code == "UnknownComponentType" && error.Path == "Pages[0]/Nodes[1]");
     }
+
+    [Fact]
+    public void Validate_ReportsDuplicateRoutesAcrossPages()
+    {
+        var document = new DesignDocument
+        {
+            Name = "Validation",
+            Pages =
+            [
+                new DesignPage
+                {
+                    Route = "/same",
+                    Title = "One"
+                },
+                new DesignPage
+                {
+                    Route = "/same",
+                    Title = "Two"
+                }
+            ]
+        };
+
+        var errors = DesignDocumentValidator.Validate(document);
+
+        Assert.Contains(errors, static error => error.Code == "DuplicateRoute" && error.Path == "Pages[0]/Route");
+        Assert.Contains(errors, static error => error.Code == "DuplicateRoute" && error.Path == "Pages[1]/Route");
+    }
 }

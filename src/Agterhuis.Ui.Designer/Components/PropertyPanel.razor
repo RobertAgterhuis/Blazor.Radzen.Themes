@@ -7,7 +7,7 @@
 {
     <section class="designer-properties">
         <h2>Pagina-eigenschappen</h2>
-        <AgtTextField Label="Route" AriaLabel="Pagina route" Value="@Page.Route" ValueChanged="OnRouteChanged" ValidationMessage="@_pageRouteValidation" />
+        <AgtTextField Label="Route" AriaLabel="Pagina route" Value="@Page.Route" ValueChanged="OnRouteChanged" ValidationMessage="@RouteValidationMessage" />
         <AgtTextField Label="Titel" AriaLabel="Pagina titel" Value="@Page.Title" ValueChanged="OnTitleChanged" ValidationMessage="@_pageTitleValidation" />
         <AgtDropdown TValue="string" Label="Canvas-thema" AriaLabel="Canvas thema" Data="ThemeOptionItems" Value="CanvasTheme" ValueChanged="OnCanvasThemeChanged" TextProperty="Label" ValueProperty="Value" />
     </section>
@@ -137,6 +137,9 @@ else
     [Parameter, EditorRequired]
     public string CanvasTheme { get; set; } = "plum-dark";
 
+    [Parameter]
+    public bool HasDuplicateRoute { get; set; }
+
     [Parameter, EditorRequired]
     public IReadOnlyList<string> ThemeOptions { get; set; } = [];
 
@@ -176,6 +179,7 @@ else
     private string? _pageRouteValidation;
     private string? _pageTitleValidation;
     private IReadOnlyList<string> _missingAccessibilityParameters = [];
+    private string? RouteValidationMessage => _pageRouteValidation ?? (HasDuplicateRoute ? "Route moet uniek zijn." : null);
 
     private IReadOnlyDictionary<string, IReadOnlyList<ComponentParameterDescriptor>> GroupedParameters => SelectedDescriptor is null
         ? new Dictionary<string, IReadOnlyList<ComponentParameterDescriptor>>(StringComparer.Ordinal)

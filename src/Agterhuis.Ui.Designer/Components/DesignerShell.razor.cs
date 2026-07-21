@@ -1,4 +1,3 @@
-using System.Reflection;
 using Agterhuis.Ui.Designer.Commands;
 using Agterhuis.Ui.Designer.Export;
 using Agterhuis.Ui.Designer.Model;
@@ -32,10 +31,9 @@ public partial class DesignerShell : IDisposable
     };
 
     private ElementReference _canvasRef;
-    private DotNetObjectReference<DesignerShell>? _keyScopeRef;
-    private DotNetObjectReference<DesignerShell>? _dragDropRef;
     private DesignerDragPayload? _activeDrag;
     private string? _selectedNodeId;
+    private int _selectedPageIndex;
     private string _paletteFilter = string.Empty;
     private string _canvasTheme;
     private string _viewport;
@@ -44,12 +42,16 @@ public partial class DesignerShell : IDisposable
     private DesignDocumentTemplateKind _selectedTemplateKind = DesignDocumentTemplateKind.FormPage;
     private List<string> _savedDocumentNames = [];
     private bool _hasRecoveredDraft;
+    private string? _editingPageTitle;
+    private int? _editingPageIndex;
+    private int? _draggedPageIndex;
 
     public DesignerShell()
     {
         _canvasTheme = DefaultCanvasTheme ?? "plum-dark";
         _viewport = string.IsNullOrWhiteSpace(DefaultViewport) || !_viewportWidths.ContainsKey(DefaultViewport) ? "desktop" : DefaultViewport;
         _commands = new DesignDocumentCommandStack(CreateNewDocument("Untitled", DesignDocumentTemplateKind.Blank));
+        _selectedPageIndex = 0;
     }
 
     [Parameter, EditorRequired]
@@ -76,6 +78,9 @@ public partial class DesignerShell : IDisposable
     [Inject]
     public IAgtCommandRegistry CommandRegistry { get; set; } = default!;
 
+    [Inject]
+    public IAgtConfirmDialog ConfirmDialog { get; set; } = default!;
+
     [SupplyParameterFromQuery(Name = "template")]
     public string? TemplateQuery { get; set; }
 
@@ -86,22 +91,23 @@ public partial class DesignerShell : IDisposable
     private IReadOnlyList<string> CanvasThemeOptions => AgtTheme.All.SelectMany(static theme => new[] { theme.LightVariantId, theme.DarkVariantId }).OrderBy(static id => id, StringComparer.Ordinal).ToArray();
     private IReadOnlyList<DesignDocumentTemplates.TemplateDefinition> TemplateOptions => DesignDocumentTemplates.DefinitionsList;
     private IReadOnlyDictionary<string, IReadOnlyList<DesignerComponentDescriptor>> PaletteByCategory => Registry.Components.Where(static descriptor => descriptor.AllowedInPalette).Where(DescriptorMatchesFilter).GroupBy(static descriptor => descriptor.Category, StringComparer.Ordinal).OrderBy(static group => group.Key, StringComparer.Ordinal).ToDictionary(static group => group.Key, static group => (IReadOnlyList<DesignerComponentDescriptor>)group.OrderBy(static descriptor => descriptor.DisplayName, StringComparer.Ordinal).ToArray(), StringComparer.Ordinal);
-    private IReadOnlyList<DesignerTreeNode> TreeRoots => BuildTree(_commands.Document.Pages[0].Nodes);
-    private DesignNode? SelectedNode => _selectedNodeId is null ? null : TryFindNode(_commands.Document.Pages[0].Nodes, _selectedNodeId, out _, out var container, out var index) ? container[index] : null;
+    private DesignPage ActivePage => _commands.Document.Pages.Count == 0 ? new DesignPage { Route = "/", Title = "Nieuwe pagina" } : _commands.Document.Pages[Math.Clamp(_selectedPageIndex, 0, _commands.Document.Pages.Count - 1)];
+    private int ActivePageIndex => _commands.Document.Pages.Count == 0 ? 0 : Math.Clamp(_selectedPageIndex, 0, _commands.Document.Pages.Count - 1);
+    private IReadOnlyList<DesignerTreeNode> TreeRoots => BuildTree(ActivePage.Nodes);
+    private DesignNode? SelectedNode => _selectedNodeId is null ? null : TryFindNode(ActivePage.Nodes, _selectedNodeId, out _, out var container, out var index) ? container[index] : null;
     private DesignerComponentDescriptor? SelectedDescriptor => SelectedNode is null ? null : Registry.TryGetDescriptor(SelectedNode.ComponentType, out var descriptor) ? descriptor : null;
     private string SelectionBreadcrumb => BuildBreadcrumb(_selectedNodeId) ?? "Selecteer een node";
     private string CanvasFrameStyle => _viewportWidths.TryGetValue(_viewport, out var width) ? $"max-width: {width}px;" : "max-width: 1200px;";
+    private bool HasDuplicateActiveRoute => _commands.Document.Pages.Count(page => string.Equals(page.Route, ActivePage.Route, StringComparison.OrdinalIgnoreCase)) > 1;
+    private string RoutePreview => string.Join(" | ", _commands.Document.Pages.Select(static page => string.IsNullOrWhiteSpace(page.Route) ? "/" : page.Route));
 
     protected override async Task OnInitializedAsync()
     {
         RegisterCommands();
         await LoadInitialDocumentAsync();
+        EnsureSelectedPageIndex();
         await RestoreDocumentsFromStorageAsync();
         _hasRecoveredDraft = !string.IsNullOrWhiteSpace(await JS.InvokeAsync<string>("designerInterop.getText", LocalStorageDraftPrefix + _commands.Document.Name));
-        _keyScopeRef = DotNetObjectReference.Create(this);
-        _dragDropRef = DotNetObjectReference.Create(this);
-        await JS.InvokeVoidAsync("designerInterop.registerKeyScope", _keyScopeRef, _canvasRef);
-        await JS.InvokeVoidAsync("designerInterop.setupDragAndDrop", _dragDropRef);
         await JS.InvokeVoidAsync("designerInterop.setupResizablePanels");
         await InvokeAsync(StateHasChanged);
     }
@@ -109,8 +115,6 @@ public partial class DesignerShell : IDisposable
     public void Dispose()
     {
         CommandRegistry.RemoveScope(CommandScope);
-        _keyScopeRef?.Dispose();
-        _dragDropRef?.Dispose();
     }
 
     private async Task RestoreDocumentsFromStorageAsync()
@@ -139,7 +143,7 @@ public partial class DesignerShell : IDisposable
         }
         else if (string.Equals(_activeDrag.Kind, "node", StringComparison.Ordinal))
         {
-            didMutate = _commands.Execute(new MoveNodeCommand(0, _activeDrag.Value, target.Location));
+            didMutate = _commands.Execute(new MoveNodeCommand(ActivePageIndex, _activeDrag.Value, target.Location));
         }
 
         _activeDrag = null;
@@ -158,7 +162,7 @@ public partial class DesignerShell : IDisposable
         }
 
         var node = CreateNodeForDescriptor(descriptor);
-        var added = _commands.Execute(new AddNodeCommand(0, location, node));
+        var added = _commands.Execute(new AddNodeCommand(ActivePageIndex, location, node));
         if (added)
         {
             _selectedNodeId = node.Id;
@@ -192,8 +196,27 @@ public partial class DesignerShell : IDisposable
         }
     }
 
-    private async Task OnUndo() { if (_commands.Undo()) { await AutoSaveAsync(); await InvokeAsync(StateHasChanged); } }
-    private async Task OnRedo() { if (_commands.Redo()) { await AutoSaveAsync(); await InvokeAsync(StateHasChanged); } }
+    private async Task OnUndo()
+    {
+        if (_commands.Undo())
+        {
+            EnsureSelectedPageIndex();
+            ClearSelectionIfMissing();
+            await AutoSaveAsync();
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task OnRedo()
+    {
+        if (_commands.Redo())
+        {
+            EnsureSelectedPageIndex();
+            ClearSelectionIfMissing();
+            await AutoSaveAsync();
+            await InvokeAsync(StateHasChanged);
+        }
+    }
 
     private async Task OnSaveDocument()
     {
@@ -274,7 +297,7 @@ public partial class DesignerShell : IDisposable
         var insertIndex = containerLocation.Index;
         foreach (var node in BuildFormNodes(entity))
         {
-            if (!_commands.Execute(new AddNodeCommand(0, containerLocation with { Index = insertIndex++ }, node)))
+            if (!_commands.Execute(new AddNodeCommand(ActivePageIndex, containerLocation with { Index = insertIndex++ }, node)))
             {
                 return;
             }
@@ -291,6 +314,7 @@ public partial class DesignerShell : IDisposable
         _commands.ReplaceDocument(CreateNewDocument(name, _selectedTemplateKind), markSaved: true);
         _selectedEntityName = _commands.Document.DataModel.Entities.FirstOrDefault()?.Name;
         _selectedNodeId = null;
+        _selectedPageIndex = 0;
         _hasRecoveredDraft = false;
         await AutoSaveAsync();
         await InvokeAsync(StateHasChanged);
@@ -314,6 +338,7 @@ public partial class DesignerShell : IDisposable
             _commands.ReplaceDocument(CreateNewDocument($"Document-{DateTime.UtcNow:yyyyMMdd-HHmmss}", templateKind), markSaved: true);
             _selectedEntityName = _commands.Document.DataModel.Entities.FirstOrDefault()?.Name;
             _selectedNodeId = null;
+            _selectedPageIndex = 0;
             _hasRecoveredDraft = false;
         }
     }
@@ -324,7 +349,11 @@ public partial class DesignerShell : IDisposable
         _commands.ReplaceDocument(document, markSaved);
         _selectedEntityName = document.DataModel.Entities.FirstOrDefault()?.Name;
         _selectedNodeId = null;
+        _selectedPageIndex = 0;
+        _editingPageIndex = null;
+        _editingPageTitle = null;
         _hasRecoveredDraft = false;
+        EnsureSelectedPageIndex();
         StateHasChanged();
     }
 
@@ -345,15 +374,161 @@ public partial class DesignerShell : IDisposable
     }
 
     private Task OnCanvasThemeChanged(object value) => OnCanvasThemeChanged(value?.ToString() ?? "plum-dark");
-    private async Task OnPageRouteChanged(string? value) { if (_commands.Execute(new SetPagePropertyCommand(0, nameof(DesignPage.Route), value))) { await AutoSaveAsync(); await InvokeAsync(StateHasChanged); } }
-    private async Task OnPageTitleChanged(string? value) { if (_commands.Execute(new SetPagePropertyCommand(0, nameof(DesignPage.Title), value))) { await AutoSaveAsync(); await InvokeAsync(StateHasChanged); } }
-    private async Task OnNodeParameterChanged((ComponentParameterDescriptor Parameter, DesignParameterValue? Value) args) { if (_selectedNodeId is not null && _commands.Execute(new SetNodeParameterCommand(0, _selectedNodeId, args.Parameter.Name, args.Value))) { await AutoSaveAsync(); await InvokeAsync(StateHasChanged); } }
-    private async Task OnDocumentChanged(DesignDocument document) { _commands.ReplaceDocument(document, markSaved: false); _selectedEntityName = _commands.Document.DataModel.Entities.FirstOrDefault()?.Name; _hasRecoveredDraft = true; await AutoSaveAsync(); await InvokeAsync(StateHasChanged); }
-    private async Task OnNodeLayoutSlotChanged(DesignLayoutSlot layoutSlot) { if (_selectedNodeId is not null && _commands.Execute(new SetNodeLayoutSlotCommand(0, _selectedNodeId, layoutSlot))) { await AutoSaveAsync(); await InvokeAsync(StateHasChanged); } }
-    private async Task OnAddColumnNode() { if (SelectedNode is null || _selectedNodeId is null || SelectedDescriptor?.Slots.Contains("Columns", StringComparer.Ordinal) != true) return; var descriptor = Registry.TryGetDescriptor("RadzenDataGridColumn", out var gridColumnDescriptor) ? gridColumnDescriptor : Registry.GetDescriptor("RadzenDataGridColumn"); var node = CreateNodeForDescriptor(descriptor); node.Parameters["Title"] = DesignParameterValue.FromValue($"Kolom {GetColumnsInsertIndex(_selectedNodeId) + 1}"); node.Parameters["Property"] = DesignParameterValue.FromValue("Dossiernummer"); if (_commands.Execute(new AddNodeCommand(0, new DesignNodeLocation(_selectedNodeId, "Columns", GetColumnsInsertIndex(_selectedNodeId)), node))) { await AutoSaveAsync(); await InvokeAsync(StateHasChanged); } }
-    private async Task OnRemoveColumnNode(string nodeId) { if (string.IsNullOrWhiteSpace(nodeId)) return; if (_commands.Execute(new RemoveNodeCommand(0, nodeId))) { if (string.Equals(_selectedNodeId, nodeId, StringComparison.Ordinal)) { _selectedNodeId = null; } await AutoSaveAsync(); await InvokeAsync(StateHasChanged); } }
+
+    private async Task OnPageRouteChanged(string? value)
+    {
+        if (_commands.Execute(new SetPagePropertyCommand(ActivePageIndex, nameof(DesignPage.Route), value)))
+        {
+            _hasRecoveredDraft = true;
+            await AutoSaveAsync();
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task OnPageTitleChanged(string? value)
+    {
+        if (_commands.Execute(new SetPagePropertyCommand(ActivePageIndex, nameof(DesignPage.Title), value)))
+        {
+            _hasRecoveredDraft = true;
+            await AutoSaveAsync();
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task OnNodeParameterChanged((ComponentParameterDescriptor Parameter, DesignParameterValue? Value) args)
+    {
+        if (_selectedNodeId is not null && _commands.Execute(new SetNodeParameterCommand(ActivePageIndex, _selectedNodeId, args.Parameter.Name, args.Value)))
+        {
+            _hasRecoveredDraft = true;
+            await AutoSaveAsync();
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task OnDocumentChanged(DesignDocument document)
+    {
+        _commands.ReplaceDocument(document, markSaved: false);
+        _selectedEntityName = _commands.Document.DataModel.Entities.FirstOrDefault()?.Name;
+        EnsureSelectedPageIndex();
+        ClearSelectionIfMissing();
+        _hasRecoveredDraft = true;
+        await AutoSaveAsync();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task OnNodeLayoutSlotChanged(DesignLayoutSlot layoutSlot)
+    {
+        if (_selectedNodeId is not null && _commands.Execute(new SetNodeLayoutSlotCommand(ActivePageIndex, _selectedNodeId, layoutSlot)))
+        {
+            _hasRecoveredDraft = true;
+            await AutoSaveAsync();
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task OnAddColumnNode()
+    {
+        if (SelectedNode is null || _selectedNodeId is null || SelectedDescriptor?.Slots.Contains("Columns", StringComparer.Ordinal) != true)
+        {
+            return;
+        }
+
+        var descriptor = Registry.TryGetDescriptor("RadzenDataGridColumn", out var gridColumnDescriptor) ? gridColumnDescriptor : Registry.GetDescriptor("RadzenDataGridColumn");
+        var node = CreateNodeForDescriptor(descriptor);
+        node.Parameters["Title"] = DesignParameterValue.FromValue($"Kolom {GetColumnsInsertIndex(_selectedNodeId) + 1}");
+        node.Parameters["Property"] = DesignParameterValue.FromValue("Dossiernummer");
+
+        if (_commands.Execute(new AddNodeCommand(ActivePageIndex, new DesignNodeLocation(_selectedNodeId, "Columns", GetColumnsInsertIndex(_selectedNodeId)), node)))
+        {
+            _hasRecoveredDraft = true;
+            await AutoSaveAsync();
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task OnRemoveColumnNode(string nodeId)
+    {
+        if (string.IsNullOrWhiteSpace(nodeId))
+        {
+            return;
+        }
+
+        if (_commands.Execute(new RemoveNodeCommand(ActivePageIndex, nodeId)))
+        {
+            if (string.Equals(_selectedNodeId, nodeId, StringComparison.Ordinal))
+            {
+                _selectedNodeId = null;
+            }
+
+            _hasRecoveredDraft = true;
+            await AutoSaveAsync();
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
     private void SetViewport(string viewport) => _viewport = _viewportWidths.ContainsKey(viewport) ? viewport : "desktop";
-    private async Task OnPageKeyDown(KeyboardEventArgs args) { if (args.CtrlKey && string.Equals(args.Key, "z", StringComparison.OrdinalIgnoreCase)) { await OnUndo(); return; } if (args.CtrlKey && string.Equals(args.Key, "y", StringComparison.OrdinalIgnoreCase)) { await OnRedo(); return; } if (string.Equals(args.Key, "Escape", StringComparison.OrdinalIgnoreCase)) { _selectedNodeId = null; return; } if (string.Equals(args.Key, "Delete", StringComparison.OrdinalIgnoreCase) && _selectedNodeId is not null && _commands.Execute(new RemoveNodeCommand(0, _selectedNodeId))) { _selectedNodeId = null; await AutoSaveAsync(); await InvokeAsync(StateHasChanged); return; } if (_selectedNodeId is null) return; if (args.CtrlKey && string.Equals(args.Key, "ArrowUp", StringComparison.OrdinalIgnoreCase) && _commands.Execute(new ReorderSiblingCommand(0, _selectedNodeId, -1))) { await AutoSaveAsync(); await InvokeAsync(StateHasChanged); return; } if (args.CtrlKey && string.Equals(args.Key, "ArrowDown", StringComparison.OrdinalIgnoreCase) && _commands.Execute(new ReorderSiblingCommand(0, _selectedNodeId, 1))) { await AutoSaveAsync(); await InvokeAsync(StateHasChanged); return; } if (string.Equals(args.Key, "ArrowUp", StringComparison.OrdinalIgnoreCase)) { SelectSibling(-1); return; } if (string.Equals(args.Key, "ArrowDown", StringComparison.OrdinalIgnoreCase)) { SelectSibling(1); } }
+
+    private async Task OnPageKeyDown(KeyboardEventArgs args)
+    {
+        if (args.CtrlKey && string.Equals(args.Key, "z", StringComparison.OrdinalIgnoreCase))
+        {
+            await OnUndo();
+            return;
+        }
+
+        if (args.CtrlKey && string.Equals(args.Key, "y", StringComparison.OrdinalIgnoreCase))
+        {
+            await OnRedo();
+            return;
+        }
+
+        if (string.Equals(args.Key, "Escape", StringComparison.OrdinalIgnoreCase))
+        {
+            _selectedNodeId = null;
+            return;
+        }
+
+        if (string.Equals(args.Key, "Delete", StringComparison.OrdinalIgnoreCase) && _selectedNodeId is not null && _commands.Execute(new RemoveNodeCommand(ActivePageIndex, _selectedNodeId)))
+        {
+            _selectedNodeId = null;
+            _hasRecoveredDraft = true;
+            await AutoSaveAsync();
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
+        if (_selectedNodeId is null)
+        {
+            return;
+        }
+
+        if (args.CtrlKey && string.Equals(args.Key, "ArrowUp", StringComparison.OrdinalIgnoreCase) && _commands.Execute(new ReorderSiblingCommand(ActivePageIndex, _selectedNodeId, -1)))
+        {
+            _hasRecoveredDraft = true;
+            await AutoSaveAsync();
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
+        if (args.CtrlKey && string.Equals(args.Key, "ArrowDown", StringComparison.OrdinalIgnoreCase) && _commands.Execute(new ReorderSiblingCommand(ActivePageIndex, _selectedNodeId, 1)))
+        {
+            _hasRecoveredDraft = true;
+            await AutoSaveAsync();
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
+        if (string.Equals(args.Key, "ArrowUp", StringComparison.OrdinalIgnoreCase))
+        {
+            SelectSibling(-1);
+            return;
+        }
+
+        if (string.Equals(args.Key, "ArrowDown", StringComparison.OrdinalIgnoreCase))
+        {
+            SelectSibling(1);
+        }
+    }
 
     [JSInvokable]
     public Task HandleCanvasKey(string key)
@@ -369,7 +544,7 @@ public partial class DesignerShell : IDisposable
 
     private void SelectSibling(int delta)
     {
-        if (_selectedNodeId is null || !TryFindNode(_commands.Document.Pages[0].Nodes, _selectedNodeId, out _, out var container, out var index))
+        if (_selectedNodeId is null || !TryFindNode(ActivePage.Nodes, _selectedNodeId, out _, out var container, out var index))
         {
             return;
         }
@@ -483,20 +658,430 @@ public partial class DesignerShell : IDisposable
         });
     }
 
-    private Task OnAddPageAsync() { var newPage = DesignDocumentTemplates.Create(_selectedTemplateKind, $"Page-{_commands.Document.Pages.Count + 1}").Pages[0]; _commands.Execute(new AddPageCommand(newPage)); _hasRecoveredDraft = true; StateHasChanged(); return Task.CompletedTask; }
-    private Task OnInsertTextFieldAsync() { var targetLocation = _selectedNodeId is null ? DesignNodeLocation.Root(_commands.Document.Pages[0].Nodes.Count) : new DesignNodeLocation(_selectedNodeId, "ChildContent", GetChildInsertIndex(_selectedNodeId)); var descriptor = Registry.GetDescriptor("AgtTextField"); var node = CreateNodeForDescriptor(descriptor); if (_commands.Execute(new AddNodeCommand(0, targetLocation, node))) { _selectedNodeId = node.Id; _hasRecoveredDraft = true; StateHasChanged(); } return Task.CompletedTask; }
-    private int GetChildInsertIndex(string parentNodeId) => TryFindNode(_commands.Document.Pages[0].Nodes, parentNodeId, out _, out var container, out _) ? container.Count : 0;
-    private int GetColumnsInsertIndex(string parentNodeId) { if (!TryFindNode(_commands.Document.Pages[0].Nodes, parentNodeId, out _, out var container, out var index)) { return 0; } var parent = container[index]; return parent.Children.TryGetValue("Columns", out var columns) ? columns.Count : 0; }
-    private DesignNodeLocation ResolveFormInsertLocation() => _selectedNodeId is not null && SelectedDescriptor?.Slots.Contains("ChildContent", StringComparer.Ordinal) == true ? new DesignNodeLocation(_selectedNodeId, "ChildContent", GetChildInsertIndex(_selectedNodeId)) : DesignNodeLocation.Root(_commands.Document.Pages[0].Nodes.Count);
-    private IReadOnlyList<DesignNode> BuildFormNodes(DesignEntity entity) { var card = CreateNodeForDescriptor(Registry.GetDescriptor("AgtCard")); card.Children["ChildContent"] = entity.Fields.Select(BuildNodeForField).ToList(); card.Children["ChildContent"].Add(CreateFormActionsNode()); return [card]; }
-    private DesignNode BuildNodeForField(DesignField field) { var componentType = field.Type switch { DesignFieldType.Int or DesignFieldType.Decimal => "AgtNumericField", DesignFieldType.Bool => "AgtSwitch", DesignFieldType.DateTime => "AgtDatePicker", DesignFieldType.Enum => "AgtDropdown", _ => "AgtTextField" }; var descriptor = Registry.GetDescriptor(componentType); var node = CreateNodeForDescriptor(descriptor); node.Parameters["Label"] = DesignParameterValue.FromValue(field.Name); node.Parameters["AriaLabel"] = DesignParameterValue.FromValue(field.Name); if (field.Type == DesignFieldType.Enum) { node.Parameters["Placeholder"] = DesignParameterValue.FromValue($"Kies {field.Name.ToLowerInvariant()}"); } return node; }
-    private DesignNode CreateFormActionsNode() { var node = CreateNodeForDescriptor(Registry.GetDescriptor("AgtFormActions")); node.Parameters["SaveText"] = DesignParameterValue.FromValue("Opslaan"); node.Parameters["CancelText"] = DesignParameterValue.FromValue("Annuleren"); return node; }
-    private DesignNode CreateNodeForDescriptor(DesignerComponentDescriptor descriptor) { var node = new DesignNode { ComponentType = descriptor.ComponentType, Parameters = new Dictionary<string, DesignParameterValue>(StringComparer.Ordinal), Children = new Dictionary<string, List<DesignNode>>(StringComparer.Ordinal) }; foreach (var slot in descriptor.Slots) { node.Children[slot] = []; } if (descriptor.Parameters.Any(static parameter => string.Equals(parameter.Name, "Label", StringComparison.Ordinal))) { node.Parameters["Label"] = DesignParameterValue.FromValue(descriptor.DisplayName); } if (descriptor.Parameters.Any(static parameter => string.Equals(parameter.Name, "AriaLabel", StringComparison.Ordinal))) { node.Parameters["AriaLabel"] = DesignParameterValue.FromValue(descriptor.DisplayName); } return DesignDocumentMigrator.Migrate(new DesignDocument { Pages = [new DesignPage { Route = "/", Title = "seed", Nodes = [node] }] }).Pages[0].Nodes[0]; }
-    private string? BuildBreadcrumb(string? nodeId) { if (string.IsNullOrWhiteSpace(nodeId) || !TryFindNode(_commands.Document.Pages[0].Nodes, nodeId, out var path, out _, out _)) { return null; } return string.Join(" > ", path.Select(static node => node.ComponentType)); }
+    private async Task OnAddPageAsync()
+    {
+        var route = GenerateUniqueRoute();
+        var title = $"Pagina {_commands.Document.Pages.Count + 1}";
+        var page = DesignDocumentTemplates.Create(_selectedTemplateKind, title).Pages.First();
+        page.Route = route;
+        page.Title = title;
+
+        if (_commands.Execute(new AddPageCommand(page)))
+        {
+            _selectedPageIndex = _commands.Document.Pages.Count - 1;
+            _selectedNodeId = null;
+            _hasRecoveredDraft = true;
+            await AutoSaveAsync();
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task OnInsertTextFieldAsync()
+    {
+        var targetLocation = _selectedNodeId is null ? DesignNodeLocation.Root(ActivePage.Nodes.Count) : new DesignNodeLocation(_selectedNodeId, "ChildContent", GetChildInsertIndex(_selectedNodeId));
+        var descriptor = Registry.GetDescriptor("AgtTextField");
+        var node = CreateNodeForDescriptor(descriptor);
+        if (_commands.Execute(new AddNodeCommand(ActivePageIndex, targetLocation, node)))
+        {
+            _selectedNodeId = node.Id;
+            _hasRecoveredDraft = true;
+            await AutoSaveAsync();
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private int GetChildInsertIndex(string parentNodeId) => TryFindNode(ActivePage.Nodes, parentNodeId, out _, out var container, out _) ? container.Count : 0;
+
+    private int GetColumnsInsertIndex(string parentNodeId)
+    {
+        if (!TryFindNode(ActivePage.Nodes, parentNodeId, out _, out var container, out var index))
+        {
+            return 0;
+        }
+
+        var parent = container[index];
+        return parent.Children.TryGetValue("Columns", out var columns) ? columns.Count : 0;
+    }
+
+    private DesignNodeLocation ResolveFormInsertLocation() => _selectedNodeId is not null && SelectedDescriptor?.Slots.Contains("ChildContent", StringComparer.Ordinal) == true ? new DesignNodeLocation(_selectedNodeId, "ChildContent", GetChildInsertIndex(_selectedNodeId)) : DesignNodeLocation.Root(ActivePage.Nodes.Count);
+
+    private IReadOnlyList<DesignNode> BuildFormNodes(DesignEntity entity)
+    {
+        var card = CreateNodeForDescriptor(Registry.GetDescriptor("AgtCard"));
+        card.Children["ChildContent"] = entity.Fields.Select(BuildNodeForField).ToList();
+        card.Children["ChildContent"].Add(CreateFormActionsNode());
+        return [card];
+    }
+
+    private DesignNode BuildNodeForField(DesignField field)
+    {
+        var componentType = field.Type switch
+        {
+            DesignFieldType.Int or DesignFieldType.Decimal => "AgtNumericField",
+            DesignFieldType.Bool => "AgtSwitch",
+            DesignFieldType.DateTime => "AgtDatePicker",
+            DesignFieldType.Enum => "AgtDropdown",
+            _ => "AgtTextField"
+        };
+
+        var descriptor = Registry.GetDescriptor(componentType);
+        var node = CreateNodeForDescriptor(descriptor);
+        node.Parameters["Label"] = DesignParameterValue.FromValue(field.Name);
+        node.Parameters["AriaLabel"] = DesignParameterValue.FromValue(field.Name);
+        if (field.Type == DesignFieldType.Enum)
+        {
+            node.Parameters["Placeholder"] = DesignParameterValue.FromValue($"Kies {field.Name.ToLowerInvariant()}");
+        }
+
+        return node;
+    }
+
+    private DesignNode CreateFormActionsNode()
+    {
+        var node = CreateNodeForDescriptor(Registry.GetDescriptor("AgtFormActions"));
+        node.Parameters["SaveText"] = DesignParameterValue.FromValue("Opslaan");
+        node.Parameters["CancelText"] = DesignParameterValue.FromValue("Annuleren");
+        return node;
+    }
+
+    private DesignNode CreateNodeForDescriptor(DesignerComponentDescriptor descriptor)
+    {
+        var node = new DesignNode
+        {
+            ComponentType = descriptor.ComponentType,
+            Parameters = new Dictionary<string, DesignParameterValue>(StringComparer.Ordinal),
+            Children = new Dictionary<string, List<DesignNode>>(StringComparer.Ordinal)
+        };
+
+        foreach (var slot in descriptor.Slots)
+        {
+            node.Children[slot] = [];
+        }
+
+        if (descriptor.Parameters.Any(static parameter => string.Equals(parameter.Name, "Label", StringComparison.Ordinal)))
+        {
+            node.Parameters["Label"] = DesignParameterValue.FromValue(descriptor.DisplayName);
+        }
+
+        if (descriptor.Parameters.Any(static parameter => string.Equals(parameter.Name, "AriaLabel", StringComparison.Ordinal)))
+        {
+            node.Parameters["AriaLabel"] = DesignParameterValue.FromValue(descriptor.DisplayName);
+        }
+
+        var document = DesignDocumentMigrator.Migrate(new DesignDocument
+        {
+            Pages =
+            [
+                new DesignPage
+                {
+                    Route = "/",
+                    Title = "seed",
+                    Nodes = [node]
+                }
+            ]
+        });
+
+        return document.Pages.First().Nodes.First();
+    }
+
+    private string? BuildBreadcrumb(string? nodeId)
+    {
+        if (string.IsNullOrWhiteSpace(nodeId) || !TryFindNode(ActivePage.Nodes, nodeId, out var path, out _, out _))
+        {
+            return null;
+        }
+
+        return string.Join(" > ", path.Select(static node => node.ComponentType));
+    }
+
     private static IReadOnlyList<DesignerTreeNode> BuildTree(IReadOnlyList<DesignNode> nodes) => nodes.Select(BuildTreeNode).ToArray();
+
     private static DesignerTreeNode BuildTreeNode(DesignNode node) => new(node.Id, node.ComponentType, node.Children.OrderBy(static pair => pair.Key, StringComparer.Ordinal).SelectMany(static pair => pair.Value).Select(BuildTreeNode).ToArray());
-    private static bool TryFindNode(IReadOnlyList<DesignNode> nodes, string targetId, out List<DesignNode> path, out List<DesignNode> container, out int index) { var mutable = nodes as List<DesignNode> ?? nodes.ToList(); for (var i = 0; i < mutable.Count; i++) { if (TryFindNodeRecursive(mutable[i], mutable, i, targetId, [], out path, out container, out index)) { return true; } } path = []; container = []; index = -1; return false; }
-    private static bool TryFindNodeRecursive(DesignNode node, List<DesignNode> container, int index, string targetId, List<DesignNode> ancestry, out List<DesignNode> path, out List<DesignNode> resultContainer, out int resultIndex) { var nextAncestry = new List<DesignNode>(ancestry) { node }; if (string.Equals(node.Id, targetId, StringComparison.Ordinal)) { path = nextAncestry; resultContainer = container; resultIndex = index; return true; } foreach (var slot in node.Children.Values) { for (var childIndex = 0; childIndex < slot.Count; childIndex++) { if (TryFindNodeRecursive(slot[childIndex], slot, childIndex, targetId, nextAncestry, out path, out resultContainer, out resultIndex)) { return true; } } } path = []; resultContainer = []; resultIndex = -1; return false; }
+
+    private static bool TryFindNode(IReadOnlyList<DesignNode> nodes, string targetId, out List<DesignNode> path, out List<DesignNode> container, out int index)
+    {
+        var mutable = nodes as List<DesignNode> ?? nodes.ToList();
+        for (var i = 0; i < mutable.Count; i++)
+        {
+            if (TryFindNodeRecursive(mutable[i], mutable, i, targetId, [], out path, out container, out index))
+            {
+                return true;
+            }
+        }
+
+        path = [];
+        container = [];
+        index = -1;
+        return false;
+    }
+
+    private static bool TryFindNodeRecursive(DesignNode node, List<DesignNode> container, int index, string targetId, List<DesignNode> ancestry, out List<DesignNode> path, out List<DesignNode> resultContainer, out int resultIndex)
+    {
+        var nextAncestry = new List<DesignNode>(ancestry) { node };
+        if (string.Equals(node.Id, targetId, StringComparison.Ordinal))
+        {
+            path = nextAncestry;
+            resultContainer = container;
+            resultIndex = index;
+            return true;
+        }
+
+        foreach (var slot in node.Children.Values)
+        {
+            for (var childIndex = 0; childIndex < slot.Count; childIndex++)
+            {
+                if (TryFindNodeRecursive(slot[childIndex], slot, childIndex, targetId, nextAncestry, out path, out resultContainer, out resultIndex))
+                {
+                    return true;
+                }
+            }
+        }
+
+        path = [];
+        resultContainer = [];
+        resultIndex = -1;
+        return false;
+    }
+
+    private void EnsureSelectedPageIndex()
+    {
+        if (_commands.Document.Pages.Count == 0)
+        {
+            _selectedPageIndex = 0;
+            return;
+        }
+
+        _selectedPageIndex = Math.Clamp(_selectedPageIndex, 0, _commands.Document.Pages.Count - 1);
+    }
+
+    private void ClearSelectionIfMissing()
+    {
+        if (_selectedNodeId is not null && !TryFindNode(ActivePage.Nodes, _selectedNodeId, out _, out _, out _))
+        {
+            _selectedNodeId = null;
+        }
+    }
+
+    private string GenerateUniqueRoute()
+    {
+        var usedRoutes = _commands.Document.Pages.Select(static page => page.Route).Where(static route => !string.IsNullOrWhiteSpace(route)).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var pageNumber = _commands.Document.Pages.Count + 1;
+
+        while (true)
+        {
+            var candidate = $"/page-{pageNumber}";
+            if (!usedRoutes.Contains(candidate))
+            {
+                return candidate;
+            }
+
+            pageNumber++;
+        }
+    }
+
+    private string GenerateUniqueRouteFromRoute(string route)
+    {
+        var normalized = string.IsNullOrWhiteSpace(route) ? "/page" : route.Trim();
+        if (!normalized.StartsWith("/", StringComparison.Ordinal))
+        {
+            normalized = "/" + normalized;
+        }
+
+        var usedRoutes = _commands.Document.Pages.Select(static page => page.Route).Where(static pageRoute => !string.IsNullOrWhiteSpace(pageRoute)).ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        if (!usedRoutes.Contains(normalized))
+        {
+            return normalized;
+        }
+
+        for (var index = 2; index < 5000; index++)
+        {
+            var candidate = $"{normalized}-{index}";
+            if (!usedRoutes.Contains(candidate))
+            {
+                return candidate;
+            }
+        }
+
+        return GenerateUniqueRoute();
+    }
+
+    private string GetPageLabel(DesignPage page)
+        => string.IsNullOrWhiteSpace(page.Title) ? (string.IsNullOrWhiteSpace(page.Route) ? "Nieuwe pagina" : page.Route) : page.Title;
+
+    private void SelectPage(int index)
+    {
+        _selectedPageIndex = index;
+        _selectedNodeId = null;
+        _editingPageIndex = null;
+        _editingPageTitle = null;
+        EnsureSelectedPageIndex();
+    }
+
+    private void BeginRenamePage(int index)
+    {
+        if (index < 0 || index >= _commands.Document.Pages.Count)
+        {
+            return;
+        }
+
+        _editingPageIndex = index;
+        _editingPageTitle = _commands.Document.Pages[index].Title;
+    }
+
+    private async Task SaveRenamePageAsync(int index)
+    {
+        if (_editingPageIndex != index)
+        {
+            return;
+        }
+
+        var title = _editingPageTitle?.Trim();
+        _editingPageIndex = null;
+        _editingPageTitle = null;
+
+        if (string.IsNullOrWhiteSpace(title))
+        {
+            return;
+        }
+
+        if (_commands.Execute(new RenamePageCommand(index, title)))
+        {
+            _hasRecoveredDraft = true;
+            await AutoSaveAsync();
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task CancelRenamePageAsync(int index)
+    {
+        if (_editingPageIndex != index)
+        {
+            return;
+        }
+
+        _editingPageIndex = null;
+        _editingPageTitle = null;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task OnRenameKeyDown(KeyboardEventArgs args, int index)
+    {
+        if (string.Equals(args.Key, "Enter", StringComparison.OrdinalIgnoreCase))
+        {
+            await SaveRenamePageAsync(index);
+            return;
+        }
+
+        if (string.Equals(args.Key, "Escape", StringComparison.OrdinalIgnoreCase))
+        {
+            await CancelRenamePageAsync(index);
+        }
+    }
+
+    private async Task DuplicatePageAsync(int index)
+    {
+        if (index < 0 || index >= _commands.Document.Pages.Count)
+        {
+            return;
+        }
+
+        var source = _commands.Document.Pages[index];
+        var route = GenerateUniqueRouteFromRoute(source.Route);
+        var title = string.IsNullOrWhiteSpace(source.Title) ? "Gekopieerde pagina" : source.Title + " kopie";
+
+        if (_commands.Execute(new DuplicatePageCommand(index, route, title)))
+        {
+            _selectedPageIndex = Math.Clamp(index + 1, 0, _commands.Document.Pages.Count - 1);
+            _selectedNodeId = null;
+            _hasRecoveredDraft = true;
+            await AutoSaveAsync();
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task RemovePageAsync(int index)
+    {
+        if (_commands.Document.Pages.Count <= 1 || index < 0 || index >= _commands.Document.Pages.Count)
+        {
+            return;
+        }
+
+        var pageName = GetPageLabel(_commands.Document.Pages[index]);
+        var confirmed = await ConfirmDialog.ConfirmDeleteAsync(pageName);
+        if (!confirmed)
+        {
+            return;
+        }
+
+        var nextPageIndex = index == 0 ? 0 : index - 1;
+        if (_commands.Execute(new RemovePageCommand(index)))
+        {
+            _selectedPageIndex = Math.Clamp(nextPageIndex, 0, _commands.Document.Pages.Count - 1);
+            _selectedNodeId = null;
+            _hasRecoveredDraft = true;
+            await AutoSaveAsync();
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task MovePageByDeltaAsync(int index, int delta)
+    {
+        if (index < 0 || index >= _commands.Document.Pages.Count)
+        {
+            return;
+        }
+
+        var target = index + delta;
+        if (target < 0 || target >= _commands.Document.Pages.Count)
+        {
+            return;
+        }
+
+        if (_commands.Execute(new ReorderPageCommand(index, target)))
+        {
+            _selectedPageIndex = target;
+            _hasRecoveredDraft = true;
+            await AutoSaveAsync();
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private void OnPageDragStart(int index)
+    {
+        _draggedPageIndex = index;
+    }
+
+    private void OnPageDragOver(DragEventArgs args) { }
+
+    private async Task OnPageDropAsync(int targetIndex)
+    {
+        if (_draggedPageIndex is null)
+        {
+            return;
+        }
+
+        var sourceIndex = _draggedPageIndex.Value;
+        _draggedPageIndex = null;
+
+        if (sourceIndex == targetIndex || targetIndex < 0 || targetIndex >= _commands.Document.Pages.Count)
+        {
+            return;
+        }
+
+        if (_commands.Execute(new ReorderPageCommand(sourceIndex, targetIndex)))
+        {
+            _selectedPageIndex = targetIndex;
+            _hasRecoveredDraft = true;
+            await AutoSaveAsync();
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private void OnPageDragEnd()
+    {
+        _draggedPageIndex = null;
+    }
 
     private sealed record DesignerTreeNode(string Id, string Text, IReadOnlyList<DesignerTreeNode> Children)
     {

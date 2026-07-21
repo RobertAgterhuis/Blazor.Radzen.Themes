@@ -44,7 +44,7 @@
                 {
                     <textarea 
                         class="agt-model-textarea"
-                        value="@ModelJson"
+                        value="@ModelJsonWithActiveMarker"
                         @oninput="OnModelJsonInput"
                         rows="20">
                     </textarea>
@@ -73,6 +73,9 @@
     public DesignDocument? Document { get; set; }
 
     [Parameter]
+    public int ActivePageIndex { get; set; }
+
+    [Parameter]
     public EventCallback<DesignDocument> OnDocumentChanged { get; set; }
 
     [Parameter]
@@ -93,6 +96,7 @@
     private string CurrentTab { get; set; } = "code";
     private string GeneratedCode { get; set; } = string.Empty;
     private string ModelJson { get; set; } = string.Empty;
+    private string ModelJsonWithActiveMarker { get; set; } = string.Empty;
     private string? ModelValidationError { get; set; }
     private DesignDocument? _lastValidDocument;
     private RazorCodeGenerator? _codeGenerator;
@@ -170,6 +174,7 @@
             if (!string.Equals(_lastDocumentSnapshot, documentJson, StringComparison.Ordinal))
             {
                 ModelJson = documentJson;
+                ModelJsonWithActiveMarker = BuildModelJsonWithActiveMarker(documentJson, ActivePageIndex);
                 _lastDocumentSnapshot = documentJson;
             }
 
@@ -209,6 +214,7 @@
                     {
                         WriteIndented = true
                     });
+                    ModelJsonWithActiveMarker = BuildModelJsonWithActiveMarker(ModelJson, ActivePageIndex);
                     _lastDocumentSnapshot = ModelJson;
                 }
 
@@ -242,7 +248,36 @@
 
     private void OnModelJsonInput(ChangeEventArgs args)
     {
-        ModelJson = args.Value?.ToString() ?? string.Empty;
+        var input = args.Value?.ToString() ?? string.Empty;
+        ModelJsonWithActiveMarker = input;
+        ModelJson = StripActiveMarker(input);
+    }
+
+    private static string BuildModelJsonWithActiveMarker(string json, int activePageIndex)
+    {
+        var marker = $"\"Pages\": [ // <- active page index: {activePageIndex}";
+        var token = "\"Pages\": [";
+        var markerIndex = json.IndexOf(token, StringComparison.Ordinal);
+        return markerIndex < 0 ? json : json.Replace(token, marker, StringComparison.Ordinal);
+    }
+
+    private static string StripActiveMarker(string json)
+    {
+        const string markerPrefix = "\"Pages\": [ // <- active page index:";
+        var markerIndex = json.IndexOf(markerPrefix, StringComparison.Ordinal);
+        if (markerIndex < 0)
+        {
+            return json;
+        }
+
+        var lineEnd = json.IndexOf('\n', markerIndex);
+        if (lineEnd < 0)
+        {
+            return json.Replace(markerPrefix, "\"Pages\": [", StringComparison.Ordinal);
+        }
+
+        var line = json.Substring(markerIndex, lineEnd - markerIndex);
+        return json.Replace(line, "\"Pages\": [", StringComparison.Ordinal);
     }
 
     private static IReadOnlyList<PreviewLine> BuildPreviewLines(string code, string? selectedNodeId)

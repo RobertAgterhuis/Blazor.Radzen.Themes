@@ -11,7 +11,7 @@ else
         @for (var index = 0; index < Page.Nodes.Count; index++)
         {
             <DesignerNodeHost Node="Page.Nodes[index]"
-                              Path="@($"Pages[0]/Nodes[{index}]")"
+                              Path="@($"Page/Nodes[{index}]")"
                               Registry="ResolvedRegistry" />
         }
     </div>

@@ -37,7 +37,9 @@ public sealed class DesignerRouteRedirectTests
 
         var cut = ctx.Render<Agterhuis.Ui.Demo.Components.Pages.DesignerStart>();
 
-        Assert.EndsWith("/designer/edit", navigation.Uri, StringComparison.OrdinalIgnoreCase);
+        var target = new Uri(navigation.Uri, UriKind.Absolute);
+        Assert.Equal("/designer/edit", target.AbsolutePath);
+        Assert.Contains("template=Blank", target.Query, StringComparison.OrdinalIgnoreCase);
         Assert.Equal(string.Empty, cut.Markup.Trim());
     }
 
@@ -52,6 +54,11 @@ public sealed class DesignerRouteRedirectTests
         {
             Uri = ToAbsoluteUri(uri).ToString();
             NotifyLocationChanged(false);
+        }
+
+        protected override void NavigateToCore(string uri, NavigationOptions options)
+        {
+            NavigateToCore(uri, options.ForceLoad);
         }
     }
 }

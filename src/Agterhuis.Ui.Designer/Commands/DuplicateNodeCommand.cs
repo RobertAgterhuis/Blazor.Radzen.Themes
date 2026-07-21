@@ -69,6 +69,6 @@ public sealed class DuplicateNodeCommand : IDesignDocumentCommand
         };
 
         var cloned = DesignDocumentSerializer.Deserialize(DesignDocumentSerializer.Serialize(tempDocument));
-        return cloned.Pages[0].Nodes[0];
+        return cloned.Pages.First().Nodes.First();
     }
 }

@@ -208,7 +208,6 @@ public class ProjectExporterTests
     [Fact]
     public void ExportProject_WithMultiplePages_GeneratesAllPages()
     {
-        // Arrange
         var document = new DesignDocument
         {
             Name = "Multi-Page",
@@ -221,11 +220,13 @@ public class ProjectExporterTests
             ]
         };
 
-        // Act
         var result = _exporter.ExportProject(document, "MyApp", "plum");
 
-        // Assert
         Assert.NotNull(result);
-        // More detailed validation would check the zip contents
+
+        using var archive = new ZipArchive(new MemoryStream(result.ZipData), ZipArchiveMode.Read);
+        Assert.Contains(archive.Entries, entry => entry.FullName == "MyApp/Components/Pages/.razor");
+        Assert.Contains(archive.Entries, entry => entry.FullName == "MyApp/Components/Pages/About.razor");
+        Assert.Contains(archive.Entries, entry => entry.FullName == "MyApp/Components/Pages/Contact.razor");
     }
 }

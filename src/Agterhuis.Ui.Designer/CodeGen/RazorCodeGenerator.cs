@@ -37,7 +37,10 @@ public sealed class RazorCodeGenerator
         ArgumentNullException.ThrowIfNull(page);
         ArgumentNullException.ThrowIfNull(document);
 
-        var qualityErrors = CodeGenerationGuard.ValidatePageForCodeGen(page, _registry);
+        var pageIndex = document.Pages.FindIndex(candidate => ReferenceEquals(candidate, page));
+        var qualityErrors = pageIndex >= 0
+            ? CodeGenerationGuard.ValidatePageForCodeGen(page, _registry, pageIndex)
+            : CodeGenerationGuard.ValidatePageForCodeGen(page, _registry);
         if (qualityErrors.Count > 0)
         {
             throw new InvalidOperationException(string.Join("; ", qualityErrors.Select(error => $"{error.Path}: {error.Message}")));

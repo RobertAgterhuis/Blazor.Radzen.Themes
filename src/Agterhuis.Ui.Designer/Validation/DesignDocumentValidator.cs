@@ -12,15 +12,27 @@ public static class DesignDocumentValidator
 
         registry ??= DesignerComponentRegistry.Instance;
         var errors = new List<DesignValidationError>();
+        var routeToIndexes = new Dictionary<string, List<int>>(StringComparer.OrdinalIgnoreCase);
 
         for (var pageIndex = 0; pageIndex < document.Pages.Count; pageIndex++)
         {
             var page = document.Pages[pageIndex];
             var pagePath = $"Pages[{pageIndex}]";
+            var normalizedRoute = (page.Route ?? string.Empty).Trim();
 
-            if (string.IsNullOrWhiteSpace(page.Route))
+            if (string.IsNullOrWhiteSpace(normalizedRoute))
             {
                 errors.Add(new DesignValidationError(pagePath, "MissingRoute", "Page route is required."));
+            }
+            else
+            {
+                if (!routeToIndexes.TryGetValue(normalizedRoute, out var indexes))
+                {
+                    indexes = [];
+                    routeToIndexes[normalizedRoute] = indexes;
+                }
+
+                indexes.Add(pageIndex);
             }
 
             if (string.IsNullOrWhiteSpace(page.Title))
@@ -30,7 +42,15 @@ public static class DesignDocumentValidator
 
             for (var nodeIndex = 0; nodeIndex < page.Nodes.Count; nodeIndex++)
             {
-                ValidateNode(page.Nodes[nodeIndex], page.Route, $"{pagePath}/Nodes[{nodeIndex}]", registry, errors);
+                ValidateNode(page.Nodes[nodeIndex], $"{pagePath}/Nodes[{nodeIndex}]", registry, errors);
+            }
+        }
+
+        foreach (var duplicate in routeToIndexes.Where(static pair => pair.Value.Count > 1))
+        {
+            foreach (var pageIndex in duplicate.Value)
+            {
+                errors.Add(new DesignValidationError($"Pages[{pageIndex}]/Route", "DuplicateRoute", $"Route '{duplicate.Key}' is used by multiple pages."));
             }
         }
 
@@ -39,7 +59,6 @@ public static class DesignDocumentValidator
 
     private static void ValidateNode(
         DesignNode node,
-        string route,
         string path,
         DesignerComponentRegistry registry,
         ICollection<DesignValidationError> errors)
@@ -91,7 +110,7 @@ public static class DesignDocumentValidator
             var children = slot.Value ?? [];
             for (var childIndex = 0; childIndex < children.Count; childIndex++)
             {
-                ValidateNode(children[childIndex], route, $"{path}/Children[{slot.Key}][{childIndex}]", registry, errors);
+                ValidateNode(children[childIndex], $"{path}/Children[{slot.Key}][{childIndex}]", registry, errors);
             }
         }
     }
