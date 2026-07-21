@@ -46,8 +46,14 @@ public sealed class DesignerShellIssueBehaviorTests
         var cut = ctx.Render<DesignerShell>(parameters => parameters
             .Add(component => component.Store, store));
 
-        Assert.Contains("Los eerst alle fouten op", cut.Markup, StringComparison.Ordinal);
-        Assert.Contains("disabled", cut.Markup, StringComparison.OrdinalIgnoreCase);
+        cut.FindAll(".designer-menu-toggle")
+            .First(button => button.TextContent.Contains("Bestand", StringComparison.Ordinal))
+            .Click();
+
+        var exportButton = cut.FindAll(".designer-menu__item")
+            .First(button => button.TextContent.Contains("Exporteren", StringComparison.Ordinal));
+
+        Assert.True(exportButton.HasAttribute("disabled"));
     }
 
     [Fact]
@@ -64,37 +70,73 @@ public sealed class DesignerShellIssueBehaviorTests
         var cut = ctx.Render<DesignerShell>(parameters => parameters
             .Add(component => component.Store, store));
 
+        cut.Find(".designer-panel--tree .designer-panel__toggle").Click();
+
         Assert.Contains("Issues", cut.Markup, StringComparison.Ordinal);
         Assert.Contains("fouten", cut.Markup, StringComparison.Ordinal);
     }
 
     private sealed class InMemoryDesignStore : IDesignStore
     {
-        private readonly Dictionary<string, string> _documents;
+        private readonly Dictionary<string, DesignDocumentEnvelope> _documents;
 
         public InMemoryDesignStore(Dictionary<string, string>? documents = null)
         {
-            _documents = documents ?? new Dictionary<string, string>(StringComparer.Ordinal);
+            _documents = new Dictionary<string, DesignDocumentEnvelope>(StringComparer.Ordinal);
+            if (documents is null)
+            {
+                return;
+            }
+
+            foreach (var pair in documents)
+            {
+                var document = Agterhuis.Ui.Designer.Serialization.DesignDocumentSerializer.Deserialize(pair.Value);
+                _documents[pair.Key] = new DesignDocumentEnvelope(pair.Key, 1, "test-v1", DateTimeOffset.UtcNow, document);
+            }
         }
 
-        public Task<IReadOnlyList<string>> GetRecentNamesAsync() => Task.FromResult<IReadOnlyList<string>>(_documents.Keys.ToArray());
+        public Task<IReadOnlyList<DesignListItem>> GetRecentAsync()
+            => Task.FromResult<IReadOnlyList<DesignListItem>>(
+                _documents.Values
+                    .Select(static envelope => new DesignListItem(envelope.Name, envelope.LastModified, envelope.Version))
+                    .ToArray());
 
-        public Task<string?> LoadAsync(string name)
+        public Task<DesignDocumentEnvelope?> LoadAsync(string name, int? version = null)
         {
             _documents.TryGetValue(name, out var value);
-            return Task.FromResult<string?>(value);
+            return Task.FromResult(value);
         }
 
-        public Task SaveAsync(string name, DesignDocument document)
+        public Task<DesignDocumentEnvelope> SaveAsync(string name, DesignDocument document, string? expectedETag)
         {
-            _documents[name] = System.Text.Json.JsonSerializer.Serialize(document);
-            return Task.CompletedTask;
+            var nextVersion = _documents.TryGetValue(name, out var existing) ? existing.Version + 1 : 1;
+            var envelope = new DesignDocumentEnvelope(name, nextVersion, $"test-v{nextVersion}", DateTimeOffset.UtcNow, document);
+            _documents[name] = envelope;
+            return Task.FromResult(envelope);
         }
 
         public Task RemoveAsync(string name)
         {
             _documents.Remove(name);
             return Task.CompletedTask;
+        }
+
+        public Task<IReadOnlyList<DesignVersionInfo>> GetVersionsAsync(string name)
+        {
+            if (!_documents.TryGetValue(name, out var envelope))
+            {
+                return Task.FromResult<IReadOnlyList<DesignVersionInfo>>([]);
+            }
+
+            return Task.FromResult<IReadOnlyList<DesignVersionInfo>>([
+                new DesignVersionInfo(envelope.Version, envelope.LastModified, 1024)
+            ]);
+        }
+
+        public Task<DesignDocumentEnvelope?> RestoreVersionAsync(string name, int version)
+        {
+            _documents.TryGetValue(name, out var envelope);
+            return Task.FromResult(envelope);
         }
     }
 

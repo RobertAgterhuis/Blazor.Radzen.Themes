@@ -9,20 +9,24 @@ using Agterhuis.Ui.Components.Feedback;
 using Agterhuis.Ui.Services;
 using Agterhuis.Ui.Theming;
 using System.Text.Json.Nodes;
+using System.Text.Json;
 using System.Threading;
+using System.Text;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
 using Radzen;
+using Radzen.Blazor;
 
 namespace Agterhuis.Ui.Designer.Components;
 
 public partial class DesignerShell : IDisposable
 {
-    private const string LocalStorageIndexKey = "agt-designer-documents";
-    private const string LocalStoragePrefix = "agt-designer-document-";
     private const string LocalStorageDraftPrefix = "agt-designer-draft-";
+    private const string LocalStorageDraftMetaPrefix = "agt-designer-draft-meta-";
+    private const string LocalStorageLayoutKey = "agt-designer-layout";
     private const string CommandScope = "designer";
 
     private readonly ProjectExporter _projectExporter = new();
@@ -44,8 +48,21 @@ public partial class DesignerShell : IDisposable
     private string? _selectedSavedName;
     private string? _selectedEntityName;
     private DesignDocumentTemplateKind _selectedTemplateKind = DesignDocumentTemplateKind.FormPage;
-    private List<string> _savedDocumentNames = [];
+    private List<DesignListItem> _savedDocuments = [];
     private bool _hasRecoveredDraft;
+    private string? _offlineWarning;
+    private bool _showConflictDialog;
+    private DesignDocumentEnvelope? _conflictServerEnvelope;
+    private bool _showVersionHistory;
+    private List<DesignVersionInfo> _versionHistory = [];
+    private int? _previewVersion;
+    private DesignDocumentEnvelope? _previewEnvelope;
+    private bool _showDraftRecoveryChoice;
+    private string? _draftJsonCandidate;
+    private string? _currentETag;
+    private int _currentVersion;
+    private DateTimeOffset _lastLocalAutosaveUtc = DateTimeOffset.MinValue;
+    private DateTimeOffset _lastRemoteAutosaveUtc = DateTimeOffset.MinValue;
     private string? _editingPageTitle;
     private int? _editingPageIndex;
     private int? _draggedPageIndex;
@@ -56,6 +73,17 @@ public partial class DesignerShell : IDisposable
     private bool _showInfoIssues = true;
     private CancellationTokenSource? _validationDebounceCts;
     private string _hardcodedColorFixToken = "var(--agt-color-primary-500)";
+    private bool _paletteCollapsed;
+    private bool _dataCollapsed = true;
+    private bool _treeCollapsed = true;
+    private bool _codeCollapsed = true;
+    private bool _fileMenuOpen;
+    private bool _settingsMenuOpen;
+    private bool _showNewDocumentDialog;
+    private int? _pageMenuIndex;
+    private string? _hoverDropzoneId;
+    private string? _uiFeedback;
+    private string _liveAnnouncement = "Designer geladen.";
 
     public DesignerShell()
     {
@@ -102,7 +130,7 @@ public partial class DesignerShell : IDisposable
     [SupplyParameterFromQuery(Name = "name")]
     public string? NameQuery { get; set; }
 
-    private IReadOnlyList<string> SavedDocumentNames => _savedDocumentNames;
+    private IReadOnlyList<string> SavedDocumentNames => _savedDocuments.Select(static item => item.Name).ToArray();
     private IReadOnlyList<string> CanvasThemeOptions => AgtTheme.All.SelectMany(static theme => new[] { theme.LightVariantId, theme.DarkVariantId }).OrderBy(static id => id, StringComparer.Ordinal).ToArray();
     private IReadOnlyList<DesignDocumentTemplates.TemplateDefinition> TemplateOptions => DesignDocumentTemplates.DefinitionsList;
     private IReadOnlyDictionary<string, IReadOnlyList<DesignerComponentDescriptor>> PaletteByCategory => Registry.Components.Where(static descriptor => descriptor.AllowedInPalette).Where(DescriptorMatchesFilter).GroupBy(static descriptor => descriptor.Category, StringComparer.Ordinal).OrderBy(static group => group.Key, StringComparer.Ordinal).ToDictionary(static group => group.Key, static group => (IReadOnlyList<DesignerComponentDescriptor>)group.OrderBy(static descriptor => descriptor.DisplayName, StringComparer.Ordinal).ToArray(), StringComparer.Ordinal);
@@ -116,6 +144,7 @@ public partial class DesignerShell : IDisposable
     private bool HasDuplicateActiveRoute => _commands.Document.Pages.Count(page => string.Equals(page.Route, ActivePage.Route, StringComparison.OrdinalIgnoreCase)) > 1;
     private string RoutePreview => string.Join(" | ", _commands.Document.Pages.Select(static page => string.IsNullOrWhiteSpace(page.Route) ? "/" : page.Route));
     private IReadOnlyList<DesignValidationError> ValidationIssues => _validationIssues;
+    private bool IsDragActive => _activeDrag is not null;
     private IReadOnlyList<DesignValidationError> FilteredIssues => _validationIssues
         .Where(issue => (issue.Severity != DesignValidationSeverity.Error || _showErrorIssues)
             && (issue.Severity != DesignValidationSeverity.Warning || _showWarningIssues)
@@ -141,11 +170,13 @@ public partial class DesignerShell : IDisposable
     protected override async Task OnInitializedAsync()
     {
         RegisterCommands();
+        await RestoreLayoutStateAsync();
         await LoadInitialDocumentAsync();
         EnsureSelectedPageIndex();
         await RestoreDocumentsFromStorageAsync();
         RefreshValidationIssues();
-        _hasRecoveredDraft = !string.IsNullOrWhiteSpace(await JS.InvokeAsync<string>("designerInterop.getText", LocalStorageDraftPrefix + _commands.Document.Name));
+        await EvaluateStoreAvailabilityAsync();
+        await EvaluateDraftRecoveryAsync();
         await JS.InvokeVoidAsync("designerInterop.setupResizablePanels");
         await InvokeAsync(StateHasChanged);
     }
@@ -160,17 +191,50 @@ public partial class DesignerShell : IDisposable
 
     private async Task RestoreDocumentsFromStorageAsync()
     {
-        _savedDocumentNames = (await Store.GetRecentNamesAsync()).ToList();
-        _savedDocumentNames = _savedDocumentNames.Where(static name => !string.IsNullOrWhiteSpace(name)).Distinct(StringComparer.Ordinal).OrderBy(static name => name, StringComparer.Ordinal).ToList();
+        _savedDocuments = (await Store.GetRecentAsync())
+            .Where(static item => !string.IsNullOrWhiteSpace(item.Name))
+            .GroupBy(static item => item.Name, StringComparer.Ordinal)
+            .Select(static group => group.OrderByDescending(item => item.LastModified).First())
+            .OrderByDescending(static item => item.LastModified)
+            .ThenBy(static item => item.Name, StringComparer.Ordinal)
+            .ToList();
     }
 
     private void OnPaletteFilterChanged(ChangeEventArgs args) => _paletteFilter = args.Value?.ToString() ?? string.Empty;
     private void OnPaletteDragStart(string componentType) => _activeDrag = DesignerDragPayload.Palette(componentType);
-    private Task OnDragStart(DesignerDragPayload payload) { _activeDrag = payload; return Task.CompletedTask; }
-    private Task OnDragEnd() { _activeDrag = null; return Task.CompletedTask; }
-    private void OnDropZoneDragOver(DragEventArgs args) { }
+    private Task OnDragStart(DesignerDragPayload payload)
+    {
+        _activeDrag = payload;
+        _liveAnnouncement = "Sleepbewerking gestart.";
+        return Task.CompletedTask;
+    }
 
-    private async Task OnDropRequested(DesignerDropTarget target)
+    private Task OnDragEnd()
+    {
+        _activeDrag = null;
+        _hoverDropzoneId = null;
+        return Task.CompletedTask;
+    }
+
+    private void OnDropZoneDragOver(DragEventArgs args, string dropzoneId)
+    {
+        _hoverDropzoneId = dropzoneId;
+    }
+
+    private void OnDropZoneDragEnter(string dropzoneId)
+    {
+        _hoverDropzoneId = dropzoneId;
+    }
+
+    private void OnDropZoneDragLeave(string dropzoneId)
+    {
+        if (string.Equals(_hoverDropzoneId, dropzoneId, StringComparison.Ordinal))
+        {
+            _hoverDropzoneId = null;
+        }
+    }
+
+    private async Task OnDropRequested(DesignerDropTarget target, string? dropzoneId = null)
     {
         if (_activeDrag is null)
         {
@@ -188,12 +252,17 @@ public partial class DesignerShell : IDisposable
         }
 
         _activeDrag = null;
+        _hoverDropzoneId = null;
         if (didMutate)
         {
+            _liveAnnouncement = "Component geplaatst op canvas.";
             await AutoSaveAsync();
             await InvokeAsync(StateHasChanged);
         }
     }
+
+    private Task OnDropRequested(DesignerDropTarget target)
+        => OnDropRequested(target, null);
 
     private bool AddFromPalette(DesignNodeLocation location, string componentType)
     {
@@ -215,7 +284,9 @@ public partial class DesignerShell : IDisposable
     private async Task OnSelectNode(string nodeId)
     {
         _selectedNodeId = nodeId;
+        _liveAnnouncement = "Node geselecteerd.";
         await InvokeAsync(StateHasChanged);
+        await JS.InvokeVoidAsync("designerInterop.scrollTreeItemIntoView", nodeId);
     }
 
     [JSInvokable]
@@ -235,6 +306,28 @@ public partial class DesignerShell : IDisposable
         {
             _selectedNodeId = nodeId;
         }
+    }
+
+    private async Task OnTreeNodeClicked(string nodeId)
+    {
+        _selectedNodeId = nodeId;
+        _liveAnnouncement = "Node geselecteerd vanuit structuurboom.";
+        await InvokeAsync(StateHasChanged);
+        await JS.InvokeVoidAsync("designerInterop.scrollTreeItemIntoView", nodeId);
+    }
+
+    private async Task OnPaletteItemClickedAsync(string componentType)
+    {
+        var location = ResolvePaletteClickInsertLocation();
+        if (!AddFromPalette(location, componentType))
+        {
+            return;
+        }
+
+        _uiFeedback = "Component toegevoegd.";
+        _liveAnnouncement = "Component toegevoegd via klik.";
+        await AutoSaveAsync();
+        await InvokeAsync(StateHasChanged);
     }
 
     private async Task OnUndo()
@@ -264,18 +357,33 @@ public partial class DesignerShell : IDisposable
         var name = _commands.Document.Name;
         var json = DesignDocumentSerializer.Serialize(_commands.Document);
         await JS.InvokeVoidAsync("designerInterop.saveDesignDocument", $"{name}.agtdesign", json);
-        await Store.SaveAsync(name, _commands.Document);
-        await JS.InvokeVoidAsync("designerInterop.removeItem", LocalStorageDraftPrefix + name);
-
-        if (!_savedDocumentNames.Contains(name, StringComparer.Ordinal))
+        try
         {
-            _savedDocumentNames.Add(name);
-            _savedDocumentNames = _savedDocumentNames.OrderBy(static item => item, StringComparer.Ordinal).ToList();
-            await JS.InvokeVoidAsync("designerInterop.setJson", LocalStorageIndexKey, _savedDocumentNames);
+            var envelope = await Store.SaveAsync(name, _commands.Document, _currentETag);
+            _currentETag = envelope.ETag;
+            _currentVersion = envelope.Version;
+            _offlineWarning = null;
         }
+        catch (DesignConflictException)
+        {
+            _offlineWarning = null;
+            _showConflictDialog = true;
+            _conflictServerEnvelope = await Store.LoadAsync(name);
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+        catch
+        {
+            _offlineWarning = "Offline modus - wijzigingen worden lokaal opgeslagen.";
+        }
+
+        await JS.InvokeVoidAsync("designerInterop.removeItem", LocalStorageDraftPrefix + name);
+        await JS.InvokeVoidAsync("designerInterop.removeItem", LocalStorageDraftMetaPrefix + name);
+        await RestoreDocumentsFromStorageAsync();
 
         _commands.MarkSaved();
         _hasRecoveredDraft = false;
+        _showDraftRecoveryChoice = false;
         await InvokeAsync(StateHasChanged);
     }
 
@@ -340,14 +448,33 @@ public partial class DesignerShell : IDisposable
         }
 
         _selectedSavedName = selected;
-        var json = await Store.LoadAsync(selected);
-        if (!string.IsNullOrWhiteSpace(json))
+        var envelope = await Store.LoadAsync(selected);
+        if (envelope is not null)
         {
-            ApplyLoadedDocument(json, markSaved: true);
+            ApplyLoadedDocument(DesignDocumentSerializer.Serialize(envelope.Document), markSaved: true);
+            _currentETag = envelope.ETag;
+            _currentVersion = envelope.Version;
+            await EvaluateDraftRecoveryAsync();
         }
     }
 
     private Task OnSelectedEntityChanged(string value) => SelectedEntityNameChanged.InvokeAsync(value);
+
+    private async Task OnImportEntitiesRequested((IReadOnlyList<DesignEntity> Entities, SchemaImportApplyOptions Options) args)
+    {
+        if (args.Entities.Count == 0)
+        {
+            return;
+        }
+
+        if (_commands.Execute(new ImportEntitiesCommand(args.Entities, args.Options)))
+        {
+            _selectedEntityName = _commands.Document.DataModel.Entities.FirstOrDefault()?.Name;
+            _hasRecoveredDraft = true;
+            await AutoSaveAsync();
+            await InvokeAsync(StateHasChanged);
+        }
+    }
 
     private async Task OnGenerateFormRequested(string entityName)
     {
@@ -357,9 +484,17 @@ public partial class DesignerShell : IDisposable
             return;
         }
 
+        var selectedFields = DesignSchemaImporter.BuildDefaultFormSelection(entity)
+            .Where(static item => item.Include)
+            .ToArray();
+        if (selectedFields.Length == 0)
+        {
+            return;
+        }
+
         var containerLocation = ResolveFormInsertLocation();
         var insertIndex = containerLocation.Index;
-        foreach (var node in BuildFormNodes(entity))
+        foreach (var node in BuildFormNodes(entity, selectedFields))
         {
             if (!_commands.Execute(new AddNodeCommand(ActivePageIndex, containerLocation with { Index = insertIndex++ }, node)))
             {
@@ -384,14 +519,33 @@ public partial class DesignerShell : IDisposable
         await InvokeAsync(StateHasChanged);
     }
 
+    private void OpenNewDocumentDialog()
+    {
+        _showNewDocumentDialog = true;
+        _fileMenuOpen = false;
+    }
+
+    private void CloseNewDocumentDialog()
+    {
+        _showNewDocumentDialog = false;
+    }
+
+    private async Task CreateNewDocumentFromDialogAsync()
+    {
+        await OnNewDocument();
+        _showNewDocumentDialog = false;
+    }
+
     private async Task LoadInitialDocumentAsync()
     {
         if (!string.IsNullOrWhiteSpace(NameQuery))
         {
-            var json = await Store.LoadAsync(NameQuery);
-            if (!string.IsNullOrWhiteSpace(json))
+            var envelope = await Store.LoadAsync(NameQuery);
+            if (envelope is not null)
             {
-                ApplyLoadedDocument(json, markSaved: true);
+                ApplyLoadedDocument(DesignDocumentSerializer.Serialize(envelope.Document), markSaved: true);
+                _currentETag = envelope.ETag;
+                _currentVersion = envelope.Version;
                 return;
             }
         }
@@ -419,6 +573,159 @@ public partial class DesignerShell : IDisposable
         _hasRecoveredDraft = false;
         EnsureSelectedPageIndex();
         StateHasChanged();
+    }
+
+    private async Task OpenVersionHistoryAsync()
+    {
+        _versionHistory = (await Store.GetVersionsAsync(_commands.Document.Name))
+            .OrderByDescending(static version => version.Version)
+            .ToList();
+        _previewVersion = null;
+        _previewEnvelope = null;
+        _showVersionHistory = true;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void CloseVersionHistory()
+    {
+        _showVersionHistory = false;
+        _previewVersion = null;
+        _previewEnvelope = null;
+    }
+
+    private async Task PreviewVersionAsync(int version)
+    {
+        _previewEnvelope = await Store.LoadAsync(_commands.Document.Name, version);
+        _previewVersion = version;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task RestoreVersionAsync(int version)
+    {
+        var restored = await Store.RestoreVersionAsync(_commands.Document.Name, version);
+        if (restored is null)
+        {
+            return;
+        }
+
+        ApplyLoadedDocument(DesignDocumentSerializer.Serialize(restored.Document), markSaved: true);
+        _currentETag = restored.ETag;
+        _currentVersion = restored.Version;
+        _showVersionHistory = false;
+        _previewEnvelope = null;
+        _previewVersion = null;
+        await JS.InvokeVoidAsync("designerInterop.removeItem", LocalStorageDraftPrefix + _commands.Document.Name);
+        await JS.InvokeVoidAsync("designerInterop.removeItem", LocalStorageDraftMetaPrefix + _commands.Document.Name);
+        await RestoreDocumentsFromStorageAsync();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task SaveConflictMineAsync()
+    {
+        var envelope = await Store.SaveAsync(_commands.Document.Name, _commands.Document, expectedETag: null);
+        _currentETag = envelope.ETag;
+        _currentVersion = envelope.Version;
+        _showConflictDialog = false;
+        _conflictServerEnvelope = null;
+        _commands.MarkSaved();
+        await RestoreDocumentsFromStorageAsync();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task LoadConflictServerAsync()
+    {
+        var server = _conflictServerEnvelope ?? await Store.LoadAsync(_commands.Document.Name);
+        if (server is not null)
+        {
+            ApplyLoadedDocument(DesignDocumentSerializer.Serialize(server.Document), markSaved: true);
+            _currentETag = server.ETag;
+            _currentVersion = server.Version;
+        }
+
+        _showConflictDialog = false;
+        _conflictServerEnvelope = null;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void CancelConflictDialog()
+    {
+        _showConflictDialog = false;
+        _conflictServerEnvelope = null;
+    }
+
+    private async Task EvaluateDraftRecoveryAsync()
+    {
+        var name = _commands.Document.Name;
+        var draftJson = await JS.InvokeAsync<string?>("designerInterop.getText", LocalStorageDraftPrefix + name);
+        if (string.IsNullOrWhiteSpace(draftJson))
+        {
+            _hasRecoveredDraft = false;
+            _showDraftRecoveryChoice = false;
+            _draftJsonCandidate = null;
+            return;
+        }
+
+        var draftMetaJson = await JS.InvokeAsync<string?>("designerInterop.getText", LocalStorageDraftMetaPrefix + name);
+        DateTimeOffset draftUpdated = DateTimeOffset.UtcNow;
+        if (!string.IsNullOrWhiteSpace(draftMetaJson))
+        {
+            try
+            {
+                var meta = JsonSerializer.Deserialize<DraftMeta>(draftMetaJson);
+                if (meta?.UpdatedUtc is DateTimeOffset parsed && parsed > DateTimeOffset.MinValue)
+                {
+                    draftUpdated = parsed;
+                }
+            }
+            catch
+            {
+                // Ignore malformed draft metadata.
+            }
+        }
+
+        var server = await Store.LoadAsync(name);
+        if (server is not null && draftUpdated <= server.LastModified)
+        {
+            _hasRecoveredDraft = false;
+            _showDraftRecoveryChoice = false;
+            _draftJsonCandidate = null;
+            return;
+        }
+
+        _hasRecoveredDraft = true;
+        _showDraftRecoveryChoice = true;
+        _draftJsonCandidate = draftJson;
+    }
+
+    private async Task UseLocalDraftAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_draftJsonCandidate))
+        {
+            return;
+        }
+
+        ApplyLoadedDocument(_draftJsonCandidate, markSaved: false);
+        _showDraftRecoveryChoice = false;
+        _hasRecoveredDraft = true;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task UseServerVersionAsync()
+    {
+        var server = await Store.LoadAsync(_commands.Document.Name);
+        if (server is not null)
+        {
+            ApplyLoadedDocument(DesignDocumentSerializer.Serialize(server.Document), markSaved: true);
+            _currentETag = server.ETag;
+            _currentVersion = server.Version;
+        }
+
+        await JS.InvokeVoidAsync("designerInterop.removeItem", LocalStorageDraftPrefix + _commands.Document.Name);
+        await JS.InvokeVoidAsync("designerInterop.removeItem", LocalStorageDraftMetaPrefix + _commands.Document.Name);
+        _showDraftRecoveryChoice = false;
+        _hasRecoveredDraft = false;
+        _draftJsonCandidate = null;
+        await InvokeAsync(StateHasChanged);
     }
 
     private Task OnTemplateChanged(object value)
@@ -530,7 +837,111 @@ public partial class DesignerShell : IDisposable
         }
     }
 
+    private async Task OnUpsertColumnNodes(IReadOnlyList<DataGridColumnConfig> columns)
+    {
+        if (SelectedNode is null || _selectedNodeId is null)
+        {
+            return;
+        }
+
+        var existingColumnIds = SelectedNode.Children.TryGetValue("Columns", out var existingColumns)
+            ? existingColumns.Select(static node => node.Id).ToArray()
+            : [];
+
+        foreach (var columnId in existingColumnIds)
+        {
+            _commands.Execute(new RemoveNodeCommand(ActivePageIndex, columnId));
+        }
+
+        var insertIndex = 0;
+        foreach (var column in columns.Where(static column => column.IsEnabled).OrderBy(static column => column.Order))
+        {
+            var descriptor = Registry.TryGetDescriptor("RadzenDataGridColumn", out var gridColumnDescriptor) ? gridColumnDescriptor : Registry.GetDescriptor("RadzenDataGridColumn");
+            var node = CreateNodeForDescriptor(descriptor);
+            node.Parameters["Title"] = DesignParameterValue.FromValue(column.Title);
+            node.Parameters["Property"] = DesignParameterValue.FromValue(column.FieldName);
+            node.Parameters["Sortable"] = DesignParameterValue.FromValue(column.Sortable);
+            node.Parameters["Filterable"] = DesignParameterValue.FromValue(column.Filterable);
+            node.Parameters["Width"] = DesignParameterValue.FromValue(column.Width);
+
+            if (!_commands.Execute(new AddNodeCommand(ActivePageIndex, new DesignNodeLocation(_selectedNodeId, "Columns", insertIndex++), node)))
+            {
+                return;
+            }
+        }
+
+        _hasRecoveredDraft = true;
+        await AutoSaveAsync();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task OnSetDataGridPaging(DataGridPagingConfig paging)
+    {
+        if (_selectedNodeId is null)
+        {
+            return;
+        }
+
+        var didMutate = false;
+        didMutate |= _commands.Execute(new SetNodeParameterCommand(ActivePageIndex, _selectedNodeId, "AllowPaging", DesignParameterValue.FromValue(paging.AllowPaging)));
+        didMutate |= _commands.Execute(new SetNodeParameterCommand(ActivePageIndex, _selectedNodeId, "PageSize", DesignParameterValue.FromValue(Math.Max(10, paging.PageSize))));
+
+        if (didMutate)
+        {
+            _hasRecoveredDraft = true;
+            await AutoSaveAsync();
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
     private void SetViewport(string viewport) => _viewport = _viewportWidths.ContainsKey(viewport) ? viewport : "desktop";
+
+    private void ToggleFileMenu()
+    {
+        _fileMenuOpen = !_fileMenuOpen;
+        if (_fileMenuOpen)
+        {
+            _settingsMenuOpen = false;
+        }
+    }
+
+    private void ToggleSettingsMenu()
+    {
+        _settingsMenuOpen = !_settingsMenuOpen;
+        if (_settingsMenuOpen)
+        {
+            _fileMenuOpen = false;
+        }
+    }
+
+    private void TogglePageMenu(int pageIndex)
+    {
+        _pageMenuIndex = _pageMenuIndex == pageIndex ? null : pageIndex;
+    }
+
+    private async Task TogglePaletteCollapsed()
+    {
+        _paletteCollapsed = !_paletteCollapsed;
+        await PersistLayoutStateAsync();
+    }
+
+    private async Task ToggleDataCollapsed()
+    {
+        _dataCollapsed = !_dataCollapsed;
+        await PersistLayoutStateAsync();
+    }
+
+    private async Task ToggleTreeCollapsed()
+    {
+        _treeCollapsed = !_treeCollapsed;
+        await PersistLayoutStateAsync();
+    }
+
+    private async Task ToggleCodeCollapsed()
+    {
+        _codeCollapsed = !_codeCollapsed;
+        await PersistLayoutStateAsync();
+    }
 
     private async Task OnPageKeyDown(KeyboardEventArgs args)
     {
@@ -549,6 +960,9 @@ public partial class DesignerShell : IDisposable
         if (string.Equals(args.Key, "Escape", StringComparison.OrdinalIgnoreCase))
         {
             _selectedNodeId = null;
+            _fileMenuOpen = false;
+            _settingsMenuOpen = false;
+            _pageMenuIndex = null;
             return;
         }
 
@@ -625,8 +1039,99 @@ public partial class DesignerShell : IDisposable
 
     private async Task AutoSaveAsync()
     {
-        await JS.InvokeVoidAsync("designerInterop.setJson", LocalStoragePrefix + _commands.Document.Name, DesignDocumentSerializer.Serialize(_commands.Document));
-        await JS.InvokeVoidAsync("designerInterop.setJson", LocalStorageDraftPrefix + _commands.Document.Name, DesignDocumentSerializer.Serialize(_commands.Document));
+        var now = DateTimeOffset.UtcNow;
+
+        if (now - _lastLocalAutosaveUtc >= TimeSpan.FromSeconds(5))
+        {
+            var json = DesignDocumentSerializer.Serialize(_commands.Document);
+            await JS.InvokeVoidAsync("designerInterop.setJson", LocalStorageDraftPrefix + _commands.Document.Name, json);
+            var draftMeta = JsonSerializer.Serialize(new DraftMeta { UpdatedUtc = now });
+            await JS.InvokeVoidAsync("designerInterop.setJson", LocalStorageDraftMetaPrefix + _commands.Document.Name, draftMeta);
+            _lastLocalAutosaveUtc = now;
+        }
+
+        if (now - _lastRemoteAutosaveUtc >= TimeSpan.FromSeconds(30))
+        {
+            try
+            {
+                var envelope = await Store.SaveAsync(_commands.Document.Name, _commands.Document, _currentETag);
+                _currentETag = envelope.ETag;
+                _currentVersion = envelope.Version;
+                _lastRemoteAutosaveUtc = now;
+                _offlineWarning = null;
+            }
+            catch (DesignConflictException)
+            {
+                _offlineWarning = "Conflictdetectie tijdens autosave. Gebruik handmatig opslaan om op te lossen.";
+            }
+            catch
+            {
+                _offlineWarning = "Offline modus - wijzigingen worden lokaal opgeslagen.";
+            }
+        }
+
+        if (!string.IsNullOrWhiteSpace(_uiFeedback))
+        {
+            _ = Task.Run(async () =>
+            {
+                await Task.Delay(1600);
+                _uiFeedback = null;
+                await InvokeAsync(StateHasChanged);
+            });
+        }
+    }
+
+    private async Task RestoreLayoutStateAsync()
+    {
+        JsonObject? payload = null;
+        try
+        {
+            payload = await JS.InvokeAsync<JsonObject?>("designerInterop.getJson", LocalStorageLayoutKey);
+        }
+        catch
+        {
+            var element = await JS.InvokeAsync<JsonElement>("designerInterop.getJson", LocalStorageLayoutKey);
+            if (element.ValueKind == JsonValueKind.Object)
+            {
+                payload = JsonNode.Parse(element.GetRawText()) as JsonObject;
+            }
+        }
+
+        if (payload is null)
+        {
+            return;
+        }
+
+        _paletteCollapsed = payload.TryGetPropertyValue("paletteCollapsed", out var paletteCollapsed) && paletteCollapsed?.GetValue<bool>() == true;
+        _dataCollapsed = !payload.TryGetPropertyValue("dataCollapsed", out var dataCollapsed) || dataCollapsed?.GetValue<bool>() != false;
+        _treeCollapsed = !payload.TryGetPropertyValue("treeCollapsed", out var treeCollapsed) || treeCollapsed?.GetValue<bool>() != false;
+        _codeCollapsed = !payload.TryGetPropertyValue("codeCollapsed", out var codeCollapsed) || codeCollapsed?.GetValue<bool>() != false;
+    }
+
+    private Task PersistLayoutStateAsync()
+    {
+        var payload = new
+        {
+            paletteCollapsed = _paletteCollapsed,
+            dataCollapsed = _dataCollapsed,
+            treeCollapsed = _treeCollapsed,
+            codeCollapsed = _codeCollapsed
+        };
+
+        return JS.InvokeVoidAsync("designerInterop.setJson", LocalStorageLayoutKey, payload).AsTask();
+    }
+
+    private async Task EvaluateStoreAvailabilityAsync()
+    {
+        try
+        {
+            _ = await Store.GetRecentAsync();
+            _offlineWarning = null;
+        }
+        catch
+        {
+            _offlineWarning = "Offline modus - wijzigingen worden lokaal opgeslagen.";
+        }
     }
 
     private bool DescriptorMatchesFilter(DesignerComponentDescriptor descriptor)
@@ -769,17 +1274,91 @@ public partial class DesignerShell : IDisposable
 
     private DesignNodeLocation ResolveFormInsertLocation() => _selectedNodeId is not null && SelectedDescriptor?.Slots.Contains("ChildContent", StringComparer.Ordinal) == true ? new DesignNodeLocation(_selectedNodeId, "ChildContent", GetChildInsertIndex(_selectedNodeId)) : DesignNodeLocation.Root(ActivePage.Nodes.Count);
 
-    private IReadOnlyList<DesignNode> BuildFormNodes(DesignEntity entity)
+    private IReadOnlyList<DesignNode> BuildFormNodes(DesignEntity entity, IReadOnlyList<FormFieldSelectionItem> selectedFields)
     {
         var card = CreateNodeForDescriptor(Registry.GetDescriptor("AgtCard"));
-        card.Children["ChildContent"] = entity.Fields.Select(BuildNodeForField).ToList();
-        card.Children["ChildContent"].Add(CreateFormActionsNode());
+        var header = CreateNodeForDescriptor(Registry.GetDescriptor("AgtPageHeader"));
+        header.Parameters["Title"] = DesignParameterValue.FromValue(entity.Name);
+
+        var rowDescriptor = Registry.GetDescriptor("RadzenRow");
+        var row = CreateNodeForDescriptor(rowDescriptor);
+
+        var fieldsByName = entity.Fields.ToDictionary(static field => field.Name, StringComparer.OrdinalIgnoreCase);
+        foreach (var selected in selectedFields)
+        {
+            if (!fieldsByName.TryGetValue(selected.Name, out var field))
+            {
+                continue;
+            }
+
+            var columnDescriptor = Registry.GetDescriptor("RadzenColumn");
+            var column = CreateNodeForDescriptor(columnDescriptor);
+            var fullWidth = ShouldUseFullWidth(field);
+            column.Parameters["Size"] = DesignParameterValue.FromValue(fullWidth ? 12 : 6);
+            column.Children["ChildContent"] = [BuildNodeForField(entity, field)];
+            row.Children["ChildContent"].Add(column);
+        }
+
+        card.Children["ChildContent"] =
+        [
+            header,
+            row,
+            CreateFormActionsNode()
+        ];
+
         return [card];
     }
 
-    private DesignNode BuildNodeForField(DesignField field)
+    private DesignNode BuildNodeForField(DesignEntity owner, DesignField field)
     {
-        var componentType = field.Type switch
+        var componentType = ResolveFieldComponentType(field);
+
+        var descriptor = Registry.GetDescriptor(componentType);
+        var node = CreateNodeForDescriptor(descriptor);
+        var label = field.DisplayLabel ?? field.Name;
+        node.Parameters["Label"] = DesignParameterValue.FromValue(label);
+        node.Parameters["AriaLabel"] = DesignParameterValue.FromValue(label);
+
+        if (componentType is "AgtDropdown")
+        {
+            if (field.Type == DesignFieldType.Enum)
+            {
+                node.Parameters["Placeholder"] = DesignParameterValue.FromValue($"Kies {label.ToLowerInvariant()}");
+            }
+            else if (field.IsForeignKey && !string.IsNullOrWhiteSpace(field.ReferenceEntityName))
+            {
+                node.Parameters["Data"] = new DesignParameterValue { Expression = $"@entities.{field.ReferenceEntityName}" };
+                node.Parameters["TextProperty"] = DesignParameterValue.FromValue("Name");
+                node.Parameters["ValueProperty"] = DesignParameterValue.FromValue("Id");
+            }
+        }
+
+        if (field.IsRequired && descriptor.Parameters.Any(static parameter => string.Equals(parameter.Name, "ValidationMessage", StringComparison.Ordinal)))
+        {
+            node.Parameters["ValidationMessage"] = DesignParameterValue.FromValue($"{label} is verplicht.");
+        }
+
+        if (componentType == "AgtTextArea")
+        {
+            node.Parameters["Rows"] = DesignParameterValue.FromValue(4L);
+        }
+
+        return node;
+    }
+
+    private static string ResolveFieldComponentType(DesignField field)
+    {
+        if (field.IsForeignKey)
+        {
+            return "AgtDropdown";
+        }
+
+        if (field.Type == DesignFieldType.String && IsLongTextField(field))
+        {
+            return "AgtTextArea";
+        }
+
+        return field.Type switch
         {
             DesignFieldType.Int or DesignFieldType.Decimal => "AgtNumericField",
             DesignFieldType.Bool => "AgtSwitch",
@@ -787,18 +1366,18 @@ public partial class DesignerShell : IDisposable
             DesignFieldType.Enum => "AgtDropdown",
             _ => "AgtTextField"
         };
-
-        var descriptor = Registry.GetDescriptor(componentType);
-        var node = CreateNodeForDescriptor(descriptor);
-        node.Parameters["Label"] = DesignParameterValue.FromValue(field.Name);
-        node.Parameters["AriaLabel"] = DesignParameterValue.FromValue(field.Name);
-        if (field.Type == DesignFieldType.Enum)
-        {
-            node.Parameters["Placeholder"] = DesignParameterValue.FromValue($"Kies {field.Name.ToLowerInvariant()}");
-        }
-
-        return node;
     }
+
+    private static bool IsLongTextField(DesignField field)
+    {
+        var source = field.DisplayLabel ?? field.Name;
+        return source.Contains("Opmerkingen", StringComparison.OrdinalIgnoreCase)
+            || source.Contains("Beschrijving", StringComparison.OrdinalIgnoreCase)
+            || source.Contains("Notes", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool ShouldUseFullWidth(DesignField field)
+        => field.IsForeignKey || field.Type == DesignFieldType.Enum || IsLongTextField(field);
 
     private DesignNode CreateFormActionsNode()
     {
@@ -860,7 +1439,50 @@ public partial class DesignerShell : IDisposable
 
     private static IReadOnlyList<DesignerTreeNode> BuildTree(IReadOnlyList<DesignNode> nodes) => nodes.Select(BuildTreeNode).ToArray();
 
-    private static DesignerTreeNode BuildTreeNode(DesignNode node) => new(node.Id, node.ComponentType, node.Children.OrderBy(static pair => pair.Key, StringComparer.Ordinal).SelectMany(static pair => pair.Value).Select(BuildTreeNode).ToArray());
+    private static DesignerTreeNode BuildTreeNode(DesignNode node) => new(node.Id, node.ComponentType, node.ComponentType, node.Children.OrderBy(static pair => pair.Key, StringComparer.Ordinal).SelectMany(static pair => pair.Value).Select(BuildTreeNode).ToArray());
+
+    private RenderFragment RenderTreeNodes(IReadOnlyList<DesignerTreeNode> nodes)
+    {
+        return builder =>
+        {
+            var sequence = 0;
+            foreach (var node in nodes)
+            {
+                RenderTreeNode(builder, node, ref sequence, 0);
+            }
+        };
+    }
+
+    private void RenderTreeNode(RenderTreeBuilder builder, DesignerTreeNode node, ref int sequence, int depth)
+    {
+        builder.OpenElement(sequence++, "button");
+        builder.AddAttribute(sequence++, "type", "button");
+        builder.AddAttribute(sequence++, "class", string.Equals(node.Id, _selectedNodeId, StringComparison.Ordinal) ? "designer-tree__item designer-tree__item--selected" : "designer-tree__item");
+        builder.AddAttribute(sequence++, "style", $"padding-left: calc(var(--agt-spacing-2) + {depth} * 0.75rem);");
+        builder.AddAttribute(sequence++, "data-agt-tree-node-id", node.Id);
+        builder.AddAttribute(sequence++, "onclick", EventCallback.Factory.Create(this, () => OnTreeNodeClicked(node.Id)));
+
+        builder.OpenComponent<RadzenIcon>(sequence++);
+        builder.AddAttribute(sequence++, "Icon", ResolveTreeIcon(node.ComponentType));
+        builder.CloseComponent();
+
+        builder.OpenElement(sequence++, "span");
+        builder.AddContent(sequence++, node.Text);
+        builder.CloseElement();
+        builder.CloseElement();
+
+        for (var index = 0; index < node.Children.Count; index++)
+        {
+            RenderTreeNode(builder, node.Children[index], ref sequence, depth + 1);
+        }
+    }
+
+    private string ResolveTreeIcon(string componentType)
+    {
+        return Registry.TryGetDescriptor(componentType, out var descriptor)
+            ? descriptor.Icon
+            : "widgets";
+    }
 
     private static bool TryFindNode(IReadOnlyList<DesignNode> nodes, string targetId, out List<DesignNode> path, out List<DesignNode> container, out int index)
     {
@@ -1011,6 +1633,7 @@ public partial class DesignerShell : IDisposable
 
         if (_commands.Execute(new RenamePageCommand(index, title)))
         {
+            _pageMenuIndex = null;
             _hasRecoveredDraft = true;
             await AutoSaveAsync();
             await InvokeAsync(StateHasChanged);
@@ -1056,6 +1679,7 @@ public partial class DesignerShell : IDisposable
 
         if (_commands.Execute(new DuplicatePageCommand(index, route, title)))
         {
+            _pageMenuIndex = null;
             _selectedPageIndex = Math.Clamp(index + 1, 0, _commands.Document.Pages.Count - 1);
             _selectedNodeId = null;
             _hasRecoveredDraft = true;
@@ -1081,6 +1705,7 @@ public partial class DesignerShell : IDisposable
         var nextPageIndex = index == 0 ? 0 : index - 1;
         if (_commands.Execute(new RemovePageCommand(index)))
         {
+            _pageMenuIndex = null;
             _selectedPageIndex = Math.Clamp(nextPageIndex, 0, _commands.Document.Pages.Count - 1);
             _selectedNodeId = null;
             _hasRecoveredDraft = true;
@@ -1150,6 +1775,67 @@ public partial class DesignerShell : IDisposable
     private void OnCommandStackDocumentChanged(object? sender, DesignDocumentChangedEventArgs args)
     {
         _ = DebounceValidationAsync();
+    }
+
+    private DesignNodeLocation ResolvePaletteClickInsertLocation()
+    {
+        if (_selectedNodeId is null)
+        {
+            return DesignNodeLocation.Root(ActivePage.Nodes.Count);
+        }
+
+        if (SelectedDescriptor?.Slots.Contains("ChildContent", StringComparer.Ordinal) == true)
+        {
+            return new DesignNodeLocation(_selectedNodeId, "ChildContent", GetChildInsertIndex(_selectedNodeId));
+        }
+
+        return DesignNodeLocation.Root(ActivePage.Nodes.Count);
+    }
+
+    private async Task OnInlineAddRequested((string ParentNodeId, string SlotName, string ComponentType) request)
+    {
+        if (string.IsNullOrWhiteSpace(request.ParentNodeId)
+            || string.IsNullOrWhiteSpace(request.SlotName)
+            || string.IsNullOrWhiteSpace(request.ComponentType))
+        {
+            return;
+        }
+
+        if (!TryFindNode(ActivePage.Nodes, request.ParentNodeId, out _, out var container, out var index))
+        {
+            return;
+        }
+
+        var parent = container[index];
+        parent.Children.TryGetValue(request.SlotName, out var slotNodes);
+        var insertIndex = slotNodes?.Count ?? 0;
+        var location = new DesignNodeLocation(request.ParentNodeId, request.SlotName, insertIndex);
+        if (!AddFromPalette(location, request.ComponentType))
+        {
+            return;
+        }
+
+        _uiFeedback = "Component toegevoegd in slot.";
+        _liveAnnouncement = "Component toegevoegd in leeg slot.";
+        await AutoSaveAsync();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private string GetRootDropzoneClass(int index)
+    {
+        var id = $"root-{index}";
+        var classes = new StringBuilder("designer-dropzone designer-dropzone--root");
+        if (IsDragActive)
+        {
+            classes.Append(" designer-dropzone--ready");
+        }
+
+        if (string.Equals(_hoverDropzoneId, id, StringComparison.Ordinal))
+        {
+            classes.Append(" designer-dropzone--hover");
+        }
+
+        return classes.ToString();
     }
 
     private async Task DebounceValidationAsync()
@@ -1382,10 +2068,17 @@ public partial class DesignerShell : IDisposable
         return node.ComponentType;
     }
 
-    private sealed record DesignerTreeNode(string Id, string Text, IReadOnlyList<DesignerTreeNode> Children)
+    private sealed record DesignerTreeNode(string Id, string Text, string ComponentType, IReadOnlyList<DesignerTreeNode> Children)
     {
         public string Value => Id;
     }
 
+    private sealed record InlineAddRequest(string ParentNodeId, string SlotName, string ComponentType);
+
     private sealed record TokenOption(string Label, string Value);
+
+    private sealed class DraftMeta
+    {
+        public DateTimeOffset UpdatedUtc { get; set; }
+    }
 }

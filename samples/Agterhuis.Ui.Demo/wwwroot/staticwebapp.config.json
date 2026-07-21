@@ -21,6 +21,12 @@
   },
   "routes": [
     {
+      "route": "/api/*",
+      "allowedRoles": [
+        "anonymous"
+      ]
+    },
+    {
       "route": "/not-found",
       "redirect": "/index.html",
       "statusCode": 302

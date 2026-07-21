@@ -24,14 +24,22 @@ The designer is a model-first editor in the demo app. It edits `DesignDocument` 
 - No event logic authoring.
 - Single-select editing.
 - Read-only code preview.
-- Local browser persistence only, with draft recovery.
+- Hybrid persistence: local plus optional server store with conflict detection.
 
 ## Roadmap
 
 - Two-way Monaco editing.
 - Multi-select.
 - Logic hooks.
-- Shared storage for documents across devices.
+- Deeper shared-storage administration and collaboration features.
+
+## Persistence (Prompt 63)
+
+- `IDesignStore` now supports envelopes, versions, restore, and optimistic concurrency.
+- `LocalDesignStore` remains available for offline and fallback behavior.
+- `RemoteDesignStore` targets `/api/designs` endpoints hosted by SWA managed Functions.
+- `FallbackDesignStore` auto-switches to local mode when the API is unavailable.
+- Conflict flow uses ETag checks and a user choice dialog (save mine, load server, cancel).
 
 ## Data model
 

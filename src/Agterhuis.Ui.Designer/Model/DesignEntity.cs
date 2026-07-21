@@ -9,4 +9,6 @@ public sealed class DesignEntity
     public List<DesignField> Fields { get; set; } = [];
 
     public DesignSeedSettings Seed { get; set; } = new();
+
+    public DesignEntityMetadata Metadata { get; set; } = new();
 }

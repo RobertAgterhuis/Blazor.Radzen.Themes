@@ -1,6 +1,7 @@
 @page "/designer/edit"
 @layout DesignerLayout
 @using Agterhuis.Ui.Designer.Components
+@using Agterhuis.Ui.Designer.Persistence
 @using Agterhuis.Ui.Designer.Registry
 @using Agterhuis.Ui.Demo.Services
 
@@ -11,6 +12,6 @@
                DefaultCanvasTheme="plum-dark" />
 
 @code {
-    [Inject] private LocalDesignStore DesignStore { get; set; } = default!;
+    [Inject] private IDesignStore DesignStore { get; set; } = default!;
     [Inject] private DesignerComponentRegistry Registry { get; set; } = default!;
 }

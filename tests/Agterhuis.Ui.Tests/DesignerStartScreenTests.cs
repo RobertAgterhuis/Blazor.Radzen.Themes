@@ -30,7 +30,9 @@ public sealed class DesignerRouteRedirectTests
         ctx.Services.AddRadzenComponents();
         var jsRuntime = new DesignerJsRuntimeStub();
         ctx.Services.AddSingleton<IJSRuntime>(jsRuntime);
-        ctx.Services.AddSingleton(new LocalDesignStore(jsRuntime));
+        var localStore = new LocalDesignStore(jsRuntime);
+        ctx.Services.AddSingleton(localStore);
+        ctx.Services.AddSingleton<IDesignStore>(localStore);
 
         var navigation = new TestNavigationManager("https://localhost/", "https://localhost/designer");
         ctx.Services.AddSingleton<NavigationManager>(navigation);

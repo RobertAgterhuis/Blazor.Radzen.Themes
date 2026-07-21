@@ -65,9 +65,26 @@
     [Parameter]
     public EventCallback EndDrag { get; set; }
 
+    [Parameter]
+    public bool IsDragActive { get; set; }
+
+    [Parameter]
+    public string? HoverDropzoneId { get; set; }
+
+    [Parameter]
+    public EventCallback<string> DropzoneDragEnter { get; set; }
+
+    [Parameter]
+    public EventCallback<string> DropzoneDragLeave { get; set; }
+
+    [Parameter]
+    public EventCallback<(string ParentNodeId, string SlotName, string ComponentType)> AddNodeRequested { get; set; }
+
     private DesignerComponentDescriptor? _descriptor;
     private Dictionary<string, object?> _parameters = [];
     private string? _errorMessage;
+    private readonly Dictionary<string, bool> _slotPickerVisible = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, string> _slotPickerSelection = new(StringComparer.Ordinal);
 
     private bool IsSelected => string.Equals(Node.Id, SelectedNodeId, StringComparison.Ordinal);
 
@@ -158,6 +175,7 @@
     private void RenderSlot(RenderTreeBuilder builder, string slotName, IReadOnlyList<DesignNode> children)
     {
         var sequence = 0;
+        var firstDropzoneId = BuildDropzoneId(slotName, 0);
 
         builder.OpenElement(sequence++, "div");
         builder.AddAttribute(sequence++, "class", "designer-slot");
@@ -169,9 +187,11 @@
         builder.CloseElement();
 
         builder.OpenElement(sequence++, "div");
-        builder.AddAttribute(sequence++, "class", "designer-dropzone");
+        builder.AddAttribute(sequence++, "class", GetDropzoneClass(firstDropzoneId));
         builder.AddAttribute(sequence++, "title", "Drop hier om in te voegen");
-        builder.AddAttribute(sequence++, "ondragover", EventCallback.Factory.Create<DragEventArgs>(this, static _ => { }));
+        builder.AddAttribute(sequence++, "ondragenter", EventCallback.Factory.Create(this, () => DropzoneDragEnter.InvokeAsync(firstDropzoneId)));
+        builder.AddAttribute(sequence++, "ondragleave", EventCallback.Factory.Create(this, () => DropzoneDragLeave.InvokeAsync(firstDropzoneId)));
+        builder.AddAttribute(sequence++, "ondragover", EventCallback.Factory.Create<DragEventArgs>(this, _ => { }));
         builder.AddEventPreventDefaultAttribute(sequence++, "ondragover", true);
         builder.AddAttribute(sequence++, "ondrop", EventCallback.Factory.Create<DragEventArgs>(this, () => DropNode.InvokeAsync(new DesignerDropTarget(new Agterhuis.Ui.Designer.Commands.DesignNodeLocation(Node.Id, slotName, 0)))));
         builder.AddEventPreventDefaultAttribute(sequence++, "ondrop", true);
@@ -180,8 +200,50 @@
         if (children.Count == 0)
         {
             builder.OpenElement(sequence++, "div");
-            builder.AddAttribute(sequence++, "class", "designer-slot__empty");
-            builder.AddContent(sequence++, "Lege slot");
+            builder.AddAttribute(sequence++, "class", IsDragActive ? "designer-slot__empty designer-slot__empty--ready" : "designer-slot__empty");
+
+            builder.OpenElement(sequence++, "span");
+            builder.AddContent(sequence++, "Leeg slot");
+            builder.CloseElement();
+
+            builder.OpenElement(sequence++, "button");
+            builder.AddAttribute(sequence++, "type", "button");
+            builder.AddAttribute(sequence++, "class", "designer-slot__add");
+            builder.AddAttribute(sequence++, "onclick", EventCallback.Factory.Create(this, () => ToggleSlotPicker(slotName)));
+            builder.AddContent(sequence++, "+");
+            builder.CloseElement();
+
+            if (IsSlotPickerVisible(slotName))
+            {
+                builder.OpenElement(sequence++, "div");
+                builder.AddAttribute(sequence++, "class", "designer-slot__picker");
+
+                var options = GetSlotPaletteOptions();
+                builder.OpenElement(sequence++, "select");
+                builder.AddAttribute(sequence++, "class", "designer-slot__picker-select");
+                builder.AddAttribute(sequence++, "value", GetSlotPickerSelection(slotName, options));
+                builder.AddAttribute(sequence++, "onchange", EventCallback.Factory.Create<ChangeEventArgs>(this, args => OnSlotSelectionChanged(slotName, args.Value?.ToString())));
+
+                foreach (var option in options)
+                {
+                    builder.OpenElement(sequence++, "option");
+                    builder.AddAttribute(sequence++, "value", option.ComponentType);
+                    builder.AddContent(sequence++, option.DisplayName);
+                    builder.CloseElement();
+                }
+
+                builder.CloseElement();
+
+                builder.OpenElement(sequence++, "button");
+                builder.AddAttribute(sequence++, "type", "button");
+                builder.AddAttribute(sequence++, "class", "designer-slot__picker-add");
+                builder.AddAttribute(sequence++, "onclick", EventCallback.Factory.Create(this, () => AddSlotSelection(slotName)));
+                builder.AddContent(sequence++, "Toevoegen");
+                builder.CloseElement();
+
+                builder.CloseElement();
+            }
+
             builder.CloseElement();
         }
 
@@ -200,10 +262,13 @@
             builder.CloseComponent();
 
             var targetIndex = index + 1;
+            var dropzoneId = BuildDropzoneId(slotName, targetIndex);
             builder.OpenElement(sequence++, "div");
-            builder.AddAttribute(sequence++, "class", "designer-dropzone");
+            builder.AddAttribute(sequence++, "class", GetDropzoneClass(dropzoneId));
             builder.AddAttribute(sequence++, "title", "Drop hier om in te voegen");
-            builder.AddAttribute(sequence++, "ondragover", EventCallback.Factory.Create<DragEventArgs>(this, static _ => { }));
+            builder.AddAttribute(sequence++, "ondragenter", EventCallback.Factory.Create(this, () => DropzoneDragEnter.InvokeAsync(dropzoneId)));
+            builder.AddAttribute(sequence++, "ondragleave", EventCallback.Factory.Create(this, () => DropzoneDragLeave.InvokeAsync(dropzoneId)));
+            builder.AddAttribute(sequence++, "ondragover", EventCallback.Factory.Create<DragEventArgs>(this, _ => { }));
             builder.AddEventPreventDefaultAttribute(sequence++, "ondragover", true);
             builder.AddAttribute(sequence++, "ondrop", EventCallback.Factory.Create<DragEventArgs>(this, () => DropNode.InvokeAsync(new DesignerDropTarget(new Agterhuis.Ui.Designer.Commands.DesignNodeLocation(Node.Id, slotName, targetIndex)))));
             builder.AddEventPreventDefaultAttribute(sequence++, "ondrop", true);
@@ -211,5 +276,73 @@
         }
 
         builder.CloseElement();
+    }
+
+    private string GetDropzoneClass(string dropzoneId)
+    {
+        var classes = "designer-dropzone";
+        if (IsDragActive)
+        {
+            classes += " designer-dropzone--ready";
+        }
+
+        if (string.Equals(HoverDropzoneId, dropzoneId, StringComparison.Ordinal))
+        {
+            classes += " designer-dropzone--hover";
+        }
+
+        return classes;
+    }
+
+    private string BuildDropzoneId(string slotName, int index)
+        => $"{Node.Id}:{slotName}:{index}";
+
+    private IReadOnlyList<DesignerComponentDescriptor> GetSlotPaletteOptions()
+        => Registry.Components
+            .Where(static descriptor => descriptor.AllowedInPalette)
+            .OrderBy(static descriptor => descriptor.DisplayName, StringComparer.Ordinal)
+            .ToArray();
+
+    private bool IsSlotPickerVisible(string slotName)
+        => _slotPickerVisible.TryGetValue(slotName, out var isVisible) && isVisible;
+
+    private void ToggleSlotPicker(string slotName)
+    {
+        _slotPickerVisible.TryGetValue(slotName, out var isVisible);
+        _slotPickerVisible[slotName] = !isVisible;
+    }
+
+    private string GetSlotPickerSelection(string slotName, IReadOnlyList<DesignerComponentDescriptor> options)
+    {
+        if (_slotPickerSelection.TryGetValue(slotName, out var value) && !string.IsNullOrWhiteSpace(value))
+        {
+            return value;
+        }
+
+        var fallback = options.FirstOrDefault()?.ComponentType ?? string.Empty;
+        _slotPickerSelection[slotName] = fallback;
+        return fallback;
+    }
+
+    private void OnSlotSelectionChanged(string slotName, string? componentType)
+    {
+        if (string.IsNullOrWhiteSpace(componentType))
+        {
+            return;
+        }
+
+        _slotPickerSelection[slotName] = componentType;
+    }
+
+    private Task AddSlotSelection(string slotName)
+    {
+        if (!_slotPickerSelection.TryGetValue(slotName, out var componentType)
+            || string.IsNullOrWhiteSpace(componentType))
+        {
+            return Task.CompletedTask;
+        }
+
+        _slotPickerVisible[slotName] = false;
+        return AddNodeRequested.InvokeAsync((Node.Id, slotName, componentType));
     }
 }

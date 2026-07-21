@@ -1,7 +1,8 @@
 using Agterhuis.Ui.Designer.Model;
 using Agterhuis.Ui.Designer.Registry;
-using Agterhuis.Ui.Demo.Components.Designer;
+using Agterhuis.Ui.Designer.Components;
 using Bunit;
+using Microsoft.AspNetCore.Components;
 
 namespace Agterhuis.Ui.Tests;
 
@@ -52,6 +53,7 @@ public sealed class DesignerPropertyPanelTests
             .Add(component => component.Page, page)
             .Add(component => component.CanvasTheme, "plum-dark")
             .Add(component => component.ThemeOptions, new[] { "plum-dark", "plum-light" })
+            .Add(component => component.DataModel, DesignDataModelSeeder.CreateDefault())
             .Add(component => component.SelectedNode, node)
             .Add(component => component.SelectedDescriptor, descriptor));
 
@@ -85,6 +87,7 @@ public sealed class DesignerPropertyPanelTests
             .Add(component => component.Page, page)
             .Add(component => component.CanvasTheme, "plum-dark")
             .Add(component => component.ThemeOptions, new[] { "plum-dark" })
+            .Add(component => component.DataModel, DesignDataModelSeeder.CreateDefault())
             .Add(component => component.SelectedNode, node)
             .Add(component => component.SelectedDescriptor, descriptor));
 
@@ -97,6 +100,7 @@ public sealed class DesignerPropertyPanelTests
             .Add(component => component.Page, page)
             .Add(component => component.CanvasTheme, "plum-dark")
             .Add(component => component.ThemeOptions, new[] { "plum-dark" })
+            .Add(component => component.DataModel, DesignDataModelSeeder.CreateDefault())
             .Add(component => component.SelectedNode, node)
             .Add(component => component.SelectedDescriptor, descriptor));
 
@@ -128,6 +132,7 @@ public sealed class DesignerPropertyPanelTests
             .Add(component => component.Page, page)
             .Add(component => component.CanvasTheme, "plum-dark")
             .Add(component => component.ThemeOptions, new[] { "plum-dark" })
+            .Add(component => component.DataModel, DesignDataModelSeeder.CreateDefault())
             .Add(component => component.SelectedNode, node)
             .Add(component => component.SelectedDescriptor, descriptor));
 
@@ -164,6 +169,7 @@ public sealed class DesignerPropertyPanelTests
             .Add(component => component.Page, page)
             .Add(component => component.CanvasTheme, "plum-dark")
             .Add(component => component.ThemeOptions, new[] { "plum-dark" })
+            .Add(component => component.DataModel, DesignDataModelSeeder.CreateDefault())
             .Add(component => component.SelectedNode, node)
             .Add(component => component.SelectedDescriptor, descriptor));
 
@@ -215,11 +221,104 @@ public sealed class DesignerPropertyPanelTests
             .Add(component => component.Page, new DesignPage { Route = "/", Title = "Page" })
             .Add(component => component.CanvasTheme, "plum-dark")
             .Add(component => component.ThemeOptions, new[] { "plum-dark" })
+            .Add(component => component.DataModel, DesignDataModelSeeder.CreateDefault())
             .Add(component => component.SelectedNode, node)
             .Add(component => component.SelectedDescriptor, descriptor));
 
         Assert.NotNull(cut.Find("[data-agt-designer-columns-editor='true']"));
         Assert.Contains("Dossiernummer", cut.Markup, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task PropertyPanel_BindingPicker_SavesExpression()
+    {
+        using var ctx = new BunitContext();
+        ctx.Services.AddRadzenComponents();
+        ctx.JSInterop.Mode = JSRuntimeMode.Loose;
+
+        var model = DesignDataModelSeeder.CreateDefault();
+        var descriptor = CreateDescriptor([CreateParameter("Data", "IEnumerable", isBindable: true)]);
+        var node = new DesignNode
+        {
+            Id = "node-1",
+            ComponentType = "RadzenDataGrid",
+            Parameters = new Dictionary<string, DesignParameterValue>(StringComparer.Ordinal)
+        };
+
+        (ComponentParameterDescriptor Parameter, DesignParameterValue? Value)? captured = null;
+        var cut = ctx.Render<PropertyPanel>(parameters => parameters
+            .Add(component => component.Page, new DesignPage { Route = "/", Title = "Page" })
+            .Add(component => component.CanvasTheme, "plum-dark")
+            .Add(component => component.ThemeOptions, new[] { "plum-dark" })
+            .Add(component => component.DataModel, model)
+            .Add(component => component.SelectedNode, node)
+            .Add(component => component.SelectedDescriptor, descriptor)
+            .Add(component => component.SetNodeParameter, EventCallback.Factory.Create<(ComponentParameterDescriptor Parameter, DesignParameterValue? Value)>(this, value => captured = value)));
+
+        var method = cut.Instance.GetType()
+            .GetMethod("OnBindingEntityChanged", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        Assert.NotNull(method);
+        var task = method!.Invoke(cut.Instance, [descriptor.Parameters[0], model.Entities[0].Name]) as Task;
+        Assert.NotNull(task);
+        await task!;
+
+        Assert.NotNull(captured);
+        Assert.NotNull(captured!.Value.Value);
+        Assert.StartsWith("@entities.", captured.Value.Value!.Expression, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void PropertyPanel_DataGridColumns_ApplyInvokesCallback()
+    {
+        using var ctx = new BunitContext();
+        ctx.Services.AddRadzenComponents();
+        ctx.JSInterop.Mode = JSRuntimeMode.Loose;
+
+        var model = DesignDataModelSeeder.CreateDefault();
+        var entity = model.Entities[0];
+        var descriptor = new DesignerComponentDescriptor(
+            "RadzenDataGrid",
+            typeof(Radzen.Blazor.RadzenDataGrid<object>),
+            "Data Grid",
+            "Data",
+            "table_rows",
+            true,
+            false,
+            false,
+            ["Columns"],
+            [CreateParameter("Data", "IEnumerable", isBindable: true)]);
+
+        var node = new DesignNode
+        {
+            Id = "grid-1",
+            ComponentType = "RadzenDataGrid",
+            Parameters = new Dictionary<string, DesignParameterValue>(StringComparer.Ordinal)
+            {
+                ["Data"] = new DesignParameterValue { Expression = $"@entities.{entity.Name}" }
+            },
+            Children = new Dictionary<string, List<DesignNode>>(StringComparer.Ordinal)
+            {
+                ["Columns"] = []
+            }
+        };
+
+        IReadOnlyList<DataGridColumnConfig>? capturedColumns = null;
+        var cut = ctx.Render<PropertyPanel>(parameters => parameters
+            .Add(component => component.Page, new DesignPage { Route = "/", Title = "Page" })
+            .Add(component => component.CanvasTheme, "plum-dark")
+            .Add(component => component.ThemeOptions, new[] { "plum-dark" })
+            .Add(component => component.DataModel, model)
+            .Add(component => component.SelectedNode, node)
+            .Add(component => component.SelectedDescriptor, descriptor)
+            .Add(component => component.UpsertColumnNodes, EventCallback.Factory.Create<IReadOnlyList<DataGridColumnConfig>>(this, value => capturedColumns = value))
+            .Add(component => component.SetDataGridPaging, EventCallback.Factory.Create<DataGridPagingConfig>(this, static _ => { })));
+
+        cut.FindAll("button").First(button => button.TextContent.Contains("Alle selecteren", StringComparison.Ordinal)).Click();
+        cut.FindAll("button").First(button => button.TextContent.Contains("Kolommen toepassen", StringComparison.Ordinal)).Click();
+
+        Assert.NotNull(capturedColumns);
+        Assert.True(capturedColumns!.Count > 0);
+        Assert.All(capturedColumns, static column => Assert.True(!string.IsNullOrWhiteSpace(column.FieldName)));
     }
 
     private static DesignerComponentDescriptor CreateDescriptor(IReadOnlyList<ComponentParameterDescriptor> parameters)
@@ -241,6 +340,7 @@ public sealed class DesignerPropertyPanelTests
         {
             "string" => typeof(string),
             "int" => typeof(int),
+            "IEnumerable" => typeof(IEnumerable<object>),
             "bool" => typeof(bool),
             "DateTime" => typeof(DateTime),
             "Variant" => typeof(Radzen.Variant),

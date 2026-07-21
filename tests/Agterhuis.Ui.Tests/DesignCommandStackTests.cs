@@ -140,6 +140,51 @@ public sealed class DesignCommandStackTests
         Assert.Single(stack.Document.Pages);
     }
 
+    [Fact]
+    public void ImportEntitiesCommand_AddsAndSupportsUndo()
+    {
+        var stack = new DesignDocumentCommandStack(CreateDocument());
+        var initialCount = stack.Document.DataModel.Entities.Count;
+
+        var imported = new DesignEntity
+        {
+            Name = "Klant",
+            PluralName = "Klanten",
+            Fields =
+            [
+                new DesignField { Name = "Klantnaam", Type = DesignFieldType.String, IsRequired = true }
+            ]
+        };
+
+        Assert.True(stack.Execute(new ImportEntitiesCommand([imported], new SchemaImportApplyOptions { ConflictResolution = SchemaImportConflictResolution.Rename })));
+        Assert.Equal(initialCount + 1, stack.Document.DataModel.Entities.Count);
+        Assert.Contains(stack.Document.DataModel.Entities, entity => entity.Name == "Klant");
+
+        Assert.True(stack.Undo());
+        Assert.Equal(initialCount, stack.Document.DataModel.Entities.Count);
+    }
+
+    [Fact]
+    public void ImportEntitiesCommand_RenameConflict_CreatesUniqueName()
+    {
+        var stack = new DesignDocumentCommandStack(CreateDocument());
+        var initialCount = stack.Document.DataModel.Entities.Count;
+
+        var imported = new DesignEntity
+        {
+            Name = "Klant",
+            PluralName = "Klanten",
+            Fields =
+            [
+                new DesignField { Name = "Klantnaam", Type = DesignFieldType.String, IsRequired = true }
+            ]
+        };
+
+        Assert.True(stack.Execute(new ImportEntitiesCommand([imported], new SchemaImportApplyOptions { ConflictResolution = SchemaImportConflictResolution.Rename })));
+        Assert.Equal(initialCount + 1, stack.Document.DataModel.Entities.Count);
+        Assert.Contains(stack.Document.DataModel.Entities, entity => entity.Name == "Klant_2");
+    }
+
     private static DesignDocument CreateReorderDocument()
     {
         return DesignDocumentMigrator.Migrate(new DesignDocument

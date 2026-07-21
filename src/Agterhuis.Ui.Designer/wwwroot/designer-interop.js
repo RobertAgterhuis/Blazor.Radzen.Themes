@@ -175,51 +175,17 @@ window.designerInterop = (() => {
         });
     };
 
-    let blazorRef = null;
+    const scrollTreeItemIntoView = (nodeId) => {
+        if (!nodeId) {
+            return;
+        }
 
-    const setupDragAndDrop = (dotnetHelper) => {
-        blazorRef = dotnetHelper;
-        let activeDrag = null;
-        const paletteItems = document.querySelectorAll('.designer-palette-item');
-        paletteItems.forEach(item => {
-            item.addEventListener('dragstart', (e) => {
-                const componentType = item.title;
-                activeDrag = { type: 'palette', value: componentType };
-                e.dataTransfer.effectAllowed = 'copy';
-                e.dataTransfer.setData('text/plain', componentType);
-                item.style.opacity = '0.6';
-            }, false);
+        const target = document.querySelector(`[data-agt-tree-node-id="${nodeId}"]`);
+        if (!target) {
+            return;
+        }
 
-            item.addEventListener('dragend', () => {
-                item.style.opacity = '1';
-                activeDrag = null;
-            }, false);
-        });
-
-        const dropzones = document.querySelectorAll('.designer-dropzone');
-        dropzones.forEach((dropzone, index) => {
-            dropzone.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                e.dataTransfer.dropEffect = 'copy';
-                dropzone.classList.add('designer-dropzone--drag-over');
-            }, false);
-
-            dropzone.addEventListener('dragleave', (e) => {
-                if (e.target === dropzone) {
-                    dropzone.classList.remove('designer-dropzone--drag-over');
-                }
-            }, false);
-
-            dropzone.addEventListener('drop', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                dropzone.classList.remove('designer-dropzone--drag-over');
-                const componentType = e.dataTransfer.getData('text/plain');
-                if (activeDrag && blazorRef) {
-                    dotnetHelper.invokeMethodAsync('OnJavaScriptDrop', componentType, index);
-                }
-            }, false);
-        });
+        target.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     };
 
     let codeEditor = null;
@@ -238,15 +204,7 @@ window.designerInterop = (() => {
                 automaticLayout: true,
                 tabSize: 2,
                 wordWrap: 'on',
-                readOnly: false
-            });
-
-            codeEditor.onDidChangeModelContent(() => {
-                clearTimeout(codeEditorChangeTimeout);
-                codeEditorChangeTimeout = setTimeout(() => {
-                    const code = codeEditor.getValue();
-                    dotnetRef.invokeMethodAsync('OnCodeEditorChanged', code);
-                }, 500);
+                readOnly: true
             });
         }
 
@@ -349,10 +307,10 @@ window.designerInterop = (() => {
         scrollToPropertyParameter,
         setMonacoTheme,
         setJson,
-        setupDragAndDrop,
         setupCodeEditors,
         updateCodeEditor,
         updateJsonEditor,
+        scrollTreeItemIntoView,
         switchCodeTab,
         setupResizablePanels
     };

@@ -3,6 +3,7 @@ using Radzen;
 using Microsoft.Extensions.DependencyInjection;
 using Agterhuis.Ui.Services;
 using Agterhuis.Ui.Demo.Services;
+using Agterhuis.Ui.Designer.Persistence;
 using Microsoft.JSInterop;
 using Agterhuis.Ui.Designer.Model;
 using Agterhuis.Ui.Designer.Registry;
@@ -18,7 +19,9 @@ public sealed class DesignerPageTests
         ctx.Services.AddRadzenComponents();
         ctx.Services.AddSingleton<IAgtCommandRegistry>(_ => new AgtCommandRegistry());
         ctx.Services.AddSingleton<IJSRuntime>(jsRuntime);
-        ctx.Services.AddSingleton(new LocalDesignStore(jsRuntime));
+        var localStore = new LocalDesignStore(jsRuntime);
+        ctx.Services.AddSingleton(localStore);
+        ctx.Services.AddSingleton<IDesignStore>(localStore);
         ctx.Services.AddSingleton(DesignerComponentRegistry.Instance);
         ctx.Services.AddSingleton<IAgtConfirmDialog>(new AlwaysConfirmDialog());
     }
@@ -64,7 +67,14 @@ public sealed class DesignerPageTests
         var cut = ctx.Render<Agterhuis.Ui.Demo.Components.Pages.Designer>();
 
         Assert.Contains("Hersteld werk uit localStorage gevonden", cut.Markup, StringComparison.Ordinal);
+        cut.FindAll(".designer-menu-toggle")
+            .First(button => button.TextContent.Contains("Instellingen", StringComparison.Ordinal))
+            .Click();
         Assert.Contains("data-testid=\"agt-command-palette-trigger\"", cut.Markup, StringComparison.Ordinal);
+
+        cut.FindAll(".designer-menu-toggle")
+            .First(button => button.TextContent.Contains("Bestand", StringComparison.Ordinal))
+            .Click();
         Assert.Contains("Exporteren", cut.Markup, StringComparison.Ordinal);
     }
 
@@ -77,6 +87,7 @@ public sealed class DesignerPageTests
 
         var cut = ctx.Render<Agterhuis.Ui.Demo.Components.Pages.Designer>();
 
+        cut.Find(".designer-panel--data .designer-panel__toggle").Click();
         cut.Find(".designer-data-panel .rz-button").Click();
 
         cut.WaitForAssertion(() =>
@@ -95,7 +106,9 @@ public sealed class DesignerPageTests
 
         var cut = ctx.Render<Agterhuis.Ui.Demo.Components.Pages.Designer>();
 
-        Assert.Contains("Code (Editable)", cut.Markup, StringComparison.Ordinal);
+        cut.Find(".designer-panel--code .designer-panel__toggle").Click();
+
+        Assert.Contains("Razor (preview)", cut.Markup, StringComparison.Ordinal);
         Assert.Contains("Model (JSON)", cut.Markup, StringComparison.Ordinal);
     }
 

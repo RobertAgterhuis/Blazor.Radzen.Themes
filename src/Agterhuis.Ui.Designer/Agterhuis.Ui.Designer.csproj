@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <PackageReference Include="Radzen.Blazor" />
+    <PackageReference Include="YamlDotNet" />
   </ItemGroup>
 
   <ItemGroup>

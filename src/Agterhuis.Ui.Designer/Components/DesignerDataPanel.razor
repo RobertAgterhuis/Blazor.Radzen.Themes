@@ -1,4 +1,6 @@
 @using System.Globalization
+@using System.Text
+@using Microsoft.AspNetCore.Components.Forms
 @using Agterhuis.Ui.Designer.Model
 
 <section class="designer-data-panel">
@@ -7,6 +9,7 @@
         <AgtDropdown TValue="string" Label="Entiteit" AriaLabel="Entiteit" Data="EntityOptions" Value="@SelectedEntityName" ValueChanged="OnEntityChanged" TextProperty="Label" ValueProperty="Value" />
         <AgtNumericField Label="Rijen" AriaLabel="Seed rijen" Value="@(Convert.ToDecimal(CurrentEntity?.Seed.RowCount ?? DataModel.RowCount))" ValueChanged="OnRowCountChanged" Min="1" Step="1" />
         <AgtNumericField Label="Seed" AriaLabel="Seed waarde" Value="@(Convert.ToDecimal(CurrentEntity?.Seed.Seed ?? DataModel.Seed))" ValueChanged="OnSeedChanged" Min="1" Step="1" />
+        <RadzenButton Text="Importeer schema" ButtonStyle="ButtonStyle.Base" Variant="Variant.Flat" Click="OpenImportDialog" />
         <RadzenButton Text="Formulier genereren" ButtonStyle="ButtonStyle.Base" Variant="Variant.Flat" Click="OnGenerateFormRequested" />
     </div>
     @if (CurrentEntity is not null)
@@ -26,6 +29,105 @@
     }
 </section>
 
+@if (_showImportDialog)
+{
+    <div class="designer-overlay" role="dialog" aria-modal="true" aria-label="Schema importeren">
+        <div class="designer-modal designer-modal--wide">
+            <h3>Importeer schema</h3>
+            <div class="designer-data-panel__controls">
+                <AgtDropdown TValue="SchemaImportSourceType"
+                             Label="Bron"
+                             AriaLabel="Importbron"
+                             Data="ImportSourceOptions"
+                             Value="@_importSource"
+                             ValueChanged="OnImportSourceChanged"
+                             TextProperty="Label"
+                             ValueProperty="Value" />
+                <InputFile accept=".json,.yaml,.yml,application/json,text/yaml,text/x-yaml" OnChange="OnSchemaFileChanged" />
+            </div>
+
+            <AgtTextArea Label="Schema JSON/YAML"
+                         AriaLabel="Schema invoer"
+                         Value="@_importText"
+                         ValueChanged="@(value => _importText = value ?? string.Empty)"
+                         Rows="8" />
+
+            <div class="designer-modal__actions">
+                <RadzenButton Text="Voorbeeld laden" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Click="PreviewImportAsync" />
+                <AgtDropdown TValue="SchemaImportConflictResolution"
+                             Label="Conflicten"
+                             AriaLabel="Conflictafhandeling"
+                             Data="ConflictOptions"
+                             Value="@_conflictResolution"
+                             ValueChanged="OnConflictResolutionChanged"
+                             TextProperty="Label"
+                             ValueProperty="Value" />
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(_importError))
+            {
+                <div class="designer-properties__validation">@_importError</div>
+            }
+
+            @if (_importWarnings.Count > 0)
+            {
+                <ul class="designer-issues__list">
+                    @foreach (var warning in _importWarnings)
+                    {
+                        <li class="designer-issues__item designer-issues__item--warning">@warning</li>
+                    }
+                </ul>
+            }
+
+            @if (_previewEntities.Count > 0)
+            {
+                @foreach (var entity in _previewEntities)
+                {
+                    <section class="designer-properties__group">
+                        <div class="designer-properties__field-head">
+                            <AgtSwitch Label="Entiteit importeren" AriaLabel="Entiteit importeren" Value="@entity.Include" ValueChanged="@(value => entity.Include = value)" />
+                            <AgtTextField Label="Entiteitsnaam" AriaLabel="Entiteitsnaam" Value="@entity.EntityName" ValueChanged="@(value => entity.EntityName = value ?? entity.EntityName)" />
+                        </div>
+                        <table class="designer-data-panel__table">
+                            <thead>
+                                <tr>
+                                    <th>Gebruik</th>
+                                    <th>Veld</th>
+                                    <th>Type</th>
+                                    <th>Verplicht</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var field in entity.Fields)
+                                {
+                                    <tr>
+                                        <td><input type="checkbox" checked="@field.Include" @onchange="args => field.Include = args.Value as bool? ?? false" /></td>
+                                        <td><input value="@field.Name" @oninput="args => field.Name = args.Value?.ToString() ?? field.Name" /></td>
+                                        <td>
+                                            <select value="@field.Type" @onchange="args => field.Type = Enum.TryParse<DesignFieldType>(args.Value?.ToString(), out var parsed) ? parsed : field.Type">
+                                                @foreach (var type in Enum.GetValues<DesignFieldType>())
+                                                {
+                                                    <option value="@type">@type</option>
+                                                }
+                                            </select>
+                                        </td>
+                                        <td><input type="checkbox" checked="@field.IsRequired" @onchange="args => field.IsRequired = args.Value as bool? ?? false" /></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </section>
+                }
+            }
+
+            <div class="designer-modal__actions">
+                <RadzenButton Text="Annuleren" ButtonStyle="ButtonStyle.Base" Variant="Variant.Outlined" Click="CloseImportDialog" />
+                <RadzenButton Text="Importeren" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Flat" Click="ImportPreviewAsync" Disabled="@(!_previewEntities.Any())" />
+            </div>
+        </div>
+    </div>
+}
+
 @code {
     [Parameter, EditorRequired]
     public DesignDataModel DataModel { get; set; } = default!;
@@ -39,6 +141,17 @@
     [Parameter]
     public EventCallback<string> GenerateFormRequested { get; set; }
 
+    [Parameter]
+    public EventCallback<(IReadOnlyList<DesignEntity> Entities, SchemaImportApplyOptions Options)> ImportEntitiesRequested { get; set; }
+
+    private bool _showImportDialog;
+    private SchemaImportSourceType _importSource = SchemaImportSourceType.JsonSchema;
+    private SchemaImportConflictResolution _conflictResolution = SchemaImportConflictResolution.Rename;
+    private string _importText = string.Empty;
+    private string? _importError;
+    private List<string> _importWarnings = [];
+    private List<SchemaImportPreview> _previewEntities = [];
+
     private DesignEntity? CurrentEntity => DataModel.Entities.FirstOrDefault(entity => string.Equals(entity.Name, SelectedEntityName, StringComparison.OrdinalIgnoreCase)) ?? DataModel.Entities.FirstOrDefault();
     private IReadOnlyList<DesignSeedRow> PreviewRows => CurrentEntity is null ? [] : DesignDataModelSeeder.GeneratePreview(DataModel, CurrentEntity.Name);
     private sealed record EntityOption(string Label, string Value);
@@ -49,4 +162,106 @@
     private Task OnSeedChanged(decimal? value) { if (CurrentEntity is not null && value.HasValue) { CurrentEntity.Seed.Seed = Math.Max(1, Convert.ToInt32(value.Value)); } return Task.CompletedTask; }
     private Task OnGenerateFormRequested() => CurrentEntity is null ? Task.CompletedTask : GenerateFormRequested.InvokeAsync(CurrentEntity.Name);
     private static string FormatValue(object? value) => value switch { null => string.Empty, DateTime dateTime => dateTime.ToString("yyyy-MM-dd HH:mm", CultureInfo.GetCultureInfo("nl-NL")), decimal decimalValue => decimalValue.ToString("0.00", CultureInfo.GetCultureInfo("nl-NL")), bool boolValue => boolValue ? "Ja" : "Nee", _ => value.ToString() ?? string.Empty };
+
+    private sealed record ImportOption(string Label, SchemaImportSourceType Value);
+    private sealed record ConflictOption(string Label, SchemaImportConflictResolution Value);
+    private IReadOnlyList<ImportOption> ImportSourceOptions =>
+    [
+        new("JSON Schema", SchemaImportSourceType.JsonSchema),
+        new("OpenAPI", SchemaImportSourceType.OpenApi),
+        new("Voorbeeld JSON", SchemaImportSourceType.SampleJson)
+    ];
+
+    private IReadOnlyList<ConflictOption> ConflictOptions =>
+    [
+        new("Overschrijven", SchemaImportConflictResolution.Overwrite),
+        new("Hernoemen", SchemaImportConflictResolution.Rename),
+        new("Annuleren", SchemaImportConflictResolution.Cancel)
+    ];
+
+    private Task OnImportSourceChanged(SchemaImportSourceType value)
+    {
+        _importSource = value;
+        return Task.CompletedTask;
+    }
+
+    private Task OnConflictResolutionChanged(SchemaImportConflictResolution value)
+    {
+        _conflictResolution = value;
+        return Task.CompletedTask;
+    }
+
+    private void OpenImportDialog()
+    {
+        _showImportDialog = true;
+        _importError = null;
+    }
+
+    private void CloseImportDialog()
+    {
+        _showImportDialog = false;
+    }
+
+    private async Task OnSchemaFileChanged(InputFileChangeEventArgs args)
+    {
+        if (args.FileCount == 0)
+        {
+            return;
+        }
+
+        var file = args.File;
+        using var stream = file.OpenReadStream(maxAllowedSize: 2_000_000);
+        using var reader = new StreamReader(stream, Encoding.UTF8);
+        _importText = await reader.ReadToEndAsync();
+    }
+
+    private Task PreviewImportAsync()
+    {
+        _importError = null;
+        _importWarnings = [];
+        _previewEntities = [];
+
+        try
+        {
+            if (string.IsNullOrWhiteSpace(_importText))
+            {
+                _importError = "Voer eerst een schema of JSON in.";
+                return Task.CompletedTask;
+            }
+
+            var result = _importSource switch
+            {
+                SchemaImportSourceType.JsonSchema => DesignSchemaImporter.ParseJsonSchema(_importText),
+                SchemaImportSourceType.OpenApi => DesignSchemaImporter.ParseOpenApi(_importText),
+                SchemaImportSourceType.SampleJson => DesignSchemaImporter.ParseSampleJson(_importText),
+                _ => throw new InvalidOperationException("Onbekende importbron.")
+            };
+
+            _importWarnings = result.Warnings.ToList();
+            _previewEntities = DesignSchemaImporter.CreatePreview(result);
+        }
+        catch (Exception ex)
+        {
+            _importError = ex.Message;
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private async Task ImportPreviewAsync()
+    {
+        var entities = DesignSchemaImporter.MaterializeEntities(_previewEntities);
+        if (entities.Count == 0)
+        {
+            _importError = "Geen geldige entiteiten geselecteerd.";
+            return;
+        }
+
+        await ImportEntitiesRequested.InvokeAsync((entities, new SchemaImportApplyOptions
+        {
+            ConflictResolution = _conflictResolution
+        }));
+
+        _showImportDialog = false;
+    }
 }

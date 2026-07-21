@@ -23,6 +23,7 @@ else
 {
     <section class="designer-properties">
         <h2>@SelectedDescriptor.DisplayName eigenschappen</h2>
+
         @if (_missingAccessibilityParameters.Count > 0)
         {
             <div class="designer-properties__a11y-warning" role="status" aria-live="polite">
@@ -30,6 +31,7 @@ else
                 <span>vul @string.Join(" en ", _missingAccessibilityParameters) in.</span>
             </div>
         }
+
         <section class="designer-properties__group">
             <h3>Layout</h3>
             <div class="designer-properties__layout-grid">
@@ -39,11 +41,63 @@ else
                 <AgtNumericField Label="Kolomspan" AriaLabel="Layout kolomspan" Value="@ConvertToDecimal(LayoutColumnSpan)" ValueChanged="@(value => OnLayoutValueChanged(LayoutKey.ColumnSpan, value))" Min="1" Step="1" />
             </div>
         </section>
-        @if (ColumnNodes.Count > 0 || SupportsColumnsSlot)
+
+        @if (IsDataGridNode)
         {
             <section class="designer-properties__group" data-agt-designer-columns-editor="true">
                 <div class="designer-properties__field-head">
                     <h3>Kolommen</h3>
+                    <div>
+                        <RadzenButton Text="Alle selecteren" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Click="SelectAllColumnsAsync" />
+                        <RadzenButton Text="Geen selecteren" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Click="ClearColumnsAsync" />
+                    </div>
+                </div>
+                @if (BoundGridEntity is null)
+                {
+                    <div class="designer-properties__readonly">Koppel eerst Data aan een entiteit om kolommen te configureren.</div>
+                }
+                else
+                {
+                    <div class="designer-properties__layout-grid">
+                        @foreach (var column in DataGridColumns.OrderBy(static item => item.Order))
+                        {
+                            <div class="designer-properties__field" data-agt-designer-column-field="@column.FieldName">
+                                <div class="designer-properties__field-head">
+                                    <AgtSwitch Label="@column.FieldName" AriaLabel="@column.FieldName" Value="@column.IsEnabled" ValueChanged="@(value => column.IsEnabled = value)" />
+                                    <div>
+                                        <RadzenButton Text="Omhoog" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Click="@(() => MoveColumn(column.FieldName, -1))" />
+                                        <RadzenButton Text="Omlaag" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Click="@(() => MoveColumn(column.FieldName, 1))" />
+                                    </div>
+                                </div>
+                                @if (column.IsEnabled)
+                                {
+                                    <AgtTextField Label="Titel" AriaLabel="Kolomtitel" Value="@column.Title" ValueChanged="@(value => column.Title = value ?? column.Title)" />
+                                    <AgtDropdown TValue="string" Label="Formaat" AriaLabel="Kolomformaat" Data="ColumnFormatOptions" Value="@column.Format" ValueChanged="@(value => column.Format = value)" TextProperty="Label" ValueProperty="Value" />
+                                    <AgtSwitch Label="Sorteerbaar" AriaLabel="Sorteerbaar" Value="@column.Sortable" ValueChanged="@(value => column.Sortable = value)" />
+                                    <AgtSwitch Label="Filterbaar" AriaLabel="Filterbaar" Value="@column.Filterable" ValueChanged="@(value => column.Filterable = value)" />
+                                    <AgtTextField Label="Breedte" AriaLabel="Breedte" Value="@column.Width" ValueChanged="@(value => column.Width = string.IsNullOrWhiteSpace(value) ? "auto" : value)" />
+                                }
+                            </div>
+                        }
+                    </div>
+
+                    <div class="designer-properties__layout-grid">
+                        <AgtSwitch Label="Paginering" AriaLabel="Paginering" Value="@PagingConfig.AllowPaging" ValueChanged="@(value => PagingConfig.AllowPaging = value)" />
+                        <AgtDropdown TValue="int" Label="Pagina-grootte" AriaLabel="Pagina-grootte" Data="PageSizeOptions" Value="@PagingConfig.PageSize" ValueChanged="OnPageSizeChanged" TextProperty="Label" ValueProperty="Value" />
+                    </div>
+
+                    <div class="designer-modal__actions">
+                        <RadzenButton Text="Kolommen toepassen" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Flat" Click="ApplyColumnsAsync" />
+                    </div>
+                }
+            </section>
+        }
+
+        @if (ColumnNodes.Count > 0 || SupportsColumnsSlot)
+        {
+            <section class="designer-properties__group" data-agt-designer-columns-editor="true">
+                <div class="designer-properties__field-head">
+                    <h3>Kolommen (handmatig)</h3>
                     <RadzenButton Text="Kolom toevoegen" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Click="OnAddColumnRequested" />
                 </div>
                 @if (ColumnNodes.Count == 0)
@@ -66,6 +120,7 @@ else
                 }
             </section>
         }
+
         @foreach (var group in GroupedParameters)
         {
             <section class="designer-properties__group">
@@ -88,10 +143,40 @@ else
                             }
                             <RadzenButton Text="Reset" Disabled="@(!hasCustomValue)" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Click="@(() => OnResetParameter(parameter))" />
                         </div>
+
+                        @if (parameter.IsBindable)
+                        {
+                            <div class="designer-properties__layout-grid">
+                                <AgtDropdown TValue="string"
+                                             Label="Entiteit"
+                                             AriaLabel="Bind entiteit"
+                                             Data="BindableEntities"
+                                             Value="@GetBindingEntity(parameter)"
+                                             ValueChanged="@(value => OnBindingEntityChanged(parameter, value))"
+                                             TextProperty="Label"
+                                             ValueProperty="Value" />
+
+                                @if (!IsCollectionBinding(parameter))
+                                {
+                                    <AgtDropdown TValue="string"
+                                                 Label="Veld"
+                                                 AriaLabel="Bind veld"
+                                                 Data="GetBindableFields(parameter)"
+                                                 Value="@GetBindingField(parameter)"
+                                                 ValueChanged="@(value => OnBindingFieldChanged(parameter, value))"
+                                                 TextProperty="Label"
+                                                 ValueProperty="Value" />
+                                }
+
+                                <AgtSwitch Label="Vrije invoer" AriaLabel="Vrije invoer" Value="@IsManualBindingMode(parameter)" ValueChanged="@(value => ToggleManualMode(parameter, value))" />
+                            </div>
+                        }
+
                         @if (!string.IsNullOrWhiteSpace(uiState.ValidationMessage))
                         {
                             <div class="designer-properties__validation">@uiState.ValidationMessage</div>
                         }
+
                         @switch (editorKind)
                         {
                             case EditorKind.String:
@@ -143,6 +228,9 @@ else
     [Parameter, EditorRequired]
     public IReadOnlyList<string> ThemeOptions { get; set; } = [];
 
+    [Parameter, EditorRequired]
+    public DesignDataModel DataModel { get; set; } = default!;
+
     [Parameter]
     public DesignNode? SelectedNode { get; set; }
 
@@ -170,6 +258,12 @@ else
     [Parameter]
     public EventCallback<string> RemoveColumnNode { get; set; }
 
+    [Parameter]
+    public EventCallback<IReadOnlyList<DataGridColumnConfig>> UpsertColumnNodes { get; set; }
+
+    [Parameter]
+    public EventCallback<DataGridPagingConfig> SetDataGridPaging { get; set; }
+
     private const string CategoryGeneral = "Algemeen";
     private const string CategoryLayout = "Layout";
     private const string CategoryData = "Data";
@@ -179,6 +273,10 @@ else
     private string? _pageRouteValidation;
     private string? _pageTitleValidation;
     private IReadOnlyList<string> _missingAccessibilityParameters = [];
+    private readonly HashSet<string> _manualBindingParameters = new(StringComparer.Ordinal);
+    private List<DataGridColumnConfig> DataGridColumns { get; set; } = [];
+    private DataGridPagingConfig PagingConfig { get; set; } = new();
+
     private string? RouteValidationMessage => _pageRouteValidation ?? (HasDuplicateRoute ? "Route moet uniek zijn." : null);
 
     private IReadOnlyDictionary<string, IReadOnlyList<ComponentParameterDescriptor>> GroupedParameters => SelectedDescriptor is null
@@ -192,9 +290,33 @@ else
     private int LayoutRowSpan => SelectedNode?.LayoutSlot?.RowSpan ?? 1;
     private int LayoutColumnSpan => SelectedNode?.LayoutSlot?.ColumnSpan ?? 1;
     private bool SupportsColumnsSlot => SelectedDescriptor?.Slots.Contains("Columns", StringComparer.Ordinal) == true;
+    private bool IsDataGridNode => string.Equals(SelectedNode?.ComponentType, "RadzenDataGrid", StringComparison.Ordinal);
     private IReadOnlyList<DesignNode> ColumnNodes => SelectedNode?.Children.TryGetValue("Columns", out var columns) == true ? columns : [];
-    private IReadOnlyList<OptionItem> ColorTokenOptions => new[]
+
+    private DesignEntity? BoundGridEntity
     {
+        get
+        {
+            if (!IsDataGridNode || SelectedNode is null)
+            {
+                return null;
+            }
+
+            var expression = GetExpressionValue("Data");
+            if (string.IsNullOrWhiteSpace(expression))
+            {
+                return null;
+            }
+
+            var entityName = ParseEntityNameFromExpression(expression);
+            return string.IsNullOrWhiteSpace(entityName)
+                ? null
+                : DataModel.Entities.FirstOrDefault(entity => string.Equals(entity.Name, entityName, StringComparison.OrdinalIgnoreCase));
+        }
+    }
+
+    private IReadOnlyList<OptionItem> ColorTokenOptions =>
+    [
         new OptionItem("Primair 500", "var(--agt-color-primary-500)"),
         new OptionItem("Accent", "var(--agt-color-accent)"),
         new OptionItem("Text body", "var(--agt-text-body)"),
@@ -203,9 +325,27 @@ else
         new OptionItem("Surface 1", "var(--agt-surface-1)"),
         new OptionItem("Border", "var(--agt-input-border)"),
         new OptionItem("Danger", "var(--agt-color-danger-500)")
-    };
+    ];
 
     private IReadOnlyList<OptionItem> ThemeOptionItems => ThemeOptions.OrderBy(static item => item, StringComparer.Ordinal).Select(static item => new OptionItem(item, item)).ToArray();
+
+    private IReadOnlyList<OptionItem> BindableEntities => DataModel.Entities.OrderBy(static entity => entity.Name, StringComparer.Ordinal).Select(static entity => new OptionItem(entity.Name, entity.Name)).ToArray();
+
+    private IReadOnlyList<OptionItem> ColumnFormatOptions =>
+    [
+        new OptionItem("Tekst", "text"),
+        new OptionItem("Numeriek", "numeric"),
+        new OptionItem("Datum", "date"),
+        new OptionItem("Boolean", "boolean")
+    ];
+
+    private IReadOnlyList<PageSizeOption> PageSizeOptions =>
+    [
+        new PageSizeOption("10", 10),
+        new PageSizeOption("25", 25),
+        new PageSizeOption("50", 50),
+        new PageSizeOption("100", 100)
+    ];
 
     protected override void OnParametersSet()
     {
@@ -214,22 +354,230 @@ else
         _missingAccessibilityParameters = SelectedNode is null || SelectedDescriptor is null
             ? []
             : SelectedDescriptor.Parameters.Where(IsAccessibilityParameter).Select(static parameter => parameter.Name).Where(name => string.IsNullOrWhiteSpace(GetCurrentTextValue(name))).ToArray();
+
+        BuildGridColumnState();
     }
 
-    private async Task OnRouteChanged(string? route) { var normalized = (route ?? string.Empty).Trim(); if (string.IsNullOrWhiteSpace(normalized)) { _pageRouteValidation = "Route is verplicht."; return; } _pageRouteValidation = null; await SetPageRoute.InvokeAsync(normalized); }
-    private async Task OnTitleChanged(string? title) { var normalized = title?.Trim(); if (string.IsNullOrWhiteSpace(normalized)) { _pageTitleValidation = "Titel is verplicht."; return; } _pageTitleValidation = null; await SetPageTitle.InvokeAsync(normalized); }
+    private void BuildGridColumnState()
+    {
+        if (!IsDataGridNode || SelectedNode is null || BoundGridEntity is null)
+        {
+            DataGridColumns = [];
+            PagingConfig = new DataGridPagingConfig();
+            return;
+        }
+
+        var configuredColumns = SelectedNode.Children.TryGetValue("Columns", out var nodes)
+            ? nodes
+            : [];
+
+        var state = new List<DataGridColumnConfig>();
+        var configuredByField = configuredColumns
+            .Select((node, index) => new { Node = node, Index = index })
+            .Where(static item => item.Node.Parameters.TryGetValue("Property", out _))
+            .ToDictionary(
+                static item => item.Node.Parameters["Property"].Literal?.GetValue<string>() ?? string.Empty,
+                static item => item,
+                StringComparer.OrdinalIgnoreCase);
+
+        var order = 0;
+        foreach (var field in BoundGridEntity.Fields)
+        {
+            if (configuredByField.TryGetValue(field.Name, out var configured))
+            {
+                var title = configured.Node.Parameters.TryGetValue("Title", out var titleValue)
+                    ? titleValue.Literal?.GetValue<string>() ?? field.DisplayLabel ?? field.Name
+                    : field.DisplayLabel ?? field.Name;
+
+                state.Add(new DataGridColumnConfig
+                {
+                    FieldName = field.Name,
+                    IsEnabled = true,
+                    Title = title,
+                    Format = GuessFormat(field),
+                    Sortable = configured.Node.Parameters.TryGetValue("Sortable", out var sortable) ? sortable.Literal?.GetValue<bool>() ?? true : true,
+                    Filterable = configured.Node.Parameters.TryGetValue("Filterable", out var filterable) ? filterable.Literal?.GetValue<bool>() ?? true : true,
+                    Width = configured.Node.Parameters.TryGetValue("Width", out var width) ? width.Literal?.GetValue<string>() ?? "auto" : "auto",
+                    Order = order++
+                });
+            }
+            else
+            {
+                state.Add(new DataGridColumnConfig
+                {
+                    FieldName = field.Name,
+                    IsEnabled = false,
+                    Title = field.DisplayLabel ?? field.Name,
+                    Format = GuessFormat(field),
+                    Sortable = true,
+                    Filterable = true,
+                    Width = "auto",
+                    Order = order++
+                });
+            }
+        }
+
+        DataGridColumns = state;
+
+        PagingConfig = new DataGridPagingConfig
+        {
+            AllowPaging = SelectedNode.Parameters.TryGetValue("AllowPaging", out var allowPaging) ? allowPaging.Literal?.GetValue<bool>() ?? true : true,
+            PageSize = SelectedNode.Parameters.TryGetValue("PageSize", out var pageSize) ? Math.Max(10, pageSize.Literal?.GetValue<int>() ?? 10) : 10
+        };
+    }
+
+    private async Task OnRouteChanged(string? route)
+    {
+        var normalized = (route ?? string.Empty).Trim();
+        if (string.IsNullOrWhiteSpace(normalized))
+        {
+            _pageRouteValidation = "Route is verplicht.";
+            return;
+        }
+
+        _pageRouteValidation = null;
+        await SetPageRoute.InvokeAsync(normalized);
+    }
+
+    private async Task OnTitleChanged(string? title)
+    {
+        var normalized = title?.Trim();
+        if (string.IsNullOrWhiteSpace(normalized))
+        {
+            _pageTitleValidation = "Titel is verplicht.";
+            return;
+        }
+
+        _pageTitleValidation = null;
+        await SetPageTitle.InvokeAsync(normalized);
+    }
+
     private Task OnCanvasThemeChanged(string theme) => SetCanvasTheme.InvokeAsync(theme);
     private Task OnAddColumnRequested() => AddColumnNode.InvokeAsync();
     private Task OnRemoveColumnRequested(string nodeId) => RemoveColumnNode.InvokeAsync(nodeId);
-    private async Task OnStringChanged(ComponentParameterDescriptor parameter, string? value) { var validation = ValidateString(parameter, value); if (validation is not null) { return; } await SetNodeParameter.InvokeAsync((parameter, DesignParameterValue.FromValue(value))); }
-    private async Task OnNumericChanged(ComponentParameterDescriptor parameter, decimal? value) { if (value is null) { await SetNodeParameter.InvokeAsync((parameter, null)); return; } object typedValue = parameter.ParameterType == typeof(int) || parameter.ParameterType == typeof(int?) ? Convert.ToInt32(decimal.Truncate(value.Value), CultureInfo.InvariantCulture) : parameter.ParameterType == typeof(double) || parameter.ParameterType == typeof(double?) ? Convert.ToDouble(value.Value, CultureInfo.InvariantCulture) : value.Value; await SetNodeParameter.InvokeAsync((parameter, DesignParameterValue.FromValue(typedValue))); }
-    private Task OnBoolChanged(ComponentParameterDescriptor parameter, bool value) => SetNodeParameter.InvokeAsync((parameter, DesignParameterValue.FromValue(value)));
-    private async Task OnEnumChanged(ComponentParameterDescriptor parameter, string? value) { if (string.IsNullOrWhiteSpace(value) || !Enum.TryParse(parameter.ParameterType, value, ignoreCase: true, out var parsed)) { return; } await SetNodeParameter.InvokeAsync((parameter, DesignParameterValue.FromValue(parsed?.ToString()))); }
-    private Task OnDateChanged(ComponentParameterDescriptor parameter, DateTime? value) => SetNodeParameter.InvokeAsync((parameter, value is null ? null : DesignParameterValue.FromValue(value)));
-    private Task OnResetParameter(ComponentParameterDescriptor parameter) => SetNodeParameter.InvokeAsync((parameter, null));
-    private async Task OnLayoutValueChanged(LayoutKey key, decimal? value) { if (SelectedNode is null || value is null) { return; } var normalized = Math.Max(1, Convert.ToInt32(decimal.Truncate(value.Value), CultureInfo.InvariantCulture)); var current = SelectedNode.LayoutSlot ?? new DesignLayoutSlot(); var next = key switch { LayoutKey.Row => current with { Row = normalized }, LayoutKey.Column => current with { Column = normalized }, LayoutKey.RowSpan => current with { RowSpan = normalized }, LayoutKey.ColumnSpan => current with { ColumnSpan = normalized }, _ => current }; await SetNodeLayoutSlot.InvokeAsync(next); }
-    private UiState GetUiState(ComponentParameterDescriptor parameter) { if (SelectedNode is null) { return UiState.Empty; } SelectedNode.Parameters.TryGetValue(parameter.Name, out var parameterValue); var literal = parameterValue?.Literal; if (literal is null) { return UiState.FromDefault(parameter.DefaultValue); } try { if (parameter.ParameterType == typeof(bool) || parameter.ParameterType == typeof(bool?)) { return new UiState(BoolValue: literal.GetValue<bool>()); } if (parameter.ParameterType == typeof(int) || parameter.ParameterType == typeof(int?) || parameter.ParameterType == typeof(decimal) || parameter.ParameterType == typeof(decimal?) || parameter.ParameterType == typeof(double) || parameter.ParameterType == typeof(double?)) { return new UiState(NumericValue: literal.GetValue<decimal?>()); } if (parameter.ParameterType == typeof(DateTime) || parameter.ParameterType == typeof(DateTime?)) { return new UiState(DateValue: literal.GetValue<DateTime?>()); } if (parameter.ParameterType.IsEnum) { var enumValue = literal.GetValue<string>(); return new UiState(TextValue: enumValue, ValidationMessage: Enum.TryParse(parameter.ParameterType, enumValue, true, out _) ? null : "Ongeldige enum-waarde."); } if (parameter.ParameterType == typeof(string)) { var text = literal.GetValue<string?>(); return new UiState(TextValue: text, ValidationMessage: ValidateString(parameter, text)); } return new UiState(JsonValue: literal.ToJsonString()); } catch { return new UiState(JsonValue: literal.ToJsonString(), ValidationMessage: "Ongeldige waarde voor dit veldtype."); } }
-    private static decimal? ConvertToDecimal(int value) => Convert.ToDecimal(value, CultureInfo.InvariantCulture);
+
+    private async Task OnStringChanged(ComponentParameterDescriptor parameter, string? value)
+    {
+        var validation = ValidateString(parameter, value);
+        if (validation is not null)
+        {
+            return;
+        }
+
+        await SetNodeParameter.InvokeAsync((parameter, DesignParameterValue.FromValue(value)));
+    }
+
+    private async Task OnNumericChanged(ComponentParameterDescriptor parameter, decimal? value)
+    {
+        if (value is null)
+        {
+            await SetNodeParameter.InvokeAsync((parameter, null));
+            return;
+        }
+
+        object typedValue = parameter.ParameterType == typeof(int) || parameter.ParameterType == typeof(int?)
+            ? Convert.ToInt32(decimal.Truncate(value.Value), CultureInfo.InvariantCulture)
+            : parameter.ParameterType == typeof(double) || parameter.ParameterType == typeof(double?)
+                ? Convert.ToDouble(value.Value, CultureInfo.InvariantCulture)
+                : value.Value;
+
+        await SetNodeParameter.InvokeAsync((parameter, DesignParameterValue.FromValue(typedValue)));
+    }
+
+    private Task OnBoolChanged(ComponentParameterDescriptor parameter, bool value)
+        => SetNodeParameter.InvokeAsync((parameter, DesignParameterValue.FromValue(value)));
+
+    private async Task OnEnumChanged(ComponentParameterDescriptor parameter, string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value) || !Enum.TryParse(parameter.ParameterType, value, ignoreCase: true, out var parsed))
+        {
+            return;
+        }
+
+        await SetNodeParameter.InvokeAsync((parameter, DesignParameterValue.FromValue(parsed?.ToString())));
+    }
+
+    private Task OnDateChanged(ComponentParameterDescriptor parameter, DateTime? value)
+        => SetNodeParameter.InvokeAsync((parameter, value is null ? null : DesignParameterValue.FromValue(value)));
+
+    private Task OnResetParameter(ComponentParameterDescriptor parameter)
+        => SetNodeParameter.InvokeAsync((parameter, null));
+
+    private async Task OnLayoutValueChanged(LayoutKey key, decimal? value)
+    {
+        if (SelectedNode is null || value is null)
+        {
+            return;
+        }
+
+        var normalized = Math.Max(1, Convert.ToInt32(decimal.Truncate(value.Value), CultureInfo.InvariantCulture));
+        var current = SelectedNode.LayoutSlot ?? new DesignLayoutSlot();
+        var next = key switch
+        {
+            LayoutKey.Row => current with { Row = normalized },
+            LayoutKey.Column => current with { Column = normalized },
+            LayoutKey.RowSpan => current with { RowSpan = normalized },
+            LayoutKey.ColumnSpan => current with { ColumnSpan = normalized },
+            _ => current
+        };
+
+        await SetNodeLayoutSlot.InvokeAsync(next);
+    }
+
+    private UiState GetUiState(ComponentParameterDescriptor parameter)
+    {
+        if (SelectedNode is null)
+        {
+            return UiState.Empty;
+        }
+
+        SelectedNode.Parameters.TryGetValue(parameter.Name, out var parameterValue);
+        var literal = parameterValue?.Literal;
+        if (literal is null)
+        {
+            return UiState.FromDefault(parameter.DefaultValue);
+        }
+
+        try
+        {
+            if (parameter.ParameterType == typeof(bool) || parameter.ParameterType == typeof(bool?))
+            {
+                return new UiState(BoolValue: literal.GetValue<bool>());
+            }
+
+            if (parameter.ParameterType == typeof(int) || parameter.ParameterType == typeof(int?) || parameter.ParameterType == typeof(decimal) || parameter.ParameterType == typeof(decimal?) || parameter.ParameterType == typeof(double) || parameter.ParameterType == typeof(double?))
+            {
+                return new UiState(NumericValue: literal.GetValue<decimal?>());
+            }
+
+            if (parameter.ParameterType == typeof(DateTime) || parameter.ParameterType == typeof(DateTime?))
+            {
+                return new UiState(DateValue: literal.GetValue<DateTime?>());
+            }
+
+            if (parameter.ParameterType.IsEnum)
+            {
+                var enumValue = literal.GetValue<string>();
+                return new UiState(TextValue: enumValue, ValidationMessage: Enum.TryParse(parameter.ParameterType, enumValue, true, out _) ? null : "Ongeldige enum-waarde.");
+            }
+
+            if (parameter.ParameterType == typeof(string))
+            {
+                var text = literal.GetValue<string?>();
+                return new UiState(TextValue: text, ValidationMessage: ValidateString(parameter, text));
+            }
+
+            return new UiState(JsonValue: literal.ToJsonString());
+        }
+        catch
+        {
+            return new UiState(JsonValue: literal.ToJsonString(), ValidationMessage: "Ongeldige waarde voor dit veldtype.");
+        }
+    }
+
+    private static decimal? ConvertToDecimal(int value)
+        => Convert.ToDecimal(value, CultureInfo.InvariantCulture);
+
     private string ResolveCategory(ComponentParameterDescriptor parameter)
         => parameter.Name.Contains("Route", StringComparison.OrdinalIgnoreCase) || parameter.Name.Contains("Title", StringComparison.OrdinalIgnoreCase)
             ? CategoryGeneral
@@ -241,15 +589,274 @@ else
                         ? CategoryAccessibility
                         : CategoryOther;
 
-    private bool IsAccessibilityParameter(ComponentParameterDescriptor parameter) => parameter.Name is "Label" or "AriaLabel" or "Title" or "Placeholder";
+    private bool IsAccessibilityParameter(ComponentParameterDescriptor parameter)
+        => parameter.Name is "Label" or "AriaLabel" or "Title" or "Placeholder";
 
-    private string? ValidateString(ComponentParameterDescriptor parameter, string? value) => parameter.IsEditorRequired && string.IsNullOrWhiteSpace(value) ? $"{parameter.Name} is verplicht." : null;
-    private string? GetCurrentTextValue(string name) => SelectedNode is null || !SelectedNode.Parameters.TryGetValue(name, out var parameterValue) ? null : parameterValue?.Literal?.GetValue<string?>();
-    private bool HasCustomValue(ComponentParameterDescriptor parameter) => SelectedNode is not null && SelectedNode.Parameters.ContainsKey(parameter.Name);
-    private EditorKind GetEditorKind(ComponentParameterDescriptor parameter) => parameter.ParameterType == typeof(string) ? EditorKind.String : parameter.ParameterType == typeof(bool) || parameter.ParameterType == typeof(bool?) ? EditorKind.Boolean : parameter.ParameterType.IsEnum ? EditorKind.Enum : parameter.ParameterType == typeof(DateTime) || parameter.ParameterType == typeof(DateTime?) ? EditorKind.DateTime : parameter.ParameterType == typeof(decimal) || parameter.ParameterType == typeof(decimal?) || parameter.ParameterType == typeof(int) || parameter.ParameterType == typeof(int?) || parameter.ParameterType == typeof(double) || parameter.ParameterType == typeof(double?) ? EditorKind.Numeric : EditorKind.ReadOnly;
-    private string GetColumnLabel(DesignNode node) => node.Parameters.TryGetValue("Title", out var title) ? title?.Literal?.GetValue<string?>() ?? node.ComponentType : node.ComponentType;
-    private IReadOnlyList<OptionItem> GetEnumOptions(ComponentParameterDescriptor parameter) => Enum.GetNames(parameter.ParameterType).Select(value => new OptionItem(value, value)).ToArray();
+    private string? ValidateString(ComponentParameterDescriptor parameter, string? value)
+        => parameter.IsEditorRequired && string.IsNullOrWhiteSpace(value) ? $"{parameter.Name} is verplicht." : null;
+
+    private string? GetCurrentTextValue(string name)
+        => SelectedNode is null || !SelectedNode.Parameters.TryGetValue(name, out var parameterValue)
+            ? null
+            : parameterValue?.Literal?.GetValue<string?>();
+
+    private bool HasCustomValue(ComponentParameterDescriptor parameter)
+        => SelectedNode is not null && SelectedNode.Parameters.ContainsKey(parameter.Name);
+
+    private EditorKind GetEditorKind(ComponentParameterDescriptor parameter)
+    {
+        if (parameter.ParameterType == typeof(string) && parameter.Name.Contains("Color", StringComparison.OrdinalIgnoreCase))
+        {
+            return EditorKind.ColorToken;
+        }
+
+        if (parameter.IsEventCallback)
+        {
+            return EditorKind.EventCallback;
+        }
+
+        return parameter.ParameterType == typeof(string)
+            ? EditorKind.String
+            : parameter.ParameterType == typeof(bool) || parameter.ParameterType == typeof(bool?)
+                ? EditorKind.Boolean
+                : parameter.ParameterType.IsEnum
+                    ? EditorKind.Enum
+                    : parameter.ParameterType == typeof(DateTime) || parameter.ParameterType == typeof(DateTime?)
+                        ? EditorKind.DateTime
+                        : parameter.ParameterType == typeof(decimal) || parameter.ParameterType == typeof(decimal?) || parameter.ParameterType == typeof(int) || parameter.ParameterType == typeof(int?) || parameter.ParameterType == typeof(double) || parameter.ParameterType == typeof(double?)
+                            ? EditorKind.Numeric
+                            : EditorKind.ReadOnly;
+    }
+
+    private string GetColumnLabel(DesignNode node)
+        => node.Parameters.TryGetValue("Title", out var title)
+            ? title?.Literal?.GetValue<string?>() ?? node.ComponentType
+            : node.ComponentType;
+
+    private IReadOnlyList<OptionItem> GetEnumOptions(ComponentParameterDescriptor parameter)
+        => Enum.GetNames(parameter.ParameterType).Select(value => new OptionItem(value, value)).ToArray();
+
+    private bool IsCollectionBinding(ComponentParameterDescriptor parameter)
+    {
+        if (parameter.Name.Contains("Data", StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        var type = parameter.ParameterType;
+        return type != typeof(string) && typeof(System.Collections.IEnumerable).IsAssignableFrom(type);
+    }
+
+    private bool IsManualBindingMode(ComponentParameterDescriptor parameter)
+        => _manualBindingParameters.Contains(parameter.Name);
+
+    private void ToggleManualMode(ComponentParameterDescriptor parameter, bool manual)
+    {
+        if (manual)
+        {
+            _manualBindingParameters.Add(parameter.Name);
+            return;
+        }
+
+        _manualBindingParameters.Remove(parameter.Name);
+    }
+
+    private string? GetBindingEntity(ComponentParameterDescriptor parameter)
+    {
+        var expression = GetExpressionValue(parameter.Name);
+        if (string.IsNullOrWhiteSpace(expression))
+        {
+            return null;
+        }
+
+        return ParseEntityNameFromExpression(expression);
+    }
+
+    private string? GetBindingField(ComponentParameterDescriptor parameter)
+    {
+        var expression = GetExpressionValue(parameter.Name);
+        if (string.IsNullOrWhiteSpace(expression))
+        {
+            return null;
+        }
+
+        var marker = ".Select(";
+        var markerIndex = expression.IndexOf(marker, StringComparison.Ordinal);
+        if (markerIndex < 0)
+        {
+            return null;
+        }
+
+        var lambdaBody = expression[(markerIndex + marker.Length)..].TrimEnd(')');
+        var fieldMarker = ".";
+        var dotIndex = lambdaBody.LastIndexOf(fieldMarker, StringComparison.Ordinal);
+        if (dotIndex < 0 || dotIndex + 1 >= lambdaBody.Length)
+        {
+            return null;
+        }
+
+        return lambdaBody[(dotIndex + 1)..].Trim();
+    }
+
+    private IReadOnlyList<OptionItem> GetBindableFields(ComponentParameterDescriptor parameter)
+    {
+        var entityName = GetBindingEntity(parameter);
+        var entity = DataModel.Entities.FirstOrDefault(candidate => string.Equals(candidate.Name, entityName, StringComparison.OrdinalIgnoreCase));
+        if (entity is null)
+        {
+            return [];
+        }
+
+        return entity.Fields
+            .Where(field => IsFieldCompatibleWithParameter(field, parameter))
+            .OrderBy(static field => field.Name, StringComparer.Ordinal)
+            .Select(field => new OptionItem(field.DisplayLabel ?? field.Name, field.Name))
+            .ToArray();
+    }
+
+    private async Task OnBindingEntityChanged(ComponentParameterDescriptor parameter, string? entityName)
+    {
+        if (string.IsNullOrWhiteSpace(entityName))
+        {
+            await SetNodeParameter.InvokeAsync((parameter, null));
+            return;
+        }
+
+        if (IsCollectionBinding(parameter))
+        {
+            await SetNodeParameter.InvokeAsync((parameter, new DesignParameterValue { Expression = $"@entities.{entityName}" }));
+            return;
+        }
+
+        var firstField = DataModel.Entities
+            .FirstOrDefault(entity => string.Equals(entity.Name, entityName, StringComparison.OrdinalIgnoreCase))
+            ?.Fields
+            .FirstOrDefault(field => IsFieldCompatibleWithParameter(field, parameter));
+
+        var expression = firstField is null
+            ? $"@entities.{entityName}"
+            : $"@entities.{entityName}.Select(item => item.{firstField.Name})";
+
+        await SetNodeParameter.InvokeAsync((parameter, new DesignParameterValue { Expression = expression }));
+    }
+
+    private async Task OnBindingFieldChanged(ComponentParameterDescriptor parameter, string? fieldName)
+    {
+        var entity = GetBindingEntity(parameter);
+        if (string.IsNullOrWhiteSpace(entity) || string.IsNullOrWhiteSpace(fieldName))
+        {
+            return;
+        }
+
+        var expression = $"@entities.{entity}.Select(item => item.{fieldName})";
+        await SetNodeParameter.InvokeAsync((parameter, new DesignParameterValue { Expression = expression }));
+    }
+
+    private static bool IsFieldCompatibleWithParameter(DesignField field, ComponentParameterDescriptor parameter)
+    {
+        var parameterType = Nullable.GetUnderlyingType(parameter.ParameterType) ?? parameter.ParameterType;
+        return field.Type switch
+        {
+            DesignFieldType.String or DesignFieldType.Enum => parameterType == typeof(string) || parameterType == typeof(object),
+            DesignFieldType.Int => parameterType == typeof(int) || parameterType == typeof(decimal) || parameterType == typeof(double) || parameterType == typeof(object),
+            DesignFieldType.Decimal => parameterType == typeof(decimal) || parameterType == typeof(double) || parameterType == typeof(int) || parameterType == typeof(object),
+            DesignFieldType.Bool => parameterType == typeof(bool) || parameterType == typeof(object),
+            DesignFieldType.DateTime => parameterType == typeof(DateTime) || parameterType == typeof(object),
+            _ => true
+        };
+    }
+
+    private string? GetExpressionValue(string parameterName)
+    {
+        if (SelectedNode?.Parameters.TryGetValue(parameterName, out var value) != true || value is null)
+        {
+            return null;
+        }
+
+        return value.Expression;
+    }
+
+    private static string? ParseEntityNameFromExpression(string expression)
+    {
+        var trimmed = expression.Trim();
+        if (!trimmed.StartsWith("@entities.", StringComparison.Ordinal))
+        {
+            return null;
+        }
+
+        var rest = trimmed["@entities.".Length..];
+        var separators = new[] { '.', '(', ' ' };
+        var index = rest.IndexOfAny(separators);
+        return index < 0 ? rest : rest[..index];
+    }
+
+    private async Task SelectAllColumnsAsync()
+    {
+        foreach (var column in DataGridColumns)
+        {
+            column.IsEnabled = true;
+        }
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task ClearColumnsAsync()
+    {
+        foreach (var column in DataGridColumns)
+        {
+            column.IsEnabled = false;
+        }
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void MoveColumn(string fieldName, int delta)
+    {
+        var index = DataGridColumns.FindIndex(column => string.Equals(column.FieldName, fieldName, StringComparison.OrdinalIgnoreCase));
+        if (index < 0)
+        {
+            return;
+        }
+
+        var targetIndex = index + delta;
+        if (targetIndex < 0 || targetIndex >= DataGridColumns.Count)
+        {
+            return;
+        }
+
+        (DataGridColumns[index], DataGridColumns[targetIndex]) = (DataGridColumns[targetIndex], DataGridColumns[index]);
+        for (var i = 0; i < DataGridColumns.Count; i++)
+        {
+            DataGridColumns[i].Order = i;
+        }
+    }
+
+    private Task OnPageSizeChanged(int pageSize)
+    {
+        PagingConfig.PageSize = pageSize;
+        return Task.CompletedTask;
+    }
+
+    private async Task ApplyColumnsAsync()
+    {
+        await UpsertColumnNodes.InvokeAsync(DataGridColumns);
+        await SetDataGridPaging.InvokeAsync(PagingConfig);
+    }
+
+    private static string GuessFormat(DesignField field)
+    {
+        return field.Type switch
+        {
+            DesignFieldType.Int or DesignFieldType.Decimal => "numeric",
+            DesignFieldType.DateTime => "date",
+            DesignFieldType.Bool => "boolean",
+            _ => "text"
+        };
+    }
+
     private sealed record OptionItem(string Label, string Value);
+    private sealed record PageSizeOption(string Label, int Value);
+
     private sealed record UiState(string? TextValue = null, decimal? NumericValue = null, bool? BoolValue = null, DateTime? DateValue = null, string? JsonValue = null, string? ValidationMessage = null)
     {
         public static UiState Empty => new();
