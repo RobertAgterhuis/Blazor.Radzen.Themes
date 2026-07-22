@@ -354,7 +354,7 @@
                                                     <div class="designer-issues__actions">
                                                         @if (issue.Code == "HardcodedColor")
                                                         {
-                                                            <RadzenDropDown TValue="string" Data="HardcodedColorTokenOptions" TextProperty="Label" ValueProperty="Value" Value="@_hardcodedColorFixToken" Change="@(value => _hardcodedColorFixToken = value?.ToString() ?? _hardcodedColorFixToken)" />
+                                                            <RadzenDropDown TValue="string" Data="HardcodedColorTokenOptions" TextProperty="Label" ValueProperty="Value" Value="@_hardcodedColorFixToken" ValueChanged="@((string v) => _hardcodedColorFixToken = v ?? _hardcodedColorFixToken)" />
                                                         }
                                                         <RadzenButton Text="Fix" Icon="build" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Click="() => ApplyIssueFixAsync(issue)" />
                                                     </div>
@@ -690,7 +690,7 @@
                     <h3>Nieuw document</h3>
                     <div class="designer-modal__content">
                         <label for="designer-template-kind">Template</label>
-                        <RadzenDropDown id="designer-template-kind" TValue="DesignDocumentTemplateKind" Data="TemplateOptions" Value="@_selectedTemplateKind" Change="OnTemplateChanged" TextProperty="DisplayName" ValueProperty="Kind" />
+                        <RadzenDropDown id="designer-template-kind" TValue="DesignDocumentTemplateKind" Data="TemplateOptions" Value="@_selectedTemplateKind" ValueChanged="@((DesignDocumentTemplateKind v) => _selectedTemplateKind = v)" TextProperty="DisplayName" ValueProperty="Kind" />
                     </div>
                     <div class="designer-modal__actions">
                         <RadzenButton Text="Aanmaken" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Flat" Click="CreateNewDocumentFromDialogAsync" />

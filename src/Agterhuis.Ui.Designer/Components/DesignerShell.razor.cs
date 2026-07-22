@@ -665,10 +665,10 @@ public partial class DesignerShell : IDisposable
         UpdateStartScreenState();
     }
 
-    private async Task OnSavedSelectionChanged(object value)
+    private async Task OnSavedSelectionChanged(string? value)
     {
         CloseAllMenus();
-        var selected = value?.ToString();
+        var selected = value;
         if (string.IsNullOrWhiteSpace(selected))
         {
             return;
@@ -1001,16 +1001,6 @@ public partial class DesignerShell : IDisposable
         await InvokeAsync(StateHasChanged);
     }
 
-    private Task OnTemplateChanged(object value)
-    {
-        if (value is DesignDocumentTemplateKind kind)
-        {
-            _selectedTemplateKind = kind;
-        }
-
-        return Task.CompletedTask;
-    }
-
     private async Task OnCanvasThemeChanged(string value)
     {
         CloseAllMenus();
@@ -1018,8 +1008,6 @@ public partial class DesignerShell : IDisposable
         await CanvasThemeChanged.InvokeAsync(_canvasTheme);
         await InvokeAsync(StateHasChanged);
     }
-
-    private Task OnCanvasThemeChanged(object value) => OnCanvasThemeChanged(value?.ToString() ?? "plum-dark");
 
     private Task ToggleDarkLight()
     {
