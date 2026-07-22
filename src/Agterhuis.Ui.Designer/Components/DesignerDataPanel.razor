@@ -9,8 +9,8 @@
         <AgtDropdown TValue="string" Label="Entiteit" AriaLabel="Entiteit" Data="EntityOptions" Value="@SelectedEntityName" ValueChanged="OnEntityChanged" TextProperty="Label" ValueProperty="Value" />
         <AgtNumericField Label="Rijen" AriaLabel="Seed rijen" Value="@(Convert.ToDecimal(CurrentEntity?.Seed.RowCount ?? DataModel.RowCount))" ValueChanged="OnRowCountChanged" Min="1" Step="1" />
         <AgtNumericField Label="Seed" AriaLabel="Seed waarde" Value="@(Convert.ToDecimal(CurrentEntity?.Seed.Seed ?? DataModel.Seed))" ValueChanged="OnSeedChanged" Min="1" Step="1" />
-        <RadzenButton Text="Importeer schema" ButtonStyle="ButtonStyle.Base" Variant="Variant.Flat" Click="OpenImportDialog" />
         <RadzenButton Text="Formulier genereren" ButtonStyle="ButtonStyle.Base" Variant="Variant.Flat" Click="OnGenerateFormRequested" />
+        <RadzenButton Text="Importeer schema" ButtonStyle="ButtonStyle.Base" Variant="Variant.Flat" Click="OpenImportDialog" />
     </div>
     @if (CurrentEntity is not null)
     {

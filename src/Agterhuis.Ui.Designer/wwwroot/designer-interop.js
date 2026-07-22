@@ -297,7 +297,8 @@ window.designerInterop = (() => {
     const setPaletteDragImage = (icon, label) => {
         window.addEventListener('dragstart', (event) => {
             const target = event.target;
-            if (!(target instanceof HTMLElement) || !target.classList.contains('designer-palette-item')) {
+            if (!(target instanceof HTMLElement)
+                || (!target.classList.contains('designer-palette-card') && !target.classList.contains('designer-palette-item'))) {
                 return;
             }
 

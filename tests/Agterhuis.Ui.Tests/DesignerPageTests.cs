@@ -237,6 +237,64 @@ public sealed class DesignerPageTests
         });
     }
 
+    [Fact]
+    public void DesignerPage_SidebarLayoutPreview_StaysInsideCanvasNode()
+    {
+        using var ctx = new BunitContext();
+        var jsRuntime = new DesignerJsRuntimeStub();
+        RegisterDesignerServices(ctx, jsRuntime);
+
+        var document = DesignDocumentTemplates.Create(DesignDocumentTemplateKind.FormPage, "SidebarPreview");
+        document.Pages[0].Nodes.Clear();
+        document.Pages[0].Nodes.Add(new DesignNode
+        {
+            ComponentType = "AgtSidebarLayout"
+        });
+
+        var json = System.Text.Json.JsonSerializer.Serialize(document, Agterhuis.Ui.Designer.Serialization.DesignJsonOptions.Default);
+        jsRuntime.SetResult("designerInterop.getText", json);
+
+        var navigation = ctx.Services.GetRequiredService<NavigationManager>();
+        navigation.NavigateTo(navigation.GetUriWithQueryParameter("name", document.Name));
+
+        var cut = ctx.Render<Agterhuis.Ui.Demo.Components.Pages.Designer>();
+        EnterEditorFromStartScreen(cut);
+
+        cut.WaitForAssertion(() =>
+        {
+            var canvas = cut.Find(".designer-canvas");
+            var sidebarLayout = canvas.QuerySelector(".agt-sidebar-layout");
+
+            Assert.NotNull(sidebarLayout);
+
+            var ownerPreview = sidebarLayout!.Closest(".designer-canvas-node__preview");
+            Assert.NotNull(ownerPreview);
+
+            var rootLevelSidebar = cut.FindAll("body > .rz-sidebar");
+            Assert.Empty(rootLevelSidebar);
+        });
+    }
+
+    [Fact]
+    public void DesignerPage_CtrlI_TogglesInteractionModeInEditCanvas()
+    {
+        using var ctx = new BunitContext();
+        var jsRuntime = new DesignerJsRuntimeStub();
+        RegisterDesignerServices(ctx, jsRuntime);
+
+        var cut = ctx.Render<Agterhuis.Ui.Demo.Components.Pages.Designer>();
+        EnterEditorFromStartScreen(cut);
+
+        var page = cut.Find(".designer-page");
+        Assert.DoesNotContain("designer-page--interaction", page.ClassList);
+
+        page.KeyDown(new KeyboardEventArgs { Key = "i", CtrlKey = true });
+        cut.WaitForAssertion(() => Assert.Contains("designer-page--interaction", cut.Find(".designer-page").ClassList));
+
+        cut.Find(".designer-page").KeyDown(new KeyboardEventArgs { Key = "i", CtrlKey = true });
+        cut.WaitForAssertion(() => Assert.DoesNotContain("designer-page--interaction", cut.Find(".designer-page").ClassList));
+    }
+
     private sealed class AlwaysConfirmDialog : IAgtConfirmDialog
     {
         public Task<bool> ConfirmAsync(string message, string title = "Bevestiging", AgtConfirmOptions? options = null)

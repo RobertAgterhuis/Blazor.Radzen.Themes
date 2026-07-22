@@ -75,6 +75,7 @@
     public Agterhuis.Ui.Designer.Registry.DesignerComponentRegistry? Registry { get; set; }
 
     private IReadOnlyList<TemplateOption> ResolvedOptions => TemplateOptions
+        .OrderBy(static definition => definition.Kind == DesignDocumentTemplateKind.FormPage ? 0 : 1)
         .Select(static definition =>
         {
             var previewDocument = DesignDocumentTemplates.Create(definition.Kind, "Preview");

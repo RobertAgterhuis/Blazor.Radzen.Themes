@@ -76,9 +76,10 @@ public partial class DesignerShell : IDisposable
     private bool _showInfoIssues = true;
     private CancellationTokenSource? _validationDebounceCts;
     private string _hardcodedColorFixToken = "var(--agt-color-primary-500)";
-    private bool _paletteCollapsed;
-    private bool _dataCollapsed = true;
-    private bool _treeCollapsed = true;
+    private LeftPanelTab _leftTab = LeftPanelTab.Palette;
+    private RightPanelTab _rightTab = RightPanelTab.Properties;
+    private bool _leftPanelCollapsed;
+    private bool _rightPanelCollapsed = true;
     private bool _codeCollapsed = true;
     private bool _fileMenuOpen;
     private bool _settingsMenuOpen;
@@ -89,6 +90,7 @@ public partial class DesignerShell : IDisposable
     private bool _showExportDialog;
     private bool _showShortcutsOverlay;
     private bool _showDesignerCommandPalette;
+    private bool _interactionMode;
     private bool _editingDocumentName;
     private string _editingDocumentNameValue = string.Empty;
     private readonly HashSet<string> _collapsedTreeNodes = new(StringComparer.Ordinal);
@@ -182,10 +184,10 @@ public partial class DesignerShell : IDisposable
         _ => string.Empty
     };
     private bool HasDuplicateActiveRoute => _commands.Document.Pages.Count(page => string.Equals(page.Route, ActivePage.Route, StringComparison.OrdinalIgnoreCase)) > 1;
-    private string RoutePreview => string.Join(" | ", _commands.Document.Pages.Select(static page => string.IsNullOrWhiteSpace(page.Route) ? "/" : page.Route));
     private IReadOnlyList<DesignValidationError> ValidationIssues => _validationIssues;
     private bool IsDragActive => _activeDrag is not null;
     private string DragStateCssClass => $"designer-page--drag-{_dragVisualState}";
+    private string InteractionModeCssClass => _interactionMode && !_previewMode ? "designer-page--interaction" : string.Empty;
     private IReadOnlyList<DesignValidationError> FilteredIssues => _validationIssues
         .Where(issue => (issue.Severity != DesignValidationSeverity.Error || _showErrorIssues)
             && (issue.Severity != DesignValidationSeverity.Warning || _showWarningIssues)
@@ -588,8 +590,27 @@ public partial class DesignerShell : IDisposable
     private void TogglePreviewMode()
     {
         _previewMode = !_previewMode;
+        if (_previewMode)
+        {
+            _interactionMode = false;
+        }
+
         _liveAnnouncement = _previewMode ? "Preview modus actief." : "Bewerkmodus actief.";
         CloseAllMenus();
+        StateHasChanged();
+    }
+
+    private void ToggleInteractionMode()
+    {
+        if (_previewMode)
+        {
+            return;
+        }
+
+        _interactionMode = !_interactionMode;
+        _liveAnnouncement = _interactionMode
+            ? "Interactie modus actief in bewerkcanvas."
+            : "Interactie modus uitgeschakeld.";
         StateHasChanged();
     }
 
@@ -1199,21 +1220,20 @@ public partial class DesignerShell : IDisposable
         CloseTreeContextMenu();
     }
 
-    private async Task TogglePaletteCollapsed()
+    private async Task ToggleLeftPanelCollapsed()
     {
-        _paletteCollapsed = !_paletteCollapsed;
+        _leftPanelCollapsed = !_leftPanelCollapsed;
         await PersistLayoutStateAsync();
     }
 
-    private async Task ToggleDataCollapsed()
+    private async Task ToggleRightPanelCollapsed()
     {
-        _dataCollapsed = !_dataCollapsed;
-        await PersistLayoutStateAsync();
-    }
+        if (_rightPanelCollapsed)
+        {
+            _rightTab = RightPanelTab.Data;
+        }
 
-    private async Task ToggleTreeCollapsed()
-    {
-        _treeCollapsed = !_treeCollapsed;
+        _rightPanelCollapsed = !_rightPanelCollapsed;
         await PersistLayoutStateAsync();
     }
 
@@ -1289,6 +1309,13 @@ public partial class DesignerShell : IDisposable
         if (args.CtrlKey && string.Equals(args.Key, "p", StringComparison.OrdinalIgnoreCase))
         {
             TogglePreviewMode();
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
+        if (args.CtrlKey && string.Equals(args.Key, "i", StringComparison.OrdinalIgnoreCase))
+        {
+            ToggleInteractionMode();
             await InvokeAsync(StateHasChanged);
             return;
         }
@@ -1485,9 +1512,38 @@ public partial class DesignerShell : IDisposable
             return;
         }
 
-        _paletteCollapsed = payload.TryGetPropertyValue("paletteCollapsed", out var paletteCollapsed) && paletteCollapsed?.GetValue<bool>() == true;
-        _dataCollapsed = !payload.TryGetPropertyValue("dataCollapsed", out var dataCollapsed) || dataCollapsed?.GetValue<bool>() != false;
-        _treeCollapsed = !payload.TryGetPropertyValue("treeCollapsed", out var treeCollapsed) || treeCollapsed?.GetValue<bool>() != false;
+        _leftPanelCollapsed = payload.TryGetPropertyValue("leftPanelCollapsed", out var leftPanelCollapsed) && leftPanelCollapsed?.GetValue<bool>() == true;
+        _rightPanelCollapsed = payload.TryGetPropertyValue("rightPanelCollapsed", out var rightPanelCollapsed) && rightPanelCollapsed?.GetValue<bool>() == true;
+
+        if (payload.TryGetPropertyValue("leftTab", out var leftTabNode)
+            && Enum.TryParse<LeftPanelTab>(leftTabNode?.GetValue<string>(), out var leftTab))
+        {
+            _leftTab = leftTab;
+        }
+
+        if (payload.TryGetPropertyValue("rightTab", out var rightTabNode)
+            && Enum.TryParse<RightPanelTab>(rightTabNode?.GetValue<string>(), out var rightTab))
+        {
+            _rightTab = rightTab;
+        }
+
+        if (payload.TryGetPropertyValue("paletteCollapsed", out var legacyPaletteCollapsed))
+        {
+            _leftPanelCollapsed = legacyPaletteCollapsed?.GetValue<bool>() == true;
+        }
+
+        if (payload.TryGetPropertyValue("dataCollapsed", out var legacyDataCollapsed)
+            && legacyDataCollapsed?.GetValue<bool>() == false)
+        {
+            _rightTab = RightPanelTab.Data;
+        }
+
+        if (payload.TryGetPropertyValue("treeCollapsed", out var legacyTreeCollapsed)
+            && legacyTreeCollapsed?.GetValue<bool>() == false)
+        {
+            _leftTab = LeftPanelTab.Navigator;
+        }
+
         _codeCollapsed = !payload.TryGetPropertyValue("codeCollapsed", out var codeCollapsed) || codeCollapsed?.GetValue<bool>() != false;
     }
 
@@ -1495,9 +1551,10 @@ public partial class DesignerShell : IDisposable
     {
         var payload = new
         {
-            paletteCollapsed = _paletteCollapsed,
-            dataCollapsed = _dataCollapsed,
-            treeCollapsed = _treeCollapsed,
+            leftPanelCollapsed = _leftPanelCollapsed,
+            rightPanelCollapsed = _rightPanelCollapsed,
+            leftTab = _leftTab.ToString(),
+            rightTab = _rightTab.ToString(),
             codeCollapsed = _codeCollapsed
         };
 
@@ -2102,12 +2159,12 @@ public partial class DesignerShell : IDisposable
             : WrapNodeInRowAsync(nodeId);
     }
 
-    private string GetPaletteItemClass(string componentType)
+    private string GetPaletteCardClass(string componentType)
     {
-        var classes = "designer-palette-item";
+        var classes = "designer-palette-card";
         if (string.Equals(_dragSourcePaletteComponentType, componentType, StringComparison.Ordinal))
         {
-            classes += " designer-palette-item--dragging";
+            classes += " designer-palette-card--dragging";
         }
 
         return classes;
@@ -2709,10 +2766,10 @@ public partial class DesignerShell : IDisposable
         await JS.InvokeVoidAsync("designerInterop.flashNode", _selectedNodeId);
     }
 
-    private Task OnRowLayoutChanged(ChangeEventArgs args)
+    private Task AddRowLayoutPreset(string layout)
     {
-        _selectedRowLayout = args.Value?.ToString() ?? "12";
-        return Task.CompletedTask;
+        _selectedRowLayout = layout;
+        return AddRowLayoutAsync();
     }
 
     private async Task AddRowLayoutAsync()
@@ -3166,6 +3223,8 @@ public partial class DesignerShell : IDisposable
 
     private sealed record SelectionBreadcrumbPart(string NodeId, string Label);
 
+    private sealed record StatusBarMessage(string Icon, string Text, RenderFragment? Actions, bool Dismissable);
+
     private sealed record ToastMessage(Guid Id, string Text, ToastType Type, DateTimeOffset Created, bool IsExiting);
 
     private sealed record DesignerCommandPaletteItem(AgtCommandItem Command, int Index);
@@ -3173,6 +3232,18 @@ public partial class DesignerShell : IDisposable
     private sealed record DesignerCommandGroup(string Key, IReadOnlyList<DesignerCommandPaletteItem> Items);
 
     private sealed record TreeNodeStatus(string CssClass, string Glyph, string Tooltip);
+
+    private enum LeftPanelTab
+    {
+        Palette,
+        Navigator
+    }
+
+    private enum RightPanelTab
+    {
+        Properties,
+        Data
+    }
 
     private enum ToastType
     {
@@ -3184,18 +3255,60 @@ public partial class DesignerShell : IDisposable
     private string GetRootDropzoneClass(int index)
     {
         var id = $"root-{index}";
-        var classes = new StringBuilder("designer-dropzone designer-dropzone--root");
-        if (IsDragActive)
-        {
-            classes.Append(" designer-dropzone--ready");
-        }
+        var classes = new StringBuilder("designer-root-dropzone");
 
         if (string.Equals(_hoverDropzoneId, id, StringComparison.Ordinal))
         {
-            classes.Append(" designer-dropzone--hover");
+            classes.Append(" designer-root-dropzone--active");
         }
 
         return classes.ToString();
+    }
+
+    private StatusBarMessage? GetStatusMessage()
+    {
+        if (_showDraftRecoveryChoice)
+        {
+            return new StatusBarMessage("history", "Hersteld werk uit localStorage gevonden. Lokale conceptversie beschikbaar.", RenderDraftRecoveryActions(), false);
+        }
+
+        if (!string.IsNullOrWhiteSpace(_offlineWarning))
+        {
+            return new StatusBarMessage("cloud_off", _offlineWarning, null, true);
+        }
+
+        if (_hasRecoveredDraft)
+        {
+            return new StatusBarMessage("restore", "Hersteld werk uit localStorage gevonden. Sla het bestand op om het definitief te bewaren.", null, true);
+        }
+
+        return null;
+    }
+
+    private RenderFragment RenderDraftRecoveryActions()
+    {
+        return builder =>
+        {
+            builder.OpenComponent<RadzenButton>(0);
+            builder.AddAttribute(1, "Text", "Lokale draft gebruiken");
+            builder.AddAttribute(2, "ButtonStyle", ButtonStyle.Primary);
+            builder.AddAttribute(3, "Variant", Variant.Flat);
+            builder.AddAttribute(4, "Click", EventCallback.Factory.Create<MouseEventArgs>(this, _ => UseLocalDraftAsync()));
+            builder.CloseComponent();
+
+            builder.OpenComponent<RadzenButton>(5);
+            builder.AddAttribute(6, "Text", "Serverversie laden");
+            builder.AddAttribute(7, "ButtonStyle", ButtonStyle.Base);
+            builder.AddAttribute(8, "Variant", Variant.Flat);
+            builder.AddAttribute(9, "Click", EventCallback.Factory.Create<MouseEventArgs>(this, _ => UseServerVersionAsync()));
+            builder.CloseComponent();
+        };
+    }
+
+    private void DismissStatusBar()
+    {
+        _offlineWarning = null;
+        _hasRecoveredDraft = false;
     }
 
     private async Task DebounceValidationAsync()

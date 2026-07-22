@@ -1,4 +1,4 @@
-<div class="designer-page @DragStateCssClass" @onkeydown="OnPageKeyDown" tabindex="0">
+<div class="designer-page @DragStateCssClass @InteractionModeCssClass" @onkeydown="OnPageKeyDown" tabindex="0">
     <div class="designer-screenreader-status" role="status" aria-live="polite">@_liveAnnouncement</div>
 
     @if (_showOnboardingOverlay)
@@ -29,28 +29,21 @@
     }
     else
     {
-        @if (_showDraftRecoveryChoice)
+        @if (GetStatusMessage() is { } statusMessage)
         {
-            <div class="designer-recovery-banner" role="status" aria-live="polite">
-                Er is een lokale conceptversie gevonden die nieuwer is dan de serverversie.
-                <span class="designer-toolbar__group">
-                    <RadzenButton Text="Lokale draft gebruiken" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Flat" Click="UseLocalDraftAsync" />
-                    <RadzenButton Text="Serverversie laden" ButtonStyle="ButtonStyle.Base" Variant="Variant.Flat" Click="UseServerVersionAsync" />
-                </span>
-            </div>
-        }
-
-        @if (!string.IsNullOrWhiteSpace(_offlineWarning))
-        {
-            <div class="designer-recovery-banner" role="status" aria-live="polite">
-                @_offlineWarning
-            </div>
-        }
-
-        @if (_hasRecoveredDraft)
-        {
-            <div class="designer-recovery-banner" role="status" aria-live="polite">
-                Hersteld werk uit localStorage gevonden. Sla het bestand op om het definitief te bewaren.
+            <div class="designer-status-bar" role="status" aria-live="polite">
+                <RadzenIcon Icon="@statusMessage.Icon" />
+                <span>@statusMessage.Text</span>
+                @if (statusMessage.Actions is not null)
+                {
+                    <div class="designer-status-bar__actions">
+                        @statusMessage.Actions
+                    </div>
+                }
+                @if (statusMessage.Dismissable)
+                {
+                    <button type="button" class="designer-status-bar__dismiss" @onclick="DismissStatusBar" aria-label="Sluiten">&times;</button>
+                }
             </div>
         }
 
@@ -119,6 +112,21 @@
             <div class="designer-toolbar__group">
                 <RadzenButton Text="@(_previewMode ? "Bewerken" : "Preview")" Icon="@(_previewMode ? "edit" : "visibility")" ButtonStyle="ButtonStyle.Base" Variant="Variant.Flat" Click="TogglePreviewMode" />
 
+                @if (!_previewMode)
+                {
+                    <RadzenButton Text="@(_interactionMode ? "Interactie uit" : "Interactie")"
+                                  Icon="@(_interactionMode ? "pan_tool" : "touch_app")"
+                                  ButtonStyle="ButtonStyle.Base"
+                                  Variant="Variant.Flat"
+                                  title="Schakel directe componentinteractie in de bewerkcanvas (Ctrl+I)"
+                                  Click="ToggleInteractionMode" />
+
+                    @if (_interactionMode)
+                    {
+                        <span class="designer-toolbar__state-badge" role="status" aria-live="polite">Interactie actief</span>
+                    }
+                }
+
                 <div class="designer-viewport-toggle" role="group" aria-label="Viewport">
                     <button type="button" class="designer-icon-toggle @(string.Equals(_viewport, "mobile", StringComparison.Ordinal) ? "designer-icon-toggle--active" : null)" @onclick='() => SetViewport("mobile")' aria-label="Mobiel">
                         <RadzenIcon Icon="smartphone" />
@@ -135,6 +143,11 @@
                 @if (_settingsMenuOpen)
                 {
                     <div class="designer-menu" role="menu" aria-label="Instellingen">
+                        <div class="designer-menu__row">
+                            <label for="designer-theme-setting">Thema</label>
+                            <RadzenDropDown id="designer-theme-setting" TValue="string" Data="CanvasThemeOptions" Value="@_canvasTheme" Change="OnCanvasThemeChanged" />
+                        </div>
+                        <hr class="designer-menu__divider" />
                         <button type="button" class="designer-menu__item" role="menuitem" @onclick="ToggleShortcutsOverlay">Sneltoetsen</button>
                         <button type="button" class="designer-menu__item" role="menuitem" @onclick="OpenDesignerCommandPaletteAsync">Zoeken (Ctrl+K)</button>
                     </div>
@@ -153,7 +166,7 @@
 
                     @if (_previewMode)
                     {
-                        <button type="button" class="designer-page-tab__button @(isActive ? "designer-page-tab--active" : null)" @onclick="() => SelectPage(pageIndex)">@GetPageLabel(page)</button>
+                        <button type="button" class="designer-page-tab__button @(isActive ? "designer-page-tab--active" : null)" @onclick="() => SelectPage(pageIndex)" title="@(page.Route)">@GetPageLabel(page)</button>
                     }
                     else
                     {
@@ -164,7 +177,7 @@
                                 @ondragover:preventDefault="true"
                              @ondrop="() => OnPageDropAsync(pageIndex)"
                              @ondragend="OnPageDragEnd">
-                            <button type="button" class="designer-page-tab__button" @onclick="() => SelectPage(pageIndex)">@GetPageLabel(page)</button>
+                                <button type="button" class="designer-page-tab__button" @onclick="() => SelectPage(pageIndex)" title="@(page.Route)">@GetPageLabel(page)</button>
                             @if (_editingPageIndex == pageIndex)
                             {
                                 <input class="designer-page-tab__rename"
@@ -196,11 +209,6 @@
             }
         </section>
 
-        @if (!_previewMode)
-        {
-            <div class="designer-route-preview" title="Routes in export">Routes: @RoutePreview</div>
-        }
-
         <div class="designer-grid">
             @if (_previewMode)
             {
@@ -214,204 +222,72 @@
             }
             else
             {
-                <aside class="designer-panel designer-panel--palette @(_paletteCollapsed ? "designer-panel--collapsed" : string.Empty)" aria-label="Componentenpalet">
+                <aside class="designer-panel designer-panel--left designer-panel--tree @(_leftPanelCollapsed ? "designer-panel--collapsed" : string.Empty)" aria-label="Palet en navigator">
                     <div class="designer-panel__header">
-                        <h2>Palet</h2>
-                        <button type="button" class="designer-panel__toggle" aria-expanded="@(!_paletteCollapsed)" @onclick="TogglePaletteCollapsed">
-                            <RadzenIcon Icon="@(_paletteCollapsed ? "chevron_right" : "chevron_left")" />
+                        @if (!_leftPanelCollapsed)
+                        {
+                            <div class="designer-panel-tabs" role="tablist" aria-label="Linker paneel tabs">
+                                <button type="button" role="tab" class="designer-panel-tab @(_leftTab == LeftPanelTab.Palette ? "designer-panel-tab--active" : string.Empty)" @onclick="() => _leftTab = LeftPanelTab.Palette">
+                                    <RadzenIcon Icon="widgets" /> Palet
+                                </button>
+                                <button type="button" role="tab" class="designer-panel-tab @(_leftTab == LeftPanelTab.Navigator ? "designer-panel-tab--active" : string.Empty)" @onclick="() => _leftTab = LeftPanelTab.Navigator">
+                                    <RadzenIcon Icon="account_tree" /> Navigator
+                                </button>
+                            </div>
+                        }
+                        <button type="button" class="designer-panel__toggle" aria-expanded="@(!_leftPanelCollapsed)" @onclick="ToggleLeftPanelCollapsed">
+                            <RadzenIcon Icon="@(_leftPanelCollapsed ? "chevron_right" : "chevron_left")" />
                         </button>
                     </div>
 
-                    @if (!_paletteCollapsed)
+                    @if (!_leftPanelCollapsed)
                     {
-                        <input class="designer-filter" type="text" placeholder="Filter componenten..." value="@_paletteFilter" @oninput="OnPaletteFilterChanged" />
-                        @foreach (var category in PaletteByCategory)
+                        @if (_leftTab == LeftPanelTab.Palette)
                         {
-                            <section class="designer-category">
-                                <h3>@category.Key</h3>
-                                @foreach (var descriptor in category.Value)
-                                {
-                                        <button type="button"
-                                            class="@GetPaletteItemClass(descriptor.ComponentType)"
-                                            draggable="true"
-                                            @ondragstart='args => OnPaletteDragStart(args, descriptor)'
-                                            @ondragend="OnDragEnd"
-                                            @onclick="() => OnPaletteItemClickedAsync(descriptor.ComponentType)"
-                                            title="@($"{descriptor.DesignerDisplayName ?? descriptor.DisplayName} - {descriptor.DesignerDescription ?? "Component in de designer"} ({descriptor.ComponentType})")">
-                                        <span class="designer-palette-item__grip" aria-hidden="true">⋮⋮</span>
-                                        <RadzenIcon Icon="@(descriptor.DesignerIcon ?? descriptor.Icon)" />
-                                        <span>@(descriptor.DesignerDisplayName ?? descriptor.DisplayName)</span>
-                                        <small class="designer-palette-item__meta">@descriptor.ComponentType</small>
-                                    </button>
-                                }
-                            </section>
-                        }
-                    }
-                </aside>
-
-                @if (!_paletteCollapsed)
-                {
-                    <div class="designer-divider designer-divider--vertical" data-divider="palette-canvas" aria-label="Resize palette"></div>
-                }
-
-                <section class="designer-panel designer-panel--canvas" aria-label="Canvas">
-                    <div class="designer-breadcrumb" aria-live="polite">
-                        @if (SelectionBreadcrumbParts.Count == 0)
-                        {
-                            <span>Selecteer een node</span>
+                            <input class="designer-filter" type="text" placeholder="Zoek component..." value="@_paletteFilter" @oninput="OnPaletteFilterChanged" />
+                            @foreach (var category in PaletteByCategory)
+                            {
+                                <section class="designer-category">
+                                    <h3>@category.Key</h3>
+                                    <div class="designer-palette-grid">
+                                        @foreach (var descriptor in category.Value)
+                                        {
+                                            <button type="button"
+                                                    class="@GetPaletteCardClass(descriptor.ComponentType)"
+                                                    draggable="true"
+                                                    @ondragstart='args => OnPaletteDragStart(args, descriptor)'
+                                                    @ondragend="OnDragEnd"
+                                                    @onclick="() => OnPaletteItemClickedAsync(descriptor.ComponentType)"
+                                                    title="@(descriptor.DesignerDescription ?? descriptor.ComponentType)">
+                                                <RadzenIcon Icon="@(descriptor.DesignerIcon ?? descriptor.Icon)" />
+                                                <span class="designer-palette-card__name">@(descriptor.DesignerDisplayName ?? descriptor.DisplayName)</span>
+                                            </button>
+                                        }
+                                    </div>
+                                </section>
+                            }
                         }
                         else
                         {
-                            @for (var crumbIndex = 0; crumbIndex < SelectionBreadcrumbParts.Count; crumbIndex++)
-                            {
-                                var crumb = SelectionBreadcrumbParts[crumbIndex];
-                                <button type="button" class="designer-breadcrumb__item" @onclick="() => OnSelectNode(crumb.NodeId)">@crumb.Label</button>
-                                if (crumbIndex < SelectionBreadcrumbParts.Count - 1)
-                                {
-                                    <span class="designer-breadcrumb__sep">&gt;</span>
-                                }
-                            }
-                        }
-                    </div>
-                    <div class="designer-canvas-frame @CanvasFrameClass" style="@CanvasFrameStyle">
-                        <div class="designer-canvas" data-agt-theme="@_canvasTheme" @ref="_canvasRef">
-                            @if (ActivePage.Nodes.Count == 0)
-                            {
-                                <div class="designer-canvas--empty">
-                                    <div class="designer-canvas-onboarding">
-                                        <RadzenIcon Icon="dashboard_customize" class="designer-canvas-onboarding__icon" />
-                                        <h3>Begin met ontwerpen</h3>
-                                        <p>Sleep een component uit het palet links, of gebruik een van de snelstartopties hieronder.</p>
-                                        <div class="designer-canvas-onboarding__actions">
-                                            <RadzenButton Text="Formulier" Icon="description" ButtonStyle="ButtonStyle.Base" Variant="Variant.Outlined" Click='() => OnTemplateStartSelected(DesignDocumentTemplateKind.FormPage)' />
-                                            <RadzenButton Text="Dashboard" Icon="dashboard" ButtonStyle="ButtonStyle.Base" Variant="Variant.Outlined" Click='() => OnTemplateStartSelected(DesignDocumentTemplateKind.Dashboard)' />
-                                            <RadzenButton Text="Lege pagina" Icon="add" ButtonStyle="ButtonStyle.Base" Variant="Variant.Outlined" Click='() => OnTemplateStartSelected(DesignDocumentTemplateKind.Blank)' />
-                                        </div>
-                                        <p class="designer-canvas-onboarding__shortcut">Tip: druk <kbd>Ctrl+K</kbd> om snel een component te zoeken.</p>
-                                    </div>
-                                </div>
-                            }
-                            else
-                            {
-                                <div class="@GetRootDropzoneClass(ActivePage.Nodes.Count)"
-                                     @ondragenter='() => OnDropZoneDragEnter($"root-{ActivePage.Nodes.Count}")'
-                                     @ondragleave='() => OnDropZoneDragLeave($"root-{ActivePage.Nodes.Count}")'
-                                     @ondragover='args => OnDropZoneDragOver(args, $"root-{ActivePage.Nodes.Count}")'
-                                      @ondragover:preventDefault="true"
-                                     @ondrop='() => OnDropRequested(new DesignerDropTarget(DesignNodeLocation.Root(ActivePage.Nodes.Count)), $"root-{ActivePage.Nodes.Count}")'
-                                     title="Drop op canvas"></div>
-                                @for (var index = 0; index < ActivePage.Nodes.Count; index++)
-                                {
-                                    var node = ActivePage.Nodes[index];
-                                    <DesignerCanvasNode Node="node"
-                                                       Registry="@Registry"
-                                                       SelectedNodeId="@_selectedNodeId"
-                                                       SelectedNodeIds="@_selectedNodeIds"
-                                                       HoveredNodeId="@_hoveredNodeId"
-                                                       HoverNodeChanged="OnTreeNodeHover"
-                                                       SelectNode="OnSelectNode"
-                                                       SelectNodeExtended="OnSelectNode"
-                                                       StartDrag="OnDragStart"
-                                                       EndDrag="OnDragEnd"
-                                                       DropNode="OnDropRequested"
-                                                       AddNodeRequested="OnInlineAddRequested"
-                                                       MoveNodeUp="OnMoveNodeUp"
-                                                       MoveNodeDown="OnMoveNodeDown"
-                                                       DuplicateNode="OnDuplicateNode"
-                                                       DeleteNode="OnDeleteNode"
-                                                       InlineEditCommitted="OnInlineEditCommitted"
-                                                       NodeQuickParameterChanged="OnInlineEditCommitted"
-                                                       IsDragActive="IsDragActive"
-                                                       HoverDropzoneId="@_hoverDropzoneId"
-                                                       DropzoneDragEnter="OnDropZoneDragEnter"
-                                                       DropzoneDragLeave="OnDropZoneDragLeave" />
-                                    <div class="@GetRootDropzoneClass(index + 1)"
-                                         @ondragenter='() => OnDropZoneDragEnter($"root-{index + 1}")'
-                                         @ondragleave='() => OnDropZoneDragLeave($"root-{index + 1}")'
-                                         @ondragover='args => OnDropZoneDragOver(args, $"root-{index + 1}")'
-                                         @ondragover:preventDefault="true"
-                                         @ondrop='() => OnDropRequested(new DesignerDropTarget(DesignNodeLocation.Root(index + 1)), $"root-{index + 1}")'
-                                         title="Drop op canvas"></div>
-                                }
-
-                                <div class="designer-quick-layout">
-                                    <label for="designer-layout-split">Voeg rij toe</label>
-                                    <select id="designer-layout-split" value="@_selectedRowLayout" @onchange="OnRowLayoutChanged">
-                                        <option value="12">1 kolom (12)</option>
-                                        <option value="6+6">2 kolommen (6+6)</option>
-                                        <option value="4+4+4">3 kolommen (4+4+4)</option>
-                                        <option value="4+8">Zijbalk + hoofdpaneel (4+8)</option>
-                                        <option value="8+4">Hoofdpaneel + zijbalk (8+4)</option>
-                                    </select>
-                                    <RadzenButton Text="Rij toevoegen" ButtonStyle="ButtonStyle.Base" Variant="Variant.Flat" Click="AddRowLayoutAsync" />
-                                </div>
-                            }
-                        </div>
-                    </div>
-                </section>
-
-                <div class="designer-divider designer-divider--vertical" data-divider="canvas-property" aria-label="Resize properties"></div>
-
-                <aside class="designer-panel designer-panel--properties" aria-label="Properties panel">
-                    <PropertyPanel Page="@ActivePage"
-                                   HasDuplicateRoute="@HasDuplicateActiveRoute"
-                                   CanvasTheme="@_canvasTheme"
-                                   ThemeOptions="CanvasThemeOptions"
-                                   DataModel="@_commands.Document.DataModel"
-                                   SelectedNode="SelectedNode"
-                                   SelectedDescriptor="SelectedDescriptor"
-                                   SetPageRoute="OnPageRouteChanged"
-                                   SetPageTitle="OnPageTitleChanged"
-                                   SetCanvasTheme="OnCanvasThemeChanged"
-                                   SetNodeParameter="OnNodeParameterChanged"
-                                   SetNodeLayoutSlot="OnNodeLayoutSlotChanged"
-                                   AddColumnNode="OnAddColumnNode"
-                                   RemoveColumnNode="OnRemoveColumnNode"
-                                   SplitColumnNode="OnSplitColumnNode"
-                                   UpsertColumnNodes="OnUpsertColumnNodes"
-                                   SetDataGridPaging="OnSetDataGridPaging" />
-                </aside>
-
-                <aside class="designer-panel designer-panel--data @(_dataCollapsed ? "designer-panel--collapsed" : string.Empty)" aria-label="Data panel">
-                    <div class="designer-panel__header">
-                        <h2>Data</h2>
-                        <button type="button" class="designer-panel__toggle" aria-expanded="@(!_dataCollapsed)" @onclick="ToggleDataCollapsed">
-                            <RadzenIcon Icon="@(_dataCollapsed ? "chevron_left" : "chevron_right")" />
-                        </button>
-                    </div>
-                    @if (!_dataCollapsed)
-                    {
-                        <DesignerDataPanel DataModel="@_commands.Document.DataModel" SelectedEntityName="@_selectedEntityName" SelectedEntityNameChanged="OnSelectedEntityChanged" GenerateFormRequested="OnGenerateFormRequested" ImportEntitiesRequested="OnImportEntitiesRequested" />
-                    }
-                </aside>
-
-                <aside class="designer-panel designer-panel--tree @(_treeCollapsed ? "designer-panel--collapsed" : string.Empty)" aria-label="Structuurboom">
-                    <div class="designer-panel__header">
-                        <h2>Structuur</h2>
-                        <button type="button" class="designer-panel__toggle" aria-expanded="@(!_treeCollapsed)" @onclick="ToggleTreeCollapsed">
-                            <RadzenIcon Icon="@(_treeCollapsed ? "chevron_left" : "chevron_right")" />
-                        </button>
-                    </div>
-
-                    @if (!_treeCollapsed)
-                    {
-                        <div class="designer-tree" aria-label="Structuurboom items">
-                            @RenderTreeNodes(TreeRoots)
-                        </div>
-
-                        @if (_treeContextMenuNodeId is not null)
-                        {
-                            <div class="designer-tree-context-menu"
-                                 role="menu"
-                                 style="left: @_treeContextMenuXpx; top: @_treeContextMenuYpx;"
-                                 @onclick:stopPropagation="true">
-                                <button type="button" class="designer-tree-context-menu__item" role="menuitem" @onclick="OnTreeContextDuplicateAsync">Dupliceren</button>
-                                <button type="button" class="designer-tree-context-menu__item" role="menuitem" @onclick="OnTreeContextDeleteAsync">Verwijderen</button>
-                                <button type="button" class="designer-tree-context-menu__item" role="menuitem" @onclick="OnTreeContextMoveUpAsync">Omhoog</button>
-                                <button type="button" class="designer-tree-context-menu__item" role="menuitem" @onclick="OnTreeContextMoveDownAsync">Omlaag</button>
-                                <button type="button" class="designer-tree-context-menu__item" role="menuitem" @onclick="OnTreeContextWrapCardAsync">Wikkel in kaart</button>
-                                <button type="button" class="designer-tree-context-menu__item" role="menuitem" @onclick="OnTreeContextWrapRowAsync">Wikkel in rij</button>
+                            <div class="designer-tree" aria-label="Navigator">
+                                @RenderTreeNodes(TreeRoots)
                             </div>
+
+                            @if (_treeContextMenuNodeId is not null)
+                            {
+                                <div class="designer-tree-context-menu"
+                                     role="menu"
+                                     style="left: @_treeContextMenuXpx; top: @_treeContextMenuYpx;"
+                                     @onclick:stopPropagation="true">
+                                    <button type="button" class="designer-tree-context-menu__item" role="menuitem" @onclick="OnTreeContextDuplicateAsync">Dupliceren</button>
+                                    <button type="button" class="designer-tree-context-menu__item" role="menuitem" @onclick="OnTreeContextDeleteAsync">Verwijderen</button>
+                                    <button type="button" class="designer-tree-context-menu__item" role="menuitem" @onclick="OnTreeContextMoveUpAsync">Omhoog</button>
+                                    <button type="button" class="designer-tree-context-menu__item" role="menuitem" @onclick="OnTreeContextMoveDownAsync">Omlaag</button>
+                                    <button type="button" class="designer-tree-context-menu__item" role="menuitem" @onclick="OnTreeContextWrapCardAsync">Wikkel in kaart</button>
+                                    <button type="button" class="designer-tree-context-menu__item" role="menuitem" @onclick="OnTreeContextWrapRowAsync">Wikkel in rij</button>
+                                </div>
+                            }
+
                         }
 
                         <section class="designer-issues" aria-label="Issues panel">
@@ -462,6 +338,214 @@
                                 }
                             }
                         </section>
+                    }
+                </aside>
+
+                @if (_leftPanelCollapsed)
+                {
+                    <section class="designer-issues designer-issues--offscreen" aria-hidden="true">
+                        <span>Issues</span>
+                        <span>@($"{ErrorCount} fouten · {WarningCount} waarschuwingen · {InfoCount} info")</span>
+                    </section>
+                }
+
+                @if (!_leftPanelCollapsed)
+                {
+                    <div class="designer-divider designer-divider--vertical" data-divider="palette-canvas" aria-label="Resize palette"></div>
+                }
+
+                <section class="designer-panel designer-panel--canvas" aria-label="Canvas">
+                    <div class="designer-breadcrumb" aria-live="polite">
+                        @if (SelectionBreadcrumbParts.Count == 0)
+                        {
+                            <span>Selecteer een node</span>
+                        }
+                        else
+                        {
+                            @for (var crumbIndex = 0; crumbIndex < SelectionBreadcrumbParts.Count; crumbIndex++)
+                            {
+                                var crumb = SelectionBreadcrumbParts[crumbIndex];
+                                <button type="button" class="designer-breadcrumb__item" @onclick="() => OnSelectNode(crumb.NodeId)">@crumb.Label</button>
+                                if (crumbIndex < SelectionBreadcrumbParts.Count - 1)
+                                {
+                                    <span class="designer-breadcrumb__sep">&gt;</span>
+                                }
+                            }
+                        }
+                    </div>
+                    <div class="designer-canvas-frame @CanvasFrameClass" style="@CanvasFrameStyle">
+                        <div class="designer-canvas" data-agt-theme="@_canvasTheme" @ref="_canvasRef">
+                            @if (ActivePage.Nodes.Count == 0)
+                            {
+                                <div class="designer-canvas-empty">
+                                    <div class="designer-canvas-empty__hero">
+                                        <RadzenIcon Icon="dashboard_customize" />
+                                        <h2>Ontwerp je pagina</h2>
+                                        <p>Kies een startpunt of sleep componenten uit het palet links.</p>
+                                    </div>
+                                    <div class="designer-canvas-empty__templates">
+                                        <button type="button" class="designer-canvas-empty__template" @onclick='() => OnTemplateStartSelected(DesignDocumentTemplateKind.FormPage)'>
+                                            <div class="designer-canvas-empty__template-preview">
+                                                <div class="designer-canvas-empty__template-line" style="width:60%;"></div>
+                                                <div class="designer-canvas-empty__template-line" style="width:100%;"></div>
+                                                <div class="designer-canvas-empty__template-line" style="width:100%;"></div>
+                                                <div class="designer-canvas-empty__template-line designer-canvas-empty__template-line--button" style="width:30%;"></div>
+                                            </div>
+                                            <span>Formulier</span>
+                                        </button>
+                                        <button type="button" class="designer-canvas-empty__template" @onclick='() => OnTemplateStartSelected(DesignDocumentTemplateKind.Dashboard)'>
+                                            <div class="designer-canvas-empty__template-preview">
+                                                <div class="designer-canvas-empty__template-row">
+                                                    <div class="designer-canvas-empty__template-card"></div>
+                                                    <div class="designer-canvas-empty__template-card"></div>
+                                                    <div class="designer-canvas-empty__template-card"></div>
+                                                </div>
+                                                <div class="designer-canvas-empty__template-chart"></div>
+                                            </div>
+                                            <span>Dashboard</span>
+                                        </button>
+                                        <button type="button" class="designer-canvas-empty__template" @onclick='() => OnTemplateStartSelected(DesignDocumentTemplateKind.Blank)'>
+                                            <div class="designer-canvas-empty__template-preview designer-canvas-empty__template-preview--blank">
+                                                <RadzenIcon Icon="add" />
+                                            </div>
+                                            <span>Leeg</span>
+                                        </button>
+                                    </div>
+                                    <p class="designer-canvas-empty__hint">Of druk <kbd>Ctrl+K</kbd> om een component te zoeken</p>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="@GetRootDropzoneClass(ActivePage.Nodes.Count)"
+                                     @ondragenter='() => OnDropZoneDragEnter($"root-{ActivePage.Nodes.Count}")'
+                                     @ondragleave='() => OnDropZoneDragLeave($"root-{ActivePage.Nodes.Count}")'
+                                     @ondragover='args => OnDropZoneDragOver(args, $"root-{ActivePage.Nodes.Count}")'
+                                      @ondragover:preventDefault="true"
+                                     @ondrop='() => OnDropRequested(new DesignerDropTarget(DesignNodeLocation.Root(ActivePage.Nodes.Count)), $"root-{ActivePage.Nodes.Count}")'
+                                     title="Drop op canvas"></div>
+                                @for (var index = 0; index < ActivePage.Nodes.Count; index++)
+                                {
+                                    var node = ActivePage.Nodes[index];
+                                    <DesignerCanvasNode Node="node"
+                                                       Registry="@Registry"
+                                                       SelectedNodeId="@_selectedNodeId"
+                                                       SelectedNodeIds="@_selectedNodeIds"
+                                                       HoveredNodeId="@_hoveredNodeId"
+                                                       HoverNodeChanged="OnTreeNodeHover"
+                                                       SelectNode="OnSelectNode"
+                                                       SelectNodeExtended="OnSelectNode"
+                                                       StartDrag="OnDragStart"
+                                                       EndDrag="OnDragEnd"
+                                                       DropNode="OnDropRequested"
+                                                       AddNodeRequested="OnInlineAddRequested"
+                                                       MoveNodeUp="OnMoveNodeUp"
+                                                       MoveNodeDown="OnMoveNodeDown"
+                                                       DuplicateNode="OnDuplicateNode"
+                                                       DeleteNode="OnDeleteNode"
+                                                       InlineEditCommitted="OnInlineEditCommitted"
+                                                       NodeQuickParameterChanged="OnInlineEditCommitted"
+                                                       IsDragActive="IsDragActive"
+                                                       HoverDropzoneId="@_hoverDropzoneId"
+                                                       DropzoneDragEnter="OnDropZoneDragEnter"
+                                                       DropzoneDragLeave="OnDropZoneDragLeave" />
+                                    <div class="@GetRootDropzoneClass(index + 1)"
+                                         @ondragenter='() => OnDropZoneDragEnter($"root-{index + 1}")'
+                                         @ondragleave='() => OnDropZoneDragLeave($"root-{index + 1}")'
+                                         @ondragover='args => OnDropZoneDragOver(args, $"root-{index + 1}")'
+                                         @ondragover:preventDefault="true"
+                                         @ondrop='() => OnDropRequested(new DesignerDropTarget(DesignNodeLocation.Root(index + 1)), $"root-{index + 1}")'
+                                         title="Drop op canvas"></div>
+                                }
+
+                                <div class="designer-layout-presets">
+                                    <span class="designer-layout-presets__label">Rij toevoegen</span>
+                                    <div class="designer-layout-presets__grid">
+                                        <button type="button" class="designer-layout-preset" title="1 kolom (12)" @onclick='() => AddRowLayoutPreset("12")'>
+                                            <div class="designer-layout-preset__preview">
+                                                <div class="designer-layout-preset__col" style="flex:1;"></div>
+                                            </div>
+                                            <span>1 kolom</span>
+                                        </button>
+                                        <button type="button" class="designer-layout-preset" title="2 kolommen (6+6)" @onclick='() => AddRowLayoutPreset("6+6")'>
+                                            <div class="designer-layout-preset__preview">
+                                                <div class="designer-layout-preset__col" style="flex:1;"></div>
+                                                <div class="designer-layout-preset__col" style="flex:1;"></div>
+                                            </div>
+                                            <span>2 kolommen</span>
+                                        </button>
+                                        <button type="button" class="designer-layout-preset" title="3 kolommen (4+4+4)" @onclick='() => AddRowLayoutPreset("4+4+4")'>
+                                            <div class="designer-layout-preset__preview">
+                                                <div class="designer-layout-preset__col" style="flex:1;"></div>
+                                                <div class="designer-layout-preset__col" style="flex:1;"></div>
+                                                <div class="designer-layout-preset__col" style="flex:1;"></div>
+                                            </div>
+                                            <span>3 kolommen</span>
+                                        </button>
+                                        <button type="button" class="designer-layout-preset" title="Zijbalk + hoofd (4+8)" @onclick='() => AddRowLayoutPreset("4+8")'>
+                                            <div class="designer-layout-preset__preview">
+                                                <div class="designer-layout-preset__col" style="flex:1;"></div>
+                                                <div class="designer-layout-preset__col" style="flex:2;"></div>
+                                            </div>
+                                            <span>Zijbalk + hoofd</span>
+                                        </button>
+                                        <button type="button" class="designer-layout-preset" title="Hoofd + zijbalk (8+4)" @onclick='() => AddRowLayoutPreset("8+4")'>
+                                            <div class="designer-layout-preset__preview">
+                                                <div class="designer-layout-preset__col" style="flex:2;"></div>
+                                                <div class="designer-layout-preset__col" style="flex:1;"></div>
+                                            </div>
+                                            <span>Hoofd + zijbalk</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </section>
+
+                <div class="designer-divider designer-divider--vertical" data-divider="canvas-property" aria-label="Resize properties"></div>
+
+                <aside class="designer-panel designer-panel--right designer-panel--data @(_rightPanelCollapsed ? "designer-panel--collapsed" : string.Empty)" aria-label="Inspector">
+                    <div class="designer-panel__header">
+                        @if (!_rightPanelCollapsed)
+                        {
+                            <div class="designer-panel-tabs" role="tablist" aria-label="Inspector tabs">
+                                <button type="button" role="tab" class="designer-panel-tab @(_rightTab == RightPanelTab.Properties ? "designer-panel-tab--active" : string.Empty)" @onclick="() => _rightTab = RightPanelTab.Properties">
+                                    <RadzenIcon Icon="tune" /> Eigenschappen
+                                </button>
+                                <button type="button" role="tab" class="designer-panel-tab @(_rightTab == RightPanelTab.Data ? "designer-panel-tab--active" : string.Empty)" @onclick="() => _rightTab = RightPanelTab.Data">
+                                    <RadzenIcon Icon="storage" /> Data
+                                </button>
+                            </div>
+                        }
+                        <button type="button" class="designer-panel__toggle" aria-expanded="@(!_rightPanelCollapsed)" @onclick="ToggleRightPanelCollapsed">
+                            <RadzenIcon Icon="@(_rightPanelCollapsed ? "chevron_left" : "chevron_right")" />
+                        </button>
+                    </div>
+
+                    @if (!_rightPanelCollapsed)
+                    {
+                        <div class="designer-properties-panel" style="@(_rightTab == RightPanelTab.Properties ? null : "display:none;")">
+                            <PropertyPanel Page="@ActivePage"
+                                           HasDuplicateRoute="@HasDuplicateActiveRoute"
+                                           CanvasTheme="@_canvasTheme"
+                                           ThemeOptions="CanvasThemeOptions"
+                                           DataModel="@_commands.Document.DataModel"
+                                           SelectedNode="SelectedNode"
+                                           SelectedDescriptor="SelectedDescriptor"
+                                           SetPageRoute="OnPageRouteChanged"
+                                           SetPageTitle="OnPageTitleChanged"
+                                           SetCanvasTheme="OnCanvasThemeChanged"
+                                           SetNodeParameter="OnNodeParameterChanged"
+                                           SetNodeLayoutSlot="OnNodeLayoutSlotChanged"
+                                           AddColumnNode="OnAddColumnNode"
+                                           RemoveColumnNode="OnRemoveColumnNode"
+                                           SplitColumnNode="OnSplitColumnNode"
+                                           UpsertColumnNodes="OnUpsertColumnNodes"
+                                           SetDataGridPaging="OnSetDataGridPaging" />
+                        </div>
+                        <div class="designer-data-panel" style="@(_rightTab == RightPanelTab.Data ? null : "display:none;")">
+                            <DesignerDataPanel DataModel="@_commands.Document.DataModel" SelectedEntityName="@_selectedEntityName" SelectedEntityNameChanged="OnSelectedEntityChanged" GenerateFormRequested="OnGenerateFormRequested" ImportEntitiesRequested="OnImportEntitiesRequested" />
+                        </div>
                     }
                 </aside>
             }
