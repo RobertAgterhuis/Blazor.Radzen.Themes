@@ -549,6 +549,10 @@
     display: inline;
 }
 
+.designer-palette-item--dragging .designer-palette-item__meta {
+    display: none;
+}
+
 .designer-palette-item:hover {
     background: var(--agt-surface-hover);
     border-color: var(--agt-input-border-hover);
