@@ -27,6 +27,43 @@ else
             <AgtSwitch Label="Geavanceerd" AriaLabel="Geavanceerde eigenschappen" Value="@(!_simpleMode)" ValueChanged="OnAdvancedModeChanged" />
         </div>
 
+        <div class="designer-inspector-tabs" role="tablist" aria-label="Inspector secties">
+            <button type="button"
+                    role="tab"
+                    class="@TabClass(InspectorSection.Content)"
+                    aria-selected="@(IsActiveSection(InspectorSection.Content))"
+                    @onclick="() => SetActiveSection(InspectorSection.Content)">Inhoud</button>
+            <button type="button"
+                    role="tab"
+                    class="@TabClass(InspectorSection.Interaction)"
+                    aria-selected="@(IsActiveSection(InspectorSection.Interaction))"
+                    @onclick="() => SetActiveSection(InspectorSection.Interaction)">Interactie</button>
+            <button type="button"
+                    role="tab"
+                    class="@TabClass(InspectorSection.Appearance)"
+                    aria-selected="@(IsActiveSection(InspectorSection.Appearance))"
+                    @onclick="() => SetActiveSection(InspectorSection.Appearance)">Weergave</button>
+        </div>
+
+        <div class="designer-inspector-more-options">
+            <AgtSwitch Label="Meer opties"
+                       AriaLabel="Meer opties"
+                       Value="@GetSectionAdvancedState()"
+                       ValueChanged="OnSectionAdvancedChanged" />
+        </div>
+        
+        @if (_activeSection == InspectorSection.Content && ContentSubcomponentPills.Count > 1)
+        {
+            <div class="designer-subcomponent-pills" role="group" aria-label="Subcomponenten">
+                @foreach (var pill in ContentSubcomponentPills)
+                {
+                    <button type="button"
+                            class="@(string.Equals(_activeSubcomponentFilter, pill, StringComparison.Ordinal) ? "designer-subcomponent-pill designer-subcomponent-pill--active" : "designer-subcomponent-pill")"
+                            @onclick="() => ToggleSubcomponentFilter(pill)">@pill</button>
+                }
+            </div>
+        }
+
         @if (_missingAccessibilityParameters.Count > 0)
         {
             <div class="designer-properties__a11y-warning" role="status" aria-live="polite">
@@ -35,6 +72,8 @@ else
             </div>
         }
 
+        @if (_activeSection == InspectorSection.Appearance && (!_simpleMode || GetSectionAdvancedState()))
+        {
         <section class="designer-properties__group">
             <h3>Layout</h3>
             <div class="designer-properties__layout-grid">
@@ -44,8 +83,9 @@ else
                 <AgtNumericField Label="Kolomspan" AriaLabel="Layout kolomspan" Value="@ConvertToDecimal(LayoutColumnSpan)" ValueChanged="@(value => OnLayoutValueChanged(LayoutKey.ColumnSpan, value))" Min="1" Step="1" />
             </div>
         </section>
+        }
 
-        @if (IsDataGridNode)
+        @if (IsDataGridNode && (_activeSection is InspectorSection.Content or InspectorSection.Appearance))
         {
             <section class="designer-properties__group" data-agt-designer-columns-editor="true">
                 <div class="designer-properties__field-head">
@@ -96,7 +136,7 @@ else
             </section>
         }
 
-        @if (ColumnNodes.Count > 0 || SupportsColumnsSlot)
+        @if ((ColumnNodes.Count > 0 || SupportsColumnsSlot) && _activeSection == InspectorSection.Appearance)
         {
             <section class="designer-properties__group" data-agt-designer-columns-editor="true">
                 <div class="designer-properties__field-head">
@@ -124,7 +164,7 @@ else
             </section>
         }
 
-        @if (IsRadzenColumnNode)
+        @if (IsRadzenColumnNode && _activeSection == InspectorSection.Appearance)
         {
             <section class="designer-properties__group">
                 <h3>Kolom</h3>
@@ -307,6 +347,11 @@ else
     private string? _pageRouteValidation;
     private string? _pageTitleValidation;
     private bool _simpleMode = true;
+    private InspectorSection _activeSection = InspectorSection.Content;
+    private bool _showAdvancedContent;
+    private bool _showAdvancedInteraction;
+    private bool _showAdvancedAppearance;
+    private string? _activeSubcomponentFilter;
     private IReadOnlyList<string> _missingAccessibilityParameters = [];
     private readonly HashSet<string> _manualBindingParameters = new(StringComparer.Ordinal);
     private List<DataGridColumnConfig> DataGridColumns { get; set; } = [];
@@ -319,18 +364,73 @@ else
         : SelectedDescriptor.Parameters
             .Where(static parameter => !parameter.IsRenderFragment)
             .Where(static parameter => !parameter.IsEventCallback)
+            .Where(parameter => Classify(parameter) == _activeSection)
+            .Where(parameter => MatchesSubcomponentFilter(parameter))
             .Where(parameter => !_simpleMode || IsSimpleParameter(parameter.Name))
+            .Where(parameter => !_simpleMode || GetSectionAdvancedState() || IsPrimaryParameter(parameter))
             .OrderBy(static parameter => parameter.Name, StringComparer.Ordinal)
             .ToArray()
             .GroupBy(ResolveCategory, StringComparer.Ordinal)
             .ToDictionary(group => group.Key, group => (IReadOnlyList<ComponentParameterDescriptor>)group.ToArray(), StringComparer.Ordinal);
+
+    private IReadOnlyList<string> ContentSubcomponentPills => SelectedDescriptor?.Parameters
+        .Where(static parameter => !parameter.IsRenderFragment && !parameter.IsEventCallback)
+        .Where(parameter => Classify(parameter) == InspectorSection.Content)
+        .Select(static parameter => InferSubcomponentGroup(parameter.Name))
+        .Distinct(StringComparer.Ordinal)
+        .OrderBy(static pill => pill, StringComparer.Ordinal)
+        .ToArray()
+        ?? [];
+    private bool MatchesSubcomponentFilter(ComponentParameterDescriptor parameter)
+    {
+        if (string.IsNullOrWhiteSpace(_activeSubcomponentFilter))
+        {
+            return true;
+        }
+
+        return string.Equals(InferSubcomponentGroup(parameter.Name), _activeSubcomponentFilter, StringComparison.Ordinal);
+    }
+
+    private static string InferSubcomponentGroup(string parameterName)
+    {
+        if (parameterName.Contains("Label", StringComparison.OrdinalIgnoreCase)
+            || parameterName.Contains("Placeholder", StringComparison.OrdinalIgnoreCase)
+            || parameterName.Contains("Text", StringComparison.OrdinalIgnoreCase)
+            || parameterName.Contains("Title", StringComparison.OrdinalIgnoreCase)
+            || parameterName.Contains("Description", StringComparison.OrdinalIgnoreCase))
+        {
+            return "Label";
+        }
+
+        if (parameterName.Contains("Icon", StringComparison.OrdinalIgnoreCase))
+        {
+            return "Icon";
+        }
+
+        if (parameterName.Contains("Tooltip", StringComparison.OrdinalIgnoreCase)
+            || parameterName.Contains("Hint", StringComparison.OrdinalIgnoreCase)
+            || parameterName.Contains("Help", StringComparison.OrdinalIgnoreCase)
+            || parameterName.Contains("Aria", StringComparison.OrdinalIgnoreCase))
+        {
+            return "Tooltip";
+        }
+
+        return "Overig";
+    }
+
+    private void ToggleSubcomponentFilter(string pill)
+    {
+        _activeSubcomponentFilter = string.Equals(_activeSubcomponentFilter, pill, StringComparison.Ordinal) ? null : pill;
+    }
 
     private int LayoutRow => SelectedNode?.LayoutSlot?.Row ?? 1;
     private int LayoutColumn => SelectedNode?.LayoutSlot?.Column ?? 1;
     private int LayoutRowSpan => SelectedNode?.LayoutSlot?.RowSpan ?? 1;
     private int LayoutColumnSpan => SelectedNode?.LayoutSlot?.ColumnSpan ?? 1;
     private bool SupportsColumnsSlot => SelectedDescriptor?.Slots.Contains("Columns", StringComparer.Ordinal) == true;
-    private bool IsDataGridNode => string.Equals(SelectedNode?.ComponentType, "RadzenDataGrid", StringComparison.Ordinal);
+    private bool IsDataGridNode
+        => string.Equals(SelectedNode?.ComponentType, "RadzenDataGrid", StringComparison.Ordinal)
+            || string.Equals(SelectedNode?.ComponentType, "AgtDataGrid", StringComparison.Ordinal);
     private IReadOnlyList<DesignNode> ColumnNodes => SelectedNode?.Children.TryGetValue("Columns", out var columns) == true ? columns : [];
     private bool IsRadzenColumnNode => string.Equals(SelectedNode?.ComponentType, "RadzenColumn", StringComparison.Ordinal);
 
@@ -395,6 +495,22 @@ else
         _missingAccessibilityParameters = SelectedNode is null || SelectedDescriptor is null
             ? []
             : SelectedDescriptor.Parameters.Where(IsAccessibilityParameter).Select(static parameter => parameter.Name).Where(name => string.IsNullOrWhiteSpace(GetCurrentTextValue(name))).ToArray();
+
+        if (SelectedDescriptor is not null && !HasParametersForSection(_activeSection))
+        {
+            if (HasParametersForSection(InspectorSection.Content))
+            {
+                _activeSection = InspectorSection.Content;
+            }
+            else if (HasParametersForSection(InspectorSection.Interaction))
+            {
+                _activeSection = InspectorSection.Interaction;
+            }
+            else
+            {
+                _activeSection = InspectorSection.Appearance;
+            }
+        }
 
         BuildGridColumnState();
     }
@@ -641,6 +757,97 @@ else
 
     private static bool IsSimpleParameter(string parameterName)
         => parameterName is "Label" or "Placeholder" or "Value" or "Text" or "Icon" or "ButtonStyle" or "Title" or "Description" or "Data" or "AllowPaging" or "PageSize" or "Intent";
+
+    private static bool IsPrimaryParameter(ComponentParameterDescriptor parameter)
+        => parameter.Name is "Label" or "Text" or "Title" or "Description" or "Placeholder" or "Value" or "Data" or "Icon" or "ButtonStyle" or "Intent" or "Visible" or "Disabled" or "Required";
+
+    private static InspectorSection Classify(ComponentParameterDescriptor parameter)
+    {
+        if (IsContentParam(parameter))
+        {
+            return InspectorSection.Content;
+        }
+
+        if (IsInteractionParam(parameter))
+        {
+            return InspectorSection.Interaction;
+        }
+
+        return InspectorSection.Appearance;
+    }
+
+    private static bool IsContentParam(ComponentParameterDescriptor parameter)
+        => ContentNames.Contains(parameter.Name) || parameter.IsBindable || parameter.IsRenderFragment;
+
+    private static bool IsInteractionParam(ComponentParameterDescriptor parameter)
+        => InteractionNames.Contains(parameter.Name) || parameter.IsEventCallback;
+
+    private static readonly HashSet<string> ContentNames = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "Label", "Placeholder", "Value", "Text", "Title", "Description",
+        "Data", "Icon", "Name", "AriaLabel", "SaveText", "CancelText"
+    };
+
+    private static readonly HashSet<string> InteractionNames = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "Disabled", "Visible", "Required", "ReadOnly", "AllowPaging",
+        "PageSize", "AllowSorting", "AllowFiltering"
+    };
+
+    private bool IsActiveSection(InspectorSection section)
+        => _activeSection == section;
+
+    private string TabClass(InspectorSection section)
+        => IsActiveSection(section)
+            ? "designer-inspector-tabs__tab designer-inspector-tabs__tab--active"
+            : "designer-inspector-tabs__tab";
+
+    private void SetActiveSection(InspectorSection section)
+    {
+        _activeSection = section;
+    }
+
+    private bool GetSectionAdvancedState()
+    {
+        return _activeSection switch
+        {
+            InspectorSection.Content => _showAdvancedContent,
+            InspectorSection.Interaction => _showAdvancedInteraction,
+            _ => _showAdvancedAppearance
+        };
+    }
+
+    private Task OnSectionAdvancedChanged(bool value)
+    {
+        switch (_activeSection)
+        {
+            case InspectorSection.Content:
+                _showAdvancedContent = value;
+                break;
+            case InspectorSection.Interaction:
+                _showAdvancedInteraction = value;
+                break;
+            default:
+                _showAdvancedAppearance = value;
+                break;
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private bool HasParametersForSection(InspectorSection section)
+    {
+        if (SelectedDescriptor is null)
+        {
+            return false;
+        }
+
+        return SelectedDescriptor.Parameters
+            .Where(static parameter => !parameter.IsRenderFragment)
+            .Where(static parameter => !parameter.IsEventCallback)
+            .Where(parameter => !_simpleMode || IsSimpleParameter(parameter.Name))
+            .Any(parameter => Classify(parameter) == section);
+    }
 
     private static string GetParameterLabel(string parameterName)
         => parameterName switch
@@ -948,5 +1155,12 @@ else
         Column,
         RowSpan,
         ColumnSpan
+    }
+
+    private enum InspectorSection
+    {
+        Content,
+        Interaction,
+        Appearance
     }
 }

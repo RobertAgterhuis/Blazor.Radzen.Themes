@@ -1,12 +1,46 @@
 @using System.Reflection
+@using System.Text.Json.Nodes
 @using Agterhuis.Ui.Designer.Model
 @using Agterhuis.Ui.Designer.Registry
 @using Agterhuis.Ui.Designer.Rendering
 @using Microsoft.AspNetCore.Components.Rendering
+@using Microsoft.AspNetCore.Components.Web
 
-<div class="designer-canvas-node @(IsSelected ? "designer-canvas-node--selected" : string.Empty)"
+<div class="designer-canvas-node @(IsSelected ? "designer-canvas-node--selected" : string.Empty) @(IsHovered && !IsSelected ? "designer-canvas-node--hover" : string.Empty)"
      data-agt-design-node-id="@Node.Id"
-     data-agt-design-component="@Node.ComponentType">
+     data-agt-design-component="@Node.ComponentType"
+     @onmouseenter="OnMouseEnter"
+     @onmouseleave="OnMouseLeave"
+     @onmouseenter:stopPropagation="true"
+     @onmouseleave:stopPropagation="true">
+    <div class="designer-canvas-node__label">@DescriptorLabel</div>
+
+    @if (IsSelected)
+    {
+        <div class="designer-floating-toolbar" @onclick:stopPropagation="true">
+            <button type="button" title="Omhoog verplaatsen" @onclick="OnMoveUp">
+                <RadzenIcon Icon="arrow_upward" />
+            </button>
+            <button type="button" title="Omlaag verplaatsen" @onclick="OnMoveDown">
+                <RadzenIcon Icon="arrow_downward" />
+            </button>
+            <button type="button" title="Dupliceren" @onclick="OnDuplicate">
+                <RadzenIcon Icon="content_copy" />
+            </button>
+            <button type="button" title="Verwijderen" @onclick="OnDelete">
+                <RadzenIcon Icon="delete_outline" />
+            </button>
+        </div>
+
+        @if (CanResizeColumn)
+        {
+            <div class="designer-resize-handles" @onclick:stopPropagation="true">
+                <button type="button" class="designer-resize-handle designer-resize-handle--left" title="Kolombreedte verkleinen" @onclick="OnResizeColumnDown">◀</button>
+                <button type="button" class="designer-resize-handle designer-resize-handle--right" title="Kolombreedte vergroten" @onclick="OnResizeColumnUp">▶</button>
+            </div>
+        }
+    }
+
     <div class="designer-canvas-node__bar">
         <button type="button"
                 class="designer-canvas-node__select"
@@ -26,7 +60,7 @@
     }
     else if (_descriptor is not null)
     {
-        <div class="designer-canvas-node__preview">
+        <div class="designer-canvas-node__preview" @ondblclick="OnDoubleClick">
             <ErrorBoundary>
                 <ChildContent>
                     <DynamicComponent Type="@_descriptor.ClrType" Parameters="@_parameters" />
@@ -35,6 +69,18 @@
                     <div class="designer-canvas-node__error">@exception.Message</div>
                 </ErrorContent>
             </ErrorBoundary>
+
+            @if (_inlineEditParam is not null)
+            {
+                <div class="designer-inline-edit" @onclick:stopPropagation="true">
+                    <input type="text"
+                           value="@_inlineEditValue"
+                           @oninput="OnInlineEditChanged"
+                           @onblur="CommitInlineEdit"
+                           @onkeydown="OnInlineEditKeyDown"
+                           autofocus />
+                </div>
+            }
         </div>
     }
 </div>
@@ -80,13 +126,52 @@
     [Parameter]
     public EventCallback<(string ParentNodeId, string SlotName, string ComponentType)> AddNodeRequested { get; set; }
 
+    [Parameter]
+    public EventCallback<string> MoveNodeUp { get; set; }
+
+    [Parameter]
+    public EventCallback<string> MoveNodeDown { get; set; }
+
+    [Parameter]
+    public EventCallback<string> DuplicateNode { get; set; }
+
+    [Parameter]
+    public EventCallback<string> DeleteNode { get; set; }
+
+    [Parameter]
+    public EventCallback<(string ParameterName, string Value)> InlineEditCommitted { get; set; }
+
+    [Parameter]
+    public EventCallback<(string ParameterName, string Value)> NodeQuickParameterChanged { get; set; }
+
+    [Parameter]
+    public string? HoveredNodeId { get; set; }
+
+    [Parameter]
+    public EventCallback<string?> HoverNodeChanged { get; set; }
+
     private DesignerComponentDescriptor? _descriptor;
     private Dictionary<string, object?> _parameters = [];
     private string? _errorMessage;
+    private bool _isHovering;
+    private string? _inlineEditParam;
+    private string _inlineEditValue = string.Empty;
     private readonly Dictionary<string, bool> _slotPickerVisible = new(StringComparer.Ordinal);
     private readonly Dictionary<string, string> _slotPickerSelection = new(StringComparer.Ordinal);
+    private static readonly HashSet<string> InlineEditableNames = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "Label",
+        "Text",
+        "Title",
+        "Description",
+        "Placeholder"
+    };
 
     private bool IsSelected => string.Equals(Node.Id, SelectedNodeId, StringComparison.Ordinal);
+
+    private bool CanResizeColumn => string.Equals(Node.ComponentType, "RadzenColumn", StringComparison.Ordinal);
+
+    private bool IsHovered => _isHovering || string.Equals(Node.Id, HoveredNodeId, StringComparison.Ordinal);
 
     private string DescriptorLabel => _descriptor?.DisplayName ?? Node.ComponentType;
 
@@ -118,9 +203,105 @@
 
     private async Task OnSelectClicked() => await SelectNode.InvokeAsync(Node.Id);
 
+    private void OnMouseEnter()
+    {
+        _isHovering = true;
+        _ = HoverNodeChanged.InvokeAsync(Node.Id);
+    }
+
+    private void OnMouseLeave()
+    {
+        _isHovering = false;
+        _ = HoverNodeChanged.InvokeAsync(null);
+    }
+
     private Task OnDragStart() => StartDrag.InvokeAsync(DesignerDragPayload.Node(Node.Id));
 
     private Task OnDragEnd() => EndDrag.InvokeAsync();
+
+    private Task OnMoveUp() => MoveNodeUp.InvokeAsync(Node.Id);
+
+    private Task OnMoveDown() => MoveNodeDown.InvokeAsync(Node.Id);
+
+    private Task OnDuplicate() => DuplicateNode.InvokeAsync(Node.Id);
+
+    private Task OnDelete() => DeleteNode.InvokeAsync(Node.Id);
+
+    private Task OnResizeColumnDown() => ApplyColumnSizeDelta(-1);
+
+    private Task OnResizeColumnUp() => ApplyColumnSizeDelta(1);
+
+    private Task ApplyColumnSizeDelta(int delta)
+    {
+        var currentSize = 6;
+        if (Node.Parameters.TryGetValue("Size", out var value)
+            && value?.Literal is JsonValue jsonValue
+            && jsonValue.TryGetValue<int>(out var parsed))
+        {
+            currentSize = parsed;
+        }
+
+        var next = Math.Clamp(currentSize + delta, 1, 12).ToString();
+        return NodeQuickParameterChanged.InvokeAsync(("Size", next));
+    }
+
+    private void OnDoubleClick()
+    {
+        var parameter = _descriptor?.Parameters.FirstOrDefault(static parameter => InlineEditableNames.Contains(parameter.Name));
+        if (parameter is null)
+        {
+            return;
+        }
+
+        _inlineEditParam = parameter.Name;
+        _inlineEditValue = GetParamValue(parameter.Name);
+    }
+
+    private void OnInlineEditChanged(ChangeEventArgs args)
+    {
+        _inlineEditValue = args.Value?.ToString() ?? string.Empty;
+    }
+
+    private async Task OnInlineEditKeyDown(KeyboardEventArgs args)
+    {
+        if (string.Equals(args.Key, "Escape", StringComparison.OrdinalIgnoreCase))
+        {
+            CancelInlineEdit();
+            return;
+        }
+
+        if (string.Equals(args.Key, "Enter", StringComparison.OrdinalIgnoreCase))
+        {
+            await CommitInlineEdit();
+        }
+    }
+
+    private async Task CommitInlineEdit()
+    {
+        if (_inlineEditParam is not null)
+        {
+            await InlineEditCommitted.InvokeAsync((_inlineEditParam, _inlineEditValue));
+        }
+
+        _inlineEditParam = null;
+        _inlineEditValue = string.Empty;
+    }
+
+    private void CancelInlineEdit()
+    {
+        _inlineEditParam = null;
+        _inlineEditValue = string.Empty;
+    }
+
+    private string GetParamValue(string parameterName)
+    {
+        if (Node.Parameters.TryGetValue(parameterName, out var value) && value?.Literal is not null)
+        {
+            return value.Literal.GetValue<string?>() ?? string.Empty;
+        }
+
+        return string.Empty;
+    }
 
     private Dictionary<string, object?> BuildParameterDictionary(DesignerComponentDescriptor descriptor)
     {
@@ -259,6 +440,19 @@
             builder.AddAttribute(sequence++, nameof(DropNode), DropNode);
             builder.AddAttribute(sequence++, nameof(StartDrag), StartDrag);
             builder.AddAttribute(sequence++, nameof(EndDrag), EndDrag);
+            builder.AddAttribute(sequence++, nameof(MoveNodeUp), MoveNodeUp);
+            builder.AddAttribute(sequence++, nameof(MoveNodeDown), MoveNodeDown);
+            builder.AddAttribute(sequence++, nameof(DuplicateNode), DuplicateNode);
+            builder.AddAttribute(sequence++, nameof(DeleteNode), DeleteNode);
+            builder.AddAttribute(sequence++, nameof(InlineEditCommitted), InlineEditCommitted);
+            builder.AddAttribute(sequence++, nameof(NodeQuickParameterChanged), NodeQuickParameterChanged);
+            builder.AddAttribute(sequence++, nameof(HoveredNodeId), HoveredNodeId);
+            builder.AddAttribute(sequence++, nameof(HoverNodeChanged), HoverNodeChanged);
+            builder.AddAttribute(sequence++, nameof(IsDragActive), IsDragActive);
+            builder.AddAttribute(sequence++, nameof(HoverDropzoneId), HoverDropzoneId);
+            builder.AddAttribute(sequence++, nameof(DropzoneDragEnter), DropzoneDragEnter);
+            builder.AddAttribute(sequence++, nameof(DropzoneDragLeave), DropzoneDragLeave);
+            builder.AddAttribute(sequence++, nameof(AddNodeRequested), AddNodeRequested);
             builder.CloseComponent();
 
             var targetIndex = index + 1;

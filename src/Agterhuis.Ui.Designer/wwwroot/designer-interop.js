@@ -325,6 +325,13 @@ window.designerInterop = (() => {
         window.setTimeout(() => node.classList.remove('designer-canvas-node--flash'), 320);
     };
 
+    const openCommandPalette = () => {
+        const trigger = document.querySelector('[data-testid="agt-command-palette-trigger"]');
+        if (trigger instanceof HTMLElement) {
+            trigger.click();
+        }
+    };
+
     return {
         createMonacoEditor,
         getJson,
@@ -338,6 +345,7 @@ window.designerInterop = (() => {
         setEditorTheme,
         scrollToPropertyParameter,
         flashNode,
+        openCommandPalette,
         setMonacoTheme,
         setJson,
         setupCodeEditors,

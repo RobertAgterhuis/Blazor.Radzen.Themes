@@ -86,9 +86,21 @@ public partial class DesignerShell : IDisposable
     private bool _previewMode;
     private bool _showOnboardingOverlay;
     private bool _showExportDialog;
+    private bool _showShortcutsOverlay;
+    private bool _showDesignerCommandPalette;
+    private bool _editingDocumentName;
+    private string _editingDocumentNameValue = string.Empty;
+    private readonly HashSet<string> _collapsedTreeNodes = new(StringComparer.Ordinal);
+    private string? _dragSourcePaletteComponentType;
+    private int _dragVisualEpoch;
+    private string _dragVisualState = "resting";
+    private string? _treeContextMenuNodeId;
+    private string _treeContextMenuXpx = "0px";
+    private string _treeContextMenuYpx = "0px";
     private int? _pageMenuIndex;
     private string? _hoverDropzoneId;
-    private string? _uiFeedback;
+    private string? _hoveredNodeId;
+    private readonly List<ToastMessage> _toasts = [];
     private string _liveAnnouncement = "Designer geladen.";
     private string _selectedRowLayout = "12";
 
@@ -156,12 +168,13 @@ public partial class DesignerShell : IDisposable
     private IReadOnlyList<DesignerTreeNode> TreeRoots => BuildTree(ActivePage.Nodes);
     private DesignNode? SelectedNode => _selectedNodeId is null ? null : TryFindNode(ActivePage.Nodes, _selectedNodeId, out _, out var container, out var index) ? container[index] : null;
     private DesignerComponentDescriptor? SelectedDescriptor => SelectedNode is null ? null : Registry.TryGetDescriptor(SelectedNode.ComponentType, out var descriptor) ? descriptor : null;
-    private string SelectionBreadcrumb => BuildBreadcrumb(_selectedNodeId) ?? "Selecteer een node";
+    private IReadOnlyList<SelectionBreadcrumbPart> SelectionBreadcrumbParts => BuildBreadcrumbParts(_selectedNodeId);
     private string CanvasFrameStyle => _viewportWidths.TryGetValue(_viewport, out var width) ? $"max-width: {width}px;" : "max-width: 1200px;";
     private bool HasDuplicateActiveRoute => _commands.Document.Pages.Count(page => string.Equals(page.Route, ActivePage.Route, StringComparison.OrdinalIgnoreCase)) > 1;
     private string RoutePreview => string.Join(" | ", _commands.Document.Pages.Select(static page => string.IsNullOrWhiteSpace(page.Route) ? "/" : page.Route));
     private IReadOnlyList<DesignValidationError> ValidationIssues => _validationIssues;
     private bool IsDragActive => _activeDrag is not null;
+    private string DragStateCssClass => $"designer-page--drag-{_dragVisualState}";
     private IReadOnlyList<DesignValidationError> FilteredIssues => _validationIssues
         .Where(issue => (issue.Severity != DesignValidationSeverity.Error || _showErrorIssues)
             && (issue.Severity != DesignValidationSeverity.Warning || _showWarningIssues)
@@ -247,6 +260,7 @@ public partial class DesignerShell : IDisposable
     private async Task OnPaletteDragStart(DragEventArgs args, DesignerComponentDescriptor descriptor)
     {
         _activeDrag = DesignerDragPayload.Palette(descriptor.ComponentType);
+        _dragSourcePaletteComponentType = descriptor.ComponentType;
         await JS.InvokeVoidAsync(
             "designerInterop.setPaletteDragImage",
             descriptor.DesignerIcon ?? descriptor.Icon,
@@ -256,24 +270,41 @@ public partial class DesignerShell : IDisposable
     {
         _activeDrag = payload;
         _liveAnnouncement = "Sleepbewerking gestart.";
+        SetDragVisualState("grabbed");
         return Task.CompletedTask;
     }
 
     private Task OnDragEnd()
     {
+        var hadDrag = _activeDrag is not null;
         _activeDrag = null;
         _hoverDropzoneId = null;
+        _dragSourcePaletteComponentType = null;
+
+        if (hadDrag)
+        {
+            _ = SetTransientDragVisualStateAsync("cancelled", 260);
+        }
+
         return Task.CompletedTask;
     }
 
     private void OnDropZoneDragOver(DragEventArgs args, string dropzoneId)
     {
         _hoverDropzoneId = dropzoneId;
+        if (_activeDrag is not null)
+        {
+            SetDragVisualState("in-transit");
+        }
     }
 
     private void OnDropZoneDragEnter(string dropzoneId)
     {
         _hoverDropzoneId = dropzoneId;
+        if (_activeDrag is not null)
+        {
+            SetDragVisualState("in-transit");
+        }
     }
 
     private void OnDropZoneDragLeave(string dropzoneId)
@@ -303,12 +334,18 @@ public partial class DesignerShell : IDisposable
 
         _activeDrag = null;
         _hoverDropzoneId = null;
+        _dragSourcePaletteComponentType = null;
         if (didMutate)
         {
             _liveAnnouncement = "Component geplaatst op canvas.";
             await AutoSaveAsync();
             await InvokeAsync(StateHasChanged);
             await JS.InvokeVoidAsync("designerInterop.flashNode", _selectedNodeId);
+            await SetTransientDragVisualStateAsync("dropped", 300);
+        }
+        else
+        {
+            await SetTransientDragVisualStateAsync("cancelled", 260);
         }
     }
 
@@ -362,9 +399,15 @@ public partial class DesignerShell : IDisposable
     private async Task OnTreeNodeClicked(string nodeId)
     {
         _selectedNodeId = nodeId;
+        CloseTreeContextMenu();
         _liveAnnouncement = "Node geselecteerd vanuit structuurboom.";
         await InvokeAsync(StateHasChanged);
         await JS.InvokeVoidAsync("designerInterop.scrollTreeItemIntoView", nodeId);
+    }
+
+    private void OnTreeNodeHover(string? nodeId)
+    {
+        _hoveredNodeId = nodeId;
     }
 
     private async Task OnPaletteItemClickedAsync(string componentType)
@@ -375,11 +418,22 @@ public partial class DesignerShell : IDisposable
             return;
         }
 
-        _uiFeedback = "Component toegevoegd.";
+        ShowToast("Component toegevoegd", ToastType.Success);
         _liveAnnouncement = "Component toegevoegd via klik.";
         await AutoSaveAsync();
         await InvokeAsync(StateHasChanged);
         await JS.InvokeVoidAsync("designerInterop.flashNode", _selectedNodeId);
+    }
+
+    private Task OpenDesignerCommandPaletteAsync()
+    {
+        _showDesignerCommandPalette = true;
+        return InvokeAsync(StateHasChanged);
+    }
+
+    private void CloseDesignerCommandPalette()
+    {
+        _showDesignerCommandPalette = false;
     }
 
     private async Task OnUndo()
@@ -1092,6 +1146,7 @@ public partial class DesignerShell : IDisposable
         _fileMenuOpen = false;
         _settingsMenuOpen = false;
         _pageMenuIndex = _pageMenuIndex == pageIndex ? null : pageIndex;
+        CloseTreeContextMenu();
     }
 
     private void CloseAllMenus()
@@ -1099,6 +1154,8 @@ public partial class DesignerShell : IDisposable
         _fileMenuOpen = false;
         _settingsMenuOpen = false;
         _pageMenuIndex = null;
+        _showDesignerCommandPalette = false;
+        CloseTreeContextMenu();
     }
 
     private async Task TogglePaletteCollapsed()
@@ -1127,6 +1184,37 @@ public partial class DesignerShell : IDisposable
 
     private async Task OnPageKeyDown(KeyboardEventArgs args)
     {
+        if (args.CtrlKey && string.Equals(args.Key, "k", StringComparison.OrdinalIgnoreCase))
+        {
+            await OpenDesignerCommandPaletteAsync();
+            return;
+        }
+
+        if (args.CtrlKey && string.Equals(args.Key, "e", StringComparison.OrdinalIgnoreCase))
+        {
+            await OnExportDocument();
+            return;
+        }
+
+        if (args.CtrlKey && string.Equals(args.Key, "s", StringComparison.OrdinalIgnoreCase))
+        {
+            await OnSaveDocument();
+            return;
+        }
+
+        if (args.CtrlKey && string.Equals(args.Key, "d", StringComparison.OrdinalIgnoreCase) && _selectedNodeId is not null)
+        {
+            await OnDuplicateNode(_selectedNodeId);
+            return;
+        }
+
+        if (args.CtrlKey && string.Equals(args.Key, "/", StringComparison.OrdinalIgnoreCase))
+        {
+            ToggleShortcutsOverlay();
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
         if (args.CtrlKey && string.Equals(args.Key, "p", StringComparison.OrdinalIgnoreCase))
         {
             TogglePreviewMode();
@@ -1151,6 +1239,20 @@ public partial class DesignerShell : IDisposable
             if (_fileMenuOpen || _settingsMenuOpen || _pageMenuIndex is not null)
             {
                 CloseAllMenus();
+                await InvokeAsync(StateHasChanged);
+                return;
+            }
+
+            if (_showDesignerCommandPalette)
+            {
+                CloseDesignerCommandPalette();
+                await InvokeAsync(StateHasChanged);
+                return;
+            }
+
+            if (_showShortcutsOverlay)
+            {
+                ToggleShortcutsOverlay();
                 await InvokeAsync(StateHasChanged);
                 return;
             }
@@ -1264,15 +1366,6 @@ public partial class DesignerShell : IDisposable
             }
         }
 
-        if (!string.IsNullOrWhiteSpace(_uiFeedback))
-        {
-            _ = Task.Run(async () =>
-            {
-                await Task.Delay(1600);
-                _uiFeedback = null;
-                await InvokeAsync(StateHasChanged);
-            });
-        }
     }
 
     private async Task RestoreLayoutStateAsync()
@@ -1397,34 +1490,80 @@ public partial class DesignerShell : IDisposable
 
     private void RegisterCommands()
     {
-        CommandRegistry.SetCommands(CommandScope, new[]
+        var dynamicCommands = new List<AgtCommandItem>
         {
-            new AgtCommandItem("designer-add-page", "Pagina toevoegen", "Designer", OnAddPageAsync)
+            new("designer-add-page", "Pagina toevoegen", "Designer", OnAddPageAsync)
             {
                 Description = "Voeg een nieuwe pagina toe vanuit het gekozen patroon.",
                 ShortcutHint = "Ctrl+Shift+P"
             },
-            new AgtCommandItem("designer-insert-text", "Tekstveld invoegen", "Designer", OnInsertTextFieldAsync)
+            new("designer-insert-text", "Tekstveld invoegen", "Designer", OnInsertTextFieldAsync)
             {
                 Description = "Voeg een tekstveld toe aan de geselecteerde container of de root.",
                 ShortcutHint = "Ctrl+K"
             },
-            new AgtCommandItem("designer-export", "Exporteren", "Designer", OnExportDocument)
+            new("designer-export", "Exporteren", "Designer", OnExportDocument)
             {
                 Description = "Download een geexporteerd projectpakket.",
                 ShortcutHint = "Ctrl+E"
             },
-            new AgtCommandItem("designer-undo", "Ongedaan maken", "Designer", OnUndo)
+            new("designer-undo", "Ongedaan maken", "Designer", OnUndo)
             {
                 Description = "Maak de laatste ontwerpwijziging ongedaan.",
                 ShortcutHint = "Ctrl+Z"
             },
-            new AgtCommandItem("designer-preview", "Preview modus", "Designer", TogglePreviewCommandAsync)
+            new("designer-preview", "Preview modus", "Designer", TogglePreviewCommandAsync)
             {
                 Description = "Wissel tussen bewerken en preview.",
                 ShortcutHint = "Ctrl+P"
             }
-        });
+        };
+
+        foreach (var descriptor in Registry.Components
+                     .Where(static descriptor => descriptor.AllowedInPalette)
+                     .Where(static descriptor => !DesignerComponentDisplayMap.IsHiddenFromPalette(descriptor.ComponentType))
+                     .OrderBy(static descriptor => descriptor.DesignerDisplayName ?? descriptor.DisplayName, StringComparer.OrdinalIgnoreCase)
+                     .Take(200))
+        {
+            var componentType = descriptor.ComponentType;
+            var title = $"Voeg toe: {descriptor.DesignerDisplayName ?? descriptor.DisplayName}";
+            dynamicCommands.Add(new AgtCommandItem($"designer-add-component-{componentType}", title, "Componenten", () => OnPaletteItemClickedAsync(componentType))
+            {
+                Description = descriptor.DesignerDescription ?? componentType,
+                Keywords = [componentType, descriptor.Category, descriptor.DesignerCategory ?? string.Empty]
+            });
+        }
+
+        for (var i = 0; i < _commands.Document.Pages.Count; i++)
+        {
+            var pageIndex = i;
+            var pageLabel = GetPageLabel(_commands.Document.Pages[pageIndex]);
+            dynamicCommands.Add(new AgtCommandItem($"designer-open-page-{pageIndex}", $"Ga naar: {pageLabel}", "Pagina's", () => InvokeAsync(() =>
+            {
+                SelectPage(pageIndex);
+                StateHasChanged();
+            }))
+            {
+                Description = _commands.Document.Pages[pageIndex].Route
+            });
+        }
+
+        if (SelectedDescriptor is not null)
+        {
+            foreach (var parameter in SelectedDescriptor.Parameters
+                         .Where(static parameter => !parameter.IsEventCallback)
+                         .OrderBy(static parameter => parameter.Name, StringComparer.OrdinalIgnoreCase)
+                         .Take(80))
+            {
+                var parameterName = parameter.Name;
+                dynamicCommands.Add(new AgtCommandItem($"designer-property-{parameterName}", $"Eigenschap: {GetParameterDisplayName(parameterName)}", "Eigenschappen", () => JS.InvokeVoidAsync("designerInterop.scrollToPropertyParameter", parameterName).AsTask())
+                {
+                    Description = $"Spring naar {parameterName}"
+                });
+            }
+        }
+
+        CommandRegistry.SetCommands(CommandScope, dynamicCommands);
     }
 
     private Task TogglePreviewCommandAsync()
@@ -1633,14 +1772,14 @@ public partial class DesignerShell : IDisposable
         return document.Pages.First().Nodes.First();
     }
 
-    private string? BuildBreadcrumb(string? nodeId)
+    private IReadOnlyList<SelectionBreadcrumbPart> BuildBreadcrumbParts(string? nodeId)
     {
         if (string.IsNullOrWhiteSpace(nodeId) || !TryFindNode(ActivePage.Nodes, nodeId, out var path, out _, out _))
         {
-            return null;
+            return [];
         }
 
-        return string.Join(" > ", path.Select(static node => node.ComponentType));
+        return path.Select(static node => new SelectionBreadcrumbPart(node.Id, node.ComponentType)).ToArray();
     }
 
     private static IReadOnlyList<DesignerTreeNode> BuildTree(IReadOnlyList<DesignNode> nodes) => nodes.Select(BuildTreeNode).ToArray();
@@ -1661,12 +1800,48 @@ public partial class DesignerShell : IDisposable
 
     private void RenderTreeNode(RenderTreeBuilder builder, DesignerTreeNode node, ref int sequence, int depth)
     {
+        var hasChildren = node.Children.Count > 0;
+        var isCollapsed = hasChildren && _collapsedTreeNodes.Contains(node.Id);
+
         builder.OpenElement(sequence++, "button");
         builder.AddAttribute(sequence++, "type", "button");
-        builder.AddAttribute(sequence++, "class", string.Equals(node.Id, _selectedNodeId, StringComparison.Ordinal) ? "designer-tree__item designer-tree__item--selected" : "designer-tree__item");
+        var classes = "designer-tree__item";
+        if (string.Equals(node.Id, _selectedNodeId, StringComparison.Ordinal))
+        {
+            classes += " designer-tree__item--selected";
+        }
+        else if (string.Equals(node.Id, _hoveredNodeId, StringComparison.Ordinal))
+        {
+            classes += " designer-tree__item--hover";
+        }
+
+        builder.AddAttribute(sequence++, "class", classes);
         builder.AddAttribute(sequence++, "style", $"padding-left: calc(var(--agt-spacing-2) + {depth} * 0.75rem);");
         builder.AddAttribute(sequence++, "data-agt-tree-node-id", node.Id);
+        builder.AddAttribute(sequence++, "draggable", "true");
+        builder.AddAttribute(sequence++, "ondragstart", EventCallback.Factory.Create<DragEventArgs>(this, _ => OnTreeDragStart(node.Id)));
+        builder.AddAttribute(sequence++, "ondragover", EventCallback.Factory.Create<DragEventArgs>(this, args => OnTreeDragOver(args, node.Id)));
+        builder.AddEventPreventDefaultAttribute(sequence++, "ondragover", true);
+        builder.AddAttribute(sequence++, "ondrop", EventCallback.Factory.Create<DragEventArgs>(this, _ => OnTreeDrop(node.Id)));
+        builder.AddEventPreventDefaultAttribute(sequence++, "ondrop", true);
+        builder.AddAttribute(sequence++, "ondragend", EventCallback.Factory.Create<DragEventArgs>(this, _ => OnDragEnd()));
+        builder.AddAttribute(sequence++, "oncontextmenu", EventCallback.Factory.Create<MouseEventArgs>(this, args => OpenTreeContextMenu(args, node.Id)));
+        builder.AddEventPreventDefaultAttribute(sequence++, "oncontextmenu", true);
         builder.AddAttribute(sequence++, "onclick", EventCallback.Factory.Create(this, () => OnTreeNodeClicked(node.Id)));
+        builder.AddAttribute(sequence++, "onmouseenter", EventCallback.Factory.Create(this, () => OnTreeNodeHover(node.Id)));
+        builder.AddAttribute(sequence++, "onmouseleave", EventCallback.Factory.Create(this, () => OnTreeNodeHover(null)));
+
+        builder.OpenElement(sequence++, "span");
+        builder.AddAttribute(sequence++, "class", hasChildren ? "designer-tree__toggle" : "designer-tree__toggle designer-tree__toggle--empty");
+        if (hasChildren)
+        {
+            builder.AddAttribute(sequence++, "role", "button");
+            builder.AddAttribute(sequence++, "aria-label", isCollapsed ? "Uitvouwen" : "Invouwen");
+            builder.AddAttribute(sequence++, "onclick:stopPropagation", true);
+            builder.AddAttribute(sequence++, "onclick", EventCallback.Factory.Create<MouseEventArgs>(this, args => ToggleTreeNodeCollapse(args, node.Id)));
+        }
+        builder.AddContent(sequence++, hasChildren ? (isCollapsed ? "▸" : "▾") : "•");
+        builder.CloseElement();
 
         builder.OpenComponent<RadzenIcon>(sequence++);
         builder.AddAttribute(sequence++, "Icon", ResolveTreeIcon(node.ComponentType));
@@ -1675,12 +1850,349 @@ public partial class DesignerShell : IDisposable
         builder.OpenElement(sequence++, "span");
         builder.AddContent(sequence++, node.Text);
         builder.CloseElement();
+
+        var status = ResolveTreeNodeStatus(node.Id);
+        builder.OpenElement(sequence++, "span");
+        builder.AddAttribute(sequence++, "class", $"designer-tree__status designer-tree__status--{status.CssClass}");
+        builder.AddAttribute(sequence++, "title", status.Tooltip);
+        builder.AddContent(sequence++, status.Glyph);
         builder.CloseElement();
+
+        builder.CloseElement();
+
+        if (isCollapsed)
+        {
+            return;
+        }
 
         for (var index = 0; index < node.Children.Count; index++)
         {
             RenderTreeNode(builder, node.Children[index], ref sequence, depth + 1);
         }
+    }
+
+    private void ToggleTreeNodeCollapse(MouseEventArgs args, string nodeId)
+    {
+        if (!_collapsedTreeNodes.Add(nodeId))
+        {
+            _collapsedTreeNodes.Remove(nodeId);
+        }
+    }
+
+    private void OnTreeDragStart(string nodeId)
+    {
+        _activeDrag = DesignerDragPayload.Node(nodeId);
+        _selectedNodeId = nodeId;
+        _hoverDropzoneId = null;
+        SetDragVisualState("grabbed");
+    }
+
+    private void OnTreeDragOver(DragEventArgs args, string targetNodeId)
+    {
+        _hoverDropzoneId = $"tree:{targetNodeId}";
+        if (_activeDrag is not null)
+        {
+            SetDragVisualState("in-transit");
+        }
+    }
+
+    private async Task OnTreeDrop(string targetNodeId)
+    {
+        if (_activeDrag is null || !string.Equals(_activeDrag.Kind, "node", StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        var sourceNodeId = _activeDrag.Value;
+        if (string.Equals(sourceNodeId, targetNodeId, StringComparison.Ordinal))
+        {
+            await OnDragEnd();
+            return;
+        }
+
+        if (!TryResolveNodePlacement(sourceNodeId, out _, out _, out _, out _)
+            || !TryResolveNodePlacement(targetNodeId, out var targetParentNodeId, out var targetSlotName, out var targetIndex, out _))
+        {
+            await OnDragEnd();
+            return;
+        }
+
+        var targetLocation = targetParentNodeId is null
+            ? DesignNodeLocation.Root(targetIndex + 1)
+            : new DesignNodeLocation(targetParentNodeId, targetSlotName, targetIndex + 1);
+
+        if (_commands.Execute(new MoveNodeCommand(ActivePageIndex, sourceNodeId, targetLocation)))
+        {
+            _selectedNodeId = sourceNodeId;
+            _hasRecoveredDraft = true;
+            ShowToast("Structuur bijgewerkt", ToastType.Info);
+            await AutoSaveAsync();
+            await SetTransientDragVisualStateAsync("dropped", 300);
+        }
+        else
+        {
+            await SetTransientDragVisualStateAsync("cancelled", 260);
+        }
+
+        _activeDrag = null;
+        _hoverDropzoneId = null;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void OpenTreeContextMenu(MouseEventArgs args, string nodeId)
+    {
+        _treeContextMenuNodeId = nodeId;
+        _treeContextMenuXpx = $"{Math.Round(args.ClientX, MidpointRounding.AwayFromZero)}px";
+        _treeContextMenuYpx = $"{Math.Round(args.ClientY, MidpointRounding.AwayFromZero)}px";
+        _selectedNodeId = nodeId;
+    }
+
+    private void CloseTreeContextMenu()
+    {
+        _treeContextMenuNodeId = null;
+    }
+
+    private Task OnTreeContextDuplicateAsync()
+    {
+        var nodeId = _treeContextMenuNodeId;
+        CloseTreeContextMenu();
+        return string.IsNullOrWhiteSpace(nodeId)
+            ? Task.CompletedTask
+            : OnDuplicateNode(nodeId);
+    }
+
+    private Task OnTreeContextDeleteAsync()
+    {
+        var nodeId = _treeContextMenuNodeId;
+        CloseTreeContextMenu();
+        return string.IsNullOrWhiteSpace(nodeId)
+            ? Task.CompletedTask
+            : OnDeleteNode(nodeId);
+    }
+
+    private Task OnTreeContextMoveUpAsync()
+    {
+        var nodeId = _treeContextMenuNodeId;
+        CloseTreeContextMenu();
+        return string.IsNullOrWhiteSpace(nodeId)
+            ? Task.CompletedTask
+            : OnMoveNodeUp(nodeId);
+    }
+
+    private Task OnTreeContextMoveDownAsync()
+    {
+        var nodeId = _treeContextMenuNodeId;
+        CloseTreeContextMenu();
+        return string.IsNullOrWhiteSpace(nodeId)
+            ? Task.CompletedTask
+            : OnMoveNodeDown(nodeId);
+    }
+
+    private Task OnTreeContextWrapCardAsync()
+    {
+        var nodeId = _treeContextMenuNodeId;
+        CloseTreeContextMenu();
+        return string.IsNullOrWhiteSpace(nodeId)
+            ? Task.CompletedTask
+            : WrapNodeAsync(nodeId, "AgtCard", "RadzenCard");
+    }
+
+    private Task OnTreeContextWrapRowAsync()
+    {
+        var nodeId = _treeContextMenuNodeId;
+        CloseTreeContextMenu();
+        return string.IsNullOrWhiteSpace(nodeId)
+            ? Task.CompletedTask
+            : WrapNodeInRowAsync(nodeId);
+    }
+
+    private string GetPaletteItemClass(string componentType)
+    {
+        var classes = "designer-palette-item";
+        if (string.Equals(_dragSourcePaletteComponentType, componentType, StringComparison.Ordinal))
+        {
+            classes += " designer-palette-item--dragging";
+        }
+
+        return classes;
+    }
+
+    private void SetDragVisualState(string state)
+    {
+        _dragVisualEpoch++;
+        _dragVisualState = state;
+    }
+
+    private async Task SetTransientDragVisualStateAsync(string state, int durationMs)
+    {
+        var epoch = ++_dragVisualEpoch;
+        _dragVisualState = state;
+        await InvokeAsync(StateHasChanged);
+        await Task.Delay(durationMs);
+
+        if (epoch == _dragVisualEpoch)
+        {
+            _dragVisualState = "resting";
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private bool TryResolveNodePlacement(
+        string nodeId,
+        out string? parentNodeId,
+        out string slotName,
+        out int index,
+        out List<DesignNode> container)
+    {
+        parentNodeId = null;
+        slotName = DesignNodeLocation.RootSlotName;
+        index = -1;
+        container = [];
+
+        if (!TryFindNode(ActivePage.Nodes, nodeId, out var path, out var nodeContainer, out var nodeIndex))
+        {
+            return false;
+        }
+
+        index = nodeIndex;
+        container = nodeContainer;
+
+        if (path.Count < 2)
+        {
+            return true;
+        }
+
+        var parent = path[^2];
+        parentNodeId = parent.Id;
+        foreach (var slot in parent.Children)
+        {
+            if (ReferenceEquals(slot.Value, nodeContainer))
+            {
+                slotName = slot.Key;
+                return true;
+            }
+        }
+
+        slotName = "ChildContent";
+        return true;
+    }
+
+    private async Task WrapNodeAsync(string nodeId, params string[] wrapperTypes)
+    {
+        if (!TryResolveNodePlacement(nodeId, out var parentNodeId, out var slotName, out var index, out _)
+            || !TryFindNode(ActivePage.Nodes, nodeId, out _, out var container, out var nodeIndex))
+        {
+            return;
+        }
+
+        var wrapperDescriptor = wrapperTypes
+            .Select(type => Registry.TryGetDescriptor(type, out var descriptor) ? descriptor : null)
+            .FirstOrDefault(static descriptor => descriptor is not null);
+
+        if (wrapperDescriptor is null)
+        {
+            return;
+        }
+
+        var selectedNode = container[nodeIndex];
+        var wrapperNode = CreateNodeForDescriptor(wrapperDescriptor);
+        if (!wrapperNode.Children.ContainsKey("ChildContent"))
+        {
+            wrapperNode.Children["ChildContent"] = [];
+        }
+
+        wrapperNode.Children["ChildContent"].Add(DesignNodeDeepClone(selectedNode));
+
+        if (!_commands.Execute(new RemoveNodeCommand(ActivePageIndex, nodeId)))
+        {
+            return;
+        }
+
+        var addLocation = parentNodeId is null
+            ? DesignNodeLocation.Root(index)
+            : new DesignNodeLocation(parentNodeId, slotName, index);
+        if (!_commands.Execute(new AddNodeCommand(ActivePageIndex, addLocation, wrapperNode)))
+        {
+            return;
+        }
+
+        _selectedNodeId = wrapperNode.Id;
+        _hasRecoveredDraft = true;
+        ShowToast("Component gewrapt", ToastType.Info);
+        await AutoSaveAsync();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task WrapNodeInRowAsync(string nodeId)
+    {
+        if (!Registry.TryGetDescriptor("RadzenRow", out var rowDescriptor)
+            || !Registry.TryGetDescriptor("RadzenColumn", out var columnDescriptor)
+            || !TryResolveNodePlacement(nodeId, out var parentNodeId, out var slotName, out var index, out _)
+            || !TryFindNode(ActivePage.Nodes, nodeId, out _, out var container, out var nodeIndex))
+        {
+            return;
+        }
+
+        var selectedNode = container[nodeIndex];
+        var rowNode = CreateNodeForDescriptor(rowDescriptor);
+        var columnNode = CreateNodeForDescriptor(columnDescriptor);
+
+        if (!rowNode.Children.ContainsKey("ChildContent"))
+        {
+            rowNode.Children["ChildContent"] = [];
+        }
+
+        if (!columnNode.Children.ContainsKey("ChildContent"))
+        {
+            columnNode.Children["ChildContent"] = [];
+        }
+
+        columnNode.Children["ChildContent"].Add(DesignNodeDeepClone(selectedNode));
+        rowNode.Children["ChildContent"].Add(columnNode);
+
+        if (!_commands.Execute(new RemoveNodeCommand(ActivePageIndex, nodeId)))
+        {
+            return;
+        }
+
+        var addLocation = parentNodeId is null
+            ? DesignNodeLocation.Root(index)
+            : new DesignNodeLocation(parentNodeId, slotName, index);
+        if (!_commands.Execute(new AddNodeCommand(ActivePageIndex, addLocation, rowNode)))
+        {
+            return;
+        }
+
+        _selectedNodeId = rowNode.Id;
+        _hasRecoveredDraft = true;
+        ShowToast("Component in rij gewrapt", ToastType.Info);
+        await AutoSaveAsync();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private TreeNodeStatus ResolveTreeNodeStatus(string nodeId)
+    {
+        var severities = _validationIssues
+            .Where(issue => string.Equals(issue.NodeId, nodeId, StringComparison.Ordinal))
+            .Select(static issue => issue.Severity)
+            .ToArray();
+
+        if (severities.Contains(DesignValidationSeverity.Error))
+        {
+            return new TreeNodeStatus("error", "✕", "Node bevat fouten");
+        }
+
+        if (severities.Contains(DesignValidationSeverity.Warning))
+        {
+            return new TreeNodeStatus("warning", "!", "Node bevat waarschuwingen");
+        }
+
+        if (severities.Contains(DesignValidationSeverity.Info))
+        {
+            return new TreeNodeStatus("info", "i", "Node heeft informatieve meldingen");
+        }
+
+        return new TreeNodeStatus("ok", "✓", "Geen issues");
     }
 
     private string ResolveTreeIcon(string componentType)
@@ -2024,7 +2536,7 @@ public partial class DesignerShell : IDisposable
             return;
         }
 
-        _uiFeedback = "Component toegevoegd in slot.";
+        ShowToast("Component toegevoegd in slot", ToastType.Success);
         _liveAnnouncement = "Component toegevoegd in leeg slot.";
         await AutoSaveAsync();
         await InvokeAsync(StateHasChanged);
@@ -2060,10 +2572,216 @@ public partial class DesignerShell : IDisposable
         {
             _selectedNodeId = row.Id;
             _hasRecoveredDraft = true;
-            _uiFeedback = "Nieuwe rij toegevoegd.";
+            ShowToast("Nieuwe rij toegevoegd", ToastType.Success);
             await AutoSaveAsync();
             await InvokeAsync(StateHasChanged);
         }
+    }
+
+    private async Task OnMoveNodeUp(string nodeId)
+    {
+        if (string.IsNullOrWhiteSpace(nodeId))
+        {
+            return;
+        }
+
+        if (_commands.Execute(new ReorderSiblingCommand(ActivePageIndex, nodeId, -1)))
+        {
+            _selectedNodeId = nodeId;
+            _hasRecoveredDraft = true;
+            await AutoSaveAsync();
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task OnMoveNodeDown(string nodeId)
+    {
+        if (string.IsNullOrWhiteSpace(nodeId))
+        {
+            return;
+        }
+
+        if (_commands.Execute(new ReorderSiblingCommand(ActivePageIndex, nodeId, 1)))
+        {
+            _selectedNodeId = nodeId;
+            _hasRecoveredDraft = true;
+            await AutoSaveAsync();
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task OnDuplicateNode(string nodeId)
+    {
+        if (string.IsNullOrWhiteSpace(nodeId)
+            || !TryFindNode(ActivePage.Nodes, nodeId, out _, out var container, out var index))
+        {
+            return;
+        }
+
+        var parentNodeId = TryFindNode(ActivePage.Nodes, nodeId, out var path, out _, out _)
+            ? (path.Count >= 2 ? path[^2].Id : null)
+            : null;
+        var targetLocation = path.Count >= 2
+            ? new DesignNodeLocation(parentNodeId, "ChildContent", index + 1)
+            : DesignNodeLocation.Root(index + 1);
+
+        if (_commands.Execute(new DuplicateNodeCommand(ActivePageIndex, nodeId, targetLocation)))
+        {
+            _selectedNodeId = null;
+
+            _hasRecoveredDraft = true;
+            ShowToast("Component gedupliceerd", ToastType.Info);
+            await AutoSaveAsync();
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task OnDeleteNode(string nodeId)
+    {
+        if (string.IsNullOrWhiteSpace(nodeId))
+        {
+            return;
+        }
+
+        if (_commands.Execute(new RemoveNodeCommand(ActivePageIndex, nodeId)))
+        {
+            _selectedNodeId = null;
+            _hasRecoveredDraft = true;
+            ShowToast("Component verwijderd", ToastType.Warning);
+            await AutoSaveAsync();
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task OnInlineEditCommitted((string ParameterName, string Value) args)
+    {
+        if (_selectedNodeId is null || string.IsNullOrWhiteSpace(args.ParameterName))
+        {
+            return;
+        }
+
+        if (_commands.Execute(new SetNodeParameterCommand(ActivePageIndex, _selectedNodeId, args.ParameterName, DesignParameterValue.FromValue(args.Value))))
+        {
+            _hasRecoveredDraft = true;
+            ShowToast("Inline wijziging opgeslagen", ToastType.Success);
+            await AutoSaveAsync();
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private void ToggleShortcutsOverlay()
+    {
+        _showShortcutsOverlay = !_showShortcutsOverlay;
+    }
+
+    private void BeginEditDocumentName()
+    {
+        _editingDocumentName = true;
+        _editingDocumentNameValue = _commands.Document.Name;
+    }
+
+    private async Task OnDocumentNameKeyDown(KeyboardEventArgs args)
+    {
+        if (string.Equals(args.Key, "Enter", StringComparison.OrdinalIgnoreCase))
+        {
+            await CommitDocumentNameAsync();
+            return;
+        }
+
+        if (string.Equals(args.Key, "Escape", StringComparison.OrdinalIgnoreCase))
+        {
+            CancelEditDocumentName();
+        }
+    }
+
+    private void CancelEditDocumentName()
+    {
+        _editingDocumentName = false;
+        _editingDocumentNameValue = string.Empty;
+    }
+
+    private async Task CommitDocumentNameAsync()
+    {
+        var nextName = _editingDocumentNameValue.Trim();
+        _editingDocumentName = false;
+        _editingDocumentNameValue = string.Empty;
+
+        if (string.IsNullOrWhiteSpace(nextName) || string.Equals(nextName, _commands.Document.Name, StringComparison.Ordinal))
+        {
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
+        if (_commands.Execute(new SetDocumentNameCommand(nextName)))
+        {
+            _hasRecoveredDraft = true;
+            ShowToast("Documentnaam bijgewerkt", ToastType.Info);
+            await AutoSaveAsync();
+        }
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private static string GetParameterDisplayName(string parameterName)
+    {
+        return parameterName switch
+        {
+            "Label" => "Labeltekst",
+            "Placeholder" => "Voorbeeldtekst",
+            "Value" => "Waarde",
+            "Text" => "Tekst",
+            "Title" => "Titel",
+            "Description" => "Omschrijving",
+            "Icon" => "Icoon",
+            "AriaLabel" => "Toegankelijkheidslabel",
+            "Disabled" => "Uitgeschakeld",
+            "Visible" => "Zichtbaar",
+            "Required" => "Verplicht",
+            _ => parameterName
+        };
+    }
+
+    private void ShowToast(string message, ToastType type = ToastType.Success)
+    {
+        if (string.IsNullOrWhiteSpace(message))
+        {
+            return;
+        }
+
+        var toast = new ToastMessage(message, type, DateTimeOffset.UtcNow);
+        _toasts.Add(toast);
+        StateHasChanged();
+        _ = DismissToastAfterDelay(toast);
+    }
+
+    private async Task DismissToastAfterDelay(ToastMessage toast)
+    {
+        await Task.Delay(3000);
+        _toasts.Remove(toast);
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private static string GetToastClass(ToastType type)
+    {
+        return type switch
+        {
+            ToastType.Warning => "designer-toast--warning",
+            ToastType.Info => "designer-toast--info",
+            _ => "designer-toast--success"
+        };
+    }
+
+    private sealed record SelectionBreadcrumbPart(string NodeId, string Label);
+
+    private sealed record ToastMessage(string Text, ToastType Type, DateTimeOffset Created);
+
+    private sealed record TreeNodeStatus(string CssClass, string Glyph, string Tooltip);
+
+    private enum ToastType
+    {
+        Success,
+        Info,
+        Warning
     }
 
     private string GetRootDropzoneClass(int index)

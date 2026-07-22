@@ -1,4 +1,4 @@
-<div class="designer-page" @onkeydown="OnPageKeyDown" tabindex="0">
+<div class="designer-page @DragStateCssClass" @onkeydown="OnPageKeyDown" tabindex="0">
     <div class="designer-screenreader-status" role="status" aria-live="polite">@_liveAnnouncement</div>
 
     @if (_showOnboardingOverlay)
@@ -54,11 +54,6 @@
             </div>
         }
 
-        @if (!string.IsNullOrWhiteSpace(_uiFeedback))
-        {
-            <div class="designer-feedback" role="status" aria-live="polite">@_uiFeedback</div>
-        }
-
         @if (_fileMenuOpen || _settingsMenuOpen || _pageMenuIndex is not null)
         {
             <div class="designer-menu-backdrop" @onclick="CloseAllMenus"></div>
@@ -85,9 +80,7 @@
                         <button type="button" class="designer-menu__item" role="menuitem" @onclick="OnExportDocument" disabled="@HasErrorIssues">Exporteren</button>
                     </div>
                 }
-            </div>
 
-            <div class="designer-toolbar__group">
                 <button type="button" class="designer-save-button" @onclick="OnSaveDocument">
                     <RadzenIcon Icon="save" />
                     <span>Opslaan</span>
@@ -96,8 +89,31 @@
                         <span class="designer-save-button__dirty-dot" aria-hidden="true"></span>
                     }
                 </button>
+
                 <RadzenButton Text="Undo" Icon="undo" Disabled="@(!_commands.CanUndo)" ButtonStyle="ButtonStyle.Base" Variant="Variant.Flat" Click="OnUndo" />
                 <RadzenButton Text="Redo" Icon="redo" Disabled="@(!_commands.CanRedo)" ButtonStyle="ButtonStyle.Base" Variant="Variant.Flat" Click="OnRedo" />
+            </div>
+
+            <div class="designer-toolbar__center" title="Documentnaam">
+                @if (_editingDocumentName)
+                {
+                    <input class="designer-toolbar__doc-input"
+                           value="@_editingDocumentNameValue"
+                           @oninput="args => _editingDocumentNameValue = args.Value?.ToString() ?? string.Empty"
+                           @onkeydown="OnDocumentNameKeyDown"
+                           @onblur="CommitDocumentNameAsync"
+                           autofocus />
+                }
+                else
+                {
+                    <button type="button" class="designer-toolbar__doc-button" @onclick="BeginEditDocumentName">
+                        <span>@_commands.Document.Name</span>
+                        @if (_commands.IsDirty)
+                        {
+                            <span class="designer-toolbar__doc-dirty" aria-label="Niet opgeslagen">★</span>
+                        }
+                    </button>
+                }
             </div>
 
             <div class="designer-toolbar__group">
@@ -119,15 +135,14 @@
                 @if (_settingsMenuOpen)
                 {
                     <div class="designer-menu" role="menu" aria-label="Instellingen">
-                        <div class="designer-menu__row">
-                            <label for="designer-theme-picker">Theme</label>
-                            <RadzenDropDown id="designer-theme-picker" TValue="string" Data="CanvasThemeOptions" Value="@_canvasTheme" Change="OnCanvasThemeChanged" />
-                        </div>
+                        <button type="button" class="designer-menu__item" role="menuitem" @onclick="ToggleShortcutsOverlay">Sneltoetsen</button>
                         <div class="designer-menu__row">
                             <AgtCommandPalette />
                         </div>
                     </div>
                 }
+
+                <RadzenButton Text="Exporteren" Icon="inventory_2" Disabled="@HasErrorIssues" ButtonStyle="ButtonStyle.Base" Variant="Variant.Flat" Click="OnExportDocument" />
             </div>
         </header>
 
@@ -218,12 +233,13 @@
                                 @foreach (var descriptor in category.Value)
                                 {
                                         <button type="button"
-                                            class="designer-palette-item"
+                                            class="@GetPaletteItemClass(descriptor.ComponentType)"
                                             draggable="true"
                                             @ondragstart='args => OnPaletteDragStart(args, descriptor)'
                                             @ondragend="OnDragEnd"
                                             @onclick="() => OnPaletteItemClickedAsync(descriptor.ComponentType)"
                                             title="@($"{descriptor.DesignerDisplayName ?? descriptor.DisplayName} - {descriptor.DesignerDescription ?? "Component in de designer"} ({descriptor.ComponentType})")">
+                                        <span class="designer-palette-item__grip" aria-hidden="true">⋮⋮</span>
                                         <RadzenIcon Icon="@(descriptor.DesignerIcon ?? descriptor.Icon)" />
                                         <span>@(descriptor.DesignerDisplayName ?? descriptor.DisplayName)</span>
                                         <small class="designer-palette-item__meta">@descriptor.ComponentType</small>
@@ -240,7 +256,24 @@
                 }
 
                 <section class="designer-panel designer-panel--canvas" aria-label="Canvas">
-                    <div class="designer-breadcrumb" aria-live="polite">@SelectionBreadcrumb</div>
+                    <div class="designer-breadcrumb" aria-live="polite">
+                        @if (SelectionBreadcrumbParts.Count == 0)
+                        {
+                            <span>Selecteer een node</span>
+                        }
+                        else
+                        {
+                            @for (var crumbIndex = 0; crumbIndex < SelectionBreadcrumbParts.Count; crumbIndex++)
+                            {
+                                var crumb = SelectionBreadcrumbParts[crumbIndex];
+                                <button type="button" class="designer-breadcrumb__item" @onclick="() => OnSelectNode(crumb.NodeId)">@crumb.Label</button>
+                                if (crumbIndex < SelectionBreadcrumbParts.Count - 1)
+                                {
+                                    <span class="designer-breadcrumb__sep">&gt;</span>
+                                }
+                            }
+                        }
+                    </div>
                     <div class="designer-canvas-frame" style="@CanvasFrameStyle">
                         <div class="designer-canvas" data-agt-theme="@_canvasTheme" @ref="_canvasRef">
                             @if (ActivePage.Nodes.Count == 0)
@@ -263,11 +296,19 @@
                                     <DesignerCanvasNode Node="node"
                                                        Registry="@Registry"
                                                        SelectedNodeId="@_selectedNodeId"
+                                                       HoveredNodeId="@_hoveredNodeId"
+                                                       HoverNodeChanged="OnTreeNodeHover"
                                                        SelectNode="OnSelectNode"
                                                        StartDrag="OnDragStart"
                                                        EndDrag="OnDragEnd"
                                                        DropNode="OnDropRequested"
                                                        AddNodeRequested="OnInlineAddRequested"
+                                                       MoveNodeUp="OnMoveNodeUp"
+                                                       MoveNodeDown="OnMoveNodeDown"
+                                                       DuplicateNode="OnDuplicateNode"
+                                                       DeleteNode="OnDeleteNode"
+                                                       InlineEditCommitted="OnInlineEditCommitted"
+                                                       NodeQuickParameterChanged="OnInlineEditCommitted"
                                                        IsDragActive="IsDragActive"
                                                        HoverDropzoneId="@_hoverDropzoneId"
                                                        DropzoneDragEnter="OnDropZoneDragEnter"
@@ -345,6 +386,21 @@
                             @RenderTreeNodes(TreeRoots)
                         </div>
 
+                        @if (_treeContextMenuNodeId is not null)
+                        {
+                            <div class="designer-tree-context-menu"
+                                 role="menu"
+                                 style="left: @_treeContextMenuXpx; top: @_treeContextMenuYpx;"
+                                 @onclick:stopPropagation="true">
+                                <button type="button" class="designer-tree-context-menu__item" role="menuitem" @onclick="OnTreeContextDuplicateAsync">Dupliceren</button>
+                                <button type="button" class="designer-tree-context-menu__item" role="menuitem" @onclick="OnTreeContextDeleteAsync">Verwijderen</button>
+                                <button type="button" class="designer-tree-context-menu__item" role="menuitem" @onclick="OnTreeContextMoveUpAsync">Omhoog</button>
+                                <button type="button" class="designer-tree-context-menu__item" role="menuitem" @onclick="OnTreeContextMoveDownAsync">Omlaag</button>
+                                <button type="button" class="designer-tree-context-menu__item" role="menuitem" @onclick="OnTreeContextWrapCardAsync">Wikkel in kaart</button>
+                                <button type="button" class="designer-tree-context-menu__item" role="menuitem" @onclick="OnTreeContextWrapRowAsync">Wikkel in rij</button>
+                            </div>
+                        }
+
                         <section class="designer-issues" aria-label="Issues panel">
                             <button type="button" class="designer-issues__header" @onclick="() => _issuesExpanded = !_issuesExpanded" aria-expanded="@_issuesExpanded">
                                 <span>Issues</span>
@@ -418,6 +474,59 @@
                     <DesignerCodePanel CurrentPage="@ActivePage" ActivePageIndex="@ActivePageIndex" Document="@_commands.Document" SelectedNodeId="@_selectedNodeId" OnDocumentChanged="OnDocumentChanged" />
                 }
             </section>
+        }
+
+        <div class="designer-toasts" aria-live="polite" aria-atomic="true">
+            @foreach (var toast in _toasts)
+            {
+                <div class="designer-toast @GetToastClass(toast.Type)">
+                    <span>@toast.Text</span>
+                </div>
+            }
+        </div>
+
+        @if (_showShortcutsOverlay)
+        {
+            <div class="designer-overlay" role="dialog" aria-modal="true" aria-label="Sneltoetsen">
+                <div class="designer-modal designer-modal--wide">
+                    <h3>Sneltoetsen</h3>
+                    <table class="designer-shortcuts-table">
+                        <thead>
+                            <tr><th>Sneltoets</th><th>Actie</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Ctrl+K</td><td>Quick Find / Command Palette</td></tr>
+                            <tr><td>Ctrl+S</td><td>Opslaan</td></tr>
+                            <tr><td>Ctrl+Z</td><td>Ongedaan maken</td></tr>
+                            <tr><td>Ctrl+Y</td><td>Opnieuw</td></tr>
+                            <tr><td>Ctrl+P</td><td>Preview toggelen</td></tr>
+                            <tr><td>Ctrl+E</td><td>Exporteren</td></tr>
+                            <tr><td>Delete</td><td>Geselecteerd component verwijderen</td></tr>
+                            <tr><td>Ctrl+D</td><td>Geselecteerd component dupliceren</td></tr>
+                            <tr><td>Ctrl+↑ / Ctrl+↓</td><td>Component omhoog/omlaag verplaatsen</td></tr>
+                            <tr><td>Escape</td><td>Menu's sluiten / selectie opheffen</td></tr>
+                            <tr><td>Ctrl+/</td><td>Dit overzicht tonen/verbergen</td></tr>
+                        </tbody>
+                    </table>
+                    <div class="designer-modal__actions">
+                        <RadzenButton Text="Sluiten" ButtonStyle="ButtonStyle.Base" Variant="Variant.Flat" Click="ToggleShortcutsOverlay" />
+                    </div>
+                </div>
+            </div>
+        }
+
+        @if (_showDesignerCommandPalette)
+        {
+            <div class="designer-overlay" role="dialog" aria-modal="true" aria-label="Designer command palette" @onclick="CloseDesignerCommandPalette">
+                <div class="designer-modal designer-modal--command" @onclick:stopPropagation="true">
+                    <div class="designer-command-palette">
+                        <AgtCommandPalette />
+                    </div>
+                    <div class="designer-modal__actions">
+                        <RadzenButton Text="Sluiten" ButtonStyle="ButtonStyle.Base" Variant="Variant.Flat" Click="CloseDesignerCommandPalette" />
+                    </div>
+                </div>
+            </div>
         }
 
         @if (_showNewDocumentDialog)
