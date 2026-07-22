@@ -431,6 +431,23 @@
     min-width: 1.8rem;
 }
 
+.designer-panel__toggle .rzi {
+    font-size: 1rem;
+    line-height: 1;
+}
+
+.designer-panel__toggle:hover {
+    border-color: var(--agt-color-primary-500);
+}
+
+.designer-panel--collapsed .designer-panel__header {
+    justify-content: center;
+}
+
+.designer-panel--collapsed .designer-panel__header h2 {
+    display: none;
+}
+
 .designer-filter {
     background: var(--agt-surface-0);
     border: 1px solid var(--agt-input-border);
