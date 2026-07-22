@@ -7,9 +7,11 @@
 
 .agt-switch__label {
     color: var(--agt-text-body);
+    cursor: pointer;
 }
 
 .agt-switch__state {
     color: var(--agt-text-muted);
+    cursor: pointer;
     font-size: var(--agt-font-size-sm);
 }
