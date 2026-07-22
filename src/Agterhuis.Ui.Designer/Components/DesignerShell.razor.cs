@@ -667,7 +667,6 @@ public partial class DesignerShell : IDisposable
 
     private async Task OnSavedSelectionChanged(string? value)
     {
-        CloseAllMenus();
         var selected = value;
         if (string.IsNullOrWhiteSpace(selected))
         {
@@ -675,6 +674,7 @@ public partial class DesignerShell : IDisposable
         }
 
         _selectedSavedName = selected;
+        CloseAllMenus();
         var envelope = await Store.LoadAsync(selected);
         if (envelope is not null)
         {
@@ -1003,10 +1003,10 @@ public partial class DesignerShell : IDisposable
 
     private async Task OnCanvasThemeChanged(string value)
     {
-        CloseAllMenus();
         _canvasTheme = string.IsNullOrWhiteSpace(value) ? "plum-dark" : value;
         await CanvasThemeChanged.InvokeAsync(_canvasTheme);
-        await InvokeAsync(StateHasChanged);
+        // No explicit StateHasChanged — Blazor auto-renders after EventCallback completes.
+        // No CloseAllMenus — the Radzen dropdown manages its own popup lifecycle.
     }
 
     private Task ToggleDarkLight()
