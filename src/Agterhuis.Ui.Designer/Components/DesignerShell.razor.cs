@@ -1267,7 +1267,7 @@ public partial class DesignerShell : IDisposable
             return;
         }
 
-        if (args.CtrlKey && string.Equals(args.Key, "v", StringComparison.OrdinalIgnoreCase) && _clipboardNodeJson is not null)
+        if (args.CtrlKey && string.Equals(args.Key, "v", StringComparison.OrdinalIgnoreCase))
         {
             await PasteNodeAsync();
             return;
