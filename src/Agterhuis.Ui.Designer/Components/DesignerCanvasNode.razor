@@ -4,6 +4,7 @@
 @using Agterhuis.Ui.Designer.Model
 @using Agterhuis.Ui.Designer.Registry
 @using Agterhuis.Ui.Designer.Rendering
+@using Agterhuis.Ui.Designer.Services
 @using Microsoft.AspNetCore.Components.Rendering
 @using Microsoft.AspNetCore.Components.Web
 
@@ -95,6 +96,19 @@
         .GetMethod(nameof(CreateTemplatedSlotCore), BindingFlags.Instance | BindingFlags.NonPublic)
         ?? throw new InvalidOperationException("Templated slot factory not found.");
 
+    private static readonly Dictionary<string, string> SlotDisplayNames = new(StringComparer.Ordinal)
+    {
+        ["ChildContent"] = "Inhoud",
+        ["HeaderActions"] = "Knoppen rechtsboven",
+        ["Logo"] = "Logo",
+        ["Sidebar"] = "Zijmenu",
+        ["Header"] = "Koptekst",
+        ["Footer"] = "Voettekst",
+        ["Columns"] = "Kolommen",
+        ["Template"] = "Sjabloon",
+        ["EmptyTemplate"] = "Lege weergave"
+    };
+
     [Parameter, EditorRequired]
     public DesignNode Node { get; set; } = default!;
 
@@ -161,6 +175,9 @@
     [Parameter]
     public EventCallback<string?> HoverNodeChanged { get; set; }
 
+    [CascadingParameter]
+    public DesignDataContext? DesignDataContext { get; set; }
+
     private DesignerComponentDescriptor? _descriptor;
     private Dictionary<string, object?> _parameters = [];
     private string? _errorMessage;
@@ -194,11 +211,9 @@
         }
 
         var size = 12;
-        if (Node.Parameters.TryGetValue("Size", out var sizeValue)
-            && sizeValue?.Literal is JsonValue jsonValue
-            && jsonValue.TryGetValue<int>(out var parsed))
+        if (TryGetColumnSize(out var parsedSize))
         {
-            size = Math.Clamp(parsed, 1, 12);
+            size = Math.Clamp(parsedSize, 1, 12);
         }
 
         var pct = Math.Round(size / 12.0 * 100, 2).ToString("0.##", CultureInfo.InvariantCulture);
@@ -208,6 +223,15 @@
     private string DescriptorLabel => _descriptor?.DisplayName ?? Node.ComponentType;
 
     private string DescriptorIcon => _descriptor?.Icon ?? "widgets";
+
+    private static bool IsFormComponent(string componentType)
+        => componentType is "AgtTextField" or "AgtNumericField" or "AgtDatePicker"
+            or "AgtDropdown" or "AgtSwitch" or "AgtTextArea" or "AgtCheckboxField"
+            or "RadzenTextBox" or "RadzenNumeric" or "RadzenDatePicker"
+            or "RadzenDropDown" or "RadzenCheckBox" or "RadzenSwitch";
+
+    private static string GetSlotDisplayName(string slotName)
+        => SlotDisplayNames.TryGetValue(slotName, out var displayName) ? displayName : slotName;
 
     protected override void OnParametersSet()
     {
@@ -226,6 +250,7 @@
         try
         {
             _parameters = BuildParameterDictionary(descriptor);
+            InjectDesignTimeDefaults(_parameters);
         }
         catch (Exception ex)
         {
@@ -276,16 +301,35 @@
 
     private Task ApplyColumnSizeDelta(int delta)
     {
-        var currentSize = 6;
-        if (Node.Parameters.TryGetValue("Size", out var value)
-            && value?.Literal is JsonValue jsonValue
-            && jsonValue.TryGetValue<int>(out var parsed))
+        var currentSize = TryGetColumnSize(out var parsed) ? parsed : 6;
+
+        var next = Math.Clamp(currentSize + delta, 1, 12).ToString(CultureInfo.InvariantCulture);
+        return NodeQuickParameterChanged.InvokeAsync(("Size", next));
+    }
+
+    private bool TryGetColumnSize(out int size)
+    {
+        size = 12;
+        if (!Node.Parameters.TryGetValue("Size", out var value)
+            || value?.Literal is not JsonValue jsonValue)
         {
-            currentSize = parsed;
+            return false;
         }
 
-        var next = Math.Clamp(currentSize + delta, 1, 12).ToString();
-        return NodeQuickParameterChanged.InvokeAsync(("Size", next));
+        if (jsonValue.TryGetValue<int>(out var parsedInt))
+        {
+            size = parsedInt;
+            return true;
+        }
+
+        if (jsonValue.TryGetValue<string>(out var parsedString)
+            && int.TryParse(parsedString, NumberStyles.Integer, CultureInfo.InvariantCulture, out parsedInt))
+        {
+            size = parsedInt;
+            return true;
+        }
+
+        return false;
     }
 
     private void OnDoubleClick()
@@ -370,6 +414,59 @@
         return parameters;
     }
 
+    private void InjectDesignTimeDefaults(Dictionary<string, object?> parameters)
+    {
+        if (IsFormComponent(Node.ComponentType) && !parameters.ContainsKey("Placeholder"))
+        {
+            var label = parameters.TryGetValue("Label", out var labelValue) && labelValue is string stringLabel
+                ? stringLabel
+                : Node.ComponentType;
+
+            parameters["Placeholder"] = ResolveDesignTimePlaceholder(label);
+        }
+
+        if (string.Equals(Node.ComponentType, "AgtEmptyState", StringComparison.Ordinal) && !parameters.ContainsKey("Description"))
+        {
+            parameters["Description"] = "Voorbeelddata verschijnt hier in de canvas.";
+        }
+    }
+
+    private string ResolveDesignTimePlaceholder(string label)
+    {
+        var normalizedLabel = NormalizeToken(label);
+        var bestMatch = DesignDataContext?.DataModel.Entities
+            .SelectMany(entity => entity.Fields.Select(field => new { EntityName = entity.Name, FieldName = field.Name }))
+            .FirstOrDefault(candidate => string.Equals(NormalizeToken(candidate.FieldName), normalizedLabel, StringComparison.Ordinal)
+                || string.Equals(NormalizeToken(candidate.EntityName), normalizedLabel, StringComparison.Ordinal));
+
+        if (bestMatch is not null)
+        {
+            var sampleValue = DesignDataContext?.GetSampleValue(bestMatch.EntityName, bestMatch.FieldName);
+            if (sampleValue is string stringValue && !string.IsNullOrWhiteSpace(stringValue))
+            {
+                return stringValue;
+            }
+        }
+
+        return $"Vul {label.Trim().ToLowerInvariant()} in...";
+    }
+
+    private static string NormalizeToken(string value)
+    {
+        Span<char> buffer = stackalloc char[value.Length];
+        var length = 0;
+
+        foreach (var character in value)
+        {
+            if (char.IsLetterOrDigit(character))
+            {
+                buffer[length++] = char.ToLowerInvariant(character);
+            }
+        }
+
+        return new string(buffer[..length]);
+    }
+
     private object CreateSlotValue(Type slotType, string slotName, IReadOnlyList<DesignNode> children)
     {
         if (slotType == typeof(RenderFragment))
@@ -409,7 +506,7 @@
 
         builder.OpenElement(sequence++, "div");
         builder.AddAttribute(sequence++, "class", "designer-slot__hint");
-        builder.AddContent(sequence++, slotName);
+        builder.AddContent(sequence++, GetSlotDisplayName(slotName));
         builder.CloseElement();
 
         builder.OpenElement(sequence++, "div");

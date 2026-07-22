@@ -17,6 +17,7 @@ internal static class DesignerComponentDisplayMap
             ["AgtCard"] = new("Kaart", "Opmaak", "crop_portrait", "Een afgebakend inhoudsblok."),
             ["AgtBreadcrumb"] = new("Kruimelpad", "Opmaak", "arrow_right", "Navigatiepad naar de huidige pagina."),
             ["AgtDrawer"] = new("Zijpaneel", "Opmaak", "menu_open", "Een in- of uitschuivend paneel."),
+            ["AgtNavLink"] = new("Navigatielink", "Navigatie", "link", "Navigeer naar een andere pagina in de app."),
             ["AgtDensityToggle"] = DesignerDisplayInfo.HiddenEntry,
             ["AgtCommandPalette"] = DesignerDisplayInfo.HiddenEntry,
             ["AgtAlert"] = new("Melding", "Meldingen", "info", "Toon een belangrijke melding."),

@@ -54,7 +54,8 @@ public sealed class ProjectExporter
     public ExportResult ExportProject(
         DesignDocument document,
         string projectName,
-        string themeFamily = "plum")
+        string themeFamily = "plum",
+        bool includeSeedData = true)
     {
         ArgumentNullException.ThrowIfNull(document);
         ArgumentNullException.ThrowIfNull(projectName);
@@ -91,9 +92,9 @@ public sealed class ProjectExporter
         }
 
         projectFiles[$"{projectName}/design/document.json"] = JsonSerializer.Serialize(document, DesignJsonOptions.Default);
-        AddDataServiceFiles(projectFiles, projectName, document);
+        AddDataServiceFiles(projectFiles, projectName, document, includeSeedData);
 
-        foreach (var (path, content) in GetStarterTemplateFiles(projectName, normalizedThemeFamily))
+        foreach (var (path, content) in GetStarterTemplateFiles(projectName, normalizedThemeFamily, includeSeedData))
         {
             projectFiles[path] = content;
         }
@@ -128,13 +129,14 @@ public sealed class ProjectExporter
         return stream.ToArray();
     }
 
-    private static IReadOnlyDictionary<string, string> GetStarterTemplateFiles(string projectName, string themeFamily)
+    private static IReadOnlyDictionary<string, string> GetStarterTemplateFiles(string projectName, string themeFamily, bool includeSeedData)
     {
         return new Dictionary<string, string>(StringComparer.Ordinal)
         {
             [$"{projectName}/{projectName}.csproj"] = LoadTemplateText("Agterhuis.Ui.Demo.export.csproj.template", projectName, themeFamily),
             [$"{projectName}/README.md"] = LoadTemplateText("README.template", projectName, themeFamily),
-            [$"{projectName}/Program.cs"] = LoadTemplateText("Program.template", projectName, themeFamily),
+            [$"{projectName}/Program.cs"] = LoadTemplateText("Program.template", projectName, themeFamily, includeSeedData),
+            [$"{projectName}/appsettings.json"] = LoadTemplateText("appsettings.json.template", projectName, themeFamily, includeSeedData),
             [$"{projectName}/Components/_Imports.razor"] = LoadTemplateText("_Imports.razor.template", projectName, themeFamily),
             [$"{projectName}/Components/Routes.razor"] = LoadTemplateText("Routes.razor.template", projectName, themeFamily),
             [$"{projectName}/Components/App.razor"] = LoadTemplateText("App.razor.template", projectName, themeFamily),
@@ -143,24 +145,87 @@ public sealed class ProjectExporter
         };
     }
 
-    private static string LoadTemplateText(string resourceSuffix, string projectName, string themeFamily)
+    private static string LoadTemplateText(string resourceSuffix, string projectName, string themeFamily, bool includeSeedData = true)
     {
         var resourceName = TemplateNamespace + "." + resourceSuffix.Replace('/', '.');
         using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName)
             ?? throw new InvalidOperationException($"Missing export template resource '{resourceName}'. Available resources: {string.Join(", ", Assembly.GetExecutingAssembly().GetManifestResourceNames().Where(name => name.StartsWith(TemplateNamespace, StringComparison.Ordinal)).OrderBy(name => name, StringComparer.Ordinal))}");
         using var reader = new StreamReader(stream, Encoding.UTF8, detectEncodingFromByteOrderMarks: false);
+        var servicesUsing = includeSeedData ? "using ExportedApp.Services;" : string.Empty;
+        var registration = includeSeedData
+            ? "builder.Services.AddScoped<DesignDataService>();\nif (useSeedData)\n{\n    builder.Services.AddScoped<IDataProvider, SeedDataProvider>();\n}"
+            : "if (useSeedData)\n{\n    // Seeded data is disabled in this export package.\n}";
         return reader.ReadToEnd()
             .Replace("__PROJECT_NAME__", projectName, StringComparison.Ordinal)
-            .Replace("__THEME_FAMILY__", themeFamily, StringComparison.Ordinal);
+            .Replace("__THEME_FAMILY__", themeFamily, StringComparison.Ordinal)
+            .Replace("__SERVICES_USING__", servicesUsing, StringComparison.Ordinal)
+            .Replace("__USE_SEED_DATA_DEFAULT__", includeSeedData ? "true" : "false", StringComparison.Ordinal)
+            .Replace("__SEED_DATA_REGISTRATION__", registration, StringComparison.Ordinal);
     }
 
-    private static void AddDataServiceFiles(Dictionary<string, string> projectFiles, string projectName, DesignDocument document)
+    private static void AddDataServiceFiles(Dictionary<string, string> projectFiles, string projectName, DesignDocument document, bool includeSeedData)
     {
+        if (!includeSeedData)
+        {
+            return;
+        }
+
         var servicesPath = $"{projectName}/Services";
         var dataModel = document.DataModel;
 
         projectFiles[$"{servicesPath}/DesignDataContracts.cs"] = GenerateDataContracts(document.DataModel);
         projectFiles[$"{servicesPath}/DesignDataService.cs"] = GenerateDataService(document.DataModel);
+        projectFiles[$"{servicesPath}/IDataProvider.cs"] = GenerateDataProviderInterface(document.DataModel);
+        projectFiles[$"{servicesPath}/SeedDataProvider.cs"] = GenerateSeedDataProvider(document.DataModel);
+    }
+
+    private static string GenerateDataProviderInterface(DesignDataModel dataModel)
+    {
+        var lines = new List<string>
+        {
+            "using System.Collections.Generic;",
+            string.Empty,
+            "namespace ExportedApp.Services;",
+            string.Empty,
+            "public interface IDataProvider",
+            "{"
+        };
+
+        foreach (var entity in dataModel.Entities)
+        {
+            lines.Add($"    IReadOnlyList<{entity.Name}Record> Get{entity.PluralName}();");
+        }
+
+        lines.Add("}");
+        return string.Join(Environment.NewLine, lines);
+    }
+
+    private static string GenerateSeedDataProvider(DesignDataModel dataModel)
+    {
+        var lines = new List<string>
+        {
+            "using System.Collections.Generic;",
+            string.Empty,
+            "namespace ExportedApp.Services;",
+            string.Empty,
+            "public sealed class SeedDataProvider : IDataProvider",
+            "{",
+            "    private readonly DesignDataService _dataService;",
+            string.Empty,
+            "    public SeedDataProvider(DesignDataService dataService)",
+            "    {",
+            "        _dataService = dataService;",
+            "    }",
+            string.Empty
+        };
+
+        foreach (var entity in dataModel.Entities)
+        {
+            lines.Add($"    public IReadOnlyList<{entity.Name}Record> Get{entity.PluralName}() => _dataService.Get{entity.PluralName}();");
+        }
+
+        lines.Add("}");
+        return string.Join(Environment.NewLine, lines);
     }
 
     private static string GenerateDataContracts(DesignDataModel dataModel)
@@ -190,6 +255,13 @@ public sealed class ProjectExporter
 
     private static string GenerateDataService(DesignDataModel dataModel)
     {
+        var usesPickHelper = dataModel.Entities
+            .SelectMany(static entity => entity.Fields, static (entity, field) => (entity, field))
+            .Any(static item =>
+                item.field.Type == DesignFieldType.Enum
+                || (string.Equals(item.entity.Name, "Schadedossier", StringComparison.Ordinal)
+                    && string.Equals(item.field.Name, "Status", StringComparison.Ordinal)));
+
         var lines = new List<string>
         {
             "using System.Collections.Generic;",
@@ -232,11 +304,17 @@ public sealed class ProjectExporter
             lines.Add("            {");
             foreach (var field in entity.Fields)
             {
-                lines.Add($"                {field.Name} = {GenerateSeedLiteral(field)},");
+                lines.Add($"                {field.Name} = {GenerateSeedLiteral(entity.Name, field)},");
             }
             lines.Add("            };");
             lines.Add("        }");
             lines.Add("    }");
+            lines.Add("");
+        }
+
+        if (usesPickHelper)
+        {
+            lines.Add("    private static string Pick(Random random, string[] values) => values.Length == 0 ? string.Empty : values[random.Next(0, values.Length)];");
             lines.Add("");
         }
 
@@ -265,15 +343,24 @@ public sealed class ProjectExporter
             _ => "string.Empty"
         };
 
-    private static string GenerateSeedLiteral(DesignField field)
-        => field.Type switch
+    private static string GenerateSeedLiteral(string entityName, DesignField field)
+        => (entityName, field.Name) switch
         {
-            DesignFieldType.Int => "random.Next(1, 1000)",
-            DesignFieldType.Decimal => "decimal.Round((decimal)(random.NextDouble() * 1000), 2)",
-            DesignFieldType.Bool => "random.NextDouble() > 0.5",
-            DesignFieldType.DateTime => "DateTime.Today.AddDays(-random.Next(0, 60))",
-            DesignFieldType.Enum => field.EnumValues.Count > 0 ? $"\"{field.EnumValues[0]}\"" : "string.Empty",
-            _ => "string.Empty"
+            ("Schadedossier", "Dossiernummer") => "$\"ATG-2024-{index + 1:00000}\"",
+            ("Schadedossier", "Status") => "Pick(random, new[] { \"Nieuw\", \"Ingepland\", \"In behandeling\", \"Gereed\" })",
+            ("Klant", "Klantnaam") => "$\"Klant {index + 1}\"",
+            ("Klant", "Email") => "$\"klant{index + 1}@voorbeeld.nl\"",
+            _ => field.Type switch
+            {
+                DesignFieldType.Int => "random.Next(1, 1000)",
+                DesignFieldType.Decimal => "decimal.Round((decimal)(random.NextDouble() * 1000), 2)",
+                DesignFieldType.Bool => "random.NextDouble() > 0.5",
+                DesignFieldType.DateTime => "DateTime.Today.AddDays(-random.Next(0, 60))",
+                DesignFieldType.Enum => field.EnumValues.Count > 0
+                    ? $"Pick(random, new[] {{ {string.Join(", ", field.EnumValues.Select(static value => $"\"{value}\""))} }})"
+                    : "string.Empty",
+                _ => "$\"Waarde {index + 1}\""
+            }
         };
 
     private static string ToCamelCase(string value)

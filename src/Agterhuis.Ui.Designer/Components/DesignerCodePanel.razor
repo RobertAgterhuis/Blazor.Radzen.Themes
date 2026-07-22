@@ -1,9 +1,14 @@
 @using System.Text.Json
 @using Agterhuis.Ui.Designer.Model
 @using Agterhuis.Ui.Designer.CodeGen
+@using Agterhuis.Ui.Designer.Registry
 @using Agterhuis.Ui.Designer.Serialization
 @using Agterhuis.Ui.Designer.Validation
 @using Microsoft.JSInterop
+@using System.Globalization
+@using System.Net
+@using System.Text.Json.Nodes
+@using System.Text.RegularExpressions
 @namespace Agterhuis.Ui.Designer.Components
 
 <div class="agt-designer-code-panel">
@@ -24,6 +29,16 @@
         @if (CurrentTab == "code")
         {
             <div class="agt-code-preview">
+                <p class="agt-code-preview__hint">Razor editor is bewerkbaar. Wijzigingen worden als JSON-apply verwerkt.</p>
+                @if (CodeDiagnostics.Count > 0)
+                {
+                    <ul class="agt-validation-error" role="status" aria-live="polite">
+                        @foreach (var diagnostic in CodeDiagnostics)
+                        {
+                            <li>Lijn @diagnostic.Line: @diagnostic.Message</li>
+                        }
+                    </ul>
+                }
                 <div class="agt-code-monaco-host" @ref="_codeHost" hidden="@(!_monacoCodeReady)"></div>
                 @if (!_monacoCodeReady)
                 {
@@ -90,6 +105,9 @@
     [Parameter]
     public bool EnableMonaco { get; set; } = true;
 
+    [Parameter]
+    public DesignerComponentRegistry Registry { get; set; } = DesignerComponentRegistry.Instance;
+
     [Inject]
     public IJSRuntime JS { get; set; } = default!;
 
@@ -108,6 +126,7 @@
     private bool _monacoCodeReady;
     private bool _monacoModelReady;
     private DotNetObjectReference<DesignerCodePanel>? _componentRef;
+    private IReadOnlyList<CodeDiagnostic> CodeDiagnostics { get; set; } = [];
 
     protected override void OnInitialized()
     {
@@ -317,24 +336,57 @@
     private sealed record PreviewLine(string Text, bool IsHighlighted);
 
     /// <summary>
-    /// Called by JavaScript when user edits code in Monaco (debounced 500ms).
-    /// Parses the Razor code and syncs changes back to the design model.
+    /// Monaco code editor callback. Applies edits by mapping code text to model JSON.
     /// </summary>
     [JSInvokable]
     public async Task OnCodeEditorChanged(string code)
     {
-        if (string.Equals(GeneratedCode, code, StringComparison.Ordinal))
+        if (string.IsNullOrWhiteSpace(code) || string.Equals(code, GeneratedCode, StringComparison.Ordinal))
         {
-            return; // No actual change
+            return;
         }
 
-        GeneratedCode = code;
-        RefreshGeneratedCode();
-        StateHasChanged();
+        if (Document is null)
+        {
+            return;
+        }
 
-        // In a real implementation, this would parse the code and update the model.
-        // For now, just sync the preview.
-        await Task.CompletedTask;
+        var parseResult = ParseNodeAttributes(code);
+        CodeDiagnostics = parseResult.Diagnostics;
+        await JS.InvokeVoidAsync("designerInterop.setCodeDiagnostics", parseResult.Diagnostics.Select(ToMonacoDiagnosticPayload).ToArray());
+
+        if (parseResult.NodeAttributes.Count == 0)
+        {
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
+        var cloned = CloneDocument(Document);
+        if (cloned is null || ActivePageIndex < 0 || ActivePageIndex >= cloned.Pages.Count)
+        {
+            return;
+        }
+
+        var changed = ApplyParsedAttributesToPage(cloned.Pages[ActivePageIndex], parseResult.NodeAttributes);
+        if (!changed)
+        {
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
+        cloned = DesignDocumentMigrator.Migrate(cloned);
+        var validationErrors = DesignDocumentValidator.Validate(cloned);
+        if (validationErrors.Count > 0)
+        {
+            ModelValidationError = string.Join("; ", validationErrors.Select(error => $"{error.Path}: {error.Message}"));
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
+        ModelValidationError = null;
+        GeneratedCode = code;
+        await OnDocumentChanged.InvokeAsync(cloned);
+        await InvokeAsync(StateHasChanged);
     }
 
     /// <summary>
@@ -357,4 +409,226 @@
     {
         _componentRef?.Dispose();
     }
+
+    private static DesignDocument? CloneDocument(DesignDocument source)
+    {
+        var serialized = JsonSerializer.Serialize(source, DesignJsonOptions.Default);
+        return JsonSerializer.Deserialize<DesignDocument>(serialized, DesignJsonOptions.Default);
+    }
+
+    private static ParseResult ParseNodeAttributes(string code)
+    {
+        var result = new Dictionary<string, Dictionary<string, string>>(StringComparer.Ordinal);
+        var diagnostics = new List<CodeDiagnostic>();
+        var lines = code.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+        var markerRegex = new Regex("@\\*\\s*agt-node:(?<id>[A-Za-z0-9_-]+)\\s*\\*@", RegexOptions.Compiled);
+        var attrRegex = new Regex("@(?<name>[A-Za-z_][A-Za-z0-9_]*)=\"(?<value>(?:[^\"]|\"\")*)\"", RegexOptions.Compiled);
+        var slotStartRegex = new Regex("^\\s*<(?<slot>[A-Za-z_][A-Za-z0-9_]*)>\\s*$", RegexOptions.Compiled);
+        var slotEndRegex = new Regex("^\\s*</(?<slot>[A-Za-z_][A-Za-z0-9_]*)>\\s*$", RegexOptions.Compiled);
+
+        var slotStack = new Stack<(string Slot, int Line)>();
+
+        for (var index = 0; index < lines.Length; index++)
+        {
+            var slotStart = slotStartRegex.Match(lines[index]);
+            if (slotStart.Success)
+            {
+                slotStack.Push((slotStart.Groups["slot"].Value, index + 1));
+            }
+
+            var slotEnd = slotEndRegex.Match(lines[index]);
+            if (slotEnd.Success)
+            {
+                var endingSlot = slotEnd.Groups["slot"].Value;
+                if (slotStack.Count == 0)
+                {
+                    diagnostics.Add(new CodeDiagnostic(index + 1, $"Onverwachte slot-sluiting </{endingSlot}> zonder opening."));
+                }
+                else
+                {
+                    var opened = slotStack.Pop();
+                    if (!string.Equals(opened.Slot, endingSlot, StringComparison.Ordinal))
+                    {
+                        diagnostics.Add(new CodeDiagnostic(index + 1, $"Slot-sluiting </{endingSlot}> matcht niet met <{opened.Slot}> op lijn {opened.Line}."));
+                    }
+                }
+            }
+
+            if (lines[index].Contains("@code", StringComparison.Ordinal)
+                || lines[index].Contains("@if", StringComparison.Ordinal)
+                || lines[index].Contains("@foreach", StringComparison.Ordinal))
+            {
+                diagnostics.Add(new CodeDiagnostic(index + 1, "Deze Razor-constructie is niet roundtrippable naar het designmodel."));
+            }
+
+            var markerMatch = markerRegex.Match(lines[index]);
+            if (!markerMatch.Success)
+            {
+                continue;
+            }
+
+            var nodeId = markerMatch.Groups["id"].Value;
+            var tagStart = -1;
+            for (var lookahead = index + 1; lookahead < lines.Length; lookahead++)
+            {
+                var trimmed = lines[lookahead].TrimStart();
+                if (trimmed.StartsWith("<", StringComparison.Ordinal) && !trimmed.StartsWith("</", StringComparison.Ordinal))
+                {
+                    tagStart = lookahead;
+                    break;
+                }
+            }
+
+            if (tagStart < 0)
+            {
+                diagnostics.Add(new CodeDiagnostic(index + 1, "Node marker zonder volgende component-tag gevonden."));
+                continue;
+            }
+
+            var openingTagBuilder = new System.Text.StringBuilder();
+            var tagEnd = tagStart;
+            for (; tagEnd < lines.Length; tagEnd++)
+            {
+                openingTagBuilder.AppendLine(lines[tagEnd]);
+                if (lines[tagEnd].Contains('>'))
+                {
+                    break;
+                }
+            }
+
+            var openingTag = openingTagBuilder.ToString();
+            var attributes = new Dictionary<string, string>(StringComparer.Ordinal);
+            foreach (Match attrMatch in attrRegex.Matches(openingTag))
+            {
+                var name = attrMatch.Groups["name"].Value;
+                var rawValue = attrMatch.Groups["value"].Value;
+                attributes[name] = WebUtility.HtmlDecode(rawValue);
+            }
+
+            if (attributes.Count > 0)
+            {
+                result[nodeId] = attributes;
+            }
+            else
+            {
+                diagnostics.Add(new CodeDiagnostic(tagStart + 1, $"Geen parsebare parameters gevonden voor node '{nodeId}'."));
+            }
+
+            index = tagEnd;
+        }
+
+        foreach (var unclosed in slotStack)
+        {
+            diagnostics.Add(new CodeDiagnostic(unclosed.Line, $"Niet-gesloten slot <{unclosed.Slot}>."));
+        }
+
+        return new ParseResult(result, diagnostics.OrderBy(static item => item.Line).ToArray());
+    }
+
+    private bool ApplyParsedAttributesToPage(DesignPage page, IReadOnlyDictionary<string, Dictionary<string, string>> parsedNodeAttributes)
+    {
+        var changed = false;
+        foreach (var root in page.Nodes)
+        {
+            changed |= ApplyParsedAttributesToNodeRecursive(root, parsedNodeAttributes);
+        }
+
+        return changed;
+    }
+
+    private bool ApplyParsedAttributesToNodeRecursive(DesignNode node, IReadOnlyDictionary<string, Dictionary<string, string>> parsedNodeAttributes)
+    {
+        var changed = false;
+        if (parsedNodeAttributes.TryGetValue(node.Id, out var attributes)
+            && Registry.TryGetDescriptor(node.ComponentType, out var descriptor))
+        {
+            foreach (var parameter in descriptor.Parameters)
+            {
+                if (!attributes.TryGetValue(parameter.Name, out var parsedText))
+                {
+                    continue;
+                }
+
+                var oldValue = node.Parameters.TryGetValue(parameter.Name, out var existingValue)
+                    ? existingValue?.Literal?.ToJsonString() ?? existingValue?.Expression
+                    : null;
+
+                var nextValue = ConvertParsedTextToParameterValue(parsedText, parameter.ParameterType, existingValue);
+                var nextSerialized = nextValue.Literal?.ToJsonString() ?? nextValue.Expression;
+
+                if (!string.Equals(oldValue, nextSerialized, StringComparison.Ordinal))
+                {
+                    node.Parameters[parameter.Name] = nextValue;
+                    changed = true;
+                }
+            }
+        }
+
+        foreach (var children in node.Children.Values)
+        {
+            foreach (var child in children)
+            {
+                changed |= ApplyParsedAttributesToNodeRecursive(child, parsedNodeAttributes);
+            }
+        }
+
+        return changed;
+    }
+
+    private static DesignParameterValue ConvertParsedTextToParameterValue(string parsedText, Type parameterType, DesignParameterValue? existing)
+    {
+        if (parameterType == typeof(bool))
+        {
+            return DesignParameterValue.FromValue(string.Equals(parsedText, "true", StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (parameterType == typeof(int) && int.TryParse(parsedText, out var intValue))
+        {
+            return DesignParameterValue.FromValue(intValue);
+        }
+
+        if (parameterType == typeof(decimal) && decimal.TryParse(parsedText, NumberStyles.Any, CultureInfo.InvariantCulture, out var decimalValue))
+        {
+            return DesignParameterValue.FromValue(decimalValue);
+        }
+
+        if (parameterType == typeof(double) && double.TryParse(parsedText, NumberStyles.Any, CultureInfo.InvariantCulture, out var doubleValue))
+        {
+            return DesignParameterValue.FromValue(doubleValue);
+        }
+
+        if (existing?.Literal is JsonValue existingLiteral)
+        {
+            if (existingLiteral.TryGetValue<bool>(out _))
+            {
+                return DesignParameterValue.FromValue(string.Equals(parsedText, "true", StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (existingLiteral.TryGetValue<int>(out _) && int.TryParse(parsedText, out var parsedInt))
+            {
+                return DesignParameterValue.FromValue(parsedInt);
+            }
+
+            if (existingLiteral.TryGetValue<decimal>(out _) && decimal.TryParse(parsedText, NumberStyles.Any, CultureInfo.InvariantCulture, out var parsedDecimal))
+            {
+                return DesignParameterValue.FromValue(parsedDecimal);
+            }
+        }
+
+        return DesignParameterValue.FromValue(parsedText);
+    }
+
+    private static object ToMonacoDiagnosticPayload(CodeDiagnostic diagnostic)
+    {
+        return new
+        {
+            line = diagnostic.Line,
+            message = diagnostic.Message,
+            severity = 2
+        };
+    }
+
+    private sealed record ParseResult(IReadOnlyDictionary<string, Dictionary<string, string>> NodeAttributes, IReadOnlyList<CodeDiagnostic> Diagnostics);
+
+    private sealed record CodeDiagnostic(int Line, string Message);
 }

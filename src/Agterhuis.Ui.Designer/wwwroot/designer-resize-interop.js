@@ -4,7 +4,7 @@ export const setupResizablePanels = () => {
   const CONFIG = {
     'palette-canvas': { dir: 'vertical', min: 150, max: 400, def: 220, prop: 'palette-width', invert: false },
     'canvas-property': { dir: 'vertical', min: 200, max: 500, def: 320, prop: 'property-width', invert: true },
-    'canvas-code': { dir: 'horizontal', min: 100, maxPct: 0.6, def: 250, prop: 'code-height', invert: false }
+    'canvas-code': { dir: 'horizontal', min: 120, def: 250, prop: 'code-height', invert: true }
   };
 
   const designerLayout = document.querySelector('.designer-page');
@@ -71,9 +71,7 @@ export const setupResizablePanels = () => {
     const startPos = isHorizontal ? event.clientY : event.clientX;
     const currentSize = parseInt(designerLayout.style.getPropertyValue(varName), 10);
     const startSize = Number.isFinite(currentSize) ? currentSize : cfg.def;
-    const maxSize = cfg.maxPct ? Math.round(window.innerHeight * cfg.maxPct) : cfg.max;
-      const minPanel = Math.max(160, cfg.min ?? 160);
-      const maxPanel = Math.max(minPanel, Math.min(600, maxSize ?? 600));
+    const minPanel = Math.max(120, cfg.min ?? 120);
 
     const overlay = document.createElement('div');
     overlay.style.cssText = `position:fixed;inset:0;z-index:10000;cursor:${isHorizontal ? 'row-resize' : 'col-resize'}`;
@@ -83,7 +81,7 @@ export const setupResizablePanels = () => {
     const onMove = (moveEvent) => {
       const delta = isHorizontal ? moveEvent.clientY - startPos : moveEvent.clientX - startPos;
       const adjusted = cfg.invert ? startSize - delta : startSize + delta;
-        const clamped = Math.max(minPanel, Math.min(maxPanel, adjusted));
+      const clamped = Math.max(minPanel, adjusted);
       designerLayout.style.setProperty(varName, `${clamped}px`);
     };
 

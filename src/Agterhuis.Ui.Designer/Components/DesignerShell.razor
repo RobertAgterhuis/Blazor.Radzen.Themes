@@ -47,7 +47,7 @@
             </div>
         }
 
-        @if (_fileMenuOpen || _settingsMenuOpen || _pageMenuIndex is not null)
+        @if (_fileMenuOpen || _settingsMenuOpen || _pageMenuIndex is not null || _pageAddMenuOpen)
         {
             <div class="designer-menu-backdrop" @onclick="CloseAllMenus"></div>
         }
@@ -66,7 +66,7 @@
                         </label>
                         <div class="designer-menu__row">
                             <label for="designer-saved-docs">Open opgeslagen</label>
-                            <RadzenDropDown id="designer-saved-docs" TValue="string" Data="SavedDocumentNames" Value="@_selectedSavedName" Placeholder="Selecteer" Change="OnSavedSelectionChanged" />
+                            <RadzenDropDown id="designer-saved-docs" TValue="string" Data="SavedDocumentNames" Value="@_selectedSavedName" Placeholder="Selecteer" ValueChanged="@(async (string v) => await OnSavedSelectionChanged(v))" />
                         </div>
                         <button type="button" class="designer-menu__item" role="menuitem" @onclick="OnSaveDocument">Opslaan</button>
                         <button type="button" class="designer-menu__item" role="menuitem" @onclick="OpenVersionHistoryAsync">Versiegeschiedenis</button>
@@ -139,15 +139,26 @@
                     </button>
                 </div>
 
+                <div class="designer-toolbar__theme" role="group" aria-label="Thema">
+                    <RadzenDropDown TValue="string"
+                                    Data="CanvasThemeOptions"
+                                    Value="@_canvasTheme"
+                                    ValueChanged="@(async (string v) => await OnCanvasThemeChanged(v))"
+                                    Style="min-width: 150px;"
+                                    Placeholder="Thema" />
+                    <button type="button"
+                            class="designer-toolbar__darkmode"
+                            title="@(_canvasTheme.EndsWith("-dark", StringComparison.OrdinalIgnoreCase) ? "Licht thema" : "Donker thema")"
+                            aria-label="@(_canvasTheme.EndsWith("-dark", StringComparison.OrdinalIgnoreCase) ? "Licht thema" : "Donker thema")"
+                            @onclick="ToggleDarkLight">
+                        <RadzenIcon Icon="@(_canvasTheme.EndsWith("-dark", StringComparison.OrdinalIgnoreCase) ? "light_mode" : "dark_mode")" />
+                    </button>
+                </div>
+
                 <button type="button" class="designer-menu-toggle" aria-expanded="@_settingsMenuOpen" @onclick="ToggleSettingsMenu" disabled="@_previewMode">Instellingen</button>
                 @if (_settingsMenuOpen)
                 {
                     <div class="designer-menu" role="menu" aria-label="Instellingen">
-                        <div class="designer-menu__row">
-                            <label for="designer-theme-setting">Thema</label>
-                            <RadzenDropDown id="designer-theme-setting" TValue="string" Data="CanvasThemeOptions" Value="@_canvasTheme" Change="OnCanvasThemeChanged" />
-                        </div>
-                        <hr class="designer-menu__divider" />
                         <button type="button" class="designer-menu__item" role="menuitem" @onclick="ToggleShortcutsOverlay">Sneltoetsen</button>
                         <button type="button" class="designer-menu__item" role="menuitem" @onclick="OpenDesignerCommandPaletteAsync">Zoeken (Ctrl+K)</button>
                     </div>
@@ -170,11 +181,12 @@
                     }
                     else
                     {
-                        <div class="designer-page-tab @(isActive ? "designer-page-tab--active" : null)"
+                            <div class="designer-page-tab @(isActive ? "designer-page-tab--active" : null) @(_pageDragOverIndex == pageIndex ? "designer-page-tab--drag-over" : null)"
                              draggable="true"
                              @ondragstart="() => OnPageDragStart(pageIndex)"
-                             @ondragover="OnPageDragOver"
+                                @ondragover="args => OnPageDragOver(pageIndex, args)"
                                 @ondragover:preventDefault="true"
+                                @ondragleave="() => OnPageDragLeave(pageIndex)"
                              @ondrop="() => OnPageDropAsync(pageIndex)"
                              @ondragend="OnPageDragEnd">
                                 <button type="button" class="designer-page-tab__button" @onclick="() => SelectPage(pageIndex)" title="@(page.Route)">@GetPageLabel(page)</button>
@@ -205,7 +217,19 @@
             </div>
             @if (!_previewMode)
             {
-                <RadzenButton class="designer-page-tabs__add" Text="+" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Flat" Click="OnAddPageAsync" />
+                <div class="designer-page-tabs__add-wrap">
+                    <RadzenButton class="designer-page-tabs__add" Text="+" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Flat" Click="TogglePageAddMenu" />
+                    @if (_pageAddMenuOpen)
+                    {
+                        <div class="designer-page-tabs__add-menu" role="menu" aria-label="Pagina toevoegen">
+                            <button type="button" class="designer-page-tabs__add-item" role="menuitem" @onclick="OnAddPageAsync">Lege pagina</button>
+                            @foreach (var template in AddPageTemplateOptions)
+                            {
+                                <button type="button" class="designer-page-tabs__add-item" role="menuitem" @onclick="() => OnAddPageFromTemplateAsync(template.Kind)">@template.DisplayName</button>
+                            }
+                        </div>
+                    }
+                </div>
             }
         </section>
 
@@ -214,8 +238,11 @@
             {
                 <section class="designer-panel designer-panel--canvas designer-panel--preview" aria-label="Preview canvas">
                     <div class="designer-canvas-frame @CanvasFrameClass" style="@CanvasFrameStyle">
-                        <div class="designer-canvas" data-agt-theme="@_canvasTheme">
-                            <DesignRenderer Page="@ActivePage" Registry="@Registry" />
+                        <div class="designer-canvas designer-canvas-scope" data-agt-theme="@_canvasTheme">
+                            <DesignPreviewRenderer Page="@ActivePage"
+                                                   Registry="@Registry"
+                                                   DataContext="@_designDataContext"
+                                                   OnNavigate="OnPreviewNavigate" />
                         </div>
                     </div>
                 </section>
@@ -373,133 +400,156 @@
                             }
                         }
                     </div>
-                    <div class="designer-canvas-frame @CanvasFrameClass" style="@CanvasFrameStyle">
-                        <div class="designer-canvas" data-agt-theme="@_canvasTheme" @ref="_canvasRef">
-                            @if (ActivePage.Nodes.Count == 0)
-                            {
-                                <div class="designer-canvas-empty">
-                                    <div class="designer-canvas-empty__hero">
-                                        <RadzenIcon Icon="dashboard_customize" />
-                                        <h2>Ontwerp je pagina</h2>
-                                        <p>Kies een startpunt of sleep componenten uit het palet links.</p>
-                                    </div>
-                                    <div class="designer-canvas-empty__templates">
-                                        <button type="button" class="designer-canvas-empty__template" @onclick='() => OnTemplateStartSelected(DesignDocumentTemplateKind.FormPage)'>
-                                            <div class="designer-canvas-empty__template-preview">
-                                                <div class="designer-canvas-empty__template-line" style="width:60%;"></div>
-                                                <div class="designer-canvas-empty__template-line" style="width:100%;"></div>
-                                                <div class="designer-canvas-empty__template-line" style="width:100%;"></div>
-                                                <div class="designer-canvas-empty__template-line designer-canvas-empty__template-line--button" style="width:30%;"></div>
+                    <div class="designer-canvas-workspace">
+                        <div class="designer-canvas-frame @CanvasFrameClass" style="@CanvasFrameStyle">
+                            <div class="designer-canvas designer-canvas-scope" data-agt-theme="@_canvasTheme" @ref="_canvasRef">
+                                <CascadingValue Value="@_designDataContext" IsFixed="false">
+                                    @if (ActivePage.Nodes.Count == 0)
+                                    {
+                                        <div class="designer-canvas-empty">
+                                            <div class="designer-canvas-empty__hero">
+                                                <RadzenIcon Icon="dashboard_customize" />
+                                                <h2>Ontwerp je pagina</h2>
+                                                <p>Kies een startpunt of sleep componenten uit het palet links.</p>
                                             </div>
-                                            <span>Formulier</span>
-                                        </button>
-                                        <button type="button" class="designer-canvas-empty__template" @onclick='() => OnTemplateStartSelected(DesignDocumentTemplateKind.Dashboard)'>
-                                            <div class="designer-canvas-empty__template-preview">
-                                                <div class="designer-canvas-empty__template-row">
-                                                    <div class="designer-canvas-empty__template-card"></div>
-                                                    <div class="designer-canvas-empty__template-card"></div>
-                                                    <div class="designer-canvas-empty__template-card"></div>
-                                                </div>
-                                                <div class="designer-canvas-empty__template-chart"></div>
+                                            <div class="designer-canvas-empty__templates">
+                                                <button type="button" class="designer-canvas-empty__template" @onclick='() => OnTemplateStartSelected(DesignDocumentTemplateKind.FormPage)'>
+                                                    <div class="designer-canvas-empty__template-preview">
+                                                        <div class="designer-canvas-empty__template-line" style="width:60%;"></div>
+                                                        <div class="designer-canvas-empty__template-line" style="width:100%;"></div>
+                                                        <div class="designer-canvas-empty__template-line" style="width:100%;"></div>
+                                                        <div class="designer-canvas-empty__template-line designer-canvas-empty__template-line--button" style="width:30%;"></div>
+                                                    </div>
+                                                    <span>Formulier</span>
+                                                </button>
+                                                <button type="button" class="designer-canvas-empty__template" @onclick='() => OnTemplateStartSelected(DesignDocumentTemplateKind.Dashboard)'>
+                                                    <div class="designer-canvas-empty__template-preview">
+                                                        <div class="designer-canvas-empty__template-row">
+                                                            <div class="designer-canvas-empty__template-card"></div>
+                                                            <div class="designer-canvas-empty__template-card"></div>
+                                                            <div class="designer-canvas-empty__template-card"></div>
+                                                        </div>
+                                                        <div class="designer-canvas-empty__template-chart"></div>
+                                                    </div>
+                                                    <span>Dashboard</span>
+                                                </button>
+                                                <button type="button" class="designer-canvas-empty__template" @onclick='() => OnTemplateStartSelected(DesignDocumentTemplateKind.Blank)'>
+                                                    <div class="designer-canvas-empty__template-preview designer-canvas-empty__template-preview--blank">
+                                                        <RadzenIcon Icon="add" />
+                                                    </div>
+                                                    <span>Leeg</span>
+                                                </button>
                                             </div>
-                                            <span>Dashboard</span>
-                                        </button>
-                                        <button type="button" class="designer-canvas-empty__template" @onclick='() => OnTemplateStartSelected(DesignDocumentTemplateKind.Blank)'>
-                                            <div class="designer-canvas-empty__template-preview designer-canvas-empty__template-preview--blank">
-                                                <RadzenIcon Icon="add" />
-                                            </div>
-                                            <span>Leeg</span>
-                                        </button>
-                                    </div>
-                                    <p class="designer-canvas-empty__hint">Of druk <kbd>Ctrl+K</kbd> om een component te zoeken</p>
-                                </div>
-                            }
-                            else
-                            {
-                                <div class="@GetRootDropzoneClass(ActivePage.Nodes.Count)"
-                                     @ondragenter='() => OnDropZoneDragEnter($"root-{ActivePage.Nodes.Count}")'
-                                     @ondragleave='() => OnDropZoneDragLeave($"root-{ActivePage.Nodes.Count}")'
-                                     @ondragover='args => OnDropZoneDragOver(args, $"root-{ActivePage.Nodes.Count}")'
-                                      @ondragover:preventDefault="true"
-                                     @ondrop='() => OnDropRequested(new DesignerDropTarget(DesignNodeLocation.Root(ActivePage.Nodes.Count)), $"root-{ActivePage.Nodes.Count}")'
-                                     title="Drop op canvas"></div>
-                                @for (var index = 0; index < ActivePage.Nodes.Count; index++)
-                                {
-                                    var node = ActivePage.Nodes[index];
-                                    <DesignerCanvasNode Node="node"
-                                                       Registry="@Registry"
-                                                       SelectedNodeId="@_selectedNodeId"
-                                                       SelectedNodeIds="@_selectedNodeIds"
-                                                       HoveredNodeId="@_hoveredNodeId"
-                                                       HoverNodeChanged="OnTreeNodeHover"
-                                                       SelectNode="OnSelectNode"
-                                                       SelectNodeExtended="OnSelectNode"
-                                                       StartDrag="OnDragStart"
-                                                       EndDrag="OnDragEnd"
-                                                       DropNode="OnDropRequested"
-                                                       AddNodeRequested="OnInlineAddRequested"
-                                                       MoveNodeUp="OnMoveNodeUp"
-                                                       MoveNodeDown="OnMoveNodeDown"
-                                                       DuplicateNode="OnDuplicateNode"
-                                                       DeleteNode="OnDeleteNode"
-                                                       InlineEditCommitted="OnInlineEditCommitted"
-                                                       NodeQuickParameterChanged="OnInlineEditCommitted"
-                                                       IsDragActive="IsDragActive"
-                                                       HoverDropzoneId="@_hoverDropzoneId"
-                                                       DropzoneDragEnter="OnDropZoneDragEnter"
-                                                       DropzoneDragLeave="OnDropZoneDragLeave" />
-                                    <div class="@GetRootDropzoneClass(index + 1)"
-                                         @ondragenter='() => OnDropZoneDragEnter($"root-{index + 1}")'
-                                         @ondragleave='() => OnDropZoneDragLeave($"root-{index + 1}")'
-                                         @ondragover='args => OnDropZoneDragOver(args, $"root-{index + 1}")'
-                                         @ondragover:preventDefault="true"
-                                         @ondrop='() => OnDropRequested(new DesignerDropTarget(DesignNodeLocation.Root(index + 1)), $"root-{index + 1}")'
-                                         title="Drop op canvas"></div>
-                                }
+                                            <p class="designer-canvas-empty__hint">Of druk <kbd>Ctrl+K</kbd> om een component te zoeken</p>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="@GetRootDropzoneClass(ActivePage.Nodes.Count)"
+                                             @ondragenter='() => OnDropZoneDragEnter($"root-{ActivePage.Nodes.Count}")'
+                                             @ondragleave='() => OnDropZoneDragLeave($"root-{ActivePage.Nodes.Count}")'
+                                             @ondragover='args => OnDropZoneDragOver(args, $"root-{ActivePage.Nodes.Count}")'
+                                             @ondragover:preventDefault="true"
+                                             @ondrop='() => OnDropRequested(new DesignerDropTarget(DesignNodeLocation.Root(ActivePage.Nodes.Count)), $"root-{ActivePage.Nodes.Count}")'
+                                             title="Drop op canvas"></div>
+                                        @for (var index = 0; index < ActivePage.Nodes.Count; index++)
+                                        {
+                                            var node = ActivePage.Nodes[index];
+                                            <DesignerCanvasNode Node="node"
+                                                               Registry="@Registry"
+                                                               SelectedNodeId="@_selectedNodeId"
+                                                               SelectedNodeIds="@_selectedNodeIds"
+                                                               HoveredNodeId="@_hoveredNodeId"
+                                                               HoverNodeChanged="OnTreeNodeHover"
+                                                               SelectNode="OnSelectNode"
+                                                               SelectNodeExtended="OnSelectNode"
+                                                               StartDrag="OnDragStart"
+                                                               EndDrag="OnDragEnd"
+                                                               DropNode="OnDropRequested"
+                                                               AddNodeRequested="OnInlineAddRequested"
+                                                               MoveNodeUp="OnMoveNodeUp"
+                                                               MoveNodeDown="OnMoveNodeDown"
+                                                               DuplicateNode="OnDuplicateNode"
+                                                               DeleteNode="OnDeleteNode"
+                                                               InlineEditCommitted="OnInlineEditCommitted"
+                                                               NodeQuickParameterChanged="OnInlineEditCommitted"
+                                                               IsDragActive="IsDragActive"
+                                                               HoverDropzoneId="@_hoverDropzoneId"
+                                                               DropzoneDragEnter="OnDropZoneDragEnter"
+                                                               DropzoneDragLeave="OnDropZoneDragLeave" />
+                                            <div class="@GetRootDropzoneClass(index + 1)"
+                                                 @ondragenter='() => OnDropZoneDragEnter($"root-{index + 1}")'
+                                                 @ondragleave='() => OnDropZoneDragLeave($"root-{index + 1}")'
+                                                 @ondragover='args => OnDropZoneDragOver(args, $"root-{index + 1}")'
+                                                 @ondragover:preventDefault="true"
+                                                 @ondrop='() => OnDropRequested(new DesignerDropTarget(DesignNodeLocation.Root(index + 1)), $"root-{index + 1}")'
+                                                 title="Drop op canvas"></div>
+                                        }
 
-                                <div class="designer-layout-presets">
-                                    <span class="designer-layout-presets__label">Rij toevoegen</span>
-                                    <div class="designer-layout-presets__grid">
-                                        <button type="button" class="designer-layout-preset" title="1 kolom (12)" @onclick='() => AddRowLayoutPreset("12")'>
-                                            <div class="designer-layout-preset__preview">
-                                                <div class="designer-layout-preset__col" style="flex:1;"></div>
+                                        <div class="designer-layout-presets">
+                                            <span class="designer-layout-presets__label">Rij toevoegen</span>
+                                            <div class="designer-layout-presets__grid">
+                                                <button type="button" class="designer-layout-preset" title="1 kolom (12)" @onclick='() => AddRowLayoutPreset("12")'>
+                                                    <div class="designer-layout-preset__preview">
+                                                        <div class="designer-layout-preset__col" style="flex:1;"></div>
+                                                    </div>
+                                                    <span>1 kolom</span>
+                                                </button>
+                                                <button type="button" class="designer-layout-preset" title="2 kolommen (6+6)" @onclick='() => AddRowLayoutPreset("6+6")'>
+                                                    <div class="designer-layout-preset__preview">
+                                                        <div class="designer-layout-preset__col" style="flex:1;"></div>
+                                                        <div class="designer-layout-preset__col" style="flex:1;"></div>
+                                                    </div>
+                                                    <span>2 kolommen</span>
+                                                </button>
+                                                <button type="button" class="designer-layout-preset" title="3 kolommen (4+4+4)" @onclick='() => AddRowLayoutPreset("4+4+4")'>
+                                                    <div class="designer-layout-preset__preview">
+                                                        <div class="designer-layout-preset__col" style="flex:1;"></div>
+                                                        <div class="designer-layout-preset__col" style="flex:1;"></div>
+                                                        <div class="designer-layout-preset__col" style="flex:1;"></div>
+                                                    </div>
+                                                    <span>3 kolommen</span>
+                                                </button>
+                                                <button type="button" class="designer-layout-preset" title="Zijbalk + hoofd (4+8)" @onclick='() => AddRowLayoutPreset("4+8")'>
+                                                    <div class="designer-layout-preset__preview">
+                                                        <div class="designer-layout-preset__col" style="flex:1;"></div>
+                                                        <div class="designer-layout-preset__col" style="flex:2;"></div>
+                                                    </div>
+                                                    <span>Zijbalk + hoofd</span>
+                                                </button>
+                                                <button type="button" class="designer-layout-preset" title="Hoofd + zijbalk (8+4)" @onclick='() => AddRowLayoutPreset("8+4")'>
+                                                    <div class="designer-layout-preset__preview">
+                                                        <div class="designer-layout-preset__col" style="flex:2;"></div>
+                                                        <div class="designer-layout-preset__col" style="flex:1;"></div>
+                                                    </div>
+                                                    <span>Hoofd + zijbalk</span>
+                                                </button>
                                             </div>
-                                            <span>1 kolom</span>
-                                        </button>
-                                        <button type="button" class="designer-layout-preset" title="2 kolommen (6+6)" @onclick='() => AddRowLayoutPreset("6+6")'>
-                                            <div class="designer-layout-preset__preview">
-                                                <div class="designer-layout-preset__col" style="flex:1;"></div>
-                                                <div class="designer-layout-preset__col" style="flex:1;"></div>
-                                            </div>
-                                            <span>2 kolommen</span>
-                                        </button>
-                                        <button type="button" class="designer-layout-preset" title="3 kolommen (4+4+4)" @onclick='() => AddRowLayoutPreset("4+4+4")'>
-                                            <div class="designer-layout-preset__preview">
-                                                <div class="designer-layout-preset__col" style="flex:1;"></div>
-                                                <div class="designer-layout-preset__col" style="flex:1;"></div>
-                                                <div class="designer-layout-preset__col" style="flex:1;"></div>
-                                            </div>
-                                            <span>3 kolommen</span>
-                                        </button>
-                                        <button type="button" class="designer-layout-preset" title="Zijbalk + hoofd (4+8)" @onclick='() => AddRowLayoutPreset("4+8")'>
-                                            <div class="designer-layout-preset__preview">
-                                                <div class="designer-layout-preset__col" style="flex:1;"></div>
-                                                <div class="designer-layout-preset__col" style="flex:2;"></div>
-                                            </div>
-                                            <span>Zijbalk + hoofd</span>
-                                        </button>
-                                        <button type="button" class="designer-layout-preset" title="Hoofd + zijbalk (8+4)" @onclick='() => AddRowLayoutPreset("8+4")'>
-                                            <div class="designer-layout-preset__preview">
-                                                <div class="designer-layout-preset__col" style="flex:2;"></div>
-                                                <div class="designer-layout-preset__col" style="flex:1;"></div>
-                                            </div>
-                                            <span>Hoofd + zijbalk</span>
-                                        </button>
-                                    </div>
-                                </div>
-                            }
+                                        </div>
+                                    }
+                                </CascadingValue>
+                            </div>
                         </div>
                     </div>
+
+                    @if (!_codeCollapsed)
+                    {
+                        <div class="designer-divider designer-divider--horizontal designer-divider--canvas-code" data-divider="canvas-code" aria-label="Resize code panel"></div>
+                    }
+
+                    <section class="designer-panel designer-panel--code designer-panel--code-inline @(_codeCollapsed ? "designer-panel--collapsed" : string.Empty)" aria-label="Code en model">
+                        <div class="designer-panel__header">
+                            <h2>Code</h2>
+                            <button type="button" class="designer-panel__toggle" aria-expanded="@(!_codeCollapsed)" @onclick="ToggleCodeCollapsed">
+                                <RadzenIcon Icon="@(_codeCollapsed ? "expand_less" : "expand_more")" />
+                            </button>
+                        </div>
+
+                        @if (!_codeCollapsed)
+                        {
+                            <DesignerCodePanel CurrentPage="@ActivePage" ActivePageIndex="@ActivePageIndex" Document="@_commands.Document" SelectedNodeId="@_selectedNodeId" Registry="@Registry" OnDocumentChanged="OnDocumentChanged" />
+                        }
+                    </section>
                 </section>
 
                 <div class="designer-divider designer-divider--vertical" data-divider="canvas-property" aria-label="Resize properties"></div>
@@ -550,28 +600,6 @@
                 </aside>
             }
         </div>
-
-        @if (!_previewMode)
-        {
-            @if (!_codeCollapsed)
-            {
-                <div class="designer-divider designer-divider--horizontal" data-divider="canvas-code" aria-label="Resize code panel"></div>
-            }
-
-            <section class="designer-panel designer-panel--code @(_codeCollapsed ? "designer-panel--collapsed" : string.Empty)" aria-label="Code en model">
-                <div class="designer-panel__header">
-                    <h2>Code</h2>
-                    <button type="button" class="designer-panel__toggle" aria-expanded="@(!_codeCollapsed)" @onclick="ToggleCodeCollapsed">
-                        <RadzenIcon Icon="@(_codeCollapsed ? "expand_less" : "expand_more")" />
-                    </button>
-                </div>
-
-                @if (!_codeCollapsed)
-                {
-                    <DesignerCodePanel CurrentPage="@ActivePage" ActivePageIndex="@ActivePageIndex" Document="@_commands.Document" SelectedNodeId="@_selectedNodeId" OnDocumentChanged="OnDocumentChanged" />
-                }
-            </section>
-        }
 
         <div class="designer-toasts" aria-live="polite" aria-atomic="true">
             @foreach (var toast in _toasts)
@@ -743,6 +771,16 @@
                         <p><strong>Entiteiten:</strong> @(UsedEntities.Count == 0 ? "Geen" : string.Join(", ", UsedEntities))</p>
                         <p><strong>Thema:</strong> @_canvasTheme</p>
                         <p><strong>Issues:</strong> @ErrorCount fouten, @WarningCount waarschuwingen, @InfoCount info</p>
+                    </div>
+                    <div class="designer-export-options">
+                        <AgtSwitch Label="Seeded data meegeven"
+                                   Value="@_exportIncludeSeedData"
+                                   ValueChanged="OnExportIncludeSeedDataChanged"
+                                   AriaLabel="Seeded data meegeven" />
+                        <p class="designer-export__hint">
+                            Wanneer ingeschakeld bevat het geexporteerde project realistische voorbeelddata.
+                            De ontwikkelaar kan dit later wijzigen via <code>appsettings.json</code>.
+                        </p>
                     </div>
                     <p>Dit pakket bevat een Blazor-project met de ontworpen pagina's. Open het in Visual Studio of VS Code met <code>dotnet run</code>.</p>
                     <div class="designer-modal__actions">

@@ -191,6 +191,8 @@ window.designerInterop = (() => {
     let codeEditor = null;
     let jsonEditor = null;
     let codeEditorChangeTimeout = null;
+    let codeEditorSyncInProgress = false;
+    let jsonEditorSyncInProgress = false;
 
     const setupCodeEditors = async (dotnetRef, codeContainer, jsonContainer) => {
         const monaco = await ensureMonaco();
@@ -204,7 +206,19 @@ window.designerInterop = (() => {
                 automaticLayout: true,
                 tabSize: 2,
                 wordWrap: 'on',
-                readOnly: true
+                readOnly: false
+            });
+
+            codeEditor.onDidChangeModelContent(() => {
+                if (codeEditorSyncInProgress) {
+                    return;
+                }
+
+                clearTimeout(codeEditorChangeTimeout);
+                codeEditorChangeTimeout = setTimeout(() => {
+                    const code = codeEditor.getValue();
+                    dotnetRef.invokeMethodAsync('OnCodeEditorChanged', code);
+                }, 500);
             });
         }
 
@@ -222,6 +236,10 @@ window.designerInterop = (() => {
             });
 
             jsonEditor.onDidChangeModelContent(() => {
+                if (jsonEditorSyncInProgress) {
+                    return;
+                }
+
                 clearTimeout(codeEditorChangeTimeout);
                 codeEditorChangeTimeout = setTimeout(() => {
                     const json = jsonEditor.getValue();
@@ -235,7 +253,9 @@ window.designerInterop = (() => {
         if (codeEditor) {
             const current = codeEditor.getValue();
             if (current !== code) {
+                codeEditorSyncInProgress = true;
                 codeEditor.setValue(code);
+                codeEditorSyncInProgress = false;
             }
         }
     };
@@ -244,9 +264,34 @@ window.designerInterop = (() => {
         if (jsonEditor) {
             const current = jsonEditor.getValue();
             if (current !== json) {
+                jsonEditorSyncInProgress = true;
                 jsonEditor.setValue(json);
+                jsonEditorSyncInProgress = false;
             }
         }
+    };
+
+    const setCodeDiagnostics = async (diagnostics) => {
+        if (!codeEditor) {
+            return;
+        }
+
+        const monaco = await ensureMonaco();
+        const model = codeEditor.getModel();
+        if (!model) {
+            return;
+        }
+
+        const markers = (diagnostics || []).map((item) => ({
+            startLineNumber: Math.max(1, Number(item.line) || 1),
+            startColumn: 1,
+            endLineNumber: Math.max(1, Number(item.line) || 1),
+            endColumn: 120,
+            message: item.message || 'Onbekende parserfout',
+            severity: item.severity || monaco.MarkerSeverity.Warning
+        }));
+
+        monaco.editor.setModelMarkers(model, 'designer-code-parser', markers);
     };
 
     const switchCodeTab = (tabName) => {
@@ -373,6 +418,7 @@ window.designerInterop = (() => {
         setupCodeEditors,
         updateCodeEditor,
         updateJsonEditor,
+        setCodeDiagnostics,
         scrollTreeItemIntoView,
         switchCodeTab,
         setupResizablePanels

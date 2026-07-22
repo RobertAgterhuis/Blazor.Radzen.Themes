@@ -7,18 +7,30 @@
     </header>
 
     <section class="designer-startscreen__templates" aria-label="Templates">
-        @foreach (var option in ResolvedOptions)
+        @foreach (var group in GroupedOptions)
         {
-            <button type="button" class="designer-template-card" @onclick="() => OnTemplateSelected.InvokeAsync(option.Kind)">
-                <div class="designer-template-card__head">
-                    <RadzenIcon Icon="@option.Icon" />
-                    <h2>@option.Title</h2>
+            <section class="designer-startscreen__group" aria-label="@group.Key">
+                <h2 class="designer-startscreen__group-title">@group.Key</h2>
+                <div class="designer-startscreen__group-grid">
+                    @foreach (var option in group)
+                    {
+                        <button type="button" class="designer-template-card" @onclick="() => OnTemplateSelected.InvokeAsync(option.Kind)">
+                            <div class="designer-template-card__head">
+                                <RadzenIcon Icon="@option.Icon" />
+                                <h3>@option.Title</h3>
+                                @if (option.IsPopular)
+                                {
+                                    <span class="designer-template-card__badge">Populair</span>
+                                }
+                            </div>
+                            <p>@option.Description</p>
+                            <div class="designer-template-card__preview">
+                                <DesignRenderer Page="@option.PreviewPage" Registry="Registry" />
+                            </div>
+                        </button>
+                    }
                 </div>
-                <p>@option.Description</p>
-                <div class="designer-template-card__preview">
-                    <DesignRenderer Page="@option.PreviewPage" Registry="Registry" />
-                </div>
-            </button>
+            </section>
         }
     </section>
 
@@ -75,7 +87,14 @@
     public Agterhuis.Ui.Designer.Registry.DesignerComponentRegistry? Registry { get; set; }
 
     private IReadOnlyList<TemplateOption> ResolvedOptions => TemplateOptions
-        .OrderBy(static definition => definition.Kind == DesignDocumentTemplateKind.FormPage ? 0 : 1)
+        .OrderBy(static definition => definition.Kind switch
+        {
+            DesignDocumentTemplateKind.Blank or DesignDocumentTemplateKind.FormPage or DesignDocumentTemplateKind.ListCrud => 0,
+            DesignDocumentTemplateKind.MasterDetail or DesignDocumentTemplateKind.Wizard or DesignDocumentTemplateKind.Dashboard => 1,
+            DesignDocumentTemplateKind.SidebarApp or DesignDocumentTemplateKind.SettingsPage or DesignDocumentTemplateKind.DetailPage => 2,
+            DesignDocumentTemplateKind.KanbanBoard or DesignDocumentTemplateKind.LoginPage or DesignDocumentTemplateKind.TableWithFilters => 3,
+            _ => 4
+        })
         .Select(static definition =>
         {
             var previewDocument = DesignDocumentTemplates.Create(definition.Kind, "Preview");
@@ -84,8 +103,13 @@
                 GetIcon(definition.Kind),
                 GetTitle(definition.Kind),
                 GetDescription(definition.Kind, definition.Description),
+                IsPopular(definition.Kind),
                 previewDocument.Pages.First());
         })
+        .ToArray();
+
+    private IReadOnlyList<IGrouping<string, TemplateOption>> GroupedOptions => ResolvedOptions
+        .GroupBy(static option => GetGroupTitle(option.Kind), StringComparer.Ordinal)
         .ToArray();
 
     private static string GetIcon(DesignDocumentTemplateKind kind) => kind switch
@@ -96,6 +120,12 @@
         DesignDocumentTemplateKind.MasterDetail => "view_sidebar",
         DesignDocumentTemplateKind.Wizard => "assistant",
         DesignDocumentTemplateKind.Dashboard => "dashboard",
+        DesignDocumentTemplateKind.SidebarApp => "menu",
+        DesignDocumentTemplateKind.SettingsPage => "settings",
+        DesignDocumentTemplateKind.DetailPage => "description",
+        DesignDocumentTemplateKind.KanbanBoard => "view_kanban",
+        DesignDocumentTemplateKind.LoginPage => "login",
+        DesignDocumentTemplateKind.TableWithFilters => "filter_list",
         _ => "widgets"
     };
 
@@ -107,6 +137,12 @@
         DesignDocumentTemplateKind.MasterDetail => "Overzicht + detail",
         DesignDocumentTemplateKind.Wizard => "Stappenwizard",
         DesignDocumentTemplateKind.Dashboard => "Dashboard",
+        DesignDocumentTemplateKind.SidebarApp => "Sidebar app",
+        DesignDocumentTemplateKind.SettingsPage => "Instellingen",
+        DesignDocumentTemplateKind.DetailPage => "Detailpagina",
+        DesignDocumentTemplateKind.KanbanBoard => "Kanbanbord",
+        DesignDocumentTemplateKind.LoginPage => "Loginpagina",
+        DesignDocumentTemplateKind.TableWithFilters => "Tabel met filters",
         _ => "Template"
     };
 
@@ -118,13 +154,31 @@
         DesignDocumentTemplateKind.MasterDetail => "Lijst links, detail rechts",
         DesignDocumentTemplateKind.Wizard => "Gebruiker door stappen leiden",
         DesignDocumentTemplateKind.Dashboard => "KPI's, grafieken en samenvatting",
+        DesignDocumentTemplateKind.SidebarApp => "Navigatie, pagina's en een vaste shell",
+        DesignDocumentTemplateKind.SettingsPage => "Compacte instellingen met secties",
+        DesignDocumentTemplateKind.DetailPage => "Samenvatting met gerelateerde inhoud",
+        DesignDocumentTemplateKind.KanbanBoard => "Werkstromen per kolom",
+        DesignDocumentTemplateKind.LoginPage => "Branding en inlogactie",
+        DesignDocumentTemplateKind.TableWithFilters => "Zoek, filter en bekijk resultaten",
         _ => fallback
     };
+
+    private static string GetGroupTitle(DesignDocumentTemplateKind kind) => kind switch
+    {
+        DesignDocumentTemplateKind.Blank or DesignDocumentTemplateKind.FormPage or DesignDocumentTemplateKind.ListCrud => "Starten",
+        DesignDocumentTemplateKind.SidebarApp or DesignDocumentTemplateKind.Dashboard or DesignDocumentTemplateKind.MasterDetail => "Applicaties",
+        DesignDocumentTemplateKind.LoginPage or DesignDocumentTemplateKind.SettingsPage or DesignDocumentTemplateKind.DetailPage or DesignDocumentTemplateKind.KanbanBoard => "Pagina's",
+        _ => "Structuur"
+    };
+
+    private static bool IsPopular(DesignDocumentTemplateKind kind)
+        => kind is DesignDocumentTemplateKind.SidebarApp or DesignDocumentTemplateKind.Dashboard;
 
     private sealed record TemplateOption(
         DesignDocumentTemplateKind Kind,
         string Icon,
         string Title,
         string Description,
+        bool IsPopular,
         DesignPage PreviewPage);
 }

@@ -1,10 +1,13 @@
 using Agterhuis.Ui.Extensions;
-using ExportedApp.Services;
+__SERVICES_USING__
 
 var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.UseStaticWebAssets();
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
-builder.Services.AddScoped<DesignDataService>();
+
+// Seed data configuration
+var useSeedData = builder.Configuration.GetValue<bool>("UseSeedData", __USE_SEED_DATA_DEFAULT__);
+__SEED_DATA_REGISTRATION__
 
 var app = builder.Build();
 app.UseHttpsRedirection();

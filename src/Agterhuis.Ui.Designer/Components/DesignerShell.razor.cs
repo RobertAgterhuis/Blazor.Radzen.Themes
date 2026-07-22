@@ -5,6 +5,7 @@ using Agterhuis.Ui.Designer.Persistence;
 using Agterhuis.Ui.Designer.Registry;
 using Agterhuis.Ui.Designer.Serialization;
 using Agterhuis.Ui.Designer.Validation;
+using Agterhuis.Ui.Designer.Services;
 using Agterhuis.Ui.Components.Feedback;
 using Agterhuis.Ui.Services;
 using Agterhuis.Ui.Theming;
@@ -88,6 +89,7 @@ public partial class DesignerShell : IDisposable
     private bool _previewMode;
     private bool _showOnboardingOverlay;
     private bool _showExportDialog;
+    private bool _exportIncludeSeedData = true;
     private bool _showShortcutsOverlay;
     private bool _showDesignerCommandPalette;
     private bool _interactionMode;
@@ -101,6 +103,8 @@ public partial class DesignerShell : IDisposable
     private string _treeContextMenuXpx = "0px";
     private string _treeContextMenuYpx = "0px";
     private int? _pageMenuIndex;
+    private int? _pageDragOverIndex;
+    private bool _pageAddMenuOpen;
     private string? _hoverDropzoneId;
     private string? _hoveredNodeId;
     private readonly List<ToastMessage> _toasts = [];
@@ -110,6 +114,7 @@ public partial class DesignerShell : IDisposable
     private string? _clipboardNodeJson;
     private string _commandSearchQuery = string.Empty;
     private int _commandSelectedIndex;
+    private DesignDataContext? _designDataContext;
 
     public DesignerShell()
     {
@@ -159,6 +164,9 @@ public partial class DesignerShell : IDisposable
     private IReadOnlyList<string> SavedDocumentNames => _savedDocuments.Select(static item => item.Name).ToArray();
     private IReadOnlyList<string> CanvasThemeOptions => AgtTheme.All.SelectMany(static theme => new[] { theme.LightVariantId, theme.DarkVariantId }).OrderBy(static id => id, StringComparer.Ordinal).ToArray();
     private IReadOnlyList<DesignDocumentTemplates.TemplateDefinition> TemplateOptions => DesignDocumentTemplates.DefinitionsList;
+    private IReadOnlyList<DesignDocumentTemplates.TemplateDefinition> AddPageTemplateOptions => TemplateOptions
+        .Where(static template => template.Kind is not DesignDocumentTemplateKind.Blank and not DesignDocumentTemplateKind.SidebarApp)
+        .ToArray();
     private IReadOnlyDictionary<string, IReadOnlyList<DesignerComponentDescriptor>> PaletteByCategory => Registry.Components
         .Where(static descriptor => descriptor.AllowedInPalette)
         .Where(static descriptor => !DesignerComponentDisplayMap.IsHiddenFromPalette(descriptor.ComponentType))
@@ -228,6 +236,7 @@ public partial class DesignerShell : IDisposable
     protected override async Task OnInitializedAsync()
     {
         RegisterCommands();
+        _designDataContext = new DesignDataContext(_commands.Document.DataModel);
         await RestoreLayoutStateAsync();
         await LoadInitialDocumentAsync();
         EnsureSelectedPageIndex();
@@ -569,9 +578,19 @@ public partial class DesignerShell : IDisposable
             }
         }
 
-        var result = _projectExporter.ExportProject(_commands.Document, _commands.Document.Name, _canvasTheme.Split('-')[0]);
+        var result = _projectExporter.ExportProject(
+            _commands.Document,
+            _commands.Document.Name,
+            _canvasTheme.Split('-')[0],
+            _exportIncludeSeedData);
         await JS.InvokeVoidAsync("designerInterop.saveBytesFile", $"{_commands.Document.Name}.zip", "application/zip", result.ZipData);
         _showExportDialog = false;
+    }
+
+    private Task OnExportIncludeSeedDataChanged(bool value)
+    {
+        _exportIncludeSeedData = value;
+        return Task.CompletedTask;
     }
 
     private async Task ExportDesignSpecAsync()
@@ -701,7 +720,12 @@ public partial class DesignerShell : IDisposable
     private Task OnStartScreenImportRequested(InputFileChangeEventArgs args)
         => OnDesignFileChanged(args);
 
-    private Task OnSelectedEntityChanged(string value) => SelectedEntityNameChanged.InvokeAsync(value);
+    private async Task OnSelectedEntityChanged(string value)
+    {
+        _selectedEntityName = string.IsNullOrWhiteSpace(value) ? null : value;
+        await SelectedEntityNameChanged.InvokeAsync(value);
+        await InvokeAsync(StateHasChanged);
+    }
 
     private async Task OnImportEntitiesRequested((IReadOnlyList<DesignEntity> Entities, SchemaImportApplyOptions Options) args)
     {
@@ -997,6 +1021,20 @@ public partial class DesignerShell : IDisposable
 
     private Task OnCanvasThemeChanged(object value) => OnCanvasThemeChanged(value?.ToString() ?? "plum-dark");
 
+    private Task ToggleDarkLight()
+    {
+        var normalized = string.IsNullOrWhiteSpace(_canvasTheme) ? "plum-dark" : _canvasTheme;
+        var isDark = normalized.EndsWith("-dark", StringComparison.OrdinalIgnoreCase);
+        var family = normalized.EndsWith("-dark", StringComparison.OrdinalIgnoreCase)
+            ? normalized[..^5]
+            : normalized.EndsWith("-light", StringComparison.OrdinalIgnoreCase)
+                ? normalized[..^6]
+                : normalized;
+
+        var targetTheme = isDark ? $"{family}-light" : $"{family}-dark";
+        return OnCanvasThemeChanged(targetTheme);
+    }
+
     private async Task OnPageRouteChanged(string? value)
     {
         if (_commands.Execute(new SetPagePropertyCommand(ActivePageIndex, nameof(DesignPage.Route), value)))
@@ -1191,6 +1229,7 @@ public partial class DesignerShell : IDisposable
         if (_fileMenuOpen)
         {
             _settingsMenuOpen = false;
+            _pageAddMenuOpen = false;
         }
     }
 
@@ -1200,6 +1239,19 @@ public partial class DesignerShell : IDisposable
         if (_settingsMenuOpen)
         {
             _fileMenuOpen = false;
+            _pageAddMenuOpen = false;
+        }
+    }
+
+    private void TogglePageAddMenu()
+    {
+        _pageAddMenuOpen = !_pageAddMenuOpen;
+        if (_pageAddMenuOpen)
+        {
+            _fileMenuOpen = false;
+            _settingsMenuOpen = false;
+            _pageMenuIndex = null;
+            CloseTreeContextMenu();
         }
     }
 
@@ -1207,6 +1259,7 @@ public partial class DesignerShell : IDisposable
     {
         _fileMenuOpen = false;
         _settingsMenuOpen = false;
+        _pageAddMenuOpen = false;
         _pageMenuIndex = _pageMenuIndex == pageIndex ? null : pageIndex;
         CloseTreeContextMenu();
     }
@@ -1215,6 +1268,7 @@ public partial class DesignerShell : IDisposable
     {
         _fileMenuOpen = false;
         _settingsMenuOpen = false;
+        _pageAddMenuOpen = false;
         _pageMenuIndex = null;
         _showDesignerCommandPalette = false;
         CloseTreeContextMenu();
@@ -1589,56 +1643,7 @@ public partial class DesignerShell : IDisposable
 
     private static DesignDocument CreateNewDocument(string name, DesignDocumentTemplateKind templateKind)
     {
-        var template = DesignDocumentTemplates.Create(templateKind, name);
-
-        if (template.Pages.Count > 0)
-        {
-            return template;
-        }
-
-        var root = new DesignNode
-        {
-            ComponentType = "RadzenRow",
-            Parameters = new Dictionary<string, DesignParameterValue>(StringComparer.Ordinal)
-            {
-                ["Gap"] = DesignParameterValue.FromValue("1rem")
-            },
-            Children = new Dictionary<string, List<DesignNode>>(StringComparer.Ordinal)
-            {
-                ["ChildContent"] =
-                [
-                    new DesignNode
-                    {
-                        ComponentType = "RadzenColumn",
-                        Parameters = new Dictionary<string, DesignParameterValue>(StringComparer.Ordinal)
-                        {
-                            ["Size"] = DesignParameterValue.FromValue(12)
-                        },
-                        Children = new Dictionary<string, List<DesignNode>>(StringComparer.Ordinal)
-                        {
-                            ["ChildContent"] = []
-                        }
-                    }
-                ]
-            }
-        };
-
-        var document = new DesignDocument
-        {
-            Name = name,
-            Version = "1.0",
-            Pages =
-            [
-                new DesignPage
-                {
-                    Route = "/",
-                    Title = "Nieuw ontwerp",
-                    Nodes = [root]
-                }
-            ]
-        };
-
-        return DesignDocumentMigrator.Migrate(document);
+        return DesignDocumentTemplates.Create(templateKind, name);
     }
 
     private void RegisterCommands()
@@ -1726,10 +1731,14 @@ public partial class DesignerShell : IDisposable
     }
 
     private async Task OnAddPageAsync()
+        => await OnAddPageFromTemplateAsync(DesignDocumentTemplateKind.Blank);
+
+    private async Task OnAddPageFromTemplateAsync(DesignDocumentTemplateKind templateKind)
     {
+        CloseAllMenus();
         var route = GenerateUniqueRoute();
         var title = $"Pagina {_commands.Document.Pages.Count + 1}";
-        var page = DesignDocumentTemplates.Create(_selectedTemplateKind, title).Pages.First();
+        var page = DesignDocumentTemplates.Create(templateKind, title).Pages.First();
         page.Route = route;
         page.Title = title;
 
@@ -1741,6 +1750,27 @@ public partial class DesignerShell : IDisposable
             await AutoSaveAsync();
             await InvokeAsync(StateHasChanged);
         }
+    }
+
+    private Task OnPreviewNavigate(string route)
+    {
+        if (string.IsNullOrWhiteSpace(route))
+        {
+            return Task.CompletedTask;
+        }
+
+        var targetIndex = _commands.Document.Pages
+            .Select((page, index) => new { page, index })
+            .FirstOrDefault(item => string.Equals(item.page.Route, route, StringComparison.OrdinalIgnoreCase))
+            ?.index;
+
+        if (targetIndex is int index)
+        {
+            SelectPage(index);
+            return InvokeAsync(StateHasChanged);
+        }
+
+        return Task.CompletedTask;
     }
 
     private async Task OnInsertTextFieldAsync()
@@ -2628,9 +2658,31 @@ public partial class DesignerShell : IDisposable
     private void OnPageDragStart(int index)
     {
         _draggedPageIndex = index;
+        _pageDragOverIndex = null;
     }
 
-    private void OnPageDragOver(DragEventArgs args) { }
+    private void OnPageDragOver(int targetIndex, DragEventArgs args)
+    {
+        if (_draggedPageIndex is null)
+        {
+            _pageDragOverIndex = null;
+            return;
+        }
+
+        _pageDragOverIndex = targetIndex;
+        if (args.DataTransfer is not null)
+        {
+            args.DataTransfer.DropEffect = "move";
+        }
+    }
+
+    private void OnPageDragLeave(int targetIndex)
+    {
+        if (_pageDragOverIndex == targetIndex)
+        {
+            _pageDragOverIndex = null;
+        }
+    }
 
     private async Task OnPageDropAsync(int targetIndex)
     {
@@ -2641,6 +2693,7 @@ public partial class DesignerShell : IDisposable
 
         var sourceIndex = _draggedPageIndex.Value;
         _draggedPageIndex = null;
+        _pageDragOverIndex = null;
 
         if (sourceIndex == targetIndex || targetIndex < 0 || targetIndex >= _commands.Document.Pages.Count)
         {
@@ -2659,10 +2712,12 @@ public partial class DesignerShell : IDisposable
     private void OnPageDragEnd()
     {
         _draggedPageIndex = null;
+        _pageDragOverIndex = null;
     }
 
     private void OnCommandStackDocumentChanged(object? sender, DesignDocumentChangedEventArgs args)
     {
+        _designDataContext = new DesignDataContext(_commands.Document.DataModel);
         _ = DebounceValidationAsync();
     }
 

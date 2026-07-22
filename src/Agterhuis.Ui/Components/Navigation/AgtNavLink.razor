@@ -1,0 +1,38 @@
+<a class="agt-nav-link @(IsActive ? "agt-nav-link--active" : string.Empty) @CssClass"
+   href="@Href"
+   @onclick="HandleClickAsync"
+   @onclick:preventDefault="true">
+    @if (!string.IsNullOrWhiteSpace(Icon))
+    {
+        <RadzenIcon Icon="@Icon" />
+    }
+    <span>@Text</span>
+</a>
+
+@code {
+    [Parameter]
+    public string Text { get; set; } = "Link";
+
+    [Parameter]
+    public string Href { get; set; } = "/";
+
+    [Parameter]
+    public string? Icon { get; set; }
+
+    [Parameter]
+    public bool IsActive { get; set; }
+
+    [Parameter]
+    public string? CssClass { get; set; }
+
+    [Parameter]
+    public EventCallback<string> OnNavigate { get; set; }
+
+    private async Task HandleClickAsync()
+    {
+        if (OnNavigate.HasDelegate)
+        {
+            await OnNavigate.InvokeAsync(Href);
+        }
+    }
+}

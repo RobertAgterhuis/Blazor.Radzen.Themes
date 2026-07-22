@@ -1,0 +1,39 @@
+@using Agterhuis.Ui.Designer.Model
+@using Agterhuis.Ui.Designer.Registry
+@using Agterhuis.Ui.Designer.Services
+
+@if (Page is null)
+{
+    <div class="agt-design-renderer agt-design-renderer--empty">Geen pagina geselecteerd.</div>
+}
+else
+{
+    <CascadingValue Value="DataContext" IsFixed="false">
+        <CascadingValue Value="OnNavigate" IsFixed="false">
+            <div class="agt-design-renderer" data-agt-design-route="@Page.Route">
+                @for (var index = 0; index < Page.Nodes.Count; index++)
+                {
+                    <DesignPreviewNodeHost Node="Page.Nodes[index]"
+                                           Path="@($"Page/Nodes[{index}]")"
+                                           Registry="ResolvedRegistry" />
+                }
+            </div>
+        </CascadingValue>
+    </CascadingValue>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public DesignPage? Page { get; set; }
+
+    [Parameter]
+    public DesignerComponentRegistry? Registry { get; set; }
+
+    [Parameter]
+    public DesignDataContext? DataContext { get; set; }
+
+    [Parameter]
+    public EventCallback<string> OnNavigate { get; set; }
+
+    private DesignerComponentRegistry ResolvedRegistry => Registry ?? DesignerComponentRegistry.Instance;
+}

@@ -354,9 +354,10 @@ public static class Program
         builder.AppendLine("        string icon,");
         builder.AppendLine("        bool allowedInPalette,");
         builder.AppendLine("        bool isWrapper,");
+        builder.AppendLine("        bool isDeprecated,");
         builder.AppendLine("        IReadOnlyList<string> slots,");
         builder.AppendLine("        IReadOnlyList<ComponentParameterDescriptor> parameters)");
-        builder.AppendLine("        => new(componentType, clrType, displayName, category, icon, allowedInPalette, isWrapper, slots, parameters);");
+        builder.AppendLine("        => new(componentType, clrType, displayName, category, icon, allowedInPalette, isWrapper, isDeprecated, slots, parameters);");
         builder.AppendLine();
         builder.AppendLine("    private static ComponentParameterDescriptor CreateParameter(");
         builder.AppendLine("        string name,");
@@ -385,6 +386,7 @@ public static class Program
         builder.AppendLine($"                {ToLiteral(descriptor.Icon)},");
         builder.AppendLine($"                {descriptor.AllowedInPalette.ToString().ToLowerInvariant()},");
         builder.AppendLine($"                {descriptor.IsWrapper.ToString().ToLowerInvariant()},");
+        builder.AppendLine("                false,");
         builder.AppendLine("                new string[]");
         builder.AppendLine("                {");
 

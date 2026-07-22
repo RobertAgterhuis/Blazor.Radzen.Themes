@@ -7,5 +7,11 @@ public enum DesignDocumentTemplateKind
     ListCrud,
     MasterDetail,
     Wizard,
-    Dashboard
+    Dashboard,
+    SidebarApp,
+    SettingsPage,
+    DetailPage,
+    KanbanBoard,
+    LoginPage,
+    TableWithFilters
 }

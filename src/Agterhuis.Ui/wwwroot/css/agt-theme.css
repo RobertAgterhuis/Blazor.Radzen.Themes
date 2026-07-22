@@ -25,6 +25,7 @@
 @import url("./theme/_display.css");
 @import url("./theme/_scheduler.css");
 @import url("./theme/_charts.css");
+@import url("./components/_nav-link.css");
 
 html,
 body {

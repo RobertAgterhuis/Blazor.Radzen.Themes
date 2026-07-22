@@ -1,0 +1,336 @@
+@using System.Dynamic
+@using System.Reflection
+@using Agterhuis.Ui.Designer.Model
+@using Agterhuis.Ui.Designer.Registry
+@using Agterhuis.Ui.Designer.Rendering
+@using Agterhuis.Ui.Designer.Services
+@using Microsoft.AspNetCore.Components.Rendering
+
+@if (_errorMessage is not null)
+{
+    <div class="agt-design-node-error"
+         data-agt-design-node-id="@Node.Id"
+         data-agt-design-component="@Node.ComponentType">
+        <strong>@Node.ComponentType</strong>
+        <p>@_errorMessage</p>
+    </div>
+}
+else if (_descriptor is not null)
+{
+    <ErrorBoundary>
+        <ChildContent>
+            <div class="agt-design-node"
+                 data-agt-design-node-id="@Node.Id"
+                 data-agt-design-component="@Node.ComponentType"
+                 data-agt-design-row="@Node.LayoutSlot?.Row"
+                 data-agt-design-column="@Node.LayoutSlot?.Column"
+                 data-agt-design-row-span="@Node.LayoutSlot?.RowSpan"
+                 data-agt-design-column-span="@Node.LayoutSlot?.ColumnSpan">
+                <DynamicComponent Type="@_descriptor.ClrType" Parameters="@_parameters" />
+            </div>
+        </ChildContent>
+        <ErrorContent Context="exception">
+            <div class="agt-design-node-error"
+                 data-agt-design-node-id="@Node.Id"
+                 data-agt-design-component="@Node.ComponentType">
+                <strong>@Node.ComponentType</strong>
+                <p>@exception.Message</p>
+            </div>
+        </ErrorContent>
+    </ErrorBoundary>
+}
+
+@code {
+    private static readonly MethodInfo TemplatedSlotMethod = typeof(DesignPreviewNodeHost)
+        .GetMethod(nameof(CreateTemplatedSlotCore), BindingFlags.Instance | BindingFlags.NonPublic)
+        ?? throw new InvalidOperationException("Templated slot factory not found.");
+
+    [Parameter, EditorRequired]
+    public DesignNode Node { get; set; } = default!;
+
+    [Parameter, EditorRequired]
+    public string Path { get; set; } = string.Empty;
+
+    [Parameter, EditorRequired]
+    public DesignerComponentRegistry Registry { get; set; } = default!;
+
+    [CascadingParameter]
+    public DesignDataContext? DataContext { get; set; }
+
+    [CascadingParameter]
+    public EventCallback<string> OnNavigate { get; set; }
+
+    private DesignerComponentDescriptor? _descriptor;
+    private Dictionary<string, object?> _parameters = [];
+    private string? _errorMessage;
+
+    protected override void OnParametersSet()
+    {
+        _parameters = [];
+        _descriptor = null;
+        _errorMessage = null;
+
+        if (!Registry.TryGetDescriptor(Node.ComponentType, out var descriptor))
+        {
+            _errorMessage = $"Onbekend componenttype '{Node.ComponentType}'.";
+            return;
+        }
+
+        _descriptor = descriptor;
+
+        try
+        {
+            _parameters = BuildParameterDictionary(descriptor);
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = ex.Message;
+        }
+    }
+
+    private Dictionary<string, object?> BuildParameterDictionary(DesignerComponentDescriptor descriptor)
+    {
+        var parameters = new Dictionary<string, object?>(StringComparer.Ordinal);
+
+        foreach (var parameter in descriptor.Parameters)
+        {
+            if (parameter.IsRenderFragment && Node.Children.TryGetValue(parameter.Name, out var children))
+            {
+                parameters[parameter.Name] = CreateSlotValue(parameter.ParameterType, children, $"{Path}/Children[{parameter.Name}]");
+                continue;
+            }
+
+            if (Node.Parameters.TryGetValue(parameter.Name, out var value))
+            {
+                parameters[parameter.Name] = BindParameter(value, parameter.ParameterType, parameter.Name);
+            }
+        }
+
+        if (DataContext is not null && IsGridComponent(Node.ComponentType) && !parameters.ContainsKey("Data"))
+        {
+            var entityName = TryParseEntityName(Node.Parameters.GetValueOrDefault("Data")?.Expression);
+            if (!string.IsNullOrWhiteSpace(entityName))
+            {
+                parameters["Data"] = CreateDataItems(entityName!);
+            }
+        }
+
+        if (string.Equals(Node.ComponentType, "AgtNavLink", StringComparison.Ordinal)
+            && OnNavigate.HasDelegate
+            && Node.Parameters.TryGetValue("Href", out var hrefValue))
+        {
+            var href = hrefValue.Literal?.GetValue<string?>() ?? string.Empty;
+            parameters["OnNavigate"] = EventCallback.Factory.Create<string>(this, target => OnNavigate.InvokeAsync(string.IsNullOrWhiteSpace(target) ? href : target));
+            if (Node.Parameters.TryGetValue("IsActive", out var isActive) && isActive.Literal is null)
+            {
+                parameters["IsActive"] = false;
+            }
+        }
+
+        return parameters;
+    }
+
+    private object? BindParameter(DesignParameterValue value, Type targetType, string parameterName)
+    {
+        if (!string.IsNullOrWhiteSpace(value.Expression)
+            && TryResolveExpression(value.Expression!, targetType, parameterName, out var resolved))
+        {
+            return resolved;
+        }
+
+        return DesignParameterBinder.Bind(value, targetType, this);
+    }
+
+    private bool TryResolveExpression(string expression, Type targetType, string parameterName, out object? resolved)
+    {
+        resolved = null;
+        var trimmed = expression.Trim();
+        if (trimmed.StartsWith("{binding:", StringComparison.OrdinalIgnoreCase) && trimmed.EndsWith("}", StringComparison.Ordinal))
+        {
+            trimmed = trimmed[9..^1].Trim();
+        }
+
+        if (trimmed.StartsWith("@", StringComparison.Ordinal))
+        {
+            trimmed = trimmed[1..];
+        }
+
+        if (!trimmed.StartsWith("entities.", StringComparison.OrdinalIgnoreCase))
+        {
+            if (TryResolveSimpleEntityField(trimmed, targetType, out resolved))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        var payload = trimmed[9..];
+        var selectMarker = ".Select(";
+        var selectIndex = payload.IndexOf(selectMarker, StringComparison.Ordinal);
+        if (selectIndex < 0)
+        {
+            if (!IsCollectionTarget(targetType))
+            {
+                return false;
+            }
+
+            var entityName = payload.Trim();
+            if (string.IsNullOrWhiteSpace(entityName))
+            {
+                return false;
+            }
+
+            resolved = CreateDataItems(entityName);
+            return true;
+        }
+
+        var entityPart = payload[..selectIndex].Trim();
+        var lambdaPart = payload[(selectIndex + selectMarker.Length)..].Trim();
+        var fieldName = TryParseSelectedField(lambdaPart);
+        if (string.IsNullOrWhiteSpace(entityPart) || string.IsNullOrWhiteSpace(fieldName))
+        {
+            return false;
+        }
+
+        if (string.Equals(parameterName, "Data", StringComparison.OrdinalIgnoreCase)
+            && IsCollectionTarget(targetType))
+        {
+            resolved = CreateDataItems(entityPart);
+            return true;
+        }
+
+        resolved = DataContext?.GetSampleValue(entityPart, fieldName!);
+        return true;
+    }
+
+    private bool TryResolveSimpleEntityField(string expression, Type targetType, out object? resolved)
+    {
+        resolved = null;
+        var dot = expression.IndexOf('.', StringComparison.Ordinal);
+        if (dot <= 0 || dot + 1 >= expression.Length)
+        {
+            return false;
+        }
+
+        var entity = expression[..dot].Trim();
+        var field = expression[(dot + 1)..].Trim();
+        if (string.IsNullOrWhiteSpace(entity) || string.IsNullOrWhiteSpace(field))
+        {
+            return false;
+        }
+
+        resolved = DataContext?.GetSampleValue(entity, field);
+        return true;
+    }
+
+    private IReadOnlyList<object> CreateDataItems(string entityName)
+    {
+        if (DataContext is null)
+        {
+            return [];
+        }
+
+        var rows = DataContext.GetPreviewRows(entityName, 10);
+        var items = new List<object>(rows.Count);
+        foreach (var row in rows)
+        {
+            IDictionary<string, object?> dynamicRow = new ExpandoObject();
+            foreach (var pair in row.Values)
+            {
+                dynamicRow[pair.Key] = pair.Value;
+            }
+
+            items.Add(dynamicRow);
+        }
+
+        return items;
+    }
+
+    private static string? TryParseEntityName(string? expression)
+    {
+        if (string.IsNullOrWhiteSpace(expression))
+        {
+            return null;
+        }
+
+        var trimmed = expression.Trim();
+        if (trimmed.StartsWith("@", StringComparison.Ordinal))
+        {
+            trimmed = trimmed[1..];
+        }
+
+        if (!trimmed.StartsWith("entities.", StringComparison.OrdinalIgnoreCase))
+        {
+            return null;
+        }
+
+        var payload = trimmed[9..];
+        var marker = ".Select(";
+        var markerIndex = payload.IndexOf(marker, StringComparison.Ordinal);
+        return markerIndex >= 0 ? payload[..markerIndex].Trim() : payload.Trim();
+    }
+
+    private static string? TryParseSelectedField(string lambda)
+    {
+        var trimmed = lambda.TrimEnd(')').Trim();
+        var arrow = trimmed.IndexOf("=>", StringComparison.Ordinal);
+        if (arrow < 0)
+        {
+            return null;
+        }
+
+        var body = trimmed[(arrow + 2)..].Trim();
+        var dot = body.LastIndexOf(".", StringComparison.Ordinal);
+        if (dot < 0 || dot + 1 >= body.Length)
+        {
+            return null;
+        }
+
+        return body[(dot + 1)..].Trim();
+    }
+
+    private static bool IsGridComponent(string componentType)
+        => componentType is "RadzenDataGrid" or "AgtDataGrid";
+
+    private static bool IsCollectionTarget(Type targetType)
+        => targetType != typeof(string) && typeof(System.Collections.IEnumerable).IsAssignableFrom(targetType);
+
+    private object CreateSlotValue(Type slotType, IReadOnlyList<DesignNode> children, string slotPath)
+    {
+        if (slotType == typeof(RenderFragment))
+        {
+            return CreateSlot(children, slotPath);
+        }
+
+        if (slotType.IsGenericType && slotType.GetGenericTypeDefinition() == typeof(RenderFragment<>))
+        {
+            return TemplatedSlotMethod.MakeGenericMethod(slotType.GetGenericArguments()[0]).Invoke(this, [children, slotPath])
+                ?? throw new InvalidOperationException($"Unable to create templated slot '{slotPath}'.");
+        }
+
+        throw new InvalidOperationException($"Unsupported slot type '{slotType.Name}' for '{Node.ComponentType}'.");
+    }
+
+    private RenderFragment CreateSlot(IReadOnlyList<DesignNode> children, string slotPath)
+    {
+        return builder => RenderChildren(builder, children, slotPath);
+    }
+
+    private RenderFragment<TContext> CreateTemplatedSlotCore<TContext>(IReadOnlyList<DesignNode> children, string slotPath)
+    {
+        return _ => builder => RenderChildren(builder, children, slotPath);
+    }
+
+    private void RenderChildren(RenderTreeBuilder builder, IReadOnlyList<DesignNode> children, string slotPath)
+    {
+        for (var index = 0; index < children.Count; index++)
+        {
+            builder.OpenComponent<DesignPreviewNodeHost>(index);
+            builder.AddAttribute(index + 1, nameof(Node), children[index]);
+            builder.AddAttribute(index + 2, nameof(Path), $"{slotPath}[{index}]");
+            builder.AddAttribute(index + 3, nameof(Registry), Registry);
+            builder.CloseComponent();
+        }
+    }
+}
