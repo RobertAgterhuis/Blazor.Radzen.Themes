@@ -104,5 +104,34 @@ export const setupResizablePanels = () => {
     document.addEventListener('mouseup', onUp);
   });
 
+  designerLayout.addEventListener('dblclick', (event) => {
+    const target = event.target;
+    if (!(target instanceof Element)) {
+      return;
+    }
+
+    const divider = target.closest('.designer-divider[data-divider]');
+    if (!(divider instanceof HTMLElement)) {
+      return;
+    }
+
+    const dividerType = divider.getAttribute('data-divider');
+    if (!dividerType) {
+      return;
+    }
+
+    const cfg = CONFIG[dividerType];
+    if (!cfg) {
+      return;
+    }
+
+    const cssVar = cssVarName(cfg.prop);
+    designerLayout.style.setProperty(cssVar, `${cfg.def}px`);
+
+    const sizes = loadSizes();
+    sizes[toStorageKey(cfg.prop)] = cfg.def;
+    saveSizes(sizes);
+  });
+
   designerLayout.dataset.resizeReady = 'true';
 };
