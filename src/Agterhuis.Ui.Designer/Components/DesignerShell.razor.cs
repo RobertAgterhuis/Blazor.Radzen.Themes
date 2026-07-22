@@ -209,8 +209,17 @@ public partial class DesignerShell : IDisposable
         await EvaluateDraftRecoveryAsync();
         await EvaluateOnboardingAsync();
         UpdateStartScreenState();
-        await JS.InvokeVoidAsync("designerInterop.setupResizablePanels");
         await InvokeAsync(StateHasChanged);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        await JS.InvokeVoidAsync("designerInterop.setupResizablePanels");
     }
 
     public void Dispose()
@@ -297,9 +306,9 @@ public partial class DesignerShell : IDisposable
         if (didMutate)
         {
             _liveAnnouncement = "Component geplaatst op canvas.";
-            await JS.InvokeVoidAsync("designerInterop.flashNode", _selectedNodeId);
             await AutoSaveAsync();
             await InvokeAsync(StateHasChanged);
+            await JS.InvokeVoidAsync("designerInterop.flashNode", _selectedNodeId);
         }
     }
 
@@ -368,9 +377,9 @@ public partial class DesignerShell : IDisposable
 
         _uiFeedback = "Component toegevoegd.";
         _liveAnnouncement = "Component toegevoegd via klik.";
-        await JS.InvokeVoidAsync("designerInterop.flashNode", _selectedNodeId);
         await AutoSaveAsync();
         await InvokeAsync(StateHasChanged);
+        await JS.InvokeVoidAsync("designerInterop.flashNode", _selectedNodeId);
     }
 
     private async Task OnUndo()
@@ -397,6 +406,7 @@ public partial class DesignerShell : IDisposable
 
     private async Task OnSaveDocument()
     {
+        CloseAllMenus();
         var name = _commands.Document.Name;
         var json = DesignDocumentSerializer.Serialize(_commands.Document);
         await JS.InvokeVoidAsync("designerInterop.saveDesignDocument", $"{name}.agtdesign", json);
@@ -432,6 +442,7 @@ public partial class DesignerShell : IDisposable
 
     private async Task OnExportDocument()
     {
+        CloseAllMenus();
         _showExportDialog = true;
         await InvokeAsync(StateHasChanged);
     }
@@ -476,12 +487,15 @@ public partial class DesignerShell : IDisposable
     private void CloseExportDialog()
     {
         _showExportDialog = false;
+        StateHasChanged();
     }
 
     private void TogglePreviewMode()
     {
         _previewMode = !_previewMode;
         _liveAnnouncement = _previewMode ? "Preview modus actief." : "Bewerkmodus actief.";
+        CloseAllMenus();
+        StateHasChanged();
     }
 
     private async Task DismissOnboardingAsync()
@@ -493,6 +507,7 @@ public partial class DesignerShell : IDisposable
 
     private async Task OnOpenDocument()
     {
+        CloseAllMenus();
         var json = await JS.InvokeAsync<string?>("designerInterop.pickDesignDocument");
         if (!string.IsNullOrWhiteSpace(json))
         {
@@ -517,6 +532,7 @@ public partial class DesignerShell : IDisposable
 
     private async Task OnSavedSelectionChanged(object value)
     {
+        CloseAllMenus();
         var selected = value?.ToString();
         if (string.IsNullOrWhiteSpace(selected))
         {
@@ -633,13 +649,14 @@ public partial class DesignerShell : IDisposable
 
     private void OpenNewDocumentDialog()
     {
+        CloseAllMenus();
         _showNewDocumentDialog = true;
-        _fileMenuOpen = false;
     }
 
     private void CloseNewDocumentDialog()
     {
         _showNewDocumentDialog = false;
+        StateHasChanged();
     }
 
     private async Task CreateNewDocumentFromDialogAsync()
@@ -692,6 +709,7 @@ public partial class DesignerShell : IDisposable
 
     private async Task OpenVersionHistoryAsync()
     {
+        CloseAllMenus();
         _versionHistory = (await Store.GetVersionsAsync(_commands.Document.Name))
             .OrderByDescending(static version => version.Version)
             .ToList();
@@ -853,10 +871,12 @@ public partial class DesignerShell : IDisposable
         return Task.CompletedTask;
     }
 
-    private Task OnCanvasThemeChanged(string value)
+    private async Task OnCanvasThemeChanged(string value)
     {
+        CloseAllMenus();
         _canvasTheme = string.IsNullOrWhiteSpace(value) ? "plum-dark" : value;
-        return CanvasThemeChanged.InvokeAsync(_canvasTheme);
+        await CanvasThemeChanged.InvokeAsync(_canvasTheme);
+        await InvokeAsync(StateHasChanged);
     }
 
     private Task OnCanvasThemeChanged(object value) => OnCanvasThemeChanged(value?.ToString() ?? "plum-dark");
@@ -1069,7 +1089,16 @@ public partial class DesignerShell : IDisposable
 
     private void TogglePageMenu(int pageIndex)
     {
+        _fileMenuOpen = false;
+        _settingsMenuOpen = false;
         _pageMenuIndex = _pageMenuIndex == pageIndex ? null : pageIndex;
+    }
+
+    private void CloseAllMenus()
+    {
+        _fileMenuOpen = false;
+        _settingsMenuOpen = false;
+        _pageMenuIndex = null;
     }
 
     private async Task TogglePaletteCollapsed()
@@ -1119,10 +1148,15 @@ public partial class DesignerShell : IDisposable
 
         if (string.Equals(args.Key, "Escape", StringComparison.OrdinalIgnoreCase))
         {
+            if (_fileMenuOpen || _settingsMenuOpen || _pageMenuIndex is not null)
+            {
+                CloseAllMenus();
+                await InvokeAsync(StateHasChanged);
+                return;
+            }
+
             _selectedNodeId = null;
-            _fileMenuOpen = false;
-            _settingsMenuOpen = false;
-            _pageMenuIndex = null;
+            await InvokeAsync(StateHasChanged);
             return;
         }
 
@@ -1778,6 +1812,7 @@ public partial class DesignerShell : IDisposable
 
     private void BeginRenamePage(int index)
     {
+        CloseAllMenus();
         if (index < 0 || index >= _commands.Document.Pages.Count)
         {
             return;
@@ -1840,6 +1875,7 @@ public partial class DesignerShell : IDisposable
 
     private async Task DuplicatePageAsync(int index)
     {
+        CloseAllMenus();
         if (index < 0 || index >= _commands.Document.Pages.Count)
         {
             return;
@@ -1862,6 +1898,7 @@ public partial class DesignerShell : IDisposable
 
     private async Task RemovePageAsync(int index)
     {
+        CloseAllMenus();
         if (_commands.Document.Pages.Count <= 1 || index < 0 || index >= _commands.Document.Pages.Count)
         {
             return;
@@ -1991,6 +2028,7 @@ public partial class DesignerShell : IDisposable
         _liveAnnouncement = "Component toegevoegd in leeg slot.";
         await AutoSaveAsync();
         await InvokeAsync(StateHasChanged);
+        await JS.InvokeVoidAsync("designerInterop.flashNode", _selectedNodeId);
     }
 
     private Task OnRowLayoutChanged(ChangeEventArgs args)

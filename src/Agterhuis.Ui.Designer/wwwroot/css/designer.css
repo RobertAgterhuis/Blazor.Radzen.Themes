@@ -179,6 +179,14 @@
     z-index: 90;
 }
 
+.designer-menu-backdrop {
+    background: transparent;
+    cursor: default;
+    inset: 0;
+    position: fixed;
+    z-index: 89;
+}
+
 .designer-menu__item {
     align-items: center;
     background: var(--agt-surface-0);
@@ -312,7 +320,7 @@
     position: absolute;
     right: 0;
     top: calc(100% + 0.2rem);
-    z-index: 80;
+    z-index: 90;
 }
 
 .designer-page-tab__action {
@@ -1014,6 +1022,14 @@
 .designer-divider {
     background: var(--agt-input-border);
     flex-shrink: 0;
+}
+
+.designer-divider:hover {
+    background: var(--agt-color-primary-300);
+}
+
+.designer-divider:active {
+    background: var(--agt-color-primary-500);
 }
 
 .designer-divider--vertical {

@@ -1,137 +1,106 @@
-// Panel resize handler with localStorage persistence
+// Panel resize handler with localStorage persistence and delegated divider handling.
 export const setupResizablePanels = () => {
   const STORAGE_KEY = 'designer-panel-sizes';
-  const MIN_PALETTE_WIDTH = 150;
-  const MAX_PALETTE_WIDTH = 400;
-  const DEFAULT_PALETTE_WIDTH = 220;
+  const CONFIG = {
+    'palette-canvas': { dir: 'vertical', min: 150, max: 400, def: 220, prop: 'palette-width', invert: false },
+    'canvas-property': { dir: 'vertical', min: 200, max: 500, def: 320, prop: 'property-width', invert: true },
+    'canvas-code': { dir: 'horizontal', min: 100, maxPct: 0.6, def: 250, prop: 'code-height', invert: false }
+  };
 
-  const MIN_PROPERTY_WIDTH = 200;
-  const MAX_PROPERTY_WIDTH = 500;
-  const DEFAULT_PROPERTY_WIDTH = 320;
+  const designerLayout = document.querySelector('.designer-page');
+  if (!designerLayout) {
+    return;
+  }
 
-  const MIN_CODE_HEIGHT = 100;
-  const MAX_CODE_HEIGHT_PCT = 0.6;
-  const DEFAULT_CODE_HEIGHT = 250;
+  if (designerLayout.dataset.resizeReady === 'true') {
+    return;
+  }
 
-  const MIN_CANVAS_HEIGHT = 200;
+  const toStorageKey = (prop) => prop.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+  const cssVarName = (prop) => `--designer-${prop}`;
 
   const loadSizes = () => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        return JSON.parse(saved);
-      }
-    } catch (e) {
-      console.warn('Failed to load panel sizes:', e);
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
     }
-    return {
-      paletteWidth: DEFAULT_PALETTE_WIDTH,
-      propertyWidth: DEFAULT_PROPERTY_WIDTH,
-      codeHeight: DEFAULT_CODE_HEIGHT
-    };
   };
 
   const saveSizes = (sizes) => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(sizes));
-    } catch (e) {
-      console.warn('Failed to save panel sizes:', e);
+    } catch {
+      // Best effort only; resize should still function without persistence.
     }
   };
 
-  const applySizes = (sizes) => {
-    const designerLayout = document.querySelector('.designer-page');
-    if (!designerLayout) return;
-    designerLayout.style.setProperty('--designer-palette-width', sizes.paletteWidth + 'px');
-    designerLayout.style.setProperty('--designer-property-width', sizes.propertyWidth + 'px');
-    designerLayout.style.setProperty('--designer-code-height', sizes.codeHeight + 'px');
-  };
+  const saved = loadSizes();
+  for (const cfg of Object.values(CONFIG)) {
+    const key = toStorageKey(cfg.prop);
+    const value = Number.isFinite(saved[key]) ? saved[key] : cfg.def;
+    designerLayout.style.setProperty(cssVarName(cfg.prop), `${value}px`);
+  }
 
-  const setupDivider = (divider, direction, minSize, maxSize, defaultSize, sizeProperty, layoutElement) => {
-    if (!divider) return;
+  designerLayout.addEventListener('mousedown', (event) => {
+    const target = event.target;
+    if (!(target instanceof Element) || event.button !== 0) {
+      return;
+    }
 
-    let isResizing = false;
-    let startPos = 0;
-    let startSize = 0;
+    const divider = target.closest('.designer-divider[data-divider]');
+    if (!(divider instanceof HTMLElement)) {
+      return;
+    }
 
-    const cssVarName = '--designer-' + sizeProperty;
-    const storageKey = sizeProperty.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
+    const dividerType = divider.getAttribute('data-divider');
+    if (!dividerType) {
+      return;
+    }
 
-    const createOverlay = () => {
-      const overlay = document.createElement('div');
-      overlay.style.position = 'fixed';
-      overlay.style.top = '0';
-      overlay.style.left = '0';
-      overlay.style.right = '0';
-      overlay.style.bottom = '0';
-      overlay.style.zIndex = '10000';
-      overlay.style.cursor = direction === 'horizontal' ? 'row-resize' : 'col-resize';
-      return overlay;
+    const cfg = CONFIG[dividerType];
+    if (!cfg) {
+      return;
+    }
+
+    event.preventDefault();
+
+    const isHorizontal = cfg.dir === 'horizontal';
+    const varName = cssVarName(cfg.prop);
+    const startPos = isHorizontal ? event.clientY : event.clientX;
+    const currentSize = parseInt(designerLayout.style.getPropertyValue(varName), 10);
+    const startSize = Number.isFinite(currentSize) ? currentSize : cfg.def;
+    const maxSize = cfg.maxPct ? Math.round(window.innerHeight * cfg.maxPct) : cfg.max;
+
+    const overlay = document.createElement('div');
+    overlay.style.cssText = `position:fixed;inset:0;z-index:10000;cursor:${isHorizontal ? 'row-resize' : 'col-resize'}`;
+    document.body.appendChild(overlay);
+    divider.style.backgroundColor = 'var(--agt-color-primary-500)';
+
+    const onMove = (moveEvent) => {
+      const delta = isHorizontal ? moveEvent.clientY - startPos : moveEvent.clientX - startPos;
+      const adjusted = cfg.invert ? startSize - delta : startSize + delta;
+      const clamped = Math.max(cfg.min, Math.min(maxSize, adjusted));
+      designerLayout.style.setProperty(varName, `${clamped}px`);
     };
 
-    const startResize = (e) => {
-      if (e.button !== 0) return;
-      isResizing = true;
-      startPos = direction === 'horizontal' ? e.clientY : e.clientX;
-      startSize = parseInt(layoutElement.style.getPropertyValue(cssVarName)) || defaultSize;
+    const onUp = () => {
+      overlay.remove();
+      divider.style.backgroundColor = '';
 
-      const overlay = createOverlay();
-      document.body.appendChild(overlay);
+      const size = parseInt(designerLayout.style.getPropertyValue(varName), 10);
+      const sizes = loadSizes();
+      sizes[toStorageKey(cfg.prop)] = Number.isFinite(size) ? size : cfg.def;
+      saveSizes(sizes);
 
-      const handleMove = (moveEvent) => {
-        if (!isResizing) return;
-
-        const delta = direction === 'horizontal'
-          ? moveEvent.clientY - startPos
-          : moveEvent.clientX - startPos;
-
-        let newSize = startSize + delta;
-        newSize = Math.max(minSize, Math.min(maxSize, newSize));
-
-        layoutElement.style.setProperty(cssVarName, newSize + 'px');
-        divider.style.backgroundColor = 'var(--agt-color-primary-500)';
-      };
-
-      const handleEnd = () => {
-        isResizing = false;
-        try {
-          if (overlay && overlay.parentNode) {
-            document.body.removeChild(overlay);
-          }
-        } catch (e) {
-          console.warn('Failed to remove overlay:', e);
-        }
-        divider.style.backgroundColor = '';
-        divider.style.width = '';
-        divider.style.height = '';
-
-        const newSize = parseInt(layoutElement.style.getPropertyValue(cssVarName));
-        const sizes = loadSizes();
-        sizes[storageKey] = newSize;
-        saveSizes(sizes);
-
-        document.removeEventListener('mousemove', handleMove);
-        document.removeEventListener('mouseup', handleEnd);
-      };
-
-      document.addEventListener('mousemove', handleMove);
-      document.addEventListener('mouseup', handleEnd);
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
     };
 
-    divider.addEventListener('mousedown', startResize);
-  };
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  });
 
-  const sizes = loadSizes();
-  applySizes(sizes);
-
-  const designerLayout = document.querySelector('.designer-page');
-  if (!designerLayout) return;
-
-  const paletteDivider = designerLayout.querySelector('[data-divider="palette-canvas"]');
-  const propertyDivider = designerLayout.querySelector('[data-divider="canvas-property"]');
-  const codeDivider = designerLayout.querySelector('[data-divider="canvas-code"]');
-
-  setupDivider(paletteDivider, 'vertical', MIN_PALETTE_WIDTH, MAX_PALETTE_WIDTH, DEFAULT_PALETTE_WIDTH, 'palette-width', designerLayout);
-  setupDivider(propertyDivider, 'vertical', MIN_PROPERTY_WIDTH, MAX_PROPERTY_WIDTH, DEFAULT_PROPERTY_WIDTH, 'property-width', designerLayout);
-  setupDivider(codeDivider, 'horizontal', MIN_CODE_HEIGHT, Math.round(window.innerHeight * MAX_CODE_HEIGHT_PCT), DEFAULT_CODE_HEIGHT, 'code-height', designerLayout);
+  designerLayout.dataset.resizeReady = 'true';
 };

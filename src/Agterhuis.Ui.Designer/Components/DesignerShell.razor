@@ -59,6 +59,11 @@
             <div class="designer-feedback" role="status" aria-live="polite">@_uiFeedback</div>
         }
 
+        @if (_fileMenuOpen || _settingsMenuOpen || _pageMenuIndex is not null)
+        {
+            <div class="designer-menu-backdrop" @onclick="CloseAllMenus"></div>
+        }
+
         <header class="designer-toolbar" aria-label="Designer toolbar">
             <div class="designer-toolbar__group">
                 <button type="button" class="designer-menu-toggle" aria-expanded="@_fileMenuOpen" @onclick="ToggleFileMenu">Bestand</button>
@@ -277,7 +282,7 @@
 
                                 <div class="designer-quick-layout">
                                     <label for="designer-layout-split">Voeg rij toe</label>
-                                    <select id="designer-layout-split" @onchange="OnRowLayoutChanged">
+                                    <select id="designer-layout-split" value="@_selectedRowLayout" @onchange="OnRowLayoutChanged">
                                         <option value="12">1 kolom (12)</option>
                                         <option value="6+6">2 kolommen (6+6)</option>
                                         <option value="4+4+4">3 kolommen (4+4+4)</option>
