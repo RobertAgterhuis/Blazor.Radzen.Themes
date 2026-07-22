@@ -332,10 +332,31 @@ window.designerInterop = (() => {
         }
     };
 
+    const copyToClipboard = async (text) => {
+        try {
+            await navigator.clipboard.writeText(text ?? "");
+            return true;
+        }
+        catch {
+            return false;
+        }
+    };
+
+    const readFromClipboard = async () => {
+        try {
+            return await navigator.clipboard.readText();
+        }
+        catch {
+            return null;
+        }
+    };
+
     return {
+        copyToClipboard,
         createMonacoEditor,
         getJson,
         getText,
+        readFromClipboard,
         registerKeyScope,
         removeItem,
         pickDesignDocument,

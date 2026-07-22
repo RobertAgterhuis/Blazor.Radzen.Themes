@@ -158,8 +158,27 @@
     private IReadOnlyList<EntityOption> EntityOptions => DataModel.Entities.OrderBy(static entity => entity.Name, StringComparer.Ordinal).Select(static entity => new EntityOption(entity.PluralName, entity.Name)).ToArray();
     protected override void OnParametersSet() { SelectedEntityName ??= DataModel.Entities.FirstOrDefault()?.Name; }
     private async Task OnEntityChanged(string value) { SelectedEntityName = value; await SelectedEntityNameChanged.InvokeAsync(value); }
-    private Task OnRowCountChanged(decimal? value) { if (CurrentEntity is not null && value.HasValue) { CurrentEntity.Seed.RowCount = Math.Max(1, Convert.ToInt32(value.Value)); } return Task.CompletedTask; }
-    private Task OnSeedChanged(decimal? value) { if (CurrentEntity is not null && value.HasValue) { CurrentEntity.Seed.Seed = Math.Max(1, Convert.ToInt32(value.Value)); } return Task.CompletedTask; }
+    private Task OnRowCountChanged(decimal? value)
+    {
+        if (CurrentEntity is not null && value.HasValue)
+        {
+            CurrentEntity.Seed.RowCount = Math.Max(1, Convert.ToInt32(value.Value));
+            StateHasChanged();
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private Task OnSeedChanged(decimal? value)
+    {
+        if (CurrentEntity is not null && value.HasValue)
+        {
+            CurrentEntity.Seed.Seed = Math.Max(1, Convert.ToInt32(value.Value));
+            StateHasChanged();
+        }
+
+        return Task.CompletedTask;
+    }
     private Task OnGenerateFormRequested() => CurrentEntity is null ? Task.CompletedTask : GenerateFormRequested.InvokeAsync(CurrentEntity.Name);
     private static string FormatValue(object? value) => value switch { null => string.Empty, DateTime dateTime => dateTime.ToString("yyyy-MM-dd HH:mm", CultureInfo.GetCultureInfo("nl-NL")), decimal decimalValue => decimalValue.ToString("0.00", CultureInfo.GetCultureInfo("nl-NL")), bool boolValue => boolValue ? "Ja" : "Nee", _ => value.ToString() ?? string.Empty };
 

@@ -13,6 +13,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Text;
 using System.Net;
+using System.Globalization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Components.Rendering;
@@ -101,8 +102,12 @@ public partial class DesignerShell : IDisposable
     private string? _hoverDropzoneId;
     private string? _hoveredNodeId;
     private readonly List<ToastMessage> _toasts = [];
+    private readonly HashSet<string> _selectedNodeIds = new(StringComparer.Ordinal);
     private string _liveAnnouncement = "Designer geladen.";
     private string _selectedRowLayout = "12";
+    private string? _clipboardNodeJson;
+    private string _commandSearchQuery = string.Empty;
+    private int _commandSelectedIndex;
 
     public DesignerShell()
     {
@@ -170,6 +175,12 @@ public partial class DesignerShell : IDisposable
     private DesignerComponentDescriptor? SelectedDescriptor => SelectedNode is null ? null : Registry.TryGetDescriptor(SelectedNode.ComponentType, out var descriptor) ? descriptor : null;
     private IReadOnlyList<SelectionBreadcrumbPart> SelectionBreadcrumbParts => BuildBreadcrumbParts(_selectedNodeId);
     private string CanvasFrameStyle => _viewportWidths.TryGetValue(_viewport, out var width) ? $"max-width: {width}px;" : "max-width: 1200px;";
+    private string CanvasFrameClass => _viewport switch
+    {
+        "mobile" => "designer-canvas-frame--mobile",
+        "tablet" => "designer-canvas-frame--tablet",
+        _ => string.Empty
+    };
     private bool HasDuplicateActiveRoute => _commands.Document.Pages.Count(page => string.Equals(page.Route, ActivePage.Route, StringComparison.OrdinalIgnoreCase)) > 1;
     private string RoutePreview => string.Join(" | ", _commands.Document.Pages.Select(static page => string.IsNullOrWhiteSpace(page.Route) ? "/" : page.Route));
     private IReadOnlyList<DesignValidationError> ValidationIssues => _validationIssues;
@@ -196,6 +207,8 @@ public partial class DesignerShell : IDisposable
         && _commands.Document.Pages[0].Nodes.Count > 0
         && _commands.Document.Pages[0].Nodes.All(static node => string.Equals(node.ComponentType, "RadzenRow", StringComparison.Ordinal));
     private int TotalComponentCount => _commands.Document.Pages.Sum(static page => CountNodes(page.Nodes));
+    private IReadOnlyList<DesignerCommandPaletteItem> FilteredCommandItems => BuildFilteredCommandItems();
+    private IReadOnlyList<DesignerCommandGroup> FilteredCommandGroups => GroupFilteredCommandItems(FilteredCommandItems);
     private IReadOnlyList<string> UsedEntities => _commands.Document.DataModel.Entities
         .Where(static entity => !string.IsNullOrWhiteSpace(entity.Name))
         .Select(static entity => entity.Name)
@@ -370,9 +383,37 @@ public partial class DesignerShell : IDisposable
     }
 
     private async Task OnSelectNode(string nodeId)
+        => await OnSelectNode(nodeId, shiftKey: false, ctrlKey: false);
+
+    private async Task OnSelectNode((string NodeId, bool ShiftKey, bool CtrlKey) args)
+        => await OnSelectNode(args.NodeId, args.ShiftKey, args.CtrlKey);
+
+    private async Task OnSelectNode(string nodeId, bool shiftKey, bool ctrlKey)
     {
-        _selectedNodeId = nodeId;
-        _liveAnnouncement = "Node geselecteerd.";
+        if (ctrlKey)
+        {
+            if (!_selectedNodeIds.Remove(nodeId))
+            {
+                _selectedNodeIds.Add(nodeId);
+            }
+
+            _selectedNodeId = _selectedNodeIds.Count == 0 ? null : _selectedNodeIds.Last();
+        }
+        else if (shiftKey)
+        {
+            _selectedNodeIds.Add(nodeId);
+            _selectedNodeId = nodeId;
+        }
+        else
+        {
+            _selectedNodeIds.Clear();
+            _selectedNodeId = nodeId;
+        }
+
+        var selectedCount = GetEffectiveSelectedNodeIds().Count;
+        _liveAnnouncement = selectedCount > 1
+            ? $"{selectedCount} nodes geselecteerd."
+            : "Node geselecteerd.";
         await InvokeAsync(StateHasChanged);
         await JS.InvokeVoidAsync("designerInterop.scrollTreeItemIntoView", nodeId);
     }
@@ -388,16 +429,9 @@ public partial class DesignerShell : IDisposable
         }
     }
 
-    private void OnTreeChange(TreeEventArgs args)
-    {
-        if (args.Value is string nodeId)
-        {
-            _selectedNodeId = nodeId;
-        }
-    }
-
     private async Task OnTreeNodeClicked(string nodeId)
     {
+        _selectedNodeIds.Clear();
         _selectedNodeId = nodeId;
         CloseTreeContextMenu();
         _liveAnnouncement = "Node geselecteerd vanuit structuurboom.";
@@ -428,20 +462,26 @@ public partial class DesignerShell : IDisposable
     private Task OpenDesignerCommandPaletteAsync()
     {
         _showDesignerCommandPalette = true;
+        _commandSearchQuery = string.Empty;
+        _commandSelectedIndex = 0;
         return InvokeAsync(StateHasChanged);
     }
 
     private void CloseDesignerCommandPalette()
     {
         _showDesignerCommandPalette = false;
+        _commandSearchQuery = string.Empty;
+        _commandSelectedIndex = 0;
     }
 
     private async Task OnUndo()
     {
+        var commandName = _commands.LastCommandName;
         if (_commands.Undo())
         {
             EnsureSelectedPageIndex();
             ClearSelectionIfMissing();
+            ShowToast($"Ongedaan: {commandName ?? "actie"}", ToastType.Info);
             await AutoSaveAsync();
             await InvokeAsync(StateHasChanged);
         }
@@ -453,6 +493,7 @@ public partial class DesignerShell : IDisposable
         {
             EnsureSelectedPageIndex();
             ClearSelectionIfMissing();
+            ShowToast($"Opnieuw: {_commands.LastCommandName ?? "actie"}", ToastType.Info);
             await AutoSaveAsync();
             await InvokeAsync(StateHasChanged);
         }
@@ -1204,7 +1245,31 @@ public partial class DesignerShell : IDisposable
 
         if (args.CtrlKey && string.Equals(args.Key, "d", StringComparison.OrdinalIgnoreCase) && _selectedNodeId is not null)
         {
-            await OnDuplicateNode(_selectedNodeId);
+            var selected = GetEffectiveSelectedNodeIds();
+            if (selected.Count > 1)
+            {
+                foreach (var nodeId in selected)
+                {
+                    await OnDuplicateNode(nodeId);
+                }
+            }
+            else
+            {
+                await OnDuplicateNode(_selectedNodeId);
+            }
+
+            return;
+        }
+
+        if (args.CtrlKey && string.Equals(args.Key, "c", StringComparison.OrdinalIgnoreCase) && _selectedNodeId is not null)
+        {
+            await CopySelectedNodeAsync();
+            return;
+        }
+
+        if (args.CtrlKey && string.Equals(args.Key, "v", StringComparison.OrdinalIgnoreCase) && _clipboardNodeJson is not null)
+        {
+            await PasteNodeAsync();
             return;
         }
 
@@ -1212,6 +1277,12 @@ public partial class DesignerShell : IDisposable
         {
             ToggleShortcutsOverlay();
             await InvokeAsync(StateHasChanged);
+            return;
+        }
+
+        if (args.CtrlKey && args.ShiftKey && string.Equals(args.Key, "p", StringComparison.OrdinalIgnoreCase))
+        {
+            await OnAddPageAsync();
             return;
         }
 
@@ -1258,16 +1329,39 @@ public partial class DesignerShell : IDisposable
             }
 
             _selectedNodeId = null;
+            _selectedNodeIds.Clear();
             await InvokeAsync(StateHasChanged);
             return;
         }
 
-        if (string.Equals(args.Key, "Delete", StringComparison.OrdinalIgnoreCase) && _selectedNodeId is not null && _commands.Execute(new RemoveNodeCommand(ActivePageIndex, _selectedNodeId)))
+        if (_showDesignerCommandPalette)
         {
-            _selectedNodeId = null;
-            _hasRecoveredDraft = true;
-            await AutoSaveAsync();
-            await InvokeAsync(StateHasChanged);
+            await OnDesignerCommandSearchKeyDown(args);
+            return;
+        }
+
+        if (string.Equals(args.Key, "Delete", StringComparison.OrdinalIgnoreCase))
+        {
+            var toDelete = GetEffectiveSelectedNodeIds();
+            var removed = 0;
+            foreach (var nodeId in toDelete)
+            {
+                if (_commands.Execute(new RemoveNodeCommand(ActivePageIndex, nodeId)))
+                {
+                    removed++;
+                }
+            }
+
+            if (removed > 0)
+            {
+                _selectedNodeId = null;
+                _selectedNodeIds.Clear();
+                _hasRecoveredDraft = true;
+                ShowToast($"{removed} component(en) verwijderd", ToastType.Warning);
+                await AutoSaveAsync();
+                await InvokeAsync(StateHasChanged);
+            }
+
             return;
         }
 
@@ -1310,6 +1404,7 @@ public partial class DesignerShell : IDisposable
         if (string.Equals(key, "Escape", StringComparison.OrdinalIgnoreCase))
         {
             _selectedNodeId = null;
+            _selectedNodeIds.Clear();
             StateHasChanged();
         }
 
@@ -1330,6 +1425,7 @@ public partial class DesignerShell : IDisposable
         }
 
         _selectedNodeId = container[nextIndex].Id;
+        _selectedNodeIds.Clear();
         StateHasChanged();
     }
 
@@ -2264,6 +2360,21 @@ public partial class DesignerShell : IDisposable
         {
             _selectedNodeId = null;
         }
+
+        _selectedNodeIds.RemoveWhere(nodeId => !TryFindNode(ActivePage.Nodes, nodeId, out _, out _, out _));
+    }
+
+    private IReadOnlyList<string> GetEffectiveSelectedNodeIds()
+    {
+        if (_selectedNodeIds.Count > 0)
+        {
+            return _selectedNodeIds
+                .Where(nodeId => TryFindNode(ActivePage.Nodes, nodeId, out _, out _, out _))
+                .Distinct(StringComparer.Ordinal)
+                .ToArray();
+        }
+
+        return _selectedNodeId is not null ? [_selectedNodeId] : [];
     }
 
     private string GenerateUniqueRoute()
@@ -2628,6 +2739,7 @@ public partial class DesignerShell : IDisposable
         if (_commands.Execute(new DuplicateNodeCommand(ActivePageIndex, nodeId, targetLocation)))
         {
             _selectedNodeId = null;
+            _selectedNodeIds.Clear();
 
             _hasRecoveredDraft = true;
             ShowToast("Component gedupliceerd", ToastType.Info);
@@ -2646,6 +2758,7 @@ public partial class DesignerShell : IDisposable
         if (_commands.Execute(new RemoveNodeCommand(ActivePageIndex, nodeId)))
         {
             _selectedNodeId = null;
+            _selectedNodeIds.Clear();
             _hasRecoveredDraft = true;
             ShowToast("Component verwijderd", ToastType.Warning);
             await AutoSaveAsync();
@@ -2666,6 +2779,66 @@ public partial class DesignerShell : IDisposable
             ShowToast("Inline wijziging opgeslagen", ToastType.Success);
             await AutoSaveAsync();
             await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task CopySelectedNodeAsync()
+    {
+        if (_selectedNodeId is null || !TryFindNode(ActivePage.Nodes, _selectedNodeId, out _, out var container, out var index))
+        {
+            return;
+        }
+
+        var node = container[index];
+        _clipboardNodeJson = DesignDocumentSerializer.SerializeNode(node);
+        await JS.InvokeVoidAsync("designerInterop.copyToClipboard", _clipboardNodeJson);
+        ShowToast("Component gekopieerd", ToastType.Info);
+        _liveAnnouncement = "Component gekopieerd naar klembord.";
+    }
+
+    private async Task PasteNodeAsync()
+    {
+        var clipboardJson = await JS.InvokeAsync<string?>("designerInterop.readFromClipboard");
+        clipboardJson ??= _clipboardNodeJson;
+        if (string.IsNullOrWhiteSpace(clipboardJson))
+        {
+            return;
+        }
+
+        var pasted = DesignDocumentSerializer.DeserializeNode(clipboardJson);
+        if (pasted is null)
+        {
+            return;
+        }
+
+        RegenerateIds(pasted);
+
+        var location = _selectedNodeId is not null && TryFindNode(ActivePage.Nodes, _selectedNodeId, out _, out var container, out var index)
+            ? DesignNodeLocation.Root(index + 1)
+            : DesignNodeLocation.Root(ActivePage.Nodes.Count);
+
+        if (_commands.Execute(new AddNodeCommand(ActivePageIndex, location, pasted)))
+        {
+            _selectedNodeId = pasted.Id;
+            _selectedNodeIds.Clear();
+            _hasRecoveredDraft = true;
+            ShowToast("Component geplakt", ToastType.Success);
+            _liveAnnouncement = "Component geplakt.";
+            await AutoSaveAsync();
+            await InvokeAsync(StateHasChanged);
+            await JS.InvokeVoidAsync("designerInterop.flashNode", pasted.Id);
+        }
+    }
+
+    private static void RegenerateIds(DesignNode node)
+    {
+        node.Id = Guid.NewGuid().ToString("n", CultureInfo.InvariantCulture);
+        foreach (var slot in node.Children.Values)
+        {
+            foreach (var child in slot)
+            {
+                RegenerateIds(child);
+            }
         }
     }
 
@@ -2741,6 +2914,157 @@ public partial class DesignerShell : IDisposable
         };
     }
 
+    private void OnCommandSearchChanged(ChangeEventArgs args)
+    {
+        _commandSearchQuery = args.Value?.ToString() ?? string.Empty;
+        _commandSelectedIndex = 0;
+    }
+
+    private async Task OnDesignerCommandSearchKeyDown(KeyboardEventArgs args)
+    {
+        if (!_showDesignerCommandPalette)
+        {
+            return;
+        }
+
+        if (string.Equals(args.Key, "Escape", StringComparison.OrdinalIgnoreCase))
+        {
+            CloseDesignerCommandPalette();
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
+        var items = FilteredCommandItems;
+        if (items.Count == 0)
+        {
+            return;
+        }
+
+        if (string.Equals(args.Key, "ArrowDown", StringComparison.OrdinalIgnoreCase))
+        {
+            _commandSelectedIndex = (_commandSelectedIndex + 1) % items.Count;
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
+        if (string.Equals(args.Key, "ArrowUp", StringComparison.OrdinalIgnoreCase))
+        {
+            _commandSelectedIndex = _commandSelectedIndex == 0 ? items.Count - 1 : _commandSelectedIndex - 1;
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
+        if (string.Equals(args.Key, "Enter", StringComparison.OrdinalIgnoreCase))
+        {
+            var item = items[Math.Clamp(_commandSelectedIndex, 0, items.Count - 1)];
+            await ExecuteCommandItemAsync(item);
+        }
+    }
+
+    private async Task ExecuteCommandItemAsync(DesignerCommandPaletteItem item)
+    {
+        await CommandRegistry.ExecuteAsync(item.Command);
+        CloseDesignerCommandPalette();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private IReadOnlyList<DesignerCommandPaletteItem> BuildFilteredCommandItems()
+    {
+        var query = _commandSearchQuery.Trim();
+        var ranked = CommandRegistry.Commands
+            .Select(command => new
+            {
+                Command = command,
+                Score = ScoreCommandForDesignerPalette(command, query)
+            })
+            .Where(entry => entry.Score > 0)
+            .OrderByDescending(entry => entry.Score)
+            .ThenBy(entry => entry.Command.Section, StringComparer.OrdinalIgnoreCase)
+            .ThenBy(entry => entry.Command.Title, StringComparer.OrdinalIgnoreCase)
+            .Select(entry => entry.Command)
+            .ToList();
+
+        return ranked
+            .Select((command, index) => new DesignerCommandPaletteItem(command, index))
+            .ToArray();
+    }
+
+    private static int ScoreCommandForDesignerPalette(AgtCommandItem command, string query)
+    {
+        if (string.IsNullOrWhiteSpace(query))
+        {
+            return 1;
+        }
+
+        var score = 0;
+        if (command.Title.Contains(query, StringComparison.OrdinalIgnoreCase))
+        {
+            score += 120;
+        }
+
+        if (FuzzyMatch(query, command.Title))
+        {
+            score += 80;
+        }
+
+        if (!string.IsNullOrWhiteSpace(command.Description))
+        {
+            if (command.Description.Contains(query, StringComparison.OrdinalIgnoreCase))
+            {
+                score += 60;
+            }
+
+            if (FuzzyMatch(query, command.Description))
+            {
+                score += 40;
+            }
+        }
+
+        if (command.Section.Contains(query, StringComparison.OrdinalIgnoreCase) || FuzzyMatch(query, command.Section))
+        {
+            score += 30;
+        }
+
+        foreach (var keyword in command.Keywords)
+        {
+            if (keyword.Contains(query, StringComparison.OrdinalIgnoreCase) || FuzzyMatch(query, keyword))
+            {
+                score += 20;
+            }
+        }
+
+        return score;
+    }
+
+    private static bool FuzzyMatch(string query, string target)
+    {
+        if (string.IsNullOrWhiteSpace(query))
+        {
+            return true;
+        }
+
+        var q = query.Trim();
+        var qi = 0;
+        foreach (var ch in target)
+        {
+            if (qi < q.Length && char.ToLowerInvariant(ch) == char.ToLowerInvariant(q[qi]))
+            {
+                qi++;
+            }
+        }
+
+        return qi == q.Length;
+    }
+
+    private static IReadOnlyList<DesignerCommandGroup> GroupFilteredCommandItems(IReadOnlyList<DesignerCommandPaletteItem> items)
+    {
+        return items
+            .GroupBy(item => string.IsNullOrWhiteSpace(item.Command.Section) ? "Algemeen" : item.Command.Section, StringComparer.OrdinalIgnoreCase)
+            .OrderBy(group => group.Key, StringComparer.OrdinalIgnoreCase)
+            .Select(group => new DesignerCommandGroup(group.Key, group.ToArray()))
+            .ToArray();
+    }
+
     private void ShowToast(string message, ToastType type = ToastType.Success)
     {
         if (string.IsNullOrWhiteSpace(message))
@@ -2748,7 +3072,7 @@ public partial class DesignerShell : IDisposable
             return;
         }
 
-        var toast = new ToastMessage(message, type, DateTimeOffset.UtcNow);
+        var toast = new ToastMessage(Guid.NewGuid(), message, type, DateTimeOffset.UtcNow, false);
         _toasts.Add(toast);
         StateHasChanged();
         _ = DismissToastAfterDelay(toast);
@@ -2757,7 +3081,21 @@ public partial class DesignerShell : IDisposable
     private async Task DismissToastAfterDelay(ToastMessage toast)
     {
         await Task.Delay(3000);
-        _toasts.Remove(toast);
+        await DismissToast(toast);
+    }
+
+    private async Task DismissToast(ToastMessage toast)
+    {
+        var index = _toasts.FindIndex(candidate => candidate.Id == toast.Id);
+        if (index < 0)
+        {
+            return;
+        }
+
+        _toasts[index] = _toasts[index] with { IsExiting = true };
+        await InvokeAsync(StateHasChanged);
+        await Task.Delay(200);
+        _toasts.RemoveAll(candidate => candidate.Id == toast.Id);
         await InvokeAsync(StateHasChanged);
     }
 
@@ -2773,7 +3111,11 @@ public partial class DesignerShell : IDisposable
 
     private sealed record SelectionBreadcrumbPart(string NodeId, string Label);
 
-    private sealed record ToastMessage(string Text, ToastType Type, DateTimeOffset Created);
+    private sealed record ToastMessage(Guid Id, string Text, ToastType Type, DateTimeOffset Created, bool IsExiting);
+
+    private sealed record DesignerCommandPaletteItem(AgtCommandItem Command, int Index);
+
+    private sealed record DesignerCommandGroup(string Key, IReadOnlyList<DesignerCommandPaletteItem> Items);
 
     private sealed record TreeNodeStatus(string CssClass, string Glyph, string Tooltip);
 

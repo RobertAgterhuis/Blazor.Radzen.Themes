@@ -83,7 +83,8 @@ public sealed class DesignerPageTests
         cut.FindAll(".designer-menu-toggle")
             .First(button => button.TextContent.Contains("Instellingen", StringComparison.Ordinal))
             .Click();
-        Assert.Contains("data-testid=\"agt-command-palette-trigger\"", cut.Markup, StringComparison.Ordinal);
+        Assert.Contains("Zoeken (Ctrl+K)", cut.Markup, StringComparison.Ordinal);
+        Assert.DoesNotContain("data-testid=\"agt-command-palette-trigger\"", cut.Markup, StringComparison.Ordinal);
 
         cut.FindAll(".designer-menu-toggle")
             .First(button => button.TextContent.Contains("Bestand", StringComparison.Ordinal))

@@ -136,9 +136,7 @@
                 {
                     <div class="designer-menu" role="menu" aria-label="Instellingen">
                         <button type="button" class="designer-menu__item" role="menuitem" @onclick="ToggleShortcutsOverlay">Sneltoetsen</button>
-                        <div class="designer-menu__row">
-                            <AgtCommandPalette />
-                        </div>
+                        <button type="button" class="designer-menu__item" role="menuitem" @onclick="OpenDesignerCommandPaletteAsync">Zoeken (Ctrl+K)</button>
                     </div>
                 }
 
@@ -163,6 +161,7 @@
                              draggable="true"
                              @ondragstart="() => OnPageDragStart(pageIndex)"
                              @ondragover="OnPageDragOver"
+                                @ondragover:preventDefault="true"
                              @ondrop="() => OnPageDropAsync(pageIndex)"
                              @ondragend="OnPageDragEnd">
                             <button type="button" class="designer-page-tab__button" @onclick="() => SelectPage(pageIndex)">@GetPageLabel(page)</button>
@@ -206,7 +205,7 @@
             @if (_previewMode)
             {
                 <section class="designer-panel designer-panel--canvas designer-panel--preview" aria-label="Preview canvas">
-                    <div class="designer-canvas-frame" style="@CanvasFrameStyle">
+                    <div class="designer-canvas-frame @CanvasFrameClass" style="@CanvasFrameStyle">
                         <div class="designer-canvas" data-agt-theme="@_canvasTheme">
                             <DesignRenderer Page="@ActivePage" Registry="@Registry" />
                         </div>
@@ -274,12 +273,22 @@
                             }
                         }
                     </div>
-                    <div class="designer-canvas-frame" style="@CanvasFrameStyle">
+                    <div class="designer-canvas-frame @CanvasFrameClass" style="@CanvasFrameStyle">
                         <div class="designer-canvas" data-agt-theme="@_canvasTheme" @ref="_canvasRef">
                             @if (ActivePage.Nodes.Count == 0)
                             {
                                 <div class="designer-canvas--empty">
-                                    <AgtEmptyState Title="Begin met ontwerpen" Description="Sleep een component hierheen of klik op een component in het palet links." Icon="widgets" />
+                                    <div class="designer-canvas-onboarding">
+                                        <RadzenIcon Icon="dashboard_customize" class="designer-canvas-onboarding__icon" />
+                                        <h3>Begin met ontwerpen</h3>
+                                        <p>Sleep een component uit het palet links, of gebruik een van de snelstartopties hieronder.</p>
+                                        <div class="designer-canvas-onboarding__actions">
+                                            <RadzenButton Text="Formulier" Icon="description" ButtonStyle="ButtonStyle.Base" Variant="Variant.Outlined" Click='() => OnTemplateStartSelected(DesignDocumentTemplateKind.FormPage)' />
+                                            <RadzenButton Text="Dashboard" Icon="dashboard" ButtonStyle="ButtonStyle.Base" Variant="Variant.Outlined" Click='() => OnTemplateStartSelected(DesignDocumentTemplateKind.Dashboard)' />
+                                            <RadzenButton Text="Lege pagina" Icon="add" ButtonStyle="ButtonStyle.Base" Variant="Variant.Outlined" Click='() => OnTemplateStartSelected(DesignDocumentTemplateKind.Blank)' />
+                                        </div>
+                                        <p class="designer-canvas-onboarding__shortcut">Tip: druk <kbd>Ctrl+K</kbd> om snel een component te zoeken.</p>
+                                    </div>
                                 </div>
                             }
                             else
@@ -288,6 +297,7 @@
                                      @ondragenter='() => OnDropZoneDragEnter($"root-{ActivePage.Nodes.Count}")'
                                      @ondragleave='() => OnDropZoneDragLeave($"root-{ActivePage.Nodes.Count}")'
                                      @ondragover='args => OnDropZoneDragOver(args, $"root-{ActivePage.Nodes.Count}")'
+                                      @ondragover:preventDefault="true"
                                      @ondrop='() => OnDropRequested(new DesignerDropTarget(DesignNodeLocation.Root(ActivePage.Nodes.Count)), $"root-{ActivePage.Nodes.Count}")'
                                      title="Drop op canvas"></div>
                                 @for (var index = 0; index < ActivePage.Nodes.Count; index++)
@@ -296,9 +306,11 @@
                                     <DesignerCanvasNode Node="node"
                                                        Registry="@Registry"
                                                        SelectedNodeId="@_selectedNodeId"
+                                                       SelectedNodeIds="@_selectedNodeIds"
                                                        HoveredNodeId="@_hoveredNodeId"
                                                        HoverNodeChanged="OnTreeNodeHover"
                                                        SelectNode="OnSelectNode"
+                                                       SelectNodeExtended="OnSelectNode"
                                                        StartDrag="OnDragStart"
                                                        EndDrag="OnDragEnd"
                                                        DropNode="OnDropRequested"
@@ -317,6 +329,7 @@
                                          @ondragenter='() => OnDropZoneDragEnter($"root-{index + 1}")'
                                          @ondragleave='() => OnDropZoneDragLeave($"root-{index + 1}")'
                                          @ondragover='args => OnDropZoneDragOver(args, $"root-{index + 1}")'
+                                         @ondragover:preventDefault="true"
                                          @ondrop='() => OnDropRequested(new DesignerDropTarget(DesignNodeLocation.Root(index + 1)), $"root-{index + 1}")'
                                          title="Drop op canvas"></div>
                                 }
@@ -479,8 +492,9 @@
         <div class="designer-toasts" aria-live="polite" aria-atomic="true">
             @foreach (var toast in _toasts)
             {
-                <div class="designer-toast @GetToastClass(toast.Type)">
+                <div class="designer-toast @(toast.IsExiting ? "designer-toast--exiting" : string.Empty) @GetToastClass(toast.Type)">
                     <span>@toast.Text</span>
+                    <button type="button" class="designer-toast__dismiss" @onclick="() => DismissToast(toast)" aria-label="Sluiten">&times;</button>
                 </div>
             }
         </div>
@@ -517,10 +531,38 @@
 
         @if (_showDesignerCommandPalette)
         {
-            <div class="designer-overlay" role="dialog" aria-modal="true" aria-label="Designer command palette" @onclick="CloseDesignerCommandPalette">
-                <div class="designer-modal designer-modal--command" @onclick:stopPropagation="true">
-                    <div class="designer-command-palette">
-                        <AgtCommandPalette />
+            <div class="designer-overlay designer-overlay--transparent" role="dialog" aria-modal="true" aria-label="Quick Find" @onclick="CloseDesignerCommandPalette">
+                <div class="designer-command-modal" @onclick:stopPropagation="true">
+                    <input class="designer-command-search"
+                           type="text"
+                           placeholder="Zoek component, actie of eigenschap..."
+                           value="@_commandSearchQuery"
+                           @oninput="OnCommandSearchChanged"
+                           @onkeydown="OnDesignerCommandSearchKeyDown"
+                           autofocus />
+                    <div class="designer-command-results">
+                        @foreach (var group in FilteredCommandGroups)
+                        {
+                            <div class="designer-command-group">
+                                <div class="designer-command-group__header">@group.Key</div>
+                                @foreach (var item in group.Items)
+                                {
+                                    <button type="button"
+                                            class="designer-command-item @(_commandSelectedIndex == item.Index ? "designer-command-item--active" : string.Empty)"
+                                            @onclick="() => ExecuteCommandItemAsync(item)">
+                                        <span>@item.Command.Title</span>
+                                        @if (!string.IsNullOrWhiteSpace(item.Command.ShortcutHint))
+                                        {
+                                            <kbd>@item.Command.ShortcutHint</kbd>
+                                        }
+                                    </button>
+                                }
+                            </div>
+                        }
+                        @if (FilteredCommandGroups.Count == 0)
+                        {
+                            <div class="designer-command-empty">Geen resultaten voor "@_commandSearchQuery"</div>
+                        }
                     </div>
                     <div class="designer-modal__actions">
                         <RadzenButton Text="Sluiten" ButtonStyle="ButtonStyle.Base" Variant="Variant.Flat" Click="CloseDesignerCommandPalette" />
