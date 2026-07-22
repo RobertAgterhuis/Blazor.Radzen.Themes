@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Agterhuis.Ui.Designer.Model;
+using System.Linq;
 
 namespace Agterhuis.Ui.Designer.Serialization;
 
@@ -20,5 +21,31 @@ public static class DesignDocumentSerializer
             ?? new DesignDocument();
 
         return DesignDocumentMigrator.Migrate(document);
+    }
+
+    public static string SerializeNode(DesignNode node)
+    {
+        ArgumentNullException.ThrowIfNull(node);
+
+        var wrapper = new DesignDocument
+        {
+            Pages =
+            [
+                new DesignPage
+                {
+                    Route = "/",
+                    Title = "clipboard",
+                    Nodes = [node]
+                }
+            ]
+        };
+
+        return Serialize(wrapper);
+    }
+
+    public static DesignNode? DeserializeNode(string json)
+    {
+        var doc = Deserialize(json);
+        return doc.Pages.FirstOrDefault()?.Nodes.FirstOrDefault();
     }
 }

@@ -47,9 +47,12 @@
                 draggable="true"
                 @ondragstart="OnDragStart"
                 @ondragend="OnDragEnd"
-                @onclick="OnSelectClicked"
+                @onclick="OnSelectClickedExtended"
+                @onclick:stopPropagation="true"
                 aria-current="@(IsSelected ? "true" : "false")">
-            <RadzenIcon Icon="@DescriptorIcon" />
+            <span class="designer-canvas-node__bar-icon">
+                <RadzenIcon Icon="@DescriptorIcon" />
+            </span>
             <span>@DescriptorLabel</span>
         </button>
     </div>
@@ -100,7 +103,13 @@
     public string? SelectedNodeId { get; set; }
 
     [Parameter]
+    public IReadOnlyCollection<string>? SelectedNodeIds { get; set; }
+
+    [Parameter]
     public EventCallback<string> SelectNode { get; set; }
+
+    [Parameter]
+    public EventCallback<(string NodeId, bool ShiftKey, bool CtrlKey)> SelectNodeExtended { get; set; }
 
     [Parameter]
     public EventCallback<DesignerDropTarget> DropNode { get; set; }
@@ -167,7 +176,9 @@
         "Placeholder"
     };
 
-    private bool IsSelected => string.Equals(Node.Id, SelectedNodeId, StringComparison.Ordinal);
+    private bool IsSelected
+        => string.Equals(Node.Id, SelectedNodeId, StringComparison.Ordinal)
+            || (SelectedNodeIds?.Contains(Node.Id) ?? false);
 
     private bool CanResizeColumn => string.Equals(Node.ComponentType, "RadzenColumn", StringComparison.Ordinal);
 
@@ -202,6 +213,17 @@
     }
 
     private async Task OnSelectClicked() => await SelectNode.InvokeAsync(Node.Id);
+
+    private async Task OnSelectClickedExtended(MouseEventArgs args)
+    {
+        if (SelectNodeExtended.HasDelegate)
+        {
+            await SelectNodeExtended.InvokeAsync((Node.Id, args.ShiftKey, args.CtrlKey));
+            return;
+        }
+
+        await OnSelectClicked();
+    }
 
     private void OnMouseEnter()
     {
@@ -436,7 +458,9 @@
             builder.AddAttribute(sequence++, nameof(Node), child);
             builder.AddAttribute(sequence++, nameof(Registry), Registry);
             builder.AddAttribute(sequence++, nameof(SelectedNodeId), SelectedNodeId);
+            builder.AddAttribute(sequence++, nameof(SelectedNodeIds), SelectedNodeIds);
             builder.AddAttribute(sequence++, nameof(SelectNode), SelectNode);
+            builder.AddAttribute(sequence++, nameof(SelectNodeExtended), SelectNodeExtended);
             builder.AddAttribute(sequence++, nameof(DropNode), DropNode);
             builder.AddAttribute(sequence++, nameof(StartDrag), StartDrag);
             builder.AddAttribute(sequence++, nameof(EndDrag), EndDrag);
