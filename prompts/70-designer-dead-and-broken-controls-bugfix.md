@@ -280,22 +280,199 @@ if (args.CtrlKey && string.Equals(args.Key, "c", StringComparison.OrdinalIgnoreC
 
 ---
 
+## Bug 8 — Kolom toevoegen plaatst in verkeerde positie (KRITIEK)
+
+### Symptoom
+Wanneer een `RadzenColumn` geselecteerd is en de gebruiker klikt op "Column" in het palet, wordt de nieuwe kolom **genest in** de geselecteerde kolom (als child in ChildContent) in plaats van als **sibling** in de bovenliggende `RadzenRow`. Visueel lijkt het alsof er een rij wordt toegevoegd in plaats van een kolom naast de bestaande.
+
+### Oorzaak
+`ResolvePaletteClickInsertLocation()` in `DesignerShell.razor.cs` (regel 2614-2625) controleert alleen of het geselecteerde component een `ChildContent` slot heeft. Omdat `RadzenColumn` dat slot heeft, wordt de nieuwe kolom daar ingevoegd — maar dat is semantisch verkeerd. Een kolom hoort als sibling in een `RadzenRow`, niet genest in een andere kolom.
+
+```csharp
+// Huidige logica — te naïef:
+if (SelectedDescriptor?.Slots.Contains("ChildContent", StringComparer.Ordinal) == true)
+{
+    return new DesignNodeLocation(_selectedNodeId, "ChildContent", GetChildInsertIndex(_selectedNodeId));
+}
+return DesignNodeLocation.Root(ActivePage.Nodes.Count);
+```
+
+### Fix
+Maak de insert-logica context-bewust. Als het in te voegen component een layout-child is (zoals `RadzenColumn`), zoek dan de juiste parent (zoals `RadzenRow`):
+
+```csharp
+private DesignNodeLocation ResolvePaletteClickInsertLocation(string? componentType = null)
+{
+    if (_selectedNodeId is null)
+    {
+        return DesignNodeLocation.Root(ActivePage.Nodes.Count);
+    }
+
+    // Als we een kolom toevoegen en het geselecteerde element IS een kolom,
+    // dan moeten we de kolom als sibling toevoegen in de parent row
+    if (IsColumnType(componentType) && IsColumnType(SelectedNode?.ComponentType))
+    {
+        var parentRow = FindParentOfType(_selectedNodeId, "RadzenRow");
+        if (parentRow is not null)
+        {
+            var siblingCount = parentRow.Children.TryGetValue("ChildContent", out var siblings) ? siblings.Count : 0;
+            return new DesignNodeLocation(parentRow.Id, "ChildContent", siblingCount);
+        }
+    }
+
+    // Als het geselecteerde element een Row is en we voegen een kolom toe, direct erin
+    if (IsColumnType(componentType) && string.Equals(SelectedNode?.ComponentType, "RadzenRow", StringComparison.Ordinal))
+    {
+        return new DesignNodeLocation(_selectedNodeId, "ChildContent", GetChildInsertIndex(_selectedNodeId));
+    }
+
+    // Standaard: als het geselecteerde element een ChildContent slot heeft, voeg daar toe
+    if (SelectedDescriptor?.Slots.Contains("ChildContent", StringComparer.Ordinal) == true)
+    {
+        return new DesignNodeLocation(_selectedNodeId, "ChildContent", GetChildInsertIndex(_selectedNodeId));
+    }
+
+    return DesignNodeLocation.Root(ActivePage.Nodes.Count);
+}
+
+private static bool IsColumnType(string? componentType)
+    => string.Equals(componentType, "RadzenColumn", StringComparison.Ordinal);
+
+private DesignNode? FindParentOfType(string childNodeId, string parentComponentType)
+{
+    return FindParentOfTypeRecursive(ActivePage.Nodes, childNodeId, parentComponentType, null);
+}
+
+private static DesignNode? FindParentOfTypeRecursive(
+    IReadOnlyList<DesignNode> nodes, string targetId, string parentType, DesignNode? currentParent)
+{
+    foreach (var node in nodes)
+    {
+        if (string.Equals(node.Id, targetId, StringComparison.Ordinal))
+        {
+            return string.Equals(currentParent?.ComponentType, parentType, StringComparison.Ordinal)
+                ? currentParent
+                : null;
+        }
+
+        foreach (var slot in node.Children.Values)
+        {
+            var result = FindParentOfTypeRecursive(slot, targetId, parentType, node);
+            if (result is not null)
+            {
+                return result;
+            }
+        }
+    }
+
+    return null;
+}
+```
+
+Update ook de aanroep in `OnPaletteItemClickedAsync` om het componenttype door te geven:
+
+```csharp
+private async Task OnPaletteItemClickedAsync(string componentType)
+{
+    var location = ResolvePaletteClickInsertLocation(componentType);
+    // ... rest ongewijzigd
+}
+```
+
+### Verificatie
+- Selecteer een RadzenColumn in een Row → klik "Column" in palet → nieuwe kolom verschijnt als sibling naast de bestaande kolom.
+- Selecteer een RadzenRow → klik "Column" → kolom wordt in de row ingevoegd.
+- Selecteer een ander component (bijv. Card) → klik "Tekstveld" → gedrag ongewijzigd (in ChildContent).
+
+---
+
+## Bug 9 — AgtSwitch label-klik togglet niet (label `for` matcht niet)
+
+### Symptoom
+Klikken op de labeltekst van "Geavanceerd" of "Meer opties" switches in het properties panel doet niets. Alleen klikken op het kleine switch-element zelf werkt.
+
+### Oorzaak
+`AgtSwitch.razor` gebruikt `<label for="@ResolvedName">` waar `ResolvedName` een eigen GUID is (`agt-switch-{guid}`). Maar `RadzenSwitch` genereert intern een eigen `id` voor zijn `<input>` element dat NIET gelijk is aan de `Name` parameter. De `for` van het label wijst dus naar een niet-bestaand element.
+
+HTML spec: een `<label for="X">` togglet het form-element met `id="X"`. Omdat er geen element met die `id` bestaat, doet klikken op het label niets.
+
+### Fix
+Verwijder de `for` attribute van het label element en gebruik in plaats daarvan een wrapper-click benadering. De `<label>` zonder `for` maar met het input element erin genest werkt via implicit label association:
+
+In `AgtSwitch.razor`, verwijder `for="@ResolvedName"`:
+
+```razor
+<div class="agt-field-wrapper @CssClass" role="group">
+    <label class="agt-switch">
+        <span class="agt-switch__label">@ResolvedLabel</span>
+        <RadzenSwitch Name="@ResolvedName"
+                      Value="@Value"
+                      ValueChanged="@ValueChanged"
+                      Disabled="@Disabled"
+                      InputAttributes="@ResolvedInputAttributes" />
+        <span class="agt-switch__state" aria-live="polite">@(Value ? OnText : OffText)</span>
+    </label>
+</div>
+```
+
+Door het `for` attribuut te verwijderen en het `<input>` element (gegenereerd door RadzenSwitch) **binnen** het `<label>` te houden, werkt de implicit label association: klikken overal op het label (inclusief de tekst) togglet het input element.
+
+**Let op:** controleer of `RadzenSwitch` een eigen wrapping element rendert dat de implicit association zou blokkeren. Test dit. Als de implicit association niet werkt omdat RadzenSwitch een `<div>` om het input element heen rendert, gebruik dan een expliciete `@onclick` handler:
+
+```razor
+<div class="agt-field-wrapper @CssClass" role="group" @onclick="OnWrapperClicked" @onclick:stopPropagation="true">
+    <label class="agt-switch">
+        <span class="agt-switch__label">@ResolvedLabel</span>
+        <RadzenSwitch Name="@ResolvedName"
+                      Value="@Value"
+                      ValueChanged="@ValueChanged"
+                      Disabled="@Disabled"
+                      InputAttributes="@ResolvedInputAttributes" />
+        <span class="agt-switch__state" aria-live="polite">@(Value ? OnText : OffText)</span>
+    </label>
+</div>
+```
+
+Met in de code:
+```csharp
+private Task OnWrapperClicked()
+{
+    if (Disabled) return Task.CompletedTask;
+    return ValueChanged.InvokeAsync(!Value);
+}
+```
+
+**Belangrijk:** deze fallback-click kan een double-toggle veroorzaken als het klik-event ook door RadzenSwitch wordt opgepakt. Test grondig: klik op labeltekst, klik op switch-thumb, klik op de "Aan/Uit" tekst — alle drie moeten exact één toggle produceren.
+
+De veiligste aanpak is het verwijderen van `for` en testen of implicit labeling werkt. Zo niet, gebruik dan de `@onclick` fallback maar met `@onclick:preventDefault="true"` om double-toggle te voorkomen.
+
+### Verificatie
+- Klik op "Geavanceerd" tekst → switch togglet, extra parameters verschijnen.
+- Klik op "Meer opties" tekst → switch togglet, Layout-sectie verschijnt in Weergave-tab.
+- Klik op de switch-thumb zelf → werkt nog steeds correct (geen double-toggle).
+- Test alle AgtSwitch-instanties in de designer: property panel, data panel column toggles, issues filters.
+
+---
+
 ## Samenvatting wijzigingen per bestand
 
 | Bestand | Bugs |
 |---------|------|
 | `DesignerShell.razor` | #1 (dropzone preventDefault), #2 (page tab preventDefault), #5 (remove AgtCommandPalette) |
-| `DesignerShell.razor.cs` | #4 (Ctrl+Shift+P handler), #6 (remove OnTreeChange), #7 (async copy/paste) |
+| `DesignerShell.razor.cs` | #4 (Ctrl+Shift+P handler), #6 (remove OnTreeChange), #7 (async copy/paste), #8 (column insert logic) |
 | `DesignerDataPanel.razor` | #3 (StateHasChanged in row/seed handlers) |
 | `designer-interop.js` | #7 (clipboard API functions) |
+| `AgtSwitch.razor` | #9 (label for/id mismatch) |
 
 ## Volgorde van uitvoering
 
 1. Bug 1 + Bug 2 (drag-and-drop fixes — kritiek)
-2. Bug 3 (data panel render fix)
-3. Bug 4 (shortcut wiring)
-4. Bug 5 (duplicate palette cleanup)
-5. Bug 6 (dead code removal)
-6. Bug 7 (clipboard integration)
+2. Bug 8 (column insert locatie — kritiek)
+3. Bug 9 (switch label-klik fix — kritiek)
+4. Bug 3 (data panel render fix)
+5. Bug 4 (shortcut wiring)
+6. Bug 5 (duplicate palette cleanup)
+7. Bug 6 (dead code removal)
+8. Bug 7 (clipboard integration)
 
 Elke bug is een eigen commit met beschrijvende message.
