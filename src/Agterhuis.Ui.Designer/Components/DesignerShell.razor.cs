@@ -446,7 +446,7 @@ public partial class DesignerShell : IDisposable
 
     private async Task OnPaletteItemClickedAsync(string componentType)
     {
-        var location = ResolvePaletteClickInsertLocation();
+        var location = ResolvePaletteClickInsertLocation(componentType);
         if (!AddFromPalette(location, componentType))
         {
             return;
@@ -2609,11 +2609,28 @@ public partial class DesignerShell : IDisposable
         _ = DebounceValidationAsync();
     }
 
-    private DesignNodeLocation ResolvePaletteClickInsertLocation()
+    private DesignNodeLocation ResolvePaletteClickInsertLocation(string? componentType = null)
     {
         if (_selectedNodeId is null)
         {
             return DesignNodeLocation.Root(ActivePage.Nodes.Count);
+        }
+
+        if (IsColumnType(componentType) && IsColumnType(SelectedNode?.ComponentType))
+        {
+            var parentRow = FindParentOfType(_selectedNodeId, "RadzenRow");
+            if (parentRow is not null)
+            {
+                var siblingCount = parentRow.Children.TryGetValue("ChildContent", out var siblings)
+                    ? siblings.Count
+                    : 0;
+                return new DesignNodeLocation(parentRow.Id, "ChildContent", siblingCount);
+            }
+        }
+
+        if (IsColumnType(componentType) && string.Equals(SelectedNode?.ComponentType, "RadzenRow", StringComparison.Ordinal))
+        {
+            return new DesignNodeLocation(_selectedNodeId, "ChildContent", GetChildInsertIndex(_selectedNodeId));
         }
 
         if (SelectedDescriptor?.Slots.Contains("ChildContent", StringComparer.Ordinal) == true)
@@ -2622,6 +2639,44 @@ public partial class DesignerShell : IDisposable
         }
 
         return DesignNodeLocation.Root(ActivePage.Nodes.Count);
+    }
+
+    private static bool IsColumnType(string? componentType)
+    {
+        return string.Equals(componentType, "RadzenColumn", StringComparison.Ordinal);
+    }
+
+    private DesignNode? FindParentOfType(string childNodeId, string parentComponentType)
+    {
+        return FindParentOfTypeRecursive(ActivePage.Nodes, childNodeId, parentComponentType, null);
+    }
+
+    private static DesignNode? FindParentOfTypeRecursive(
+        IReadOnlyList<DesignNode> nodes,
+        string targetId,
+        string parentType,
+        DesignNode? currentParent)
+    {
+        foreach (var node in nodes)
+        {
+            if (string.Equals(node.Id, targetId, StringComparison.Ordinal))
+            {
+                return string.Equals(currentParent?.ComponentType, parentType, StringComparison.Ordinal)
+                    ? currentParent
+                    : null;
+            }
+
+            foreach (var slot in node.Children.Values)
+            {
+                var result = FindParentOfTypeRecursive(slot, targetId, parentType, node);
+                if (result is not null)
+                {
+                    return result;
+                }
+            }
+        }
+
+        return null;
     }
 
     private async Task OnInlineAddRequested((string ParentNodeId, string SlotName, string ComponentType) request)
