@@ -1,4 +1,5 @@
 @using System.Reflection
+@using System.Globalization
 @using System.Text.Json.Nodes
 @using Agterhuis.Ui.Designer.Model
 @using Agterhuis.Ui.Designer.Registry
@@ -9,6 +10,7 @@
 <div class="designer-canvas-node @(IsSelected ? "designer-canvas-node--selected" : string.Empty) @(IsHovered && !IsSelected ? "designer-canvas-node--hover" : string.Empty)"
      data-agt-design-node-id="@Node.Id"
      data-agt-design-component="@Node.ComponentType"
+    style="@GetColumnFlexStyle()"
      @onmouseenter="OnMouseEnter"
      @onmouseleave="OnMouseLeave"
      @onmouseenter:stopPropagation="true"
@@ -183,6 +185,25 @@
     private bool CanResizeColumn => string.Equals(Node.ComponentType, "RadzenColumn", StringComparison.Ordinal);
 
     private bool IsHovered => _isHovering || string.Equals(Node.Id, HoveredNodeId, StringComparison.Ordinal);
+
+    private string? GetColumnFlexStyle()
+    {
+        if (!string.Equals(Node.ComponentType, "RadzenColumn", StringComparison.Ordinal))
+        {
+            return null;
+        }
+
+        var size = 12;
+        if (Node.Parameters.TryGetValue("Size", out var sizeValue)
+            && sizeValue?.Literal is JsonValue jsonValue
+            && jsonValue.TryGetValue<int>(out var parsed))
+        {
+            size = Math.Clamp(parsed, 1, 12);
+        }
+
+        var pct = Math.Round(size / 12.0 * 100, 2).ToString("0.##", CultureInfo.InvariantCulture);
+        return $"flex: 0 0 calc({pct}% - var(--agt-spacing-2)); min-width: 0;";
+    }
 
     private string DescriptorLabel => _descriptor?.DisplayName ?? Node.ComponentType;
 
@@ -379,10 +400,12 @@
     {
         var sequence = 0;
         var firstDropzoneId = BuildDropzoneId(slotName, 0);
+        var isRowSlot = string.Equals(Node.ComponentType, "RadzenRow", StringComparison.Ordinal);
 
         builder.OpenElement(sequence++, "div");
-        builder.AddAttribute(sequence++, "class", "designer-slot");
+        builder.AddAttribute(sequence++, "class", isRowSlot ? "designer-slot designer-slot--row" : "designer-slot");
         builder.AddAttribute(sequence++, "data-slot-name", slotName);
+        builder.AddAttribute(sequence++, "data-slot-parent", Node.ComponentType);
 
         builder.OpenElement(sequence++, "div");
         builder.AddAttribute(sequence++, "class", "designer-slot__hint");
