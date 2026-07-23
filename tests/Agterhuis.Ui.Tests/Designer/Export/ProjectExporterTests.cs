@@ -203,33 +203,40 @@ public class ProjectExporterTests
         var programSource = reader.ReadToEnd();
 
         Assert.Contains("using ExportedApp.Services;", programSource, StringComparison.Ordinal);
-        Assert.Contains("var useSeedData = builder.Configuration.GetValue<bool>(\"UseSeedData\", true);", programSource, StringComparison.Ordinal);
-        Assert.Contains("builder.Services.AddScoped<DesignDataService>();", programSource, StringComparison.Ordinal);
+        Assert.Contains("var useSeedData = builder.Configuration.GetValue(\"UseSeedData\", true);", programSource, StringComparison.Ordinal);
+        Assert.Contains("builder.Services.AddSingleton<DesignDataService>();", programSource, StringComparison.Ordinal);
         Assert.Contains("if (useSeedData)", programSource, StringComparison.Ordinal);
         Assert.Contains("builder.Services.AddScoped<IDataProvider, SeedDataProvider>();", programSource, StringComparison.Ordinal);
     }
 
     [Fact]
-    public void ExportProject_WithSeedDataDisabled_OmitsDataServiceFilesAndDisablesRegistration()
+    public void ExportProject_WithSeedDataDisabled_GeneratesEmptyDataServiceAndDisablesDataInAppSettings()
     {
         var document = DesignDocumentTemplates.Create(DesignDocumentTemplateKind.FormPage, "Data demo");
 
         var result = _exporter.ExportProject(document, "DataProject", "plum", includeSeedData: false);
 
         using var archive = new ZipArchive(new MemoryStream(result.ZipData), ZipArchiveMode.Read);
-        Assert.DoesNotContain(archive.Entries, entry => entry.FullName == "DataProject/Services/DesignDataContracts.cs");
-        Assert.DoesNotContain(archive.Entries, entry => entry.FullName == "DataProject/Services/DesignDataService.cs");
-        Assert.DoesNotContain(archive.Entries, entry => entry.FullName == "DataProject/Services/IDataProvider.cs");
-        Assert.DoesNotContain(archive.Entries, entry => entry.FullName == "DataProject/Services/SeedDataProvider.cs");
+        Assert.Contains(archive.Entries, entry => entry.FullName == "DataProject/Services/DesignDataContracts.cs");
+        Assert.Contains(archive.Entries, entry => entry.FullName == "DataProject/Services/DesignDataService.cs");
+        Assert.Contains(archive.Entries, entry => entry.FullName == "DataProject/Services/IDataProvider.cs");
+        Assert.Contains(archive.Entries, entry => entry.FullName == "DataProject/Services/SeedDataProvider.cs");
 
         using var programStream = archive.GetEntry("DataProject/Program.cs")!.Open();
         using var programReader = new StreamReader(programStream, Encoding.UTF8);
         var programSource = programReader.ReadToEnd();
 
-        Assert.DoesNotContain("using ExportedApp.Services;", programSource, StringComparison.Ordinal);
-        Assert.DoesNotContain("builder.Services.AddScoped<DesignDataService>();", programSource, StringComparison.Ordinal);
-        Assert.DoesNotContain("builder.Services.AddScoped<IDataProvider, SeedDataProvider>();", programSource, StringComparison.Ordinal);
-        Assert.Contains("var useSeedData = builder.Configuration.GetValue<bool>(\"UseSeedData\", false);", programSource, StringComparison.Ordinal);
+        Assert.Contains("using ExportedApp.Services;", programSource, StringComparison.Ordinal);
+        Assert.Contains("builder.Services.AddSingleton<DesignDataService>();", programSource, StringComparison.Ordinal);
+        Assert.Contains("builder.Services.AddScoped<IDataProvider, SeedDataProvider>();", programSource, StringComparison.Ordinal);
+        Assert.Contains("var useSeedData = builder.Configuration.GetValue(\"UseSeedData\", false);", programSource, StringComparison.Ordinal);
+
+        using var dataServiceStream = archive.GetEntry("DataProject/Services/DesignDataService.cs")!.Open();
+        using var dataServiceReader = new StreamReader(dataServiceStream, Encoding.UTF8);
+        var dataService = dataServiceReader.ReadToEnd();
+        Assert.DoesNotContain("Generate", dataService, StringComparison.Ordinal);
+        Assert.DoesNotContain("Pick(", dataService, StringComparison.Ordinal);
+        Assert.Contains("= [];", dataService, StringComparison.Ordinal);
 
         using var appSettingsStream = archive.GetEntry("DataProject/appsettings.json")!.Open();
         using var appSettingsReader = new StreamReader(appSettingsStream, Encoding.UTF8);
@@ -256,6 +263,8 @@ public class ProjectExporterTests
         var dataService = dataServiceReader.ReadToEnd();
         Assert.Contains("ATG-2024", dataService, StringComparison.Ordinal);
         Assert.Contains("klant{index + 1}@voorbeeld.nl", dataService, StringComparison.Ordinal);
+        Assert.Contains("Pick(random, new[] { \"Volkswagen\", \"Toyota\", \"BMW\", \"Peugeot\", \"Opel\", \"Škoda\" })", dataService, StringComparison.Ordinal);
+        Assert.Contains("private static T Pick<T>(Random random, IReadOnlyList<T> items)", dataService, StringComparison.Ordinal);
 
         using var providerStream = archive.GetEntry("DataProject/Services/SeedDataProvider.cs")!.Open();
         using var providerReader = new StreamReader(providerStream, Encoding.UTF8);

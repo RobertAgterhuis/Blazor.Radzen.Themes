@@ -788,13 +788,13 @@
                         <p><strong>Issues:</strong> @ErrorCount fouten, @WarningCount waarschuwingen, @InfoCount info</p>
                     </div>
                     <div class="designer-export-options">
-                        <AgtSwitch Label="Seeded data meegeven"
+                        <AgtSwitch Label="Voorbeelddata meegeven"
                                    Value="@_exportIncludeSeedData"
                                    ValueChanged="OnExportIncludeSeedDataChanged"
-                                   AriaLabel="Seeded data meegeven" />
+                                   AriaLabel="Voorbeelddata meegeven" />
                         <p class="designer-export__hint">
-                            Wanneer ingeschakeld bevat het geexporteerde project realistische voorbeelddata.
-                            De ontwikkelaar kan dit later wijzigen via <code>appsettings.json</code>.
+                            Het geexporteerde project bevat realistische voorbeelddata.
+                            Schakel uit via <code>appsettings.json -> "UseSeedData": false</code>.
                         </p>
                     </div>
                     <p>Dit pakket bevat een Blazor-project met de ontworpen pagina's. Open het in Visual Studio of VS Code met <code>dotnet run</code>.</p>

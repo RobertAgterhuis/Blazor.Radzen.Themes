@@ -8,7 +8,7 @@ builder.Services.AddAgterhuisUi();
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 
 // Seed data configuration
-var useSeedData = builder.Configuration.GetValue<bool>("UseSeedData", __USE_SEED_DATA_DEFAULT__);
+var useSeedData = builder.Configuration.GetValue("UseSeedData", __USE_SEED_DATA__);
 __SEED_DATA_REGISTRATION__
 
 var app = builder.Build();

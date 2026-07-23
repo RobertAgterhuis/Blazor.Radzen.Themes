@@ -155,30 +155,23 @@ public sealed class ProjectExporter
         using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName)
             ?? throw new InvalidOperationException($"Missing export template resource '{resourceName}'. Available resources: {string.Join(", ", Assembly.GetExecutingAssembly().GetManifestResourceNames().Where(name => name.StartsWith(TemplateNamespace, StringComparison.Ordinal)).OrderBy(name => name, StringComparer.Ordinal))}");
         using var reader = new StreamReader(stream, Encoding.UTF8, detectEncodingFromByteOrderMarks: false);
-        var servicesUsing = includeSeedData ? "using ExportedApp.Services;" : string.Empty;
-        var registration = includeSeedData
-            ? "builder.Services.AddScoped<DesignDataService>();\nif (useSeedData)\n{\n    builder.Services.AddScoped<IDataProvider, SeedDataProvider>();\n}"
-            : "if (useSeedData)\n{\n    // Seeded data is disabled in this export package.\n}";
+        var servicesUsing = "using ExportedApp.Services;";
+        var registration = "builder.Services.AddSingleton<DesignDataService>();\nif (useSeedData)\n{\n    builder.Services.AddScoped<IDataProvider, SeedDataProvider>();\n}";
         return reader.ReadToEnd()
             .Replace("__PROJECT_NAME__", projectName, StringComparison.Ordinal)
             .Replace("__THEME_FAMILY__", themeFamily, StringComparison.Ordinal)
             .Replace("__SERVICES_USING__", servicesUsing, StringComparison.Ordinal)
-            .Replace("__USE_SEED_DATA_DEFAULT__", includeSeedData ? "true" : "false", StringComparison.Ordinal)
+            .Replace("__USE_SEED_DATA__", includeSeedData ? "true" : "false", StringComparison.Ordinal)
             .Replace("__SEED_DATA_REGISTRATION__", registration, StringComparison.Ordinal);
     }
 
     private static void AddDataServiceFiles(Dictionary<string, string> projectFiles, string projectName, DesignDocument document, bool includeSeedData)
     {
-        if (!includeSeedData)
-        {
-            return;
-        }
-
         var servicesPath = $"{projectName}/Services";
         var dataModel = document.DataModel;
 
         projectFiles[$"{servicesPath}/DesignDataContracts.cs"] = GenerateDataContracts(document.DataModel);
-        projectFiles[$"{servicesPath}/DesignDataService.cs"] = GenerateDataService(document.DataModel);
+        projectFiles[$"{servicesPath}/DesignDataService.cs"] = GenerateDataService(document.DataModel, includeSeedData);
         projectFiles[$"{servicesPath}/IDataProvider.cs"] = GenerateDataProviderInterface(document.DataModel);
         projectFiles[$"{servicesPath}/SeedDataProvider.cs"] = GenerateSeedDataProvider(document.DataModel);
     }
@@ -257,25 +250,22 @@ public sealed class ProjectExporter
         return string.Join(Environment.NewLine, lines);
     }
 
-    private static string GenerateDataService(DesignDataModel dataModel)
+    private static string GenerateDataService(DesignDataModel dataModel, bool includeSeedData)
     {
-        var usesPickHelper = dataModel.Entities
-            .SelectMany(static entity => entity.Fields, static (entity, field) => (entity, field))
-            .Any(static item =>
-                item.field.Type == DesignFieldType.Enum
-                || (string.Equals(item.entity.Name, "Schadedossier", StringComparison.Ordinal)
-                    && string.Equals(item.field.Name, "Status", StringComparison.Ordinal)));
-
         var lines = new List<string>
         {
             "using System.Collections.Generic;",
-            "using System.Linq;",
             "",
             "namespace ExportedApp.Services;",
             "",
             "public sealed class DesignDataService",
             "{"
         };
+
+        if (includeSeedData)
+        {
+            lines.Insert(1, "using System.Linq;");
+        }
 
         foreach (var entity in dataModel.Entities)
         {
@@ -287,7 +277,9 @@ public sealed class ProjectExporter
         lines.Add("    {");
         foreach (var entity in dataModel.Entities)
         {
-            lines.Add($"        _{ToCamelCase(entity.PluralName)} = Generate{entity.PluralName}(new Random({entity.Seed.Seed})).ToList();");
+            lines.Add(includeSeedData
+                ? $"        _{ToCamelCase(entity.PluralName)} = Generate{entity.PluralName}(new Random({entity.Seed.Seed})).ToList();"
+                : $"        _{ToCamelCase(entity.PluralName)} = [];");
         }
         lines.Add("    }");
         lines.Add("");
@@ -298,27 +290,28 @@ public sealed class ProjectExporter
             lines.Add("");
         }
 
-        foreach (var entity in dataModel.Entities)
+        if (includeSeedData)
         {
-            lines.Add($"    private static IEnumerable<{entity.Name}Record> Generate{entity.PluralName}(Random random)");
-            lines.Add("    {");
-            lines.Add($"        for (var index = 0; index < {entity.Seed.RowCount}; index++)");
-            lines.Add("        {");
-            lines.Add($"            yield return new {entity.Name}Record");
-            lines.Add("            {");
-            foreach (var field in entity.Fields)
+            foreach (var entity in dataModel.Entities)
             {
-                lines.Add($"                {field.Name} = {GenerateSeedLiteral(entity.Name, field)},");
+                lines.Add($"    private static IEnumerable<{entity.Name}Record> Generate{entity.PluralName}(Random random)");
+                lines.Add("    {");
+                lines.Add($"        for (var index = 0; index < {entity.Seed.RowCount}; index++)");
+                lines.Add("        {");
+                lines.Add($"            yield return new {entity.Name}Record");
+                lines.Add("            {");
+                foreach (var field in entity.Fields)
+                {
+                    lines.Add($"                {field.Name} = {GenerateSeedLiteral(field, entity.Name)},");
+                }
+                lines.Add("            };");
+                lines.Add("        }");
+                lines.Add("    }");
+                lines.Add("");
             }
-            lines.Add("            };");
-            lines.Add("        }");
-            lines.Add("    }");
-            lines.Add("");
-        }
 
-        if (usesPickHelper)
-        {
-            lines.Add("    private static string Pick(Random random, string[] values) => values.Length == 0 ? string.Empty : values[random.Next(0, values.Length)];");
+            lines.Add("    private static T Pick<T>(Random random, IReadOnlyList<T> items)");
+            lines.Add("        => items[random.Next(items.Count)];");
             lines.Add("");
         }
 
@@ -347,13 +340,37 @@ public sealed class ProjectExporter
             _ => "string.Empty"
         };
 
-    private static string GenerateSeedLiteral(string entityName, DesignField field)
-        => (entityName, field.Name) switch
+    private static string GenerateSeedLiteral(DesignField field, string entityName)
+        => (entityName, field.Name, field.Type) switch
         {
-            ("Schadedossier", "Dossiernummer") => "$\"ATG-2024-{index + 1:00000}\"",
-            ("Schadedossier", "Status") => "Pick(random, new[] { \"Nieuw\", \"Ingepland\", \"In behandeling\", \"Gereed\" })",
-            ("Klant", "Klantnaam") => "$\"Klant {index + 1}\"",
-            ("Klant", "Email") => "$\"klant{index + 1}@voorbeeld.nl\"",
+            ("Schadedossier", "Dossiernummer", _) => "$\"ATG-2024-{index + 1:00000}\"",
+            ("Schadedossier", "Status", _) => "Pick(random, new[] { \"Nieuw\", \"Ingepland\", \"InBehandeling\", \"Gereed\", \"Gefactureerd\", \"Gesloten\" })",
+            ("Schadedossier", "Schadesoort", _) => "Pick(random, new[] { \"Sterretje\", \"Ster\", \"Barst\", \"TotaalBreuk\" })",
+            ("Schadedossier", "GlasType", _) => "Pick(random, new[] { \"Voorruit\", \"Achterruit\", \"Zijruit\", \"Dakraam\" })",
+            ("Schadedossier", "Actie", _) => "Pick(random, new[] { \"Reparatie\", \"Vervanging\" })",
+            ("Schadedossier", "Opmerkingen", _) => "$\"Dossier {index + 1} opmerking.\"",
+
+            ("Klant", "Klantnaam", _) => "$\"Klant {index + 1}\"",
+            ("Klant", "KlantType", _) => "Pick(random, new[] { \"Particulier\", \"Lease\", \"Wagenparkbeheerder\", \"Dealer\" })",
+            ("Klant", "Telefoonnummer", _) => "$\"06 {random.Next(10,99)} {random.Next(10,99)} {random.Next(10,99)}\"",
+            ("Klant", "Email", _) => "$\"klant{index + 1}@voorbeeld.nl\"",
+            ("Klant", "Verzekeraar", _) => "Pick(random, new[] { \"Centraal Beheer\", \"Interpolis\", \"FBTO\", \"Univé\", \"OHRA\" })",
+            ("Klant", "Polisnummer", _) => "$\"POL-{random.Next(100000, 999999)}\"",
+            ("Klant", "Woonplaats", _) => "Pick(random, new[] { \"Amsterdam\", \"Rotterdam\", \"Utrecht\", \"Den Haag\", \"Eindhoven\" })",
+
+            ("Voertuig", "Kenteken", _) => "$\"{Pick(random, new[] { \"AB\", \"CD\", \"EF\", \"GH\" })}-{random.Next(100,999)}-{Pick(random, new[] { \"A\", \"B\", \"C\", \"D\" })}\"",
+            ("Voertuig", "Merk", _) => "Pick(random, new[] { \"Volkswagen\", \"Toyota\", \"BMW\", \"Peugeot\", \"Opel\", \"Škoda\" })",
+            ("Voertuig", "Model", _) => "Pick(random, new[] { \"Golf\", \"Corolla\", \"3 Serie\", \"208\", \"Astra\", \"Octavia\" })",
+            ("Voertuig", "Kleur", _) => "Pick(random, new[] { \"Grijs\", \"Wit\", \"Zwart\", \"Blauw\", \"Rood\", \"Zilver\" })",
+
+            ("Werkorder", "DossierNummer", _) => "$\"ATG-2024-{index + 1:00000}\"",
+            ("Werkorder", "WerkorderType", _) => "Pick(random, new[] { \"RuitReparatie\", \"RuitVervanging\", \"AdasKalibratie\" })",
+            ("Werkorder", "Monteur", _) => "Pick(random, new[] { \"J. de Vries\", \"M. Jansen\", \"S. Bakker\", \"T. Visser\" })",
+            ("Werkorder", "Status", _) => "Pick(random, new[] { \"Gepland\", \"Onderweg\", \"Bezig\", \"Afgerond\" })",
+
+            ("Factuur", "FactuurNummer", _) => "$\"F-2024-{index + 1:00000}\"",
+            ("Factuur", "BetaalStatus", _) => "Pick(random, new[] { \"Open\", \"Verzonden\", \"BetaaldKlant\", \"Volledig\" })",
+
             _ => field.Type switch
             {
                 DesignFieldType.Int => "random.Next(1, 1000)",
@@ -363,7 +380,7 @@ public sealed class ProjectExporter
                 DesignFieldType.Enum => field.EnumValues.Count > 0
                     ? $"Pick(random, new[] {{ {string.Join(", ", field.EnumValues.Select(static value => $"\"{value}\""))} }})"
                     : "string.Empty",
-                _ => "$\"Waarde {index + 1}\""
+                _ => $"$\"{field.Name} {{index + 1}}\""
             }
         };
 
