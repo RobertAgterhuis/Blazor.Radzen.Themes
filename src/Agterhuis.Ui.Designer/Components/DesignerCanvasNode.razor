@@ -96,19 +96,6 @@
         .GetMethod(nameof(CreateTemplatedSlotCore), BindingFlags.Instance | BindingFlags.NonPublic)
         ?? throw new InvalidOperationException("Templated slot factory not found.");
 
-    private static readonly Dictionary<string, string> SlotDisplayNames = new(StringComparer.Ordinal)
-    {
-        ["ChildContent"] = "Inhoud",
-        ["HeaderActions"] = "Knoppen rechtsboven",
-        ["Logo"] = "Logo",
-        ["Sidebar"] = "Zijmenu",
-        ["Header"] = "Koptekst",
-        ["Footer"] = "Voettekst",
-        ["Columns"] = "Kolommen",
-        ["Template"] = "Sjabloon",
-        ["EmptyTemplate"] = "Lege weergave"
-    };
-
     [Parameter, EditorRequired]
     public DesignNode Node { get; set; } = default!;
 
@@ -231,7 +218,7 @@
             or "RadzenDropDown" or "RadzenCheckBox" or "RadzenSwitch";
 
     private static string GetSlotDisplayName(string slotName)
-        => SlotDisplayNames.TryGetValue(slotName, out var displayName) ? displayName : slotName;
+        => DesignerDisplayText.GetSlotDisplayName(slotName);
 
     protected override void OnParametersSet()
     {
@@ -416,7 +403,7 @@
 
     private void InjectDesignTimeDefaults(Dictionary<string, object?> parameters)
     {
-        if (IsFormComponent(Node.ComponentType) && !parameters.ContainsKey("Placeholder"))
+        if (CanInjectPlaceholder(parameters) && !parameters.ContainsKey("Placeholder"))
         {
             var label = parameters.TryGetValue("Label", out var labelValue) && labelValue is string stringLabel
                 ? stringLabel
@@ -431,40 +418,24 @@
         }
     }
 
-    private string ResolveDesignTimePlaceholder(string label)
+    private bool CanInjectPlaceholder(IReadOnlyDictionary<string, object?> parameters)
     {
-        var normalizedLabel = NormalizeToken(label);
-        var bestMatch = DesignDataContext?.DataModel.Entities
-            .SelectMany(entity => entity.Fields.Select(field => new { EntityName = entity.Name, FieldName = field.Name }))
-            .FirstOrDefault(candidate => string.Equals(NormalizeToken(candidate.FieldName), normalizedLabel, StringComparison.Ordinal)
-                || string.Equals(NormalizeToken(candidate.EntityName), normalizedLabel, StringComparison.Ordinal));
-
-        if (bestMatch is not null)
+        if (!IsFormComponent(Node.ComponentType))
         {
-            var sampleValue = DesignDataContext?.GetSampleValue(bestMatch.EntityName, bestMatch.FieldName);
-            if (sampleValue is string stringValue && !string.IsNullOrWhiteSpace(stringValue))
-            {
-                return stringValue;
-            }
+            return false;
         }
 
-        return $"Vul {label.Trim().ToLowerInvariant()} in...";
+        return _descriptor?.Parameters.Any(parameter =>
+                   string.Equals(parameter.Name, "Placeholder", StringComparison.Ordinal))
+               ?? parameters.ContainsKey("Placeholder");
     }
 
-    private static string NormalizeToken(string value)
+    private string ResolveDesignTimePlaceholder(string label)
     {
-        Span<char> buffer = stackalloc char[value.Length];
-        var length = 0;
-
-        foreach (var character in value)
-        {
-            if (char.IsLetterOrDigit(character))
-            {
-                buffer[length++] = char.ToLowerInvariant(character);
-            }
-        }
-
-        return new string(buffer[..length]);
+        var normalizedLabel = label.Trim().ToLowerInvariant();
+        return string.IsNullOrWhiteSpace(normalizedLabel)
+            ? $"Bijv. {Node.ComponentType.ToLowerInvariant()}..."
+            : $"Bijv. {normalizedLabel}...";
     }
 
     private object CreateSlotValue(Type slotType, string slotName, IReadOnlyList<DesignNode> children)

@@ -283,6 +283,11 @@ else
                 }
             </section>
         }
+
+        @if (!HasVisibleContentForActiveSection)
+        {
+            <div class="designer-properties__readonly">@GetEmptySectionMessage()</div>
+        }
     </section>
 }
 
@@ -848,6 +853,50 @@ else
             .Where(parameter => !_simpleMode || IsSimpleParameter(parameter.Name))
             .Any(parameter => Classify(parameter) == section);
     }
+
+    private bool HasVisibleContentForActiveSection
+    {
+        get
+        {
+            if (SelectedDescriptor is null)
+            {
+                return false;
+            }
+
+            if (GroupedParameters.Count > 0)
+            {
+                return true;
+            }
+
+            if (_activeSection == InspectorSection.Appearance)
+            {
+                if (!_simpleMode || GetSectionAdvancedState())
+                {
+                    return true;
+                }
+
+                if ((ColumnNodes.Count > 0 || SupportsColumnsSlot) || IsRadzenColumnNode)
+                {
+                    return true;
+                }
+            }
+
+            if (IsDataGridNode && (_activeSection is InspectorSection.Content or InspectorSection.Appearance))
+            {
+                return true;
+            }
+
+            return false;
+        }
+    }
+
+    private string GetEmptySectionMessage()
+        => _activeSection switch
+        {
+            InspectorSection.Content => "Geen inhoudseigenschappen beschikbaar voor deze selectie.",
+            InspectorSection.Interaction => "Geen interactie-eigenschappen beschikbaar voor deze selectie.",
+            _ => "Geen weergave-eigenschappen beschikbaar voor deze selectie."
+        };
 
     private static string GetParameterLabel(string parameterName)
         => parameterName switch

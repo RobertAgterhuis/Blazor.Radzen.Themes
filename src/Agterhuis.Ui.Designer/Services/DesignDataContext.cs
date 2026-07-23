@@ -13,10 +13,18 @@ public sealed class DesignDataContext
 
     public bool IsDesignMode => true;
 
-    public IReadOnlyList<DesignSeedRow> GetPreviewRows(string entityName, int maxRows = 10)
+    public IReadOnlyList<string> EntityNames => DataModel.Entities.Select(static entity => entity.Name).ToArray();
+
+    public IReadOnlyList<DesignSeedRow> GetRows(string entityName, int maxRows = 5)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(entityName);
         var previewRows = DesignDataModelSeeder.GeneratePreview(DataModel, entityName);
         return previewRows.Take(Math.Max(1, maxRows)).ToArray();
+    }
+
+    public IReadOnlyList<DesignSeedRow> GetPreviewRows(string entityName, int maxRows = 10)
+    {
+        return GetRows(entityName, maxRows);
     }
 
     public object? GetSampleValue(string entityName, string fieldName)

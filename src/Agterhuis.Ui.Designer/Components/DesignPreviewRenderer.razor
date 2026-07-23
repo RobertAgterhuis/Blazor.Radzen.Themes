@@ -10,7 +10,7 @@ else
 {
     <CascadingValue Value="DataContext" IsFixed="false">
         <CascadingValue Value="OnNavigate" IsFixed="false">
-            <div class="agt-design-renderer" data-agt-design-route="@Page.Route">
+            <div class="agt-design-renderer agt-design-renderer--preview" data-agt-design-route="@Page.Route">
                 @for (var index = 0; index < Page.Nodes.Count; index++)
                 {
                     <DesignPreviewNodeHost Node="Page.Nodes[index]"

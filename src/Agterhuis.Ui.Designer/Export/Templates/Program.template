@@ -1,8 +1,10 @@
 using Agterhuis.Ui.Extensions;
+using __PROJECT_NAME__.Components;
 __SERVICES_USING__
 
 var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.UseStaticWebAssets();
+builder.Services.AddAgterhuisUi();
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 
 // Seed data configuration

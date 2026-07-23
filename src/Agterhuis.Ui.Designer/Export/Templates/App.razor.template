@@ -1,5 +1,5 @@
-@using Agterhuis.Ui.Demo.Components.Layout
-@using Agterhuis.Ui.Demo.Components.Pages
+@using __PROJECT_NAME__.Components.Layout
+@using __PROJECT_NAME__.Components.Pages
 
 <HeadContent>
     <meta name="color-scheme" content="dark light" />

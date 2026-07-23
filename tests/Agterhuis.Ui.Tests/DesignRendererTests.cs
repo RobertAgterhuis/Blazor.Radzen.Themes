@@ -157,4 +157,40 @@ public sealed class DesignRendererTests
         var first = Assert.IsAssignableFrom<IDictionary<string, object?>>(data[0]);
         Assert.Equal("ATG-2024-00001", first["Dossiernummer"]?.ToString());
     }
+
+    [Fact]
+    public void DesignPreviewRenderer_BindsEnumValuesToDropDown()
+    {
+        using var ctx = new BunitContext();
+        ctx.Services.AddRadzenComponents();
+        ctx.JSInterop.Mode = JSRuntimeMode.Loose;
+
+        var model = DesignDataModelSeeder.CreateDefault();
+        var dataContext = new DesignDataContext(model);
+        var page = new DesignPage
+        {
+            Route = "/preview-dropdown",
+            Title = "Preview dropdown",
+            Nodes =
+            [
+                new DesignNode
+                {
+                    ComponentType = "AgtDropdown",
+                    Parameters = new Dictionary<string, DesignParameterValue>(StringComparer.Ordinal)
+                    {
+                        ["Label"] = DesignParameterValue.FromValue("Status"),
+                        ["AriaLabel"] = DesignParameterValue.FromValue("Status"),
+                        ["Data"] = new DesignParameterValue { Expression = "@entities.Schadedossier.Select(item => item.Status)" }
+                    }
+                }
+            ]
+        };
+
+        var cut = ctx.Render<DesignPreviewRenderer>(parameters => parameters
+            .Add(component => component.Page, page)
+            .Add(component => component.DataContext, dataContext));
+
+        Assert.DoesNotContain("agt-design-node-error", cut.Markup, StringComparison.Ordinal);
+        Assert.Contains("Nieuw", cut.Markup, StringComparison.Ordinal);
+    }
 }

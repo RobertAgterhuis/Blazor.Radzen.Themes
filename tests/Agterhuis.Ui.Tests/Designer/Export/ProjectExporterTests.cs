@@ -1,4 +1,5 @@
 using System.IO.Compression;
+using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
 using Agterhuis.Ui.Designer.Export;
@@ -301,9 +302,223 @@ public class ProjectExporterTests
         Assert.NotNull(result);
 
         using var archive = new ZipArchive(new MemoryStream(result.ZipData), ZipArchiveMode.Read);
-        Assert.Contains(archive.Entries, entry => entry.FullName == "MyApp/Components/Pages/.razor");
+        Assert.Contains(archive.Entries, entry => entry.FullName == "MyApp/Components/Pages/Home.razor");
         Assert.Contains(archive.Entries, entry => entry.FullName == "MyApp/Components/Pages/About.razor");
         Assert.Contains(archive.Entries, entry => entry.FullName == "MyApp/Components/Pages/Contact.razor");
+    }
+
+    [Fact]
+    public async Task ExportProject_UnpackedProject_RestoresBuildsAndStartsInIsolation()
+    {
+        var document = DesignDocumentTemplates.Create(DesignDocumentTemplateKind.FormPage, "Isolation Smoke");
+        var result = _exporter.ExportProject(document, "IsolationSmokeProject", "plum", includeSeedData: true);
+
+        var tempRoot = Path.Combine(Path.GetTempPath(), "agt-export-smoke", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(tempRoot);
+        var projectRoot = Path.Combine(tempRoot, "IsolationSmokeProject");
+        var cliHome = Path.Combine(tempRoot, "cli-home");
+        Directory.CreateDirectory(cliHome);
+
+        try
+        {
+            using (var archive = new ZipArchive(new MemoryStream(result.ZipData), ZipArchiveMode.Read))
+            {
+                archive.ExtractToDirectory(tempRoot, overwriteFiles: true);
+            }
+
+            Assert.True(File.Exists(Path.Combine(projectRoot, "IsolationSmokeProject.csproj")));
+            Assert.True(File.Exists(Path.Combine(projectRoot, "wwwroot", "index.html")));
+            var pageFiles = Directory.GetFiles(Path.Combine(projectRoot, "Components", "Pages"), "*.razor", SearchOption.TopDirectoryOnly);
+            Assert.NotEmpty(pageFiles);
+            Assert.Contains(pageFiles.Select(File.ReadAllText), content => content.Contains("@page \"", StringComparison.Ordinal));
+
+            var repoRoot = FindRepositoryRoot();
+            var localFeed = Path.Combine(tempRoot, "feed");
+            Directory.CreateDirectory(localFeed);
+
+            var libraryProject = Path.Combine(repoRoot, "src", "Agterhuis.Ui", "Agterhuis.Ui.csproj");
+            await RunDotNetAsync(
+                workingDirectory: Path.GetDirectoryName(libraryProject)!,
+                cliHomeDirectory: cliHome,
+                arguments: ["pack", libraryProject, "-c", "Release", "-o", localFeed]);
+
+            var packagePath = Directory.GetFiles(localFeed, "Agterhuis.Ui.*.nupkg", SearchOption.TopDirectoryOnly)
+                .Single(path => !path.EndsWith(".snupkg", StringComparison.OrdinalIgnoreCase));
+            var packageVersion = Path.GetFileNameWithoutExtension(packagePath)["Agterhuis.Ui.".Length..];
+
+            var projectFilePath = Path.Combine(projectRoot, "IsolationSmokeProject.csproj");
+            var projectFileContent = await File.ReadAllTextAsync(projectFilePath);
+            projectFileContent = projectFileContent.Replace("Version=\"1.0.0\"", $"Version=\"{packageVersion}\"", StringComparison.Ordinal);
+            await File.WriteAllTextAsync(projectFilePath, projectFileContent);
+
+            var nugetConfigPath = Path.Combine(projectRoot, "NuGet.config");
+            await File.WriteAllTextAsync(
+                nugetConfigPath,
+                $"""
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <packageSources>
+    <clear />
+        <add key="local" value="{localFeed.Replace("&", "&amp;", StringComparison.Ordinal)}" />
+        <add key="nuget.org" value="https://api.nuget.org/v3/index.json" />
+  </packageSources>
+</configuration>
+""");
+
+            await RunDotNetAsync(
+                workingDirectory: projectRoot,
+                cliHomeDirectory: cliHome,
+                arguments: ["restore", "IsolationSmokeProject.csproj"]);
+
+            await RunDotNetAsync(
+                workingDirectory: projectRoot,
+                cliHomeDirectory: cliHome,
+                arguments: ["build", "IsolationSmokeProject.csproj", "-c", "Release", "--no-restore"]);
+
+            await StartDotNetAndWaitForOutputAsync(
+                workingDirectory: projectRoot,
+                cliHomeDirectory: cliHome,
+                arguments: ["run", "--project", "IsolationSmokeProject.csproj", "--no-build", "-c", "Release", "--urls", "http://127.0.0.1:5188"],
+                requiredOutput: "Now listening on");
+        }
+        finally
+        {
+            try
+            {
+                Directory.Delete(tempRoot, recursive: true);
+            }
+            catch
+            {
+                // Ignore cleanup failures in temp directories.
+            }
+        }
+    }
+
+    private static string FindRepositoryRoot()
+    {
+        var currentDirectory = AppContext.BaseDirectory;
+
+        while (!string.IsNullOrWhiteSpace(currentDirectory))
+        {
+            if (File.Exists(Path.Combine(currentDirectory, "Agterhuis.Ui.sln")))
+            {
+                return currentDirectory;
+            }
+
+            var parent = Directory.GetParent(currentDirectory);
+            if (parent is null)
+            {
+                break;
+            }
+
+            currentDirectory = parent.FullName;
+        }
+
+        throw new InvalidOperationException("Unable to locate repository root.");
+    }
+
+    private static async Task RunDotNetAsync(string workingDirectory, string cliHomeDirectory, IReadOnlyList<string> arguments)
+    {
+        var executable = OperatingSystem.IsWindows() ? "dotnet.exe" : "dotnet";
+        var commandLine = string.Join(" ", arguments);
+        var startInfo = new ProcessStartInfo(executable)
+        {
+            WorkingDirectory = workingDirectory,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false
+        };
+        startInfo.Environment["DOTNET_CLI_HOME"] = cliHomeDirectory;
+
+        foreach (var argument in arguments)
+        {
+            startInfo.ArgumentList.Add(argument);
+        }
+
+        using var process = Process.Start(startInfo) ?? throw new InvalidOperationException($"Failed to start dotnet {commandLine}.");
+        var output = await process.StandardOutput.ReadToEndAsync();
+        var error = await process.StandardError.ReadToEndAsync();
+        await process.WaitForExitAsync();
+
+        if (process.ExitCode != 0)
+        {
+            throw new Xunit.Sdk.XunitException($"dotnet {commandLine} failed in {workingDirectory}.{Environment.NewLine}{output}{Environment.NewLine}{error}");
+        }
+    }
+
+    private static async Task StartDotNetAndWaitForOutputAsync(
+        string workingDirectory,
+        string cliHomeDirectory,
+        IReadOnlyList<string> arguments,
+        string requiredOutput)
+    {
+        var executable = OperatingSystem.IsWindows() ? "dotnet.exe" : "dotnet";
+        var commandLine = string.Join(" ", arguments);
+        var startInfo = new ProcessStartInfo(executable)
+        {
+            WorkingDirectory = workingDirectory,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false
+        };
+        startInfo.Environment["DOTNET_CLI_HOME"] = cliHomeDirectory;
+
+        foreach (var argument in arguments)
+        {
+            startInfo.ArgumentList.Add(argument);
+        }
+
+        using var process = Process.Start(startInfo) ?? throw new InvalidOperationException($"Failed to start dotnet {commandLine}.");
+
+        var startDeadline = DateTime.UtcNow.AddSeconds(45);
+        var stdout = new StringBuilder();
+        var stderr = new StringBuilder();
+        while (DateTime.UtcNow < startDeadline)
+        {
+            var line = await process.StandardOutput.ReadLineAsync();
+            if (!string.IsNullOrEmpty(line))
+            {
+                stdout.AppendLine(line);
+                if (line.Contains(requiredOutput, StringComparison.OrdinalIgnoreCase))
+                {
+                    if (!process.HasExited)
+                    {
+                        process.Kill(entireProcessTree: true);
+                        await process.WaitForExitAsync();
+                    }
+
+                    return;
+                }
+            }
+
+            if (process.HasExited)
+            {
+                var errText = await process.StandardError.ReadToEndAsync();
+                stderr.Append(errText);
+                break;
+            }
+        }
+
+        if (!process.HasExited)
+        {
+            try
+            {
+                process.Kill(entireProcessTree: true);
+                await process.WaitForExitAsync();
+            }
+            catch
+            {
+                // Ignore kill failures.
+            }
+        }
+
+        if (stderr.Length == 0)
+        {
+            stderr.Append(await process.StandardError.ReadToEndAsync());
+        }
+
+        throw new Xunit.Sdk.XunitException(
+            $"dotnet {commandLine} did not emit '{requiredOutput}' in time.{Environment.NewLine}{stdout}{Environment.NewLine}{stderr}");
     }
 
     private static DesignNode CreateValidNode(string id)

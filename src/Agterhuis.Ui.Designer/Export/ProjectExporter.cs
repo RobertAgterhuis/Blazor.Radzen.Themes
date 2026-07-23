@@ -87,7 +87,10 @@ public sealed class ProjectExporter
         foreach (var page in document.Pages)
         {
             var razorCode = _codeGenerator.GeneratePageCode(page, document);
-            var fileName = ToPascalCase(page.Route.TrimStart('/').Replace('/', '-')) + ".razor";
+            var normalizedRoute = page.Route.TrimStart('/').Replace('/', '-');
+            var fileName = string.IsNullOrWhiteSpace(normalizedRoute)
+                ? "Home.razor"
+                : ToPascalCase(normalizedRoute) + ".razor";
             projectFiles[$"{pagesPath}/{fileName}"] = razorCode;
         }
 
@@ -141,6 +144,7 @@ public sealed class ProjectExporter
             [$"{projectName}/Components/Routes.razor"] = LoadTemplateText("Routes.razor.template", projectName, themeFamily),
             [$"{projectName}/Components/App.razor"] = LoadTemplateText("App.razor.template", projectName, themeFamily),
             [$"{projectName}/Components/Layout/MainLayout.razor"] = LoadTemplateText("Components.Layout.MainLayout.template", projectName, themeFamily),
+            [$"{projectName}/wwwroot/index.html"] = LoadTemplateText("wwwroot.index.html.template", projectName, themeFamily),
             [$"{projectName}/wwwroot/app.css"] = LoadTemplateText("wwwroot.app.css.template", projectName, themeFamily)
         };
     }

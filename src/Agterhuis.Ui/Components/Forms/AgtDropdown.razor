@@ -17,6 +17,9 @@
                     Data="@Data"
                     Value="@Value"
                     ValueChanged="@ValueChanged"
+                    Change="@Change"
+                    Open="@Open"
+                    Close="@Close"
                     ValueExpression="@ValueExpression"
                     Name="@ResolvedName"
                     TextProperty="@TextProperty"
@@ -43,6 +46,15 @@
 
     [Parameter]
     public EventCallback<TValue> ValueChanged { get; set; }
+
+    [Parameter]
+    public EventCallback<object?> Change { get; set; }
+
+    [Parameter]
+    public EventCallback Open { get; set; }
+
+    [Parameter]
+    public EventCallback Close { get; set; }
 
     [Parameter]
     public Expression<Func<TValue>>? ValueExpression { get; set; }

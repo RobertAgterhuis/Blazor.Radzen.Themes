@@ -106,14 +106,7 @@ else if (_descriptor is not null)
             }
         }
 
-        if (DataContext is not null && IsGridComponent(Node.ComponentType) && !parameters.ContainsKey("Data"))
-        {
-            var entityName = TryParseEntityName(Node.Parameters.GetValueOrDefault("Data")?.Expression);
-            if (!string.IsNullOrWhiteSpace(entityName))
-            {
-                parameters["Data"] = CreateDataItems(entityName!);
-            }
-        }
+        InjectPreviewDefaults(descriptor, parameters);
 
         if (string.Equals(Node.ComponentType, "AgtNavLink", StringComparison.Ordinal)
             && OnNavigate.HasDelegate
@@ -128,6 +121,38 @@ else if (_descriptor is not null)
         }
 
         return parameters;
+    }
+
+    private void InjectPreviewDefaults(DesignerComponentDescriptor descriptor, Dictionary<string, object?> parameters)
+    {
+        if (DataContext is null)
+        {
+            return;
+        }
+
+        if (IsGridComponent(Node.ComponentType) && !parameters.ContainsKey("Data"))
+        {
+            var gridEntityName = TryParseEntityName(Node.Parameters.GetValueOrDefault("Data")?.Expression)
+                ?? DataContext.EntityNames.FirstOrDefault();
+            if (!string.IsNullOrWhiteSpace(gridEntityName))
+            {
+                parameters["Data"] = CreateDataItems(gridEntityName);
+            }
+        }
+
+        if (IsDropdownComponent(Node.ComponentType)
+            && (!parameters.ContainsKey("Data") || HasDropdownFieldDataExpression()))
+        {
+            InjectDropdownPreviewData(parameters);
+        }
+
+        if (IsPreviewFormComponent(Node.ComponentType)
+            && descriptor.Parameters.Any(static parameter => string.Equals(parameter.Name, "Value", StringComparison.Ordinal))
+            && !parameters.ContainsKey("Value")
+            && TryResolveSampleField(parameters, out var sampleEntityName, out var field))
+        {
+            parameters["Value"] = DataContext.GetSampleValue(sampleEntityName, field.Name);
+        }
     }
 
     private object? BindParameter(DesignParameterValue value, Type targetType, string parameterName)
@@ -247,6 +272,43 @@ else if (_descriptor is not null)
         return items;
     }
 
+    private void InjectDropdownPreviewData(Dictionary<string, object?> parameters)
+    {
+        if (!TryResolveSampleField(parameters, out var entityName, out var field))
+        {
+            return;
+        }
+
+        var optionValues = field.Type == DesignFieldType.Enum && field.EnumValues.Count > 0
+            ? field.EnumValues
+            : DataContext?.GetRows(entityName, 5)
+                .Select(row => row.Values.TryGetValue(field.Name, out var value) ? value?.ToString() : null)
+                .Where(static value => !string.IsNullOrWhiteSpace(value))
+                .Select(static value => value!)
+                .Distinct(StringComparer.Ordinal)
+                .ToList()
+            ?? [];
+
+        if (optionValues.Count == 0)
+        {
+            return;
+        }
+
+        parameters["Data"] = optionValues.Select(static value => new PreviewOptionItem(value, value)).ToArray();
+        parameters["TextProperty"] = nameof(PreviewOptionItem.Text);
+        parameters["ValueProperty"] = nameof(PreviewOptionItem.Value);
+
+        if (!parameters.ContainsKey("Value"))
+        {
+            parameters["Value"] = optionValues[0];
+        }
+    }
+
+    private bool HasDropdownFieldDataExpression()
+        => Node.Parameters.TryGetValue("Data", out var value)
+            && !string.IsNullOrWhiteSpace(value.Expression)
+            && !string.IsNullOrWhiteSpace(TryParseSelectedField(value.Expression!));
+
     private static string? TryParseEntityName(string? expression)
     {
         if (string.IsNullOrWhiteSpace(expression))
@@ -293,8 +355,196 @@ else if (_descriptor is not null)
     private static bool IsGridComponent(string componentType)
         => componentType is "RadzenDataGrid" or "AgtDataGrid";
 
+    private static bool IsDropdownComponent(string componentType)
+        => componentType is "AgtDropdown" or "RadzenDropDown";
+
+    private static bool IsPreviewFormComponent(string componentType)
+        => componentType is "AgtTextField" or "AgtNumericField" or "AgtDatePicker"
+            or "AgtDropdown" or "AgtSwitch" or "AgtTextArea" or "AgtCheckboxField"
+            or "RadzenTextBox" or "RadzenNumeric" or "RadzenDatePicker"
+            or "RadzenDropDown" or "RadzenCheckBox" or "RadzenSwitch";
+
     private static bool IsCollectionTarget(Type targetType)
         => targetType != typeof(string) && typeof(System.Collections.IEnumerable).IsAssignableFrom(targetType);
+
+    private bool TryResolveSampleField(IReadOnlyDictionary<string, object?> parameters, out string entityName, out DesignField field)
+    {
+        if (TryResolveFieldFromBinding(out entityName, out field))
+        {
+            return true;
+        }
+
+        if (TryResolveFieldFromDataExpression(out entityName, out field))
+        {
+            return true;
+        }
+
+        var label = parameters.TryGetValue("Label", out var labelValue)
+            ? labelValue?.ToString()
+            : null;
+
+        return TryResolveFieldFromLabel(label, out entityName, out field);
+    }
+
+    private bool TryResolveFieldFromBinding(out string entityName, out DesignField field)
+    {
+        entityName = string.Empty;
+        field = default!;
+
+        if (!Node.Parameters.TryGetValue("Value", out var value)
+            || string.IsNullOrWhiteSpace(value.Expression))
+        {
+            return false;
+        }
+
+        return TryResolveFieldReference(value.Expression!, out entityName, out field);
+    }
+
+    private bool TryResolveFieldFromDataExpression(out string entityName, out DesignField field)
+    {
+        entityName = string.Empty;
+        field = default!;
+
+        if (!Node.Parameters.TryGetValue("Data", out var value)
+            || string.IsNullOrWhiteSpace(value.Expression))
+        {
+            return false;
+        }
+
+        var expression = value.Expression!;
+        var selectedField = TryParseSelectedField(expression);
+        var resolvedEntityName = TryParseEntityName(expression);
+        if (string.IsNullOrWhiteSpace(selectedField) || string.IsNullOrWhiteSpace(resolvedEntityName))
+        {
+            return false;
+        }
+
+        return TryResolveFieldByName(resolvedEntityName!, selectedField!, out entityName, out field);
+    }
+
+    private bool TryResolveFieldFromLabel(string? label, out string entityName, out DesignField field)
+    {
+        entityName = string.Empty;
+        field = default!;
+
+        if (string.IsNullOrWhiteSpace(label) || DataContext is null)
+        {
+            return false;
+        }
+
+        var normalizedLabel = NormalizeToken(label);
+        foreach (var entity in DataContext.DataModel.Entities)
+        {
+            var matchedField = entity.Fields.FirstOrDefault(candidate =>
+                string.Equals(NormalizeToken(candidate.Name), normalizedLabel, StringComparison.Ordinal)
+                || string.Equals(NormalizeToken(candidate.DisplayLabel ?? string.Empty), normalizedLabel, StringComparison.Ordinal));
+
+            if (matchedField is not null)
+            {
+                entityName = entity.Name;
+                field = matchedField;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private bool TryResolveFieldReference(string expression, out string entityName, out DesignField field)
+    {
+        entityName = string.Empty;
+        field = default!;
+
+        var trimmed = expression.Trim();
+        if (trimmed.StartsWith("{binding:", StringComparison.OrdinalIgnoreCase) && trimmed.EndsWith("}", StringComparison.Ordinal))
+        {
+            trimmed = trimmed[9..^1].Trim();
+        }
+
+        if (trimmed.StartsWith("@", StringComparison.Ordinal))
+        {
+            trimmed = trimmed[1..];
+        }
+
+        if (trimmed.StartsWith("entities.", StringComparison.OrdinalIgnoreCase))
+        {
+            var resolvedEntity = TryParseEntityName(trimmed);
+            var selectedField = TryParseSelectedField(trimmed);
+            if (!string.IsNullOrWhiteSpace(resolvedEntity) && !string.IsNullOrWhiteSpace(selectedField))
+            {
+                return TryResolveFieldByName(resolvedEntity!, selectedField!, out entityName, out field);
+            }
+        }
+
+        var dotIndex = trimmed.IndexOf('.', StringComparison.Ordinal);
+        if (dotIndex <= 0 || dotIndex + 1 >= trimmed.Length)
+        {
+            return false;
+        }
+
+        return TryResolveFieldByName(trimmed[..dotIndex].Trim(), trimmed[(dotIndex + 1)..].Trim(), out entityName, out field);
+    }
+
+    private bool TryResolveFieldByName(string candidateEntityName, string candidateFieldName, out string entityName, out DesignField field)
+    {
+        entityName = string.Empty;
+        field = default!;
+
+        if (DataContext is null)
+        {
+            return false;
+        }
+
+        var normalizedEntityName = NormalizeToken(candidateEntityName);
+        var normalizedFieldName = NormalizeToken(candidateFieldName);
+
+        foreach (var entity in DataContext.DataModel.Entities)
+        {
+            if (!string.Equals(NormalizeToken(entity.Name), normalizedEntityName, StringComparison.Ordinal)
+                && !string.Equals(NormalizeToken(entity.PluralName), normalizedEntityName, StringComparison.Ordinal))
+            {
+                continue;
+            }
+
+            var matchedField = entity.Fields.FirstOrDefault(candidate =>
+                string.Equals(NormalizeToken(candidate.Name), normalizedFieldName, StringComparison.Ordinal)
+                || string.Equals(NormalizeToken(candidate.DisplayLabel ?? string.Empty), normalizedFieldName, StringComparison.Ordinal));
+
+            if (matchedField is null)
+            {
+                return false;
+            }
+
+            entityName = entity.Name;
+            field = matchedField;
+            return true;
+        }
+
+        return false;
+    }
+
+    private static string NormalizeToken(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return string.Empty;
+        }
+
+        Span<char> buffer = stackalloc char[value.Length];
+        var length = 0;
+
+        foreach (var character in value)
+        {
+            if (char.IsLetterOrDigit(character))
+            {
+                buffer[length++] = char.ToLowerInvariant(character);
+            }
+        }
+
+        return new string(buffer[..length]);
+    }
+
+    private sealed record PreviewOptionItem(string Text, string Value);
 
     private object CreateSlotValue(Type slotType, IReadOnlyList<DesignNode> children, string slotPath)
     {

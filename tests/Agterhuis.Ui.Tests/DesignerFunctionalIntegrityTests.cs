@@ -85,7 +85,7 @@ public sealed class DesignerFunctionalIntegrityTests
     }
 
     [Fact]
-    public void DesignerCanvasNode_FindingDfi002b_UsesSeededPlaceholderFromDesignDataContext()
+    public void DesignerCanvasNode_FindingDfi002b_UsesFriendlyPlaceholderFromDesignDataContext()
     {
         using var ctx = new BunitContext();
         ctx.Services.AddRadzenComponents();
@@ -109,7 +109,33 @@ public sealed class DesignerFunctionalIntegrityTests
             .Add(component => component.Registry, Agterhuis.Ui.Designer.Registry.DesignerComponentRegistry.Instance)
             .Add(component => component.DesignDataContext, context));
 
-        Assert.Contains("Klant 1", cut.Markup, StringComparison.Ordinal);
+        Assert.Contains("Bijv. klantnaam...", cut.Markup, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void DesignerCanvasNode_Func002_DoesNotInjectUnsupportedPlaceholderForAgtSwitch()
+    {
+        using var ctx = new BunitContext();
+        ctx.Services.AddRadzenComponents();
+        ctx.JSInterop.Mode = JSRuntimeMode.Loose;
+
+        var node = new DesignNode
+        {
+            ComponentType = "AgtSwitch",
+            Parameters = new Dictionary<string, DesignParameterValue>(StringComparer.Ordinal)
+            {
+                ["Label"] = DesignParameterValue.FromValue("Voorbeeld schakelaar"),
+                ["AriaLabel"] = DesignParameterValue.FromValue("Voorbeeld schakelaar")
+            }
+        };
+
+        var cut = ctx.Render<DesignerCanvasNode>(parameters => parameters
+            .Add(component => component.Node, node)
+            .Add(component => component.Registry, Agterhuis.Ui.Designer.Registry.DesignerComponentRegistry.Instance)
+            .Add(component => component.DesignDataContext, new DesignDataContext(DesignDataModelSeeder.CreateDefault())));
+
+        var errorNode = cut.FindAll(".designer-canvas-node__error").FirstOrDefault();
+        Assert.Null(errorNode);
     }
 
     [Fact]

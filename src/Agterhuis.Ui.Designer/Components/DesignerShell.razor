@@ -66,7 +66,7 @@
                         </label>
                         <div class="designer-menu__row">
                             <label for="designer-saved-docs">Open opgeslagen</label>
-                            <RadzenDropDown id="designer-saved-docs" TValue="string" Data="SavedDocumentNames" @bind-Value="_selectedSavedName" Placeholder="Selecteer" Change="@(async (object _) => await OnSavedSelectionChanged(_selectedSavedName))" />
+                            <RadzenDropDown id="designer-saved-docs" TValue="string" Data="SavedDocumentNames" @bind-Value="_selectedSavedName" Placeholder="Selecteer" Change="OnSavedDocumentDropdownChanged" />
                         </div>
                         <button type="button" class="designer-menu__item" role="menuitem" @onclick="OnSaveDocument">Opslaan</button>
                         <button type="button" class="designer-menu__item" role="menuitem" @onclick="OpenVersionHistoryAsync">Versiegeschiedenis</button>
@@ -142,8 +142,9 @@
                 <div class="designer-toolbar__theme" role="group" aria-label="Thema">
                     <RadzenDropDown TValue="string"
                                     Data="CanvasThemeOptions"
-                                    @bind-Value="_canvasTheme"
-                                    Change="@(async (object v) => await CanvasThemeChanged.InvokeAsync(_canvasTheme))"
+                                    Value="@_canvasTheme"
+                                    ValueChanged="OnToolbarCanvasThemeValueChanged"
+                                    Open="OnToolbarThemeDropdownOpened"
                                     Style="min-width: 150px;"
                                     Placeholder="Thema" />
                     <button type="button"
@@ -286,8 +287,8 @@
                                                     @ondragend="OnDragEnd"
                                                     @onclick="() => OnPaletteItemClickedAsync(descriptor.ComponentType)"
                                                     title="@(descriptor.DesignerDescription ?? descriptor.ComponentType)">
-                                                <RadzenIcon Icon="@(descriptor.DesignerIcon ?? descriptor.Icon)" />
-                                                <span class="designer-palette-card__name">@(descriptor.DesignerDisplayName ?? descriptor.DisplayName)</span>
+                                                <RadzenIcon Icon="@GetPaletteIcon(descriptor)" />
+                                                <span class="designer-palette-card__name">@GetPaletteDisplayName(descriptor)</span>
                                             </button>
                                         }
                                     </div>
@@ -392,7 +393,14 @@
                             @for (var crumbIndex = 0; crumbIndex < SelectionBreadcrumbParts.Count; crumbIndex++)
                             {
                                 var crumb = SelectionBreadcrumbParts[crumbIndex];
-                                <button type="button" class="designer-breadcrumb__item" @onclick="() => OnSelectNode(crumb.NodeId)">@crumb.Label</button>
+                                @if (crumb.IsSelectable && crumb.NodeId is not null)
+                                {
+                                    <button type="button" class="designer-breadcrumb__item" @onclick="() => OnSelectNode(crumb.NodeId)">@crumb.Label</button>
+                                }
+                                else
+                                {
+                                    <span class="designer-breadcrumb__item">@crumb.Label</span>
+                                }
                                 if (crumbIndex < SelectionBreadcrumbParts.Count - 1)
                                 {
                                     <span class="designer-breadcrumb__sep">&gt;</span>
@@ -690,7 +698,14 @@
                     <h3>Nieuw document</h3>
                     <div class="designer-modal__content">
                         <label for="designer-template-kind">Template</label>
-                        <RadzenDropDown id="designer-template-kind" TValue="DesignDocumentTemplateKind" Data="TemplateOptions" @bind-Value="_selectedTemplateKind" TextProperty="DisplayName" ValueProperty="Kind" />
+                        <RadzenDropDown id="designer-template-kind"
+                                        TValue="DesignDocumentTemplateKind"
+                                        Data="TemplateOptions"
+                                        Value="@_selectedTemplateKind"
+                                        Open="OnNewDocumentTemplateDropdownOpened"
+                                        Change="OnNewDocumentTemplateChanged"
+                                        TextProperty="DisplayName"
+                                        ValueProperty="Kind" />
                     </div>
                     <div class="designer-modal__actions">
                         <RadzenButton Text="Aanmaken" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Flat" Click="CreateNewDocumentFromDialogAsync" />

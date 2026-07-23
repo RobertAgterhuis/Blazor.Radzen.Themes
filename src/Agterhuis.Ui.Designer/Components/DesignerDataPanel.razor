@@ -1,12 +1,22 @@
 @using System.Globalization
 @using System.Text
 @using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.JSInterop
 @using Agterhuis.Ui.Designer.Model
 
 <section class="designer-data-panel">
     <h2>Data</h2>
     <div class="designer-data-panel__controls">
-        <AgtDropdown TValue="string" Label="Entiteit" AriaLabel="Entiteit" Data="EntityOptions" Value="@SelectedEntityName" ValueChanged="OnEntityChanged" TextProperty="Label" ValueProperty="Value" />
+        <AgtDropdown TValue="string"
+                     Label="Entiteit"
+                     AriaLabel="Entiteit"
+                     Data="EntityOptions"
+                     Value="@SelectedEntityName"
+                     ValueChanged="OnEntityValueChanged"
+                     Open="OnEntityDropdownOpened"
+                     Change="OnEntityDropdownChanged"
+                     TextProperty="Label"
+                     ValueProperty="Value" />
         <AgtNumericField Label="Rijen" AriaLabel="Seed rijen" Value="@(Convert.ToDecimal(CurrentEntity?.Seed.RowCount ?? DataModel.RowCount))" ValueChanged="OnRowCountChanged" Min="1" Step="1" />
         <AgtNumericField Label="Seed" AriaLabel="Seed waarde" Value="@(Convert.ToDecimal(CurrentEntity?.Seed.Seed ?? DataModel.Seed))" ValueChanged="OnSeedChanged" Min="1" Step="1" />
         <RadzenButton Text="Formulier genereren" ButtonStyle="ButtonStyle.Base" Variant="Variant.Flat" Click="OnGenerateFormRequested" />
@@ -144,6 +154,9 @@
     [Parameter]
     public EventCallback<(IReadOnlyList<DesignEntity> Entities, SchemaImportApplyOptions Options)> ImportEntitiesRequested { get; set; }
 
+    [Inject]
+    public IJSRuntime JS { get; set; } = default!;
+
     private bool _showImportDialog;
     private SchemaImportSourceType _importSource = SchemaImportSourceType.JsonSchema;
     private SchemaImportConflictResolution _conflictResolution = SchemaImportConflictResolution.Rename;
@@ -157,7 +170,43 @@
     private sealed record EntityOption(string Label, string Value);
     private IReadOnlyList<EntityOption> EntityOptions => DataModel.Entities.OrderBy(static entity => entity.Name, StringComparer.Ordinal).Select(static entity => new EntityOption(entity.PluralName, entity.Name)).ToArray();
     protected override void OnParametersSet() { SelectedEntityName ??= DataModel.Entities.FirstOrDefault()?.Name; }
-    private async Task OnEntityChanged(string value) { SelectedEntityName = value; await SelectedEntityNameChanged.InvokeAsync(value); }
+    private Task OnEntityValueChanged(string value)
+    {
+        SelectedEntityName = value;
+        return Task.CompletedTask;
+    }
+
+    private async Task OnEntityChanged(string value)
+    {
+        SelectedEntityName = value;
+        await SelectedEntityNameChanged.InvokeAsync(value);
+    }
+
+    private Task OnEntityDropdownOpened() => Task.CompletedTask;
+
+    private async Task OnEntityDropdownChanged(object? value)
+    {
+        var selected = value?.ToString();
+        if (!string.IsNullOrWhiteSpace(selected))
+        {
+            await OnEntityChanged(selected);
+        }
+
+        await CloseRadzenPopupsBestEffortAsync();
+        await Task.Yield();
+    }
+
+    private async Task CloseRadzenPopupsBestEffortAsync()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("agtTheme.closeAllPopups");
+        }
+        catch (JSException)
+        {
+            // Best-effort close to prevent popup-stuck states in the designer shell.
+        }
+    }
     private Task OnRowCountChanged(decimal? value)
     {
         if (CurrentEntity is not null && value.HasValue)

@@ -193,6 +193,86 @@ window.designerInterop = (() => {
     let codeEditorChangeTimeout = null;
     let codeEditorSyncInProgress = false;
     let jsonEditorSyncInProgress = false;
+    let designerThemeSnapshot = null;
+    let dropdownGuardAttached = false;
+    let dropdownGuardClickHandler = null;
+    let dropdownGuardKeyHandler = null;
+
+    const dropdownOptionSelector = [
+        ".rz-dropdown-item",
+        ".rz-multiselect-item",
+        ".rz-listbox-item",
+        ".rz-autocomplete-list li"
+    ].join(", ");
+
+    const closeRadzenPopupsBestEffort = () => {
+        try {
+            if (typeof window.agtTheme?.closeAllPopups === "function") {
+                window.agtTheme.closeAllPopups();
+            }
+        }
+        catch {
+        }
+    };
+
+    const attachDropdownGuard = () => {
+        if (dropdownGuardAttached) {
+            return;
+        }
+
+        dropdownGuardClickHandler = (event) => {
+            const target = event.target;
+            if (!(target instanceof Element) || !target.closest(dropdownOptionSelector)) {
+                return;
+            }
+
+            window.setTimeout(closeRadzenPopupsBestEffort, 0);
+        };
+
+        dropdownGuardKeyHandler = (event) => {
+            if (event.key !== "Enter" && event.key !== " ") {
+                return;
+            }
+
+            const active = document.activeElement;
+            if (!(active instanceof Element)) {
+                return;
+            }
+
+            const onOption = !!active.closest(dropdownOptionSelector);
+            const onExpandedCombo = active.getAttribute("role") === "combobox"
+                && active.classList.contains("rz-dropdown")
+                && active.getAttribute("aria-expanded") === "true";
+
+            if (!onOption && !onExpandedCombo) {
+                return;
+            }
+
+            window.setTimeout(closeRadzenPopupsBestEffort, 0);
+        };
+
+        document.addEventListener("click", dropdownGuardClickHandler, true);
+        document.addEventListener("keydown", dropdownGuardKeyHandler, true);
+        dropdownGuardAttached = true;
+    };
+
+    const detachDropdownGuard = () => {
+        if (!dropdownGuardAttached) {
+            return;
+        }
+
+        if (dropdownGuardClickHandler) {
+            document.removeEventListener("click", dropdownGuardClickHandler, true);
+        }
+
+        if (dropdownGuardKeyHandler) {
+            document.removeEventListener("keydown", dropdownGuardKeyHandler, true);
+        }
+
+        dropdownGuardClickHandler = null;
+        dropdownGuardKeyHandler = null;
+        dropdownGuardAttached = false;
+    };
 
     const setupCodeEditors = async (dotnetRef, codeContainer, jsonContainer) => {
         const monaco = await ensureMonaco();
@@ -323,6 +403,66 @@ window.designerInterop = (() => {
         monaco.editor.setTheme(themeName);
     };
 
+    const setDesignerShellActive = (isActive) => {
+        const active = !!isActive;
+        if (active) {
+            if (designerThemeSnapshot === null) {
+                designerThemeSnapshot = document.documentElement.getAttribute("data-agt-theme");
+            }
+            document.body.setAttribute("data-agt-designer-shell-active", "true");
+            attachDropdownGuard();
+            return;
+        }
+
+        document.body.removeAttribute("data-agt-designer-shell-active");
+        detachDropdownGuard();
+        restoreDesignerTheme();
+    };
+
+    const applyDesignerTheme = (theme) => {
+        if (typeof window.agtTheme?.setTheme === "function") {
+            window.agtTheme.setTheme(theme, false);
+            return;
+        }
+
+        const normalized = (theme || "").toString().trim();
+        if (!normalized) {
+            return;
+        }
+
+        document.documentElement.setAttribute("data-agt-theme", normalized);
+        if (document.body) {
+            document.body.setAttribute("data-agt-theme", normalized);
+        }
+    };
+
+    const restoreDesignerTheme = () => {
+        if (designerThemeSnapshot === null) {
+            return;
+        }
+
+        if (typeof window.agtTheme?.setTheme === "function") {
+            window.agtTheme.setTheme(designerThemeSnapshot, false);
+            designerThemeSnapshot = null;
+            return;
+        }
+
+        if (designerThemeSnapshot) {
+            document.documentElement.setAttribute("data-agt-theme", designerThemeSnapshot);
+            if (document.body) {
+                document.body.setAttribute("data-agt-theme", designerThemeSnapshot);
+            }
+        }
+        else {
+            document.documentElement.removeAttribute("data-agt-theme");
+            if (document.body) {
+                document.body.removeAttribute("data-agt-theme");
+            }
+        }
+
+        designerThemeSnapshot = null;
+    };
+
     const scrollToPropertyParameter = (parameterName) => {
         if (!parameterName) {
             return;
@@ -421,6 +561,9 @@ window.designerInterop = (() => {
         setCodeDiagnostics,
         scrollTreeItemIntoView,
         switchCodeTab,
-        setupResizablePanels
+        setupResizablePanels,
+        setDesignerShellActive,
+        applyDesignerTheme,
+        restoreDesignerTheme
     };
 })();

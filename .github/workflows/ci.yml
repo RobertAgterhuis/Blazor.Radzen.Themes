@@ -41,6 +41,9 @@ jobs:
       - name: Test (Release)
         run: dotnet test tests/Agterhuis.Ui.Tests/Agterhuis.Ui.Tests.csproj -c Release --no-build --logger "trx;LogFileName=test-results.trx" --results-directory artifacts/test-results
 
+      - name: Validate generated export isolation
+        run: dotnet test tests/Agterhuis.Ui.Tests/Agterhuis.Ui.Tests.csproj -c Release --no-build --filter "FullyQualifiedName~ProjectExporterTests.ExportProject_UnpackedProject_RestoresBuildsAndStartsInIsolation"
+
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4

@@ -6,6 +6,7 @@
 @using Radzen
 @using Radzen.Blazor
 @using Agterhuis.Ui
+@using Agterhuis.Ui.Components
 @using Agterhuis.Ui.Components.Buttons
 @using Agterhuis.Ui.Components.Layout
 @using Agterhuis.Ui.Components.Feedback
@@ -13,12 +14,7 @@
 @using Agterhuis.Ui.Components.Data
 @using Agterhuis.Ui.Services
 @using Agterhuis.Ui.Theming
-@using Agterhuis.Ui.Demo
-@using Agterhuis.Ui.Demo.Components
-@using Agterhuis.Ui.Demo.Components.Demo
-@using Agterhuis.Ui.Demo.Components.Designer
-@using Agterhuis.Ui.Demo.Components.Layout
-@using Agterhuis.Ui.Demo.Components.Pages
-@using Agterhuis.Ui.Demo.Components.Pages.App
-@using Agterhuis.Ui.Demo.Services
+@using __PROJECT_NAME__.Components
+@using __PROJECT_NAME__.Components.Layout
+@using __PROJECT_NAME__.Components.Pages
 @using System.Linq.Expressions

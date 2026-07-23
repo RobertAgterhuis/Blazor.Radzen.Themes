@@ -256,11 +256,14 @@ public partial class DesignerShell : IDisposable
             return;
         }
 
+        await JS.InvokeVoidAsync("designerInterop.setDesignerShellActive", true);
+        await JS.InvokeVoidAsync("designerInterop.applyDesignerTheme", _canvasTheme);
         await JS.InvokeVoidAsync("designerInterop.setupResizablePanels");
     }
 
     public void Dispose()
     {
+        _ = JS.InvokeVoidAsync("designerInterop.setDesignerShellActive", false);
         _commands.DocumentChanged -= OnCommandStackDocumentChanged;
         _validationDebounceCts?.Cancel();
         _validationDebounceCts?.Dispose();
@@ -287,9 +290,20 @@ public partial class DesignerShell : IDisposable
         _dragSourcePaletteComponentType = descriptor.ComponentType;
         await JS.InvokeVoidAsync(
             "designerInterop.setPaletteDragImage",
-            descriptor.DesignerIcon ?? descriptor.Icon,
-            descriptor.DesignerDisplayName ?? descriptor.DisplayName);
+            GetPaletteIcon(descriptor),
+            GetPaletteDisplayName(descriptor));
     }
+
+    private static string GetPaletteIcon(DesignerComponentDescriptor descriptor)
+        => DesignerComponentDisplayMap.Resolve(descriptor.ComponentType)?.Icon
+           ?? descriptor.DesignerIcon
+           ?? descriptor.Icon;
+
+    private static string GetPaletteDisplayName(DesignerComponentDescriptor descriptor)
+        => DesignerComponentDisplayMap.Resolve(descriptor.ComponentType)?.DisplayName
+           ?? descriptor.DesignerDisplayName
+           ?? descriptor.DisplayName;
+
     private Task OnDragStart(DesignerDragPayload payload)
     {
         _activeDrag = payload;
@@ -674,6 +688,8 @@ public partial class DesignerShell : IDisposable
         }
 
         _selectedSavedName = selected;
+        await CloseRadzenPopupsBestEffortAsync();
+        await Task.Yield();
         CloseAllMenus();
         var envelope = await Store.LoadAsync(selected);
         if (envelope is not null)
@@ -685,6 +701,9 @@ public partial class DesignerShell : IDisposable
             UpdateStartScreenState();
         }
     }
+
+    private Task OnSavedDocumentDropdownChanged(object? value)
+        => OnSavedSelectionChanged(value?.ToString() ?? _selectedSavedName);
 
     private async Task OnTemplateStartSelected(DesignDocumentTemplateKind kind)
     {
@@ -1003,10 +1022,44 @@ public partial class DesignerShell : IDisposable
 
     private async Task OnCanvasThemeChanged(string value)
     {
-        _canvasTheme = string.IsNullOrWhiteSpace(value) ? "plum-dark" : value;
+        var targetTheme = string.IsNullOrWhiteSpace(value) ? "plum-dark" : value;
+
+        await CloseRadzenPopupsBestEffortAsync();
+        await Task.Yield();
+
+        _canvasTheme = targetTheme;
+        await JS.InvokeVoidAsync("designerInterop.applyDesignerTheme", _canvasTheme);
         await CanvasThemeChanged.InvokeAsync(_canvasTheme);
-        // No explicit StateHasChanged — Blazor auto-renders after EventCallback completes.
-        // No CloseAllMenus — the Radzen dropdown manages its own popup lifecycle.
+    }
+
+    private Task OnToolbarCanvasThemeValueChanged(string value)
+        => OnCanvasThemeChanged(value);
+
+    private Task OnToolbarThemeDropdownOpened()
+    {
+        CloseAllMenus();
+        return Task.CompletedTask;
+    }
+
+    private Task OnNewDocumentTemplateDropdownOpened()
+    {
+        CloseAllMenus();
+        return Task.CompletedTask;
+    }
+
+    private async Task OnNewDocumentTemplateChanged(object? value)
+    {
+        if (value is DesignDocumentTemplateKind kind)
+        {
+            _selectedTemplateKind = kind;
+        }
+        else if (value is string text && Enum.TryParse<DesignDocumentTemplateKind>(text, out var parsed))
+        {
+            _selectedTemplateKind = parsed;
+        }
+
+        await CloseRadzenPopupsBestEffortAsync();
+        await Task.Yield();
     }
 
     private Task ToggleDarkLight()
@@ -1021,6 +1074,18 @@ public partial class DesignerShell : IDisposable
 
         var targetTheme = isDark ? $"{family}-light" : $"{family}-dark";
         return OnCanvasThemeChanged(targetTheme);
+    }
+
+    private async Task CloseRadzenPopupsBestEffortAsync()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("agtTheme.closeAllPopups");
+        }
+        catch (JSException)
+        {
+            // Closing Radzen popups is best-effort. Selection/theme updates should continue.
+        }
     }
 
     private async Task OnPageRouteChanged(string? value)
@@ -1950,12 +2015,73 @@ public partial class DesignerShell : IDisposable
             return [];
         }
 
-        return path.Select(static node => new SelectionBreadcrumbPart(node.Id, node.ComponentType)).ToArray();
+        var breadcrumbParts = new List<SelectionBreadcrumbPart>(path.Count * 2);
+        for (var index = 0; index < path.Count; index++)
+        {
+            var node = path[index];
+            breadcrumbParts.Add(new SelectionBreadcrumbPart(node.Id, node.ComponentType, true));
+
+            if (index >= path.Count - 1)
+            {
+                continue;
+            }
+
+            var childNode = path[index + 1];
+            if (TryFindChildSlotName(node, childNode.Id, out var slotName))
+            {
+                breadcrumbParts.Add(new SelectionBreadcrumbPart(null, DesignerDisplayText.GetSlotDisplayName(slotName), false));
+            }
+        }
+
+        return breadcrumbParts;
     }
 
-    private static IReadOnlyList<DesignerTreeNode> BuildTree(IReadOnlyList<DesignNode> nodes) => nodes.Select(BuildTreeNode).ToArray();
+    private static IReadOnlyList<DesignerTreeNode> BuildTree(IReadOnlyList<DesignNode> nodes)
+    {
+        var treeNodes = new List<DesignerTreeNode>(nodes.Count);
+        foreach (var node in nodes)
+        {
+            treeNodes.Add(BuildTreeNode(node));
+        }
 
-    private static DesignerTreeNode BuildTreeNode(DesignNode node) => new(node.Id, node.ComponentType, node.ComponentType, node.Children.OrderBy(static pair => pair.Key, StringComparer.Ordinal).SelectMany(static pair => pair.Value).Select(BuildTreeNode).ToArray());
+        return treeNodes;
+    }
+
+    private static DesignerTreeNode BuildTreeNode(DesignNode node, string? slotName = null)
+        => new(
+            node.Id,
+            string.IsNullOrWhiteSpace(slotName) ? node.ComponentType : $"{DesignerDisplayText.GetSlotDisplayName(slotName)}: {node.ComponentType}",
+            node.ComponentType,
+            BuildChildTreeNodes(node));
+
+    private static IReadOnlyList<DesignerTreeNode> BuildChildTreeNodes(DesignNode node)
+    {
+        var children = new List<DesignerTreeNode>();
+        foreach (var slot in node.Children.OrderBy(static pair => pair.Key, StringComparer.Ordinal))
+        {
+            foreach (var child in slot.Value)
+            {
+                children.Add(BuildTreeNode(child, slot.Key));
+            }
+        }
+
+        return children;
+    }
+
+    private static bool TryFindChildSlotName(DesignNode parentNode, string childNodeId, out string slotName)
+    {
+        foreach (var slot in parentNode.Children)
+        {
+            if (slot.Value.Any(child => string.Equals(child.Id, childNodeId, StringComparison.Ordinal)))
+            {
+                slotName = slot.Key;
+                return true;
+            }
+        }
+
+        slotName = string.Empty;
+        return false;
+    }
 
     private RenderFragment RenderTreeNodes(IReadOnlyList<DesignerTreeNode> nodes)
     {
@@ -3264,7 +3390,7 @@ public partial class DesignerShell : IDisposable
         };
     }
 
-    private sealed record SelectionBreadcrumbPart(string NodeId, string Label);
+    private sealed record SelectionBreadcrumbPart(string? NodeId, string Label, bool IsSelectable);
 
     private sealed record StatusBarMessage(string Icon, string Text, RenderFragment? Actions, bool Dismissable);
 
