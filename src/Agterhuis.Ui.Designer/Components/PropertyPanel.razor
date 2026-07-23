@@ -43,6 +43,11 @@ else
                     class="@TabClass(InspectorSection.Appearance)"
                     aria-selected="@(IsActiveSection(InspectorSection.Appearance))"
                     @onclick="() => SetActiveSection(InspectorSection.Appearance)">Weergave</button>
+                <button type="button"
+                    role="tab"
+                    class="@TabClass(InspectorSection.Style)"
+                    aria-selected="@(IsActiveSection(InspectorSection.Style))"
+                    @onclick="() => SetActiveSection(InspectorSection.Style)">Stijl</button>
         </div>
 
         <div class="designer-inspector-more-options">
@@ -174,6 +179,150 @@ else
             </section>
         }
 
+        @if (_activeSection == InspectorSection.Style && SelectedNode is not null)
+        {
+            <section class="designer-properties__group">
+                <h3>Afmetingen</h3>
+                <div class="designer-properties__layout-grid">
+                    <AgtTextField Label="Breedte" AriaLabel="CSS breedte"
+                                  Value="@GetStyle("width")"
+                                  ValueChanged="@(value => SetStyle("width", value))"
+                                  Placeholder="bijv. 100%, 200px, auto" />
+                    <AgtTextField Label="Hoogte" AriaLabel="CSS hoogte"
+                                  Value="@GetStyle("height")"
+                                  ValueChanged="@(value => SetStyle("height", value))"
+                                  Placeholder="bijv. auto, 300px" />
+                    <AgtTextField Label="Min. breedte" AriaLabel="CSS min-width"
+                                  Value="@GetStyle("min-width")"
+                                  ValueChanged="@(value => SetStyle("min-width", value))" />
+                    <AgtTextField Label="Max. breedte" AriaLabel="CSS max-width"
+                                  Value="@GetStyle("max-width")"
+                                  ValueChanged="@(value => SetStyle("max-width", value))" />
+                </div>
+            </section>
+
+            <section class="designer-properties__group">
+                <h3>Spacing</h3>
+                <div class="designer-properties__layout-grid">
+                    <AgtTextField Label="Padding" AriaLabel="CSS padding"
+                                  Value="@GetStyle("padding")"
+                                  ValueChanged="@(value => SetStyle("padding", value))"
+                                  Placeholder="bijv. 8px, 16px 24px" />
+                    <AgtTextField Label="Margin" AriaLabel="CSS margin"
+                                  Value="@GetStyle("margin")"
+                                  ValueChanged="@(value => SetStyle("margin", value))"
+                                  Placeholder="bijv. 0 auto, 16px 0" />
+                    <AgtTextField Label="Gap" AriaLabel="CSS gap"
+                                  Value="@GetStyle("gap")"
+                                  ValueChanged="@(value => SetStyle("gap", value))" />
+                </div>
+            </section>
+
+            <section class="designer-properties__group">
+                <h3>Typografie</h3>
+                <div class="designer-properties__layout-grid">
+                    <AgtTextField Label="Lettergrootte" AriaLabel="CSS font-size"
+                                  Value="@GetStyle("font-size")"
+                                  ValueChanged="@(value => SetStyle("font-size", value))"
+                                  Placeholder="bijv. 14px, 1rem" />
+                    <AgtDropdown TValue="string" Label="Letterdikte" AriaLabel="CSS font-weight"
+                                 Data="FontWeightOptions"
+                                 Value="@GetStyle("font-weight")"
+                                 ValueChanged="@(value => SetStyle("font-weight", value))"
+                                 TextProperty="Label" ValueProperty="Value" />
+                    <AgtDropdown TValue="string" Label="Tekstuitlijning" AriaLabel="CSS text-align"
+                                 Data="TextAlignOptions"
+                                 Value="@GetStyle("text-align")"
+                                 ValueChanged="@(value => SetStyle("text-align", value))"
+                                 TextProperty="Label" ValueProperty="Value" />
+                </div>
+            </section>
+
+            <section class="designer-properties__group">
+                <h3>Kleuren</h3>
+                <div class="designer-properties__layout-grid">
+                    <AgtDropdown TValue="string" Label="Achtergrond" AriaLabel="CSS background"
+                                 Data="BackgroundColorOptions"
+                                 Value="@GetStyle("background")"
+                                 ValueChanged="@(value => SetStyle("background", value))"
+                                 TextProperty="Label" ValueProperty="Value" />
+                    <AgtDropdown TValue="string" Label="Tekstkleur" AriaLabel="CSS color"
+                                 Data="TextColorOptions"
+                                 Value="@GetStyle("color")"
+                                 ValueChanged="@(value => SetStyle("color", value))"
+                                 TextProperty="Label" ValueProperty="Value" />
+                </div>
+                <div class="designer-properties__hint">Gebruik design tokens voor thema-compatibiliteit.</div>
+            </section>
+
+            <section class="designer-properties__group">
+                <h3>Border</h3>
+                <div class="designer-properties__layout-grid">
+                    <AgtTextField Label="Border" AriaLabel="CSS border"
+                                  Value="@GetStyle("border")"
+                                  ValueChanged="@(value => SetStyle("border", value))"
+                                  Placeholder="bijv. 1px solid var(--agt-border-subtle)" />
+                    <AgtTextField Label="Border-radius" AriaLabel="CSS border-radius"
+                                  Value="@GetStyle("border-radius")"
+                                  ValueChanged="@(value => SetStyle("border-radius", value))"
+                                  Placeholder="bijv. 8px, var(--agt-border-radius-md)" />
+                </div>
+            </section>
+
+            <section class="designer-properties__group">
+                <h3>Layout</h3>
+                <div class="designer-properties__layout-grid">
+                    <AgtDropdown TValue="string" Label="Display" AriaLabel="CSS display"
+                                 Data="DisplayOptions"
+                                 Value="@GetStyle("display")"
+                                 ValueChanged="@(value => SetStyle("display", value))"
+                                 TextProperty="Label" ValueProperty="Value" />
+                    <AgtDropdown TValue="string" Label="Flex-richting" AriaLabel="CSS flex-direction"
+                                 Data="FlexDirectionOptions"
+                                 Value="@GetStyle("flex-direction")"
+                                 ValueChanged="@(value => SetStyle("flex-direction", value))"
+                                 TextProperty="Label" ValueProperty="Value" />
+                    <AgtDropdown TValue="string" Label="Uitlijning" AriaLabel="CSS align-items"
+                                 Data="AlignItemsOptions"
+                                 Value="@GetStyle("align-items")"
+                                 ValueChanged="@(value => SetStyle("align-items", value))"
+                                 TextProperty="Label" ValueProperty="Value" />
+                    <AgtDropdown TValue="string" Label="Verdeling" AriaLabel="CSS justify-content"
+                                 Data="JustifyContentOptions"
+                                 Value="@GetStyle("justify-content")"
+                                 ValueChanged="@(value => SetStyle("justify-content", value))"
+                                 TextProperty="Label" ValueProperty="Value" />
+                </div>
+            </section>
+
+            <section class="designer-properties__group">
+                <h3>Vrije CSS</h3>
+                <div class="designer-properties__hint">Voeg willekeurige CSS-properties toe.</div>
+                @foreach (var entry in GetFreeStyleEntries())
+                {
+                    <div class="designer-properties__layout-grid">
+                        <AgtTextField Label="Property" Value="@entry.Key" ValueChanged="@(value => RenameStyle(entry.Key, value))" />
+                        <AgtTextField Label="Waarde" Value="@entry.Value" ValueChanged="@(value => SetStyle(entry.Key, value))" />
+                        <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Click="@(() => RemoveStyle(entry.Key))" title="Verwijderen" />
+                    </div>
+                }
+                <RadzenButton Text="CSS-property toevoegen" Icon="add" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Click="AddFreeStyle" />
+            </section>
+
+            <section class="designer-properties__group">
+                <h3>HTML-attributen</h3>
+                @foreach (var attr in GetAttributeEntries())
+                {
+                    <div class="designer-properties__layout-grid">
+                        <AgtTextField Label="Naam" Value="@attr.Key" ValueChanged="@(value => RenameAttribute(attr.Key, value))" />
+                        <AgtTextField Label="Waarde" Value="@attr.Value" ValueChanged="@(value => SetAttribute(attr.Key, value))" />
+                        <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Click="@(() => RemoveAttribute(attr.Key))" title="Verwijderen" />
+                    </div>
+                }
+                <RadzenButton Text="Attribuut toevoegen" Icon="add" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Click="AddAttribute" />
+            </section>
+        }
+
         @foreach (var group in GroupedParameters)
         {
             <section class="designer-properties__group">
@@ -273,7 +422,30 @@ else
                                 <div class="designer-properties__hint">Vrije hex-waarden kunnen token-bleed veroorzaken bij export.</div>
                                 break;
                             case EditorKind.EventCallback:
-                                <div class="designer-properties__readonly">Logica in geexporteerde code (v1-scope).</div>
+                                @if (string.IsNullOrWhiteSpace(GetEventHandlerName(parameter)))
+                                {
+                                    <div class="designer-event-handler">
+                                        <RadzenButton Text="Handler toevoegen"
+                                                      Icon="add"
+                                                      ButtonStyle="ButtonStyle.Base"
+                                                      Variant="Variant.Text"
+                                                      Click="@(() => AddEventHandler(parameter))" />
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="designer-event-handler">
+                                        <AgtTextField Label="Methode-naam"
+                                                      AriaLabel="Event handler naam"
+                                                      Value="@GetEventHandlerName(parameter)"
+                                                      ValueChanged="@(value => SetEventHandler(parameter, value))" />
+                                        <RadzenButton Icon="close"
+                                                      ButtonStyle="ButtonStyle.Base"
+                                                      Variant="Variant.Text"
+                                                      title="Handler verwijderen"
+                                                      Click="@(() => RemoveEventHandler(parameter))" />
+                                    </div>
+                                }
                                 break;
                             case EditorKind.ReadOnly:
                                 <div class="designer-properties__readonly">@uiState.JsonValue</div>
@@ -329,6 +501,12 @@ else
     public EventCallback<DesignLayoutSlot> SetNodeLayoutSlot { get; set; }
 
     [Parameter]
+    public EventCallback<Dictionary<string, string>> SetNodeStyleChanged { get; set; }
+
+    [Parameter]
+    public EventCallback<Dictionary<string, string>> SetNodeAttributesChanged { get; set; }
+
+    [Parameter]
     public EventCallback AddColumnNode { get; set; }
 
     [Parameter]
@@ -356,6 +534,7 @@ else
     private bool _showAdvancedContent;
     private bool _showAdvancedInteraction;
     private bool _showAdvancedAppearance;
+    private bool _showAdvancedStyle;
     private string? _activeSubcomponentFilter;
     private IReadOnlyList<string> _missingAccessibilityParameters = [];
     private readonly HashSet<string> _manualBindingParameters = new(StringComparer.Ordinal);
@@ -368,11 +547,10 @@ else
         ? new Dictionary<string, IReadOnlyList<ComponentParameterDescriptor>>(StringComparer.Ordinal)
         : SelectedDescriptor.Parameters
             .Where(static parameter => !parameter.IsRenderFragment)
-            .Where(static parameter => !parameter.IsEventCallback)
             .Where(parameter => Classify(parameter) == _activeSection)
             .Where(parameter => MatchesSubcomponentFilter(parameter))
-            .Where(parameter => !_simpleMode || IsSimpleParameter(parameter.Name))
-            .Where(parameter => !_simpleMode || GetSectionAdvancedState() || IsPrimaryParameter(parameter))
+            .Where(parameter => !_simpleMode || parameter.IsEventCallback || IsSimpleParameter(parameter.Name))
+            .Where(parameter => !_simpleMode || GetSectionAdvancedState() || parameter.IsEventCallback || IsPrimaryParameter(parameter))
             .OrderBy(static parameter => parameter.Name, StringComparer.Ordinal)
             .ToArray()
             .GroupBy(ResolveCategory, StringComparer.Ordinal)
@@ -511,9 +689,13 @@ else
             {
                 _activeSection = InspectorSection.Interaction;
             }
-            else
+            else if (HasParametersForSection(InspectorSection.Appearance))
             {
                 _activeSection = InspectorSection.Appearance;
+            }
+            else
+            {
+                _activeSection = InspectorSection.Style;
             }
         }
 
@@ -818,7 +1000,8 @@ else
         {
             InspectorSection.Content => _showAdvancedContent,
             InspectorSection.Interaction => _showAdvancedInteraction,
-            _ => _showAdvancedAppearance
+            InspectorSection.Appearance => _showAdvancedAppearance,
+            _ => _showAdvancedStyle
         };
     }
 
@@ -832,6 +1015,9 @@ else
             case InspectorSection.Interaction:
                 _showAdvancedInteraction = value;
                 break;
+            case InspectorSection.Style:
+                _showAdvancedStyle = value;
+                break;
             default:
                 _showAdvancedAppearance = value;
                 break;
@@ -842,6 +1028,11 @@ else
 
     private bool HasParametersForSection(InspectorSection section)
     {
+        if (section == InspectorSection.Style)
+        {
+            return SelectedNode is not null;
+        }
+
         if (SelectedDescriptor is null)
         {
             return false;
@@ -849,10 +1040,55 @@ else
 
         return SelectedDescriptor.Parameters
             .Where(static parameter => !parameter.IsRenderFragment)
-            .Where(static parameter => !parameter.IsEventCallback)
-            .Where(parameter => !_simpleMode || IsSimpleParameter(parameter.Name))
+            .Where(parameter => !_simpleMode || parameter.IsEventCallback || IsSimpleParameter(parameter.Name))
             .Any(parameter => Classify(parameter) == section);
     }
+
+    private string? GetEventHandlerName(ComponentParameterDescriptor parameter)
+    {
+        if (SelectedNode is null)
+        {
+            return null;
+        }
+
+        if (!SelectedNode.Parameters.TryGetValue(parameter.Name, out var value))
+        {
+            return null;
+        }
+
+        return value?.EventHandlerName;
+    }
+
+    private Task AddEventHandler(ComponentParameterDescriptor parameter)
+    {
+        var eventNameCore = parameter.Name.Replace("Changed", string.Empty, StringComparison.Ordinal);
+        var defaultName = $"On{eventNameCore}";
+
+        if (SelectedDescriptor is not null)
+        {
+            var componentShort = SelectedDescriptor.DisplayName
+                .Replace("Agt", string.Empty, StringComparison.Ordinal)
+                .Replace("Radzen", string.Empty, StringComparison.Ordinal)
+                .Replace(" ", string.Empty, StringComparison.Ordinal);
+            defaultName = $"On{componentShort}{eventNameCore}";
+        }
+
+        return SetEventHandler(parameter, defaultName);
+    }
+
+    private Task SetEventHandler(ComponentParameterDescriptor parameter, string? name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return RemoveEventHandler(parameter);
+        }
+
+        var value = new DesignParameterValue { EventHandlerName = name.Trim() };
+        return SetNodeParameter.InvokeAsync((parameter, value));
+    }
+
+    private Task RemoveEventHandler(ComponentParameterDescriptor parameter)
+        => SetNodeParameter.InvokeAsync((parameter, null));
 
     private bool HasVisibleContentForActiveSection
     {
@@ -881,6 +1117,11 @@ else
                 }
             }
 
+            if (_activeSection == InspectorSection.Style)
+            {
+                return SelectedNode is not null;
+            }
+
             if (IsDataGridNode && (_activeSection is InspectorSection.Content or InspectorSection.Appearance))
             {
                 return true;
@@ -895,8 +1136,263 @@ else
         {
             InspectorSection.Content => "Geen inhoudseigenschappen beschikbaar voor deze selectie.",
             InspectorSection.Interaction => "Geen interactie-eigenschappen beschikbaar voor deze selectie.",
-            _ => "Geen weergave-eigenschappen beschikbaar voor deze selectie."
+            InspectorSection.Appearance => "Geen weergave-eigenschappen beschikbaar voor deze selectie.",
+            _ => "Geen stijleigenschappen beschikbaar voor deze selectie."
         };
+
+    private string? GetStyle(string property)
+        => SelectedNode?.InlineStyles.GetValueOrDefault(property);
+
+    private Task SetStyle(string property, string? value)
+    {
+        if (SelectedNode is null || string.IsNullOrWhiteSpace(property))
+        {
+            return Task.CompletedTask;
+        }
+
+        var normalizedProperty = property.Trim();
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            SelectedNode.InlineStyles.Remove(normalizedProperty);
+        }
+        else
+        {
+            SelectedNode.InlineStyles[normalizedProperty] = value.Trim();
+        }
+
+        return SetNodeStyleChanged.InvokeAsync(SelectedNode.InlineStyles);
+    }
+
+    private Task RemoveStyle(string property)
+    {
+        if (SelectedNode is null || string.IsNullOrWhiteSpace(property))
+        {
+            return Task.CompletedTask;
+        }
+
+        SelectedNode.InlineStyles.Remove(property);
+        return SetNodeStyleChanged.InvokeAsync(SelectedNode.InlineStyles);
+    }
+
+    private Task RenameStyle(string oldKey, string? newKey)
+    {
+        if (SelectedNode is null || string.IsNullOrWhiteSpace(oldKey) || string.IsNullOrWhiteSpace(newKey))
+        {
+            return Task.CompletedTask;
+        }
+
+        var normalizedNewKey = newKey.Trim();
+        if (string.IsNullOrWhiteSpace(normalizedNewKey))
+        {
+            return Task.CompletedTask;
+        }
+
+        if (SelectedNode.InlineStyles.Remove(oldKey, out var existingValue))
+        {
+            SelectedNode.InlineStyles[normalizedNewKey] = existingValue;
+            return SetNodeStyleChanged.InvokeAsync(SelectedNode.InlineStyles);
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private Task AddFreeStyle()
+    {
+        if (SelectedNode is null)
+        {
+            return Task.CompletedTask;
+        }
+
+        var index = SelectedNode.InlineStyles.Count + 1;
+        var key = $"custom-{index}";
+        while (SelectedNode.InlineStyles.ContainsKey(key))
+        {
+            index++;
+            key = $"custom-{index}";
+        }
+
+        SelectedNode.InlineStyles[key] = string.Empty;
+        return SetNodeStyleChanged.InvokeAsync(SelectedNode.InlineStyles);
+    }
+
+    private IReadOnlyList<KeyValuePair<string, string>> GetFreeStyleEntries()
+    {
+        if (SelectedNode is null)
+        {
+            return [];
+        }
+
+        return SelectedNode.InlineStyles
+            .Where(static entry => !KnownStyleProperties.Contains(entry.Key))
+            .OrderBy(static entry => entry.Key, StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+    }
+
+    private Task SetAttribute(string key, string? value)
+    {
+        if (SelectedNode is null || string.IsNullOrWhiteSpace(key))
+        {
+            return Task.CompletedTask;
+        }
+
+        var normalizedKey = key.Trim();
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            SelectedNode.CustomAttributes.Remove(normalizedKey);
+        }
+        else
+        {
+            SelectedNode.CustomAttributes[normalizedKey] = value.Trim();
+        }
+
+        return SetNodeAttributesChanged.InvokeAsync(SelectedNode.CustomAttributes);
+    }
+
+    private Task RemoveAttribute(string key)
+    {
+        if (SelectedNode is null || string.IsNullOrWhiteSpace(key))
+        {
+            return Task.CompletedTask;
+        }
+
+        SelectedNode.CustomAttributes.Remove(key);
+        return SetNodeAttributesChanged.InvokeAsync(SelectedNode.CustomAttributes);
+    }
+
+    private Task RenameAttribute(string oldKey, string? newKey)
+    {
+        if (SelectedNode is null || string.IsNullOrWhiteSpace(oldKey) || string.IsNullOrWhiteSpace(newKey))
+        {
+            return Task.CompletedTask;
+        }
+
+        var normalizedNewKey = newKey.Trim();
+        if (string.IsNullOrWhiteSpace(normalizedNewKey))
+        {
+            return Task.CompletedTask;
+        }
+
+        if (SelectedNode.CustomAttributes.Remove(oldKey, out var existingValue))
+        {
+            SelectedNode.CustomAttributes[normalizedNewKey] = existingValue;
+            return SetNodeAttributesChanged.InvokeAsync(SelectedNode.CustomAttributes);
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private Task AddAttribute()
+    {
+        if (SelectedNode is null)
+        {
+            return Task.CompletedTask;
+        }
+
+        var index = SelectedNode.CustomAttributes.Count + 1;
+        var key = $"data-custom-{index}";
+        while (SelectedNode.CustomAttributes.ContainsKey(key))
+        {
+            index++;
+            key = $"data-custom-{index}";
+        }
+
+        SelectedNode.CustomAttributes[key] = string.Empty;
+        return SetNodeAttributesChanged.InvokeAsync(SelectedNode.CustomAttributes);
+    }
+
+    private IReadOnlyList<KeyValuePair<string, string>> GetAttributeEntries()
+    {
+        if (SelectedNode is null)
+        {
+            return [];
+        }
+
+        return SelectedNode.CustomAttributes
+            .OrderBy(static entry => entry.Key, StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+    }
+
+    private static readonly HashSet<string> KnownStyleProperties = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "width", "height", "min-width", "max-width",
+        "padding", "margin", "gap",
+        "font-size", "font-weight", "text-align",
+        "background", "color",
+        "border", "border-radius",
+        "display", "flex-direction", "align-items", "justify-content"
+    };
+
+    private static readonly OptionItem[] FontWeightOptions =
+    [
+        new("Normaal", "normal"),
+        new("Vet", "bold"),
+        new("Licht", "300"),
+        new("Medium", "500"),
+        new("Zwaar", "700")
+    ];
+
+    private static readonly OptionItem[] TextAlignOptions =
+    [
+        new("Links", "left"),
+        new("Midden", "center"),
+        new("Rechts", "right"),
+        new("Uitvullen", "justify")
+    ];
+
+    private static readonly OptionItem[] DisplayOptions =
+    [
+        new("Block", "block"),
+        new("Flex", "flex"),
+        new("Grid", "grid"),
+        new("Inline", "inline"),
+        new("Inline-flex", "inline-flex"),
+        new("Geen", "none")
+    ];
+
+    private static readonly OptionItem[] FlexDirectionOptions =
+    [
+        new("Rij", "row"),
+        new("Kolom", "column"),
+        new("Rij (omgekeerd)", "row-reverse"),
+        new("Kolom (omgekeerd)", "column-reverse")
+    ];
+
+    private static readonly OptionItem[] AlignItemsOptions =
+    [
+        new("Start", "flex-start"),
+        new("Midden", "center"),
+        new("Einde", "flex-end"),
+        new("Stretch", "stretch")
+    ];
+
+    private static readonly OptionItem[] JustifyContentOptions =
+    [
+        new("Start", "flex-start"),
+        new("Midden", "center"),
+        new("Einde", "flex-end"),
+        new("Tussenruimte", "space-between"),
+        new("Gelijkmatig", "space-evenly")
+    ];
+
+    private static readonly OptionItem[] BackgroundColorOptions =
+    [
+        new("Transparant", "transparent"),
+        new("Surface 0", "var(--agt-surface-0)"),
+        new("Surface 1", "var(--agt-surface-1)"),
+        new("Surface 2", "var(--agt-surface-2)"),
+        new("Primair (licht)", "var(--agt-alpha-primary-10)"),
+        new("Danger (licht)", "var(--agt-alpha-danger-10)")
+    ];
+
+    private static readonly OptionItem[] TextColorOptions =
+    [
+        new("Body", "var(--agt-text-body)"),
+        new("Heading", "var(--agt-text-heading)"),
+        new("Muted", "var(--agt-text-muted)"),
+        new("Primair", "var(--agt-color-primary-500)"),
+        new("Danger", "var(--agt-color-danger-500)"),
+        new("Succes", "var(--agt-color-success-500)")
+    ];
 
     private static string GetParameterLabel(string parameterName)
         => parameterName switch
@@ -1210,6 +1706,7 @@ else
     {
         Content,
         Interaction,
-        Appearance
+        Appearance,
+        Style
     }
 }

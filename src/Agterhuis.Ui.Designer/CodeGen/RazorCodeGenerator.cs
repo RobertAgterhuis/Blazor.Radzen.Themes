@@ -2,6 +2,7 @@ using System.Text.Json;
 using Agterhuis.Ui.Designer.Model;
 using Agterhuis.Ui.Designer.Registry;
 using Agterhuis.Ui.Designer.Serialization;
+using Microsoft.AspNetCore.Components.Web;
 
 namespace Agterhuis.Ui.Designer.CodeGen;
 
@@ -81,10 +82,30 @@ public sealed class RazorCodeGenerator
 
         lines.Add("</MainLayout>");
 
-        // Code section (empty for v1)
+        var eventHandlers = CollectEventHandlers(page);
+
+        // Code section
         lines.Add("");
         lines.Add("@code {");
-        lines.Add("    // TODO: Add component logic here");
+        if (eventHandlers.Count == 0)
+        {
+            lines.Add("    // TODO: Add component logic here");
+        }
+        else
+        {
+            foreach (var method in eventHandlers)
+            {
+                foreach (var methodLine in method)
+                {
+                    lines.Add(methodLine);
+                }
+
+                lines.Add("");
+            }
+
+            lines.RemoveAt(lines.Count - 1);
+        }
+
         lines.Add("}");
 
         var code = string.Join(Environment.NewLine, lines);
@@ -181,8 +202,18 @@ public sealed class RazorCodeGenerator
                 continue;
             }
 
-            if (paramValue.Literal is null && paramValue.Expression is null)
+            if (paramValue.Literal is null && paramValue.Expression is null && string.IsNullOrWhiteSpace(paramValue.EventHandlerName))
             {
+                continue;
+            }
+
+            if (paramDesc.IsEventCallback)
+            {
+                if (!string.IsNullOrWhiteSpace(paramValue.EventHandlerName))
+                {
+                    parameters.Add($"{paramDesc.Name}=\"{EscapeQuotes(paramValue.EventHandlerName)}\"");
+                }
+
                 continue;
             }
 
@@ -193,6 +224,27 @@ public sealed class RazorCodeGenerator
             }
 
             parameters.Add($"@{paramDesc.Name}=\"{EscapeQuotes(valueStr)}\"");
+        }
+
+        if (SupportsUnmatchedAttributes(descriptor))
+        {
+            if (node.InlineStyles.Count > 0)
+            {
+                var styleValue = string.Join("; ", node.InlineStyles
+                    .OrderBy(static entry => entry.Key, StringComparer.OrdinalIgnoreCase)
+                    .Select(static entry => $"{entry.Key}: {entry.Value}"));
+                parameters.Add($"style=\"{EscapeQuotes(styleValue)}\"");
+            }
+
+            foreach (var (key, value) in node.CustomAttributes.OrderBy(static entry => entry.Key, StringComparer.OrdinalIgnoreCase))
+            {
+                if (string.IsNullOrWhiteSpace(key) || string.IsNullOrWhiteSpace(value))
+                {
+                    continue;
+                }
+
+                parameters.Add($"{key}=\"{EscapeQuotes(value)}\"");
+            }
         }
 
         return parameters;
@@ -247,5 +299,90 @@ public sealed class RazorCodeGenerator
     private static bool HasSlotContent(DesignerComponentDescriptor descriptor)
     {
         return descriptor.Slots.Count > 0;
+    }
+
+    private static bool SupportsUnmatchedAttributes(DesignerComponentDescriptor descriptor)
+    {
+        return descriptor.Parameters.Any(parameter => string.Equals(parameter.Name, "Attributes", StringComparison.Ordinal));
+    }
+
+    private IReadOnlyList<IReadOnlyList<string>> CollectEventHandlers(DesignPage page)
+    {
+        var handlers = new Dictionary<string, string>(StringComparer.Ordinal);
+        CollectEventHandlersFromNodes(page.Nodes, handlers);
+
+        var result = new List<IReadOnlyList<string>>(handlers.Count);
+        foreach (var (handlerName, eventTypeName) in handlers.OrderBy(static item => item.Key, StringComparer.Ordinal))
+        {
+            if (string.Equals(eventTypeName, nameof(MouseEventArgs), StringComparison.Ordinal))
+            {
+                result.Add(
+                [
+                    $"    private void {handlerName}(MouseEventArgs args)",
+                    "    {",
+                    "        // TODO: implementeer logica",
+                    "    }"
+                ]);
+            }
+            else
+            {
+                result.Add(
+                [
+                    $"    private void {handlerName}()",
+                    "    {",
+                    "        // TODO: implementeer logica",
+                    "    }"
+                ]);
+            }
+        }
+
+        return result;
+    }
+
+    private void CollectEventHandlersFromNodes(IEnumerable<DesignNode> nodes, Dictionary<string, string> handlers)
+    {
+        foreach (var node in nodes)
+        {
+            if (_registry.TryGetDescriptor(node.ComponentType, out var descriptor))
+            {
+                foreach (var parameter in descriptor.Parameters.Where(static candidate => candidate.IsEventCallback))
+                {
+                    if (!node.Parameters.TryGetValue(parameter.Name, out var value)
+                        || string.IsNullOrWhiteSpace(value?.EventHandlerName))
+                    {
+                        continue;
+                    }
+
+                    handlers.TryAdd(
+                        value.EventHandlerName,
+                        ResolveEventArgTypeName(parameter.TypeName));
+                }
+            }
+
+            foreach (var childSlot in node.Children.Values)
+            {
+                CollectEventHandlersFromNodes(childSlot, handlers);
+            }
+        }
+    }
+
+    private static string ResolveEventArgTypeName(string parameterTypeName)
+    {
+        const string marker = "EventCallback<";
+        var markerIndex = parameterTypeName.IndexOf(marker, StringComparison.Ordinal);
+        if (markerIndex < 0)
+        {
+            return "void";
+        }
+
+        var start = markerIndex + marker.Length;
+        var end = parameterTypeName.IndexOf('>', start);
+        if (end <= start)
+        {
+            return "void";
+        }
+
+        var genericArgument = parameterTypeName[start..end].Trim();
+        return string.IsNullOrWhiteSpace(genericArgument) ? "void" : genericArgument;
     }
 }

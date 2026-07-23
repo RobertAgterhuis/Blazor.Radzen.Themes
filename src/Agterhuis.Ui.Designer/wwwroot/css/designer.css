@@ -1939,6 +1939,16 @@ body[data-agt-designer-shell-active="true"] .rz-multiselect-panel {
     margin-bottom: var(--agt-spacing-2);
 }
 
+.designer-event-handler {
+    align-items: center;
+    display: flex;
+    gap: var(--agt-spacing-2);
+}
+
+.designer-event-handler .agt-text-field {
+    flex: 1;
+}
+
 .designer-toasts {
     bottom: var(--agt-spacing-3);
     display: grid;

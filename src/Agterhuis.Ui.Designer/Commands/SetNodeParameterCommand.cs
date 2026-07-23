@@ -59,7 +59,8 @@ public sealed class SetNodeParameterCommand : IDesignDocumentCommand
         return new DesignParameterValue
         {
             Literal = value.Literal?.DeepClone(),
-            Expression = value.Expression
+            Expression = value.Expression,
+            EventHandlerName = value.EventHandlerName
         };
     }
 }

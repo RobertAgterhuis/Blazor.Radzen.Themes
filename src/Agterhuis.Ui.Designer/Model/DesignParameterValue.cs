@@ -10,6 +10,12 @@ public sealed class DesignParameterValue
 
     public string? Expression { get; set; }
 
+    /// <summary>
+    /// Name of the event handler method to generate in exported code.
+    /// Only used for EventCallback parameters.
+    /// </summary>
+    public string? EventHandlerName { get; set; }
+
     public static DesignParameterValue FromValue<T>(T value)
     {
         return new DesignParameterValue

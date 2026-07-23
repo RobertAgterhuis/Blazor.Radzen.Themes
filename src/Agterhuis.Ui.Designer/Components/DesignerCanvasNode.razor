@@ -11,7 +11,8 @@
 <div class="designer-canvas-node @(IsSelected ? "designer-canvas-node--selected" : string.Empty) @(IsHovered && !IsSelected ? "designer-canvas-node--hover" : string.Empty)"
      data-agt-design-node-id="@Node.Id"
      data-agt-design-component="@Node.ComponentType"
-    style="@GetColumnFlexStyle()"
+    style="@GetNodeStyle()"
+    @attributes="GetWrapperAttributes()"
      @onmouseenter="OnMouseEnter"
      @onmouseleave="OnMouseLeave"
      @onmouseenter:stopPropagation="true"
@@ -207,6 +208,43 @@
         return $"flex: 0 0 calc({pct}% - var(--agt-spacing-2)); min-width: 0;";
     }
 
+    private string? GetNodeStyle()
+    {
+        var columnStyle = GetColumnFlexStyle();
+        var inlineStyle = Node.InlineStyles.Count > 0
+            ? string.Join("; ", Node.InlineStyles
+                .OrderBy(static entry => entry.Key, StringComparer.OrdinalIgnoreCase)
+                .Select(static entry => $"{entry.Key}: {entry.Value}"))
+            : null;
+
+        return (columnStyle, inlineStyle) switch
+        {
+            (null, null) => null,
+            (not null, null) => columnStyle,
+            (null, not null) => inlineStyle,
+            _ => $"{columnStyle}; {inlineStyle}"
+        };
+    }
+
+    private IReadOnlyDictionary<string, object>? GetWrapperAttributes()
+    {
+        if (Node.CustomAttributes.Count == 0 || ComponentSupportsAttributes())
+        {
+            return null;
+        }
+
+        var attributes = new Dictionary<string, object>(Node.CustomAttributes.Count, StringComparer.OrdinalIgnoreCase);
+        foreach (var (key, value) in Node.CustomAttributes)
+        {
+            attributes[key] = value;
+        }
+
+        return attributes;
+    }
+
+    private bool ComponentSupportsAttributes()
+        => _descriptor?.Parameters.Any(parameter => string.Equals(parameter.Name, "Attributes", StringComparison.Ordinal)) == true;
+
     private string DescriptorLabel => _descriptor?.DisplayName ?? Node.ComponentType;
 
     private string DescriptorIcon => _descriptor?.Icon ?? "widgets";
@@ -396,6 +434,18 @@
             {
                 parameters[parameter.Name] = DesignParameterBinder.Bind(value, parameter.ParameterType, this);
             }
+        }
+
+        if (descriptor.Parameters.Any(parameter => string.Equals(parameter.Name, "Attributes", StringComparison.Ordinal))
+            && Node.CustomAttributes.Count > 0)
+        {
+            var additionalAttributes = new Dictionary<string, object>(Node.CustomAttributes.Count, StringComparer.OrdinalIgnoreCase);
+            foreach (var (key, value) in Node.CustomAttributes)
+            {
+                additionalAttributes[key] = value;
+            }
+
+            parameters["Attributes"] = additionalAttributes;
         }
 
         return parameters;

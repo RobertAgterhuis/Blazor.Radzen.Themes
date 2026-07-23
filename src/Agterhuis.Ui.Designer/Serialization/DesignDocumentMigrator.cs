@@ -85,6 +85,8 @@ public static class DesignDocumentMigrator
 
         node.Parameters ??= new Dictionary<string, DesignParameterValue>(StringComparer.Ordinal);
         node.Children ??= new Dictionary<string, List<DesignNode>>(StringComparer.Ordinal);
+        node.InlineStyles ??= new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        node.CustomAttributes ??= new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
         if (string.IsNullOrWhiteSpace(node.Id))
         {

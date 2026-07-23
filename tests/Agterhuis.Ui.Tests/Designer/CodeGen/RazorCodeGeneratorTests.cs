@@ -2,6 +2,7 @@ using System.Text;
 using Agterhuis.Ui.Designer.CodeGen;
 using Agterhuis.Ui.Designer.Model;
 using Agterhuis.Ui.Designer.Registry;
+using Microsoft.AspNetCore.Components.Web;
 
 namespace Agterhuis.Ui.Designer.Tests.CodeGen;
 
@@ -194,5 +195,40 @@ public class RazorCodeGeneratorTests
 
         var ex = Assert.Throws<InvalidOperationException>(() => _generator.GeneratePageCode(page, document));
         Assert.Contains("requires Label or AriaLabel", ex.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void GeneratePageCode_EmitsEventCallbackAttributeAndHandlerStub()
+    {
+        var document = new DesignDocument
+        {
+            Name = "Events",
+            Pages =
+            [
+                new DesignPage
+                {
+                    Route = "/events",
+                    Title = "Events",
+                    Nodes =
+                    [
+                        new DesignNode
+                        {
+                            Id = "node-1",
+                            ComponentType = "AgtPrimaryButton",
+                            Parameters = new Dictionary<string, DesignParameterValue>(StringComparer.Ordinal)
+                            {
+                                ["Text"] = DesignParameterValue.FromValue("Opslaan"),
+                                ["Click"] = new DesignParameterValue { EventHandlerName = "OnSaveClicked" }
+                            }
+                        }
+                    ]
+                }
+            ]
+        };
+
+        var code = _generator.GeneratePageCode(document.Pages[0], document);
+
+        Assert.Contains("Click=\"OnSaveClicked\"", code, StringComparison.Ordinal);
+        Assert.Contains($"private void OnSaveClicked({nameof(MouseEventArgs)} args)", code, StringComparison.Ordinal);
     }
 }

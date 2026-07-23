@@ -61,7 +61,47 @@ public sealed class DesignerPropertyPanelTests
     }
 
     [Fact]
-    public void PropertyPanel_HidesEventCallbackParameters()
+    public async Task PropertyPanel_ShowsEventCallbackParameters_AndAddsDefaultHandler()
+    {
+        using var ctx = new BunitContext();
+        ctx.Services.AddRadzenComponents();
+        ctx.JSInterop.Mode = JSRuntimeMode.Loose;
+
+        var descriptor = CreateDescriptor([CreateParameter("Click", "EventCallback")]);
+        var node = new DesignNode
+        {
+            Id = "node-1",
+            ComponentType = "AgtTest",
+            Parameters = new Dictionary<string, DesignParameterValue>(StringComparer.Ordinal)
+        };
+
+        (ComponentParameterDescriptor Parameter, DesignParameterValue? Value)? captured = null;
+
+        var cut = ctx.Render<PropertyPanel>(parameters => parameters
+            .Add(component => component.Page, new DesignPage { Route = "/", Title = "Page" })
+            .Add(component => component.CanvasTheme, "plum-dark")
+            .Add(component => component.ThemeOptions, new[] { "plum-dark" })
+            .Add(component => component.DataModel, DesignDataModelSeeder.CreateDefault())
+            .Add(component => component.SelectedNode, node)
+            .Add(component => component.SelectedDescriptor, descriptor)
+            .Add(component => component.SetNodeParameter, EventCallback.Factory.Create<(ComponentParameterDescriptor Parameter, DesignParameterValue? Value)>(this, value => captured = value)));
+
+        cut.Find("button[role='tab']:nth-of-type(2)").Click();
+
+        var eventField = cut.Find("[data-agt-designer-param='Click']");
+        Assert.Equal("EventCallback", eventField.GetAttribute("data-agt-designer-editor-kind"));
+
+        var addButton = cut.FindAll("button").First(button => button.TextContent.Contains("Handler toevoegen", StringComparison.Ordinal));
+        addButton.Click();
+        await cut.InvokeAsync(() => Task.CompletedTask);
+
+        Assert.NotNull(captured);
+        Assert.NotNull(captured!.Value.Value);
+        Assert.Equal("OnTestClick", captured.Value.Value!.EventHandlerName);
+    }
+
+    [Fact]
+    public async Task PropertyPanel_EventHandlerValueChanged_AndRemove_InvokeSetNodeParameter()
     {
         using var ctx = new BunitContext();
         ctx.Services.AddRadzenComponents();
@@ -74,19 +114,43 @@ public sealed class DesignerPropertyPanelTests
             ComponentType = "AgtTest",
             Parameters = new Dictionary<string, DesignParameterValue>(StringComparer.Ordinal)
             {
-                ["Click"] = DesignParameterValue.FromValue("noop")
+                ["Click"] = new DesignParameterValue
+                {
+                    EventHandlerName = "OnTestClick"
+                }
             }
         };
 
+        var invocations = new List<(ComponentParameterDescriptor Parameter, DesignParameterValue? Value)>();
         var cut = ctx.Render<PropertyPanel>(parameters => parameters
             .Add(component => component.Page, new DesignPage { Route = "/", Title = "Page" })
             .Add(component => component.CanvasTheme, "plum-dark")
             .Add(component => component.ThemeOptions, new[] { "plum-dark" })
             .Add(component => component.DataModel, DesignDataModelSeeder.CreateDefault())
             .Add(component => component.SelectedNode, node)
-            .Add(component => component.SelectedDescriptor, descriptor));
+            .Add(component => component.SelectedDescriptor, descriptor)
+            .Add(component => component.SetNodeParameter, EventCallback.Factory.Create<(ComponentParameterDescriptor Parameter, DesignParameterValue? Value)>(this, value => invocations.Add(value))));
 
-        Assert.Empty(cut.FindAll("[data-agt-designer-param='Click']"));
+        cut.Find("button[role='tab']:nth-of-type(2)").Click();
+
+        var method = cut.Instance.GetType()
+            .GetMethod("SetEventHandler", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        Assert.NotNull(method);
+        var updateTask = method!.Invoke(cut.Instance, [descriptor.Parameters[0], "OnSaveClicked"]) as Task;
+        Assert.NotNull(updateTask);
+        await updateTask!;
+
+        Assert.NotEmpty(invocations);
+        Assert.Equal("OnSaveClicked", invocations[^1].Value?.EventHandlerName);
+
+        var removeMethod = cut.Instance.GetType()
+            .GetMethod("RemoveEventHandler", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        Assert.NotNull(removeMethod);
+        var removeTask = removeMethod!.Invoke(cut.Instance, [descriptor.Parameters[0]]) as Task;
+        Assert.NotNull(removeTask);
+        await removeTask!;
+
+        Assert.Null(invocations[^1].Value);
     }
 
     [Fact]
@@ -252,6 +316,8 @@ public sealed class DesignerPropertyPanelTests
             .Add(component => component.DataModel, DesignDataModelSeeder.CreateDefault())
             .Add(component => component.SelectedNode, node)
             .Add(component => component.SelectedDescriptor, descriptor));
+
+        cut.Find("button[role='tab']:nth-of-type(3)").Click();
 
         Assert.NotNull(cut.Find("[data-agt-designer-columns-editor='true']"));
         Assert.Contains("Dossiernummer", cut.Markup, StringComparison.Ordinal);

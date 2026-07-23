@@ -1189,6 +1189,34 @@ public partial class DesignerShell : IDisposable
         }
     }
 
+    private async Task OnNodeStyleChanged(Dictionary<string, string> styles)
+    {
+        if (_selectedNodeId is null
+            || !TryFindNode(ActivePage.Nodes, _selectedNodeId, out _, out var container, out var index))
+        {
+            return;
+        }
+
+        container[index].InlineStyles = new Dictionary<string, string>(styles, StringComparer.OrdinalIgnoreCase);
+        _hasRecoveredDraft = true;
+        await AutoSaveAsync();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task OnNodeAttributesChanged(Dictionary<string, string> attributes)
+    {
+        if (_selectedNodeId is null
+            || !TryFindNode(ActivePage.Nodes, _selectedNodeId, out _, out var container, out var index))
+        {
+            return;
+        }
+
+        container[index].CustomAttributes = new Dictionary<string, string>(attributes, StringComparer.OrdinalIgnoreCase);
+        _hasRecoveredDraft = true;
+        await AutoSaveAsync();
+        await InvokeAsync(StateHasChanged);
+    }
+
     private async Task OnAddColumnNode()
     {
         if (SelectedNode is null || _selectedNodeId is null || SelectedDescriptor?.Slots.Contains("Columns", StringComparer.Ordinal) != true)
