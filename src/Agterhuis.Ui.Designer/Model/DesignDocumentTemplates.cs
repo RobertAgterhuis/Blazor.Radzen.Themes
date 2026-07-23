@@ -115,7 +115,7 @@ public static class DesignDocumentTemplates
             Pages =
             [
                 CreateBasePage("/", "Dashboard", CreateSidebarDashboardNodes()),
-                CreateBasePage("/dossiers", "Schadedossiers", CreateSidebarListNodes()),
+                CreateBasePage("/dossiers", "Dossiers", CreateSidebarListNodes()),
                 CreateBasePage("/dossier/nieuw", "Nieuw dossier", CreateSidebarFormNodes()),
                 CreateBasePage("/instellingen", "Instellingen", CreateSidebarSettingsNodes())
             ]
@@ -209,61 +209,127 @@ public static class DesignDocumentTemplates
     private static IReadOnlyList<DesignNode> CreateFormPageNodes()
         =>
         [
-            CreatePageHeader("Formulierpagina", "Werkvelden en acties voor een bewerkbaar formulier."),
-            CreateCard([CreateTextField("Klantnaam"), CreateNumericField("Aantal"), CreateSwitch("Actief"), CreateFormActions()])
+            CreatePageHeader("Nieuw schadedossier", "Vul de gegevens in voor een nieuw dossier."),
+            CreateCard([
+                CreateRow(
+                    CreateColumn(6, CreateTextField("Dossiernummer")),
+                    CreateColumn(6, CreateDatePicker("Schadedatum"))),
+                CreateRow(
+                    CreateColumn(6, CreateDropdown("Schadesoort")),
+                    CreateColumn(6, CreateDropdown("Glastype"))),
+                CreateRow(
+                    CreateColumn(6, CreateDropdown("Actie")),
+                    CreateColumn(6, CreateSwitch("Voorexpertise nodig"))),
+                CreateTextArea("Opmerkingen"),
+                CreateFormActions()
+            ])
         ];
 
     private static IReadOnlyList<DesignNode> CreateListCrudNodes()
         =>
         [
-            CreatePageHeader("Lijst/CRUD", "Startpunt voor zoeken, filteren en bewerken."),
-            CreateCard([CreateTextField("Zoeken"), CreateEmptyState("Nog geen items", "Voeg gegevens toe of importeer een dataset.")])
+            CreatePageHeader("Schadedossiers", "Zoek, filter en beheer dossiers."),
+            CreateRow(
+                CreateColumn(4, CreateTextField("Zoeken")),
+                CreateColumn(4, CreateDropdown("Status")),
+                CreateColumn(4, CreateDropdown("Glastype"))),
+            CreateCard([CreateEmptyState("Geen resultaten", "Pas de filters aan of maak een nieuw dossier.", "search")])
         ];
 
     private static IReadOnlyList<DesignNode> CreateMasterDetailNodes()
         =>
         [
-            CreatePageHeader("Master-detail", "Selecteer links, bekijk details rechts."),
-            CreateCard([
-                CreateTextField("Master item"),
-                CreateCard([CreateTextField("Detail titel"), CreateSwitch("Publiceren")])
-            ])
+            CreatePageHeader("Dossieroverzicht", "Selecteer links een dossier en werk rechts de details bij."),
+            CreateRow(
+                CreateColumn(
+                    4,
+                    CreateCard([
+                        CreateTextField("Zoeken"),
+                        CreateDropdown("Status"),
+                        CreateDropdown("Actie"),
+                        CreateEmptyState("Geen selectie", "Kies links een dossier voor detailinformatie.", "fact_check")
+                    ])),
+                CreateColumn(
+                    8,
+                    CreateCard([
+                        CreatePageHeader("Dossierdetails", "Werk de belangrijkste dossiergegevens bij."),
+                        CreateRow(
+                            CreateColumn(6, CreateTextField("Dossiernummer")),
+                            CreateColumn(6, CreateDatePicker("Schadedatum"))),
+                        CreateRow(
+                            CreateColumn(6, CreateDropdown("Schadesoort")),
+                            CreateColumn(6, CreateDropdown("Glastype"))),
+                        CreateTextArea("Opmerkingen"),
+                        CreateFormActions()
+                    ])))
         ];
 
     private static IReadOnlyList<DesignNode> CreateWizardNodes()
         =>
         [
-            CreatePageHeader("Wizard", "Leid de gebruiker door een stap-voor-stap flow."),
-            CreateCard([CreateTextField("Stap 1"), CreateTextField("Stap 2"), CreateFormActions()]),
-            CreateCard([CreateEmptyState("Volgende stap", "Gebruik de navigatieknoppen om door te gaan.")])
+            CreatePageHeader("Nieuwe claim wizard", "Doorloop de stappen om een claim volledig vast te leggen."),
+            CreateCard([
+                CreateEmptyState("Stap 1 van 3", "Vastleggen van basisgegevens.", "looks_one"),
+                CreateRow(
+                    CreateColumn(6, CreateTextField("Dossiernummer")),
+                    CreateColumn(6, CreateDatePicker("Schadedatum")),
+                    CreateColumn(6, CreateDropdown("Schadesoort")),
+                    CreateColumn(6, CreateDropdown("Glastype")))
+            ]),
+            CreateCard([
+                CreateEmptyState("Stap 2 van 3", "Bepaal vervolgactie en planning.", "looks_two"),
+                CreateRow(
+                    CreateColumn(6, CreateDropdown("Actie")),
+                    CreateColumn(6, CreateSwitch("Voorexpertise nodig"))),
+                CreateTextArea("Opmerkingen")
+            ]),
+            CreateCard([
+                CreateEmptyState("Stap 3 van 3", "Controleer en bevestig de aanvraag.", "looks_3"),
+                CreateFormActions()
+            ])
         ];
 
     private static IReadOnlyList<DesignNode> CreateDashboardNodes()
         =>
         [
-            CreatePageHeader("Schadedossier Dashboard", "Een realtime overzicht van dossiers, klanten en werkorders."),
+            CreatePageHeader("Schadedossier Dashboard", "Overzicht van lopende dossiers en werkorders."),
             CreateRow(
-                CreateColumn(3, CreateCard([CreateEmptyState("Open dossiers", "124 open dossiers")])),
-                CreateColumn(3, CreateCard([CreateEmptyState("Vandaag gepland", "18 werkorders")])),
-                CreateColumn(3, CreateCard([CreateEmptyState("Gereed", "87 dossiers gereed")])),
-                CreateColumn(3, CreateCard([CreateEmptyState("Facturatie", "€ 38k")]))),
+                CreateColumn(3, CreateCard([CreatePageHeader("Nieuwe dossiers", "Vandaag toegevoegd")])),
+                CreateColumn(3, CreateCard([CreatePageHeader("In behandeling", "Actieve werkorders")])),
+                CreateColumn(3, CreateCard([CreatePageHeader("Gereed", "Klaar voor factuur")])),
+                CreateColumn(3, CreateCard([CreatePageHeader("Gefactureerd", "Afgeronde administratie")]))),
             CreateRow(
-                CreateColumn(8, CreateCard([CreateEmptyState("Schadedossiers", "Hier verschijnt de data-grid met seeded dossiers.")])),
-                CreateColumn(4, CreateCard([CreateTextField("Filter op status"), CreateSwitch("Alleen urgente"), CreateTextField("Team")])) )
+                CreateColumn(8, CreateCard([
+                    CreatePageHeader("Recente dossiers", "Laatste wijzigingen uit de werkvoorraad."),
+                    CreateEmptyState("Data wordt geladen...", "Dossiers verschijnen hier zodra de gegevens beschikbaar zijn.", "sync")
+                ])),
+                CreateColumn(4, CreateCard([
+                    CreatePageHeader("Status verdeling", "Samenvatting per status."),
+                    CreateEmptyState("Nog geen grafiek", "Voeg een visualisatie toe voor statusverdeling.", "pie_chart")
+                ])) )
         ];
 
     private static IReadOnlyList<DesignNode> CreateSidebarDashboardNodes()
         =>
         [
             CreateSidebarLayoutShell(
-                "Dashboard",
+                "/",
                 [
-                    CreatePageHeader("Dashboard", "Overzicht van dossiers en werkvoorraad."),
-            CreateRow(
-                CreateColumn(4, CreateCard([CreateEmptyState("Open", "48 dossiers")])),
-                CreateColumn(4, CreateCard([CreateEmptyState("In behandeling", "22 dossiers")])),
-                CreateColumn(4, CreateCard([CreateEmptyState("Afgerond", "61 dossiers")]))),
-                    CreateCard([CreateEmptyState("Activiteit", "Grafieken en tabellen verschijnen hier met seeded data.")])
+                    CreatePageHeader("Schadedossier Dashboard", "Overzicht van lopende dossiers en werkorders."),
+                    CreateRow(
+                        CreateColumn(3, CreateCard([CreatePageHeader("Nieuwe dossiers", "Vandaag toegevoegd")])),
+                        CreateColumn(3, CreateCard([CreatePageHeader("In behandeling", "Actieve werkorders")])),
+                        CreateColumn(3, CreateCard([CreatePageHeader("Gereed", "Klaar voor factuur")])),
+                        CreateColumn(3, CreateCard([CreatePageHeader("Gefactureerd", "Afgeronde administratie")]))),
+                    CreateRow(
+                        CreateColumn(8, CreateCard([
+                            CreatePageHeader("Recente dossiers", "Laatste wijzigingen uit de werkvoorraad."),
+                            CreateEmptyState("Data wordt geladen...", "Dossiers verschijnen hier zodra de gegevens beschikbaar zijn.", "sync")
+                        ])),
+                        CreateColumn(4, CreateCard([
+                            CreatePageHeader("Status verdeling", "Samenvatting per status."),
+                            CreateEmptyState("Nog geen grafiek", "Voeg een visualisatie toe voor statusverdeling.", "pie_chart")
+                        ])))
                 ])
         ];
 
@@ -271,11 +337,14 @@ public static class DesignDocumentTemplates
         =>
         [
             CreateSidebarLayoutShell(
-                "Schadedossiers",
+                "/dossiers",
                 [
-                    CreatePageHeader("Schadedossiers", "Selecteer een dossier en bekijk de details."),
-                    CreateCard([CreateTextField("Zoek dossier"), CreateNumericField("Aantal"), CreateSwitch("Toon gesloten")]),
-                    CreateCard([CreateEmptyState("Lijst", "Hier komt een seeded tabel met dossiers.")])
+                    CreatePageHeader("Schadedossiers", "Zoek, filter en beheer dossiers."),
+                    CreateRow(
+                        CreateColumn(4, CreateTextField("Zoeken")),
+                        CreateColumn(4, CreateDropdown("Status")),
+                        CreateColumn(4, CreateDropdown("Glastype"))),
+                    CreateCard([CreateEmptyState("Geen resultaten", "Pas de filters aan of maak een nieuw dossier.", "search")])
                 ])
         ];
 
@@ -283,11 +352,22 @@ public static class DesignDocumentTemplates
         =>
         [
             CreateSidebarLayoutShell(
-                "Nieuw dossier",
+                "/dossier/nieuw",
                 [
-                    CreatePageHeader("Nieuw dossier", "Leg een nieuw schadegeval vast."),
-                    CreateCard([CreateTextField("Dossiernummer"), CreateTextField("Klantnaam"), CreateSwitch("Voorrijkosten")]),
-                    CreateCard([CreateNumericField("Eigen risico"), CreateTextField("Kenteken"), CreateFormActions()])
+                    CreatePageHeader("Nieuw schadedossier", "Vul de gegevens in voor een nieuw dossier."),
+                    CreateCard([
+                        CreateRow(
+                            CreateColumn(6, CreateTextField("Dossiernummer")),
+                            CreateColumn(6, CreateDatePicker("Schadedatum"))),
+                        CreateRow(
+                            CreateColumn(6, CreateDropdown("Schadesoort")),
+                            CreateColumn(6, CreateDropdown("Glastype"))),
+                        CreateRow(
+                            CreateColumn(6, CreateDropdown("Actie")),
+                            CreateColumn(6, CreateSwitch("Voorexpertise nodig"))),
+                        CreateTextArea("Opmerkingen"),
+                        CreateFormActions()
+                    ])
                 ])
         ];
 
@@ -295,29 +375,45 @@ public static class DesignDocumentTemplates
         =>
         [
             CreateSidebarLayoutShell(
-                "Instellingen",
+                "/instellingen",
                 [
-                    CreatePageHeader("Instellingen", "Pas de werkruimte en meldingen aan."),
-                    CreateCard([CreateTextField("Bedrijfsnaam"), CreateSwitch("Notificaties"), CreateSwitch("Donkere modus")]),
-                    CreateCard([CreateNumericField("Standaard wachttijd"), CreateTextField("Support e-mail")])
+                    CreatePageHeader("Instellingen", "Beheer profiel, notificaties en weergavevoorkeuren."),
+                    CreateCard([
+                        CreatePageHeader("Profiel", "Persoonlijke en organisatorische gegevens."),
+                        CreateRow(
+                            CreateColumn(6, CreateTextField("Naam")),
+                            CreateColumn(6, CreateTextField("E-mail")))
+                    ]),
+                    CreateCard([
+                        CreatePageHeader("Notificaties", "Ontvang updates voor belangrijke gebeurtenissen."),
+                        CreateSwitch("Nieuwe dossiers"),
+                        CreateSwitch("Statuswijzigingen"),
+                        CreateSwitch("Facturatie updates")
+                    ]),
+                    CreateCard([
+                        CreatePageHeader("Weergave", "Kies weergave-instellingen voor de werkplek."),
+                        CreateDropdown("Thema"),
+                        CreateSwitch("Compacte modus")
+                    ]),
+                    CreateFormActions()
                 ])
         ];
 
-    private static DesignNode CreateSidebarLayoutShell(string headerTitle, IReadOnlyList<DesignNode> content)
+    private static DesignNode CreateSidebarLayoutShell(string activeRoute, IReadOnlyList<DesignNode> content)
     {
         var layout = new DesignNode
         {
             ComponentType = "AgtSidebarLayout",
             Children = new Dictionary<string, List<DesignNode>>(StringComparer.Ordinal)
             {
-                ["Logo"] = [CreateTextValue("Agt Autoschade")],
-                ["HeaderActions"] = [CreateTextValue($"Gebruiker · {headerTitle}")],
+                ["Logo"] = [CreatePageHeader("Agterhuis Autoschade", "Schadeportaal")],
+                ["HeaderActions"] = [CreateTextValue("Planner · Team Noord")],
                 ["Sidebar"] =
                 [
-                    CreateNavLink("Dashboard", "/", "dashboard"),
-                    CreateNavLink("Schadedossiers", "/dossiers", "table_rows"),
-                    CreateNavLink("Nieuw dossier", "/dossier/nieuw", "add_circle"),
-                    CreateNavLink("Instellingen", "/instellingen", "settings")
+                    CreateNavLink("Dashboard", "/", "dashboard", string.Equals(activeRoute, "/", StringComparison.OrdinalIgnoreCase)),
+                    CreateNavLink("Dossiers", "/dossiers", "table_rows", string.Equals(activeRoute, "/dossiers", StringComparison.OrdinalIgnoreCase)),
+                    CreateNavLink("Nieuw dossier", "/dossier/nieuw", "add_circle", string.Equals(activeRoute, "/dossier/nieuw", StringComparison.OrdinalIgnoreCase)),
+                    CreateNavLink("Instellingen", "/instellingen", "settings", string.Equals(activeRoute, "/instellingen", StringComparison.OrdinalIgnoreCase))
                 ],
                 ["ChildContent"] = content.ToList()
             }
@@ -326,7 +422,7 @@ public static class DesignDocumentTemplates
         return layout;
     }
 
-    private static DesignNode CreateNavLink(string text, string href, string icon)
+    private static DesignNode CreateNavLink(string text, string href, string icon, bool isActive = false)
         => new()
         {
             ComponentType = "AgtNavLink",
@@ -334,7 +430,8 @@ public static class DesignDocumentTemplates
             {
                 ["Text"] = DesignParameterValue.FromValue(text),
                 ["Href"] = DesignParameterValue.FromValue(href),
-                ["Icon"] = DesignParameterValue.FromValue(icon)
+                ["Icon"] = DesignParameterValue.FromValue(icon),
+                ["IsActive"] = DesignParameterValue.FromValue(isActive)
             }
         };
 
@@ -351,9 +448,25 @@ public static class DesignDocumentTemplates
     private static IReadOnlyList<DesignNode> CreateSettingsPageNodes()
         =>
         [
-            CreatePageHeader("Instellingen", "Configuratie van het portaal en teaminstellingen."),
-            CreateCard([CreateTextField("Tenant"), CreateSwitch("Audit logging"), CreateNumericField("Sessieduur")]),
-            CreateCard([CreateTextField("Thema"), CreateTextField("Logo"), CreateFormActions()])
+            CreatePageHeader("Instellingen", "Beheer profiel, notificaties en weergavevoorkeuren."),
+            CreateCard([
+                CreatePageHeader("Profiel", "Persoonlijke en organisatorische gegevens."),
+                CreateRow(
+                    CreateColumn(6, CreateTextField("Naam")),
+                    CreateColumn(6, CreateTextField("E-mail")))
+            ]),
+            CreateCard([
+                CreatePageHeader("Notificaties", "Ontvang updates voor belangrijke gebeurtenissen."),
+                CreateSwitch("Nieuwe dossiers"),
+                CreateSwitch("Statuswijzigingen"),
+                CreateSwitch("Facturatie updates")
+            ]),
+            CreateCard([
+                CreatePageHeader("Weergave", "Kies weergave-instellingen voor de werkplek."),
+                CreateDropdown("Thema"),
+                CreateSwitch("Compacte modus")
+            ]),
+            CreateFormActions()
         ];
 
     private static IReadOnlyList<DesignNode> CreateDetailPageNodes()
@@ -387,9 +500,13 @@ public static class DesignDocumentTemplates
     private static IReadOnlyList<DesignNode> CreateTableWithFiltersNodes()
         =>
         [
-            CreatePageHeader("Tabel met filters", "Filter, sorteer en exporteer dossiers."),
-            CreateCard([CreateTextField("Zoekterm"), CreateSwitch("Actief"), CreateNumericField("Pagina grootte")]),
-            CreateCard([CreateEmptyState("Resultaten", "Seeded tabel met meerdere rijen.")])
+            CreatePageHeader("Voertuigen", "Filter en doorzoek het voertuigenoverzicht."),
+            CreateRow(
+                CreateColumn(3, CreateDropdown("Merk")),
+                CreateColumn(3, CreateDropdown("Bouwjaar")),
+                CreateColumn(3, CreateDropdown("Kleur")),
+                CreateColumn(3, CreateDropdown("ADAS"))),
+            CreateCard([CreateEmptyState("Tabel volgt", "Voeg een gegevensbron toe om voertuigen te tonen.", "table_chart")])
         ];
 
     private static DesignNode CreatePageHeader(string title, string description)
@@ -434,13 +551,34 @@ public static class DesignDocumentTemplates
             Parameters = CreateAccessibleFieldParameters(label, "Schakel dit veld")
         };
 
-    private static DesignNode CreateEmptyState(string title, string description)
+    private static DesignNode CreateDatePicker(string label)
+        => new()
+        {
+            ComponentType = "AgtDatePicker",
+            Parameters = CreateAccessibleFieldParameters(label, "Kies een datum")
+        };
+
+    private static DesignNode CreateDropdown(string label)
+        => new()
+        {
+            ComponentType = "AgtDropdown",
+            Parameters = CreateAccessibleFieldParameters(label, "Kies een optie")
+        };
+
+    private static DesignNode CreateTextArea(string label)
+        => new()
+        {
+            ComponentType = "AgtTextArea",
+            Parameters = CreateAccessibleFieldParameters(label, "Geef aanvullende informatie")
+        };
+
+    private static DesignNode CreateEmptyState(string title, string description, string icon = "info")
         => new()
         {
             ComponentType = "AgtEmptyState",
             Parameters = new Dictionary<string, DesignParameterValue>(StringComparer.Ordinal)
             {
-                ["Icon"] = DesignParameterValue.FromValue("info"),
+                ["Icon"] = DesignParameterValue.FromValue(icon),
                 ["Title"] = DesignParameterValue.FromValue(title),
                 ["Description"] = DesignParameterValue.FromValue(description)
             }

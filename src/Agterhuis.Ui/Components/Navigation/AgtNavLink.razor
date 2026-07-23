@@ -1,12 +1,12 @@
 <a class="agt-nav-link @(IsActive ? "agt-nav-link--active" : string.Empty) @CssClass"
    href="@Href"
    @onclick="HandleClickAsync"
-   @onclick:preventDefault="true">
+   @onclick:preventDefault="@OnNavigate.HasDelegate">
     @if (!string.IsNullOrWhiteSpace(Icon))
     {
         <RadzenIcon Icon="@Icon" />
     }
-    <span>@Text</span>
+    <span class="agt-nav-link__text">@Text</span>
 </a>
 
 @code {

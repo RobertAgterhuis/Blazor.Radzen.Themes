@@ -1,0 +1,27 @@
+.agt-nav-link {
+    align-items: center;
+    border-radius: var(--agt-border-radius-sm);
+    color: var(--agt-text-body);
+    cursor: pointer;
+    display: flex;
+    gap: var(--agt-spacing-2);
+    padding: var(--agt-spacing-2) var(--agt-spacing-3);
+    text-decoration: none;
+    transition: background 120ms, color 120ms;
+}
+
+.agt-nav-link:hover {
+    background: var(--agt-alpha-primary-10);
+}
+
+.agt-nav-link--active {
+    background: var(--agt-alpha-primary-15);
+    color: var(--agt-color-primary-500);
+    font-weight: 600;
+}
+
+.agt-nav-link__text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
