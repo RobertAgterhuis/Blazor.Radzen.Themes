@@ -2,6 +2,7 @@
 @using System.Text.Json
 @using Agterhuis.Ui.Designer.Model
 @using Agterhuis.Ui.Designer.Registry
+@using Agterhuis.Ui.Designer.Services
 
 @if (SelectedNode is null)
 {
@@ -456,6 +457,36 @@ else
             </section>
         }
 
+        @if (RenderFragmentParameters.Count > 0 && _activeSection == InspectorSection.Content)
+        {
+            <section class="designer-properties__group">
+                <h3>Sjablonen (slots)</h3>
+                @foreach (var fragment in RenderFragmentParameters)
+                {
+                    var slotName = fragment.Name;
+                    var displayName = GetSlotDisplayName(slotName);
+                    var hasContent = HasSlotContent(slotName);
+                    <div class="designer-properties__field designer-slot-entry">
+                        <div class="designer-properties__field-head">
+                            <span class="designer-properties__field-label">
+                                <RadzenIcon Icon="@(hasContent ? "edit_note" : "add_circle_outline")" />
+                                @displayName
+                            </span>
+                            <RadzenButton Text="@(hasContent ? "Bewerken" : "Invullen")"
+                                          Icon="edit"
+                                          ButtonStyle="ButtonStyle.Base"
+                                          Variant="Variant.Text"
+                                          Click="@(() => NavigateToSlot.InvokeAsync(slotName))" />
+                        </div>
+                        @if (hasContent)
+                        {
+                            <div class="designer-properties__hint">@GetSlotChildCount(slotName) component(en)</div>
+                        }
+                    </div>
+                }
+            </section>
+        }
+
         @if (!HasVisibleContentForActiveSection)
         {
             <div class="designer-properties__readonly">@GetEmptySectionMessage()</div>
@@ -520,6 +551,9 @@ else
 
     [Parameter]
     public EventCallback<DataGridPagingConfig> SetDataGridPaging { get; set; }
+
+    [Parameter]
+    public EventCallback<string> NavigateToSlot { get; set; }
 
     private const string CategoryGeneral = "Algemeen";
     private const string CategoryLayout = "Layout";
@@ -616,6 +650,11 @@ else
             || string.Equals(SelectedNode?.ComponentType, "AgtDataGrid", StringComparison.Ordinal);
     private IReadOnlyList<DesignNode> ColumnNodes => SelectedNode?.Children.TryGetValue("Columns", out var columns) == true ? columns : [];
     private bool IsRadzenColumnNode => string.Equals(SelectedNode?.ComponentType, "RadzenColumn", StringComparison.Ordinal);
+    private IReadOnlyList<ComponentParameterDescriptor> RenderFragmentParameters
+        => SelectedDescriptor?.Parameters
+            .Where(static parameter => parameter.IsRenderFragment)
+            .OrderBy(static parameter => parameter.Name, StringComparer.Ordinal)
+            .ToArray() ?? [];
 
     private DesignEntity? BoundGridEntity
     {
@@ -966,6 +1005,15 @@ else
     private static bool IsContentParam(ComponentParameterDescriptor parameter)
         => ContentNames.Contains(parameter.Name) || parameter.IsBindable || parameter.IsRenderFragment;
 
+    private bool HasSlotContent(string slotName)
+        => SelectedNode?.Children.TryGetValue(slotName, out var children) == true && children.Count > 0;
+
+    private int GetSlotChildCount(string slotName)
+        => SelectedNode?.Children.TryGetValue(slotName, out var children) == true ? children.Count : 0;
+
+    private static string GetSlotDisplayName(string slotName)
+        => DesignerDisplayText.GetSlotDisplayName(slotName);
+
     private static bool IsInteractionParam(ComponentParameterDescriptor parameter)
         => InteractionNames.Contains(parameter.Name) || parameter.IsEventCallback;
 
@@ -1041,7 +1089,8 @@ else
         return SelectedDescriptor.Parameters
             .Where(static parameter => !parameter.IsRenderFragment)
             .Where(parameter => !_simpleMode || parameter.IsEventCallback || IsSimpleParameter(parameter.Name))
-            .Any(parameter => Classify(parameter) == section);
+            .Any(parameter => Classify(parameter) == section)
+            || (section == InspectorSection.Content && RenderFragmentParameters.Count > 0);
     }
 
     private string? GetEventHandlerName(ComponentParameterDescriptor parameter)
@@ -1100,6 +1149,11 @@ else
             }
 
             if (GroupedParameters.Count > 0)
+            {
+                return true;
+            }
+
+            if (_activeSection == InspectorSection.Content && RenderFragmentParameters.Count > 0)
             {
                 return true;
             }

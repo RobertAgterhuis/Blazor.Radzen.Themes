@@ -611,7 +611,8 @@
                                            RemoveColumnNode="OnRemoveColumnNode"
                                            SplitColumnNode="OnSplitColumnNode"
                                            UpsertColumnNodes="OnUpsertColumnNodes"
-                                           SetDataGridPaging="OnSetDataGridPaging" />
+                                           SetDataGridPaging="OnSetDataGridPaging"
+                                           NavigateToSlot="OnNavigateToSlot" />
                         </div>
                         <div class="designer-data-panel" style="@(_rightTab == RightPanelTab.Data ? null : "display:none;")">
                             <DesignerDataPanel DataModel="@_commands.Document.DataModel" SelectedEntityName="@_selectedEntityName" SelectedEntityNameChanged="OnSelectedEntityChanged" GenerateFormRequested="OnGenerateFormRequested" ImportEntitiesRequested="OnImportEntitiesRequested" />

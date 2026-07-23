@@ -191,6 +191,25 @@
 
     private bool IsHovered => _isHovering || string.Equals(Node.Id, HoveredNodeId, StringComparison.Ordinal);
 
+    private IReadOnlyList<string> EffectiveSlots
+    {
+        get
+        {
+            if (_descriptor is null)
+            {
+                return [];
+            }
+
+            var all = new HashSet<string>(_descriptor.Slots, StringComparer.Ordinal);
+            foreach (var parameter in _descriptor.Parameters.Where(static parameter => parameter.IsRenderFragment))
+            {
+                all.Add(parameter.Name);
+            }
+
+            return all.OrderBy(static slot => slot, StringComparer.Ordinal).ToArray();
+        }
+    }
+
     private string? GetColumnFlexStyle()
     {
         if (!string.Equals(Node.ComponentType, "RadzenColumn", StringComparison.Ordinal))
@@ -419,6 +438,8 @@
     {
         var parameters = new Dictionary<string, object?>(StringComparer.Ordinal);
 
+        EnsureEffectiveSlotsChildren();
+
         foreach (var parameter in descriptor.Parameters)
         {
             if (parameter.IsRenderFragment)
@@ -635,6 +656,22 @@
         }
 
         builder.CloseElement();
+
+        if (children.Count == 0)
+        {
+            builder.OpenElement(sequence++, "div");
+            builder.AddAttribute(sequence++, "class", "designer-slot-empty-hint");
+
+            builder.OpenComponent<RadzenIcon>(sequence++);
+            builder.AddAttribute(sequence++, "Icon", "add_circle_outline");
+            builder.CloseComponent();
+
+            builder.OpenElement(sequence++, "span");
+            builder.AddContent(sequence++, GetSlotDisplayName(slotName));
+            builder.CloseElement();
+
+            builder.CloseElement();
+        }
     }
 
     private string GetDropzoneClass(string dropzoneId)
@@ -661,6 +698,22 @@
             .Where(static descriptor => descriptor.AllowedInPalette)
             .OrderBy(static descriptor => descriptor.DisplayName, StringComparer.Ordinal)
             .ToArray();
+
+    private void EnsureEffectiveSlotsChildren()
+    {
+        if (_descriptor is null)
+        {
+            return;
+        }
+
+        foreach (var slotName in EffectiveSlots)
+        {
+            if (!Node.Children.ContainsKey(slotName))
+            {
+                Node.Children[slotName] = [];
+            }
+        }
+    }
 
     private bool IsSlotPickerVisible(string slotName)
         => _slotPickerVisible.TryGetValue(slotName, out var isVisible) && isVisible;

@@ -15,7 +15,24 @@ internal static class DesignerDisplayText
         ["EmptyTemplate"] = "Lege weergave",
         ["HeaderTemplate"] = "Kop-sjabloon",
         ["FooterTemplate"] = "Voet-sjabloon",
-        ["SummaryTemplate"] = "Samenvatting"
+        ["SummaryTemplate"] = "Samenvatting",
+        ["Start"] = "Start-inhoud",
+        ["End"] = "Eind-inhoud",
+        ["PageTitle"] = "Paginatitel",
+        ["Body"] = "Hoofdinhoud",
+        ["Tabs"] = "Tabbladen",
+        ["Items"] = "Items",
+        ["Content"] = "Inhoud",
+        ["Actions"] = "Acties",
+        ["Icon"] = "Icoon",
+        ["Prefix"] = "Prefix",
+        ["Suffix"] = "Suffix",
+        ["ValueTemplate"] = "Waarde-sjabloon",
+        ["GroupHeaderTemplate"] = "Groepskop-sjabloon",
+        ["EditTemplate"] = "Bewerk-sjabloon",
+        ["FilterTemplate"] = "Filter-sjabloon",
+        ["TitleTemplate"] = "Titel-sjabloon",
+        ["DetailRowTemplate"] = "Detail-rij sjabloon"
     };
 
     public static string GetSlotDisplayName(string slotName)

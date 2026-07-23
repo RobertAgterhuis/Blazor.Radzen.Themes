@@ -1237,6 +1237,24 @@
     animation: slot-ready-pulse 1.2s ease-in-out infinite;
 }
 
+.designer-slot-empty-hint {
+    align-items: center;
+    border: 1px dashed var(--agt-input-border);
+    border-radius: var(--agt-border-radius-sm);
+    color: var(--agt-text-muted);
+    display: flex;
+    font-size: 0.75rem;
+    gap: var(--agt-spacing-1);
+    justify-content: center;
+    min-height: 32px;
+    opacity: 0.6;
+    padding: var(--agt-spacing-1) var(--agt-spacing-2);
+}
+
+.designer-slot-entry .rz-icon {
+    font-size: 16px;
+}
+
 .designer-slot__add,
 .designer-slot__picker-add {
     background: var(--agt-surface-0);

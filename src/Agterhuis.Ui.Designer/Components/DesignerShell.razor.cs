@@ -1352,6 +1352,27 @@ public partial class DesignerShell : IDisposable
         }
     }
 
+    private async Task OnNavigateToSlot(string slotName)
+    {
+        if (_selectedNodeId is null || string.IsNullOrWhiteSpace(slotName))
+        {
+            return;
+        }
+
+        if (TryFindNode(ActivePage.Nodes, _selectedNodeId, out _, out var container, out var index))
+        {
+            var node = container[index];
+            if (!node.Children.ContainsKey(slotName))
+            {
+                node.Children[slotName] = [];
+            }
+        }
+
+        _leftTab = LeftPanelTab.Navigator;
+        ShowToast($"Bewerk slot: {DesignerDisplayText.GetSlotDisplayName(slotName)}", ToastType.Info);
+        await InvokeAsync(StateHasChanged);
+    }
+
     private void SetViewport(string viewport) => _viewport = _viewportWidths.ContainsKey(viewport) ? viewport : "desktop";
 
     private void ToggleFileMenu()
