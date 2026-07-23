@@ -41,8 +41,7 @@
 
 .designer-startscreen__templates {
     display: grid;
-    gap: var(--agt-spacing-3);
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--agt-spacing-4);
 }
 
 .designer-startscreen__group {
@@ -51,15 +50,18 @@
 }
 
 .designer-startscreen__group-title {
-    color: var(--agt-text-body);
-    font-size: var(--agt-font-size-lg);
+    color: var(--agt-text-muted);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
     margin: 0;
+    text-transform: uppercase;
 }
 
 .designer-startscreen__group-grid {
     display: grid;
-    gap: var(--agt-spacing-3);
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--agt-spacing-4);
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
 }
 
 .designer-template-card {
@@ -69,14 +71,18 @@
     color: var(--agt-text-body);
     cursor: pointer;
     display: grid;
-    gap: var(--agt-spacing-2);
+    grid-template-rows: auto auto 1fr;
+    height: 100%;
+    min-height: 320px;
+    overflow: hidden;
     padding: var(--agt-spacing-3);
     text-align: left;
+    transition: border-color 200ms ease, box-shadow 200ms ease;
 }
 
 .designer-template-card:hover {
     border-color: var(--agt-color-primary-500);
-    box-shadow: 0 10px 26px var(--agt-shadow-2);
+    box-shadow: 0 2px 12px var(--agt-alpha-primary-15);
 }
 
 .designer-template-card__head {
@@ -88,6 +94,15 @@
 .designer-template-card__head h3 {
     flex: 1;
     font-size: var(--agt-font-size-md);
+    margin: 0;
+}
+
+.designer-template-card__label {
+    min-height: 2.75rem;
+}
+
+.designer-template-card__label p {
+    color: var(--agt-text-muted);
     margin: 0;
 }
 
@@ -104,15 +119,16 @@
 .designer-template-card__preview {
     border: 1px dashed var(--agt-input-border);
     border-radius: var(--agt-border-radius-sm);
-    max-height: 180px;
-    overflow: auto;
+    height: 100%;
+    min-height: 180px;
+    overflow: hidden;
     padding: var(--agt-spacing-2);
 }
 
 .designer-template-card__preview > .agt-design-renderer {
-    transform: scale(0.45);
+    transform: scale(0.5);
     transform-origin: top left;
-    width: 220%;
+    width: 200%;
 }
 
 .designer-startscreen__recent ul {
@@ -268,6 +284,20 @@
     align-items: center;
     display: inline-flex;
     gap: var(--agt-spacing-1);
+}
+
+.designer-theme-option {
+    align-items: center;
+    display: inline-flex;
+    gap: var(--agt-spacing-2);
+}
+
+.designer-theme-swatch {
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+    height: 14px;
+    width: 14px;
 }
 
 .designer-toolbar__darkmode {

@@ -141,18 +141,28 @@
 
                 <div class="designer-toolbar__theme" role="group" aria-label="Thema">
                     <RadzenDropDown TValue="string"
-                                    Data="CanvasThemeOptions"
-                                    Value="@_canvasTheme"
-                                    ValueChanged="OnToolbarCanvasThemeValueChanged"
+                                    Data="CanvasThemeFamilyOptions"
+                                    Value="@_canvasThemeFamily"
+                                    ValueChanged="OnToolbarCanvasThemeFamilyValueChanged"
                                     Open="OnToolbarThemeDropdownOpened"
                                     Style="min-width: 150px;"
-                                    Placeholder="Thema" />
+                                    Placeholder="Thema">
+                        <Template Context="item">
+                            @{
+                                var familyId = item?.ToString() ?? "plum";
+                            }
+                            <div class="designer-theme-option">
+                                <span class="designer-theme-swatch" style="background: @GetThemeSwatchColor(familyId);"></span>
+                                <span>@FormatThemeFamilyName(familyId)</span>
+                            </div>
+                        </Template>
+                    </RadzenDropDown>
                     <button type="button"
                             class="designer-toolbar__darkmode"
-                            title="@(_canvasTheme.EndsWith("-dark", StringComparison.OrdinalIgnoreCase) ? "Licht thema" : "Donker thema")"
-                            aria-label="@(_canvasTheme.EndsWith("-dark", StringComparison.OrdinalIgnoreCase) ? "Licht thema" : "Donker thema")"
+                            title="@(_isDarkMode ? "Licht thema" : "Donker thema")"
+                            aria-label="@(_isDarkMode ? "Licht thema" : "Donker thema")"
                             @onclick="ToggleDarkLight">
-                        <RadzenIcon Icon="@(_canvasTheme.EndsWith("-dark", StringComparison.OrdinalIgnoreCase) ? "light_mode" : "dark_mode")" />
+                        <RadzenIcon Icon="@(_isDarkMode ? "light_mode" : "dark_mode")" />
                     </button>
                 </div>
 

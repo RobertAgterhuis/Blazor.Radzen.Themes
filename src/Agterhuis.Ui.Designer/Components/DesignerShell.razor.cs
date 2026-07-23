@@ -48,6 +48,7 @@ public partial class DesignerShell : IDisposable
     private int _selectedPageIndex;
     private string _paletteFilter = string.Empty;
     private string _canvasTheme;
+    private string _canvasThemeFamily;
     private string _viewport;
     private string? _selectedSavedName;
     private string? _selectedEntityName;
@@ -119,6 +120,7 @@ public partial class DesignerShell : IDisposable
     public DesignerShell()
     {
         _canvasTheme = DefaultCanvasTheme ?? "plum-dark";
+        _canvasThemeFamily = ExtractThemeFamilyId(_canvasTheme);
         _viewport = string.IsNullOrWhiteSpace(DefaultViewport) || !_viewportWidths.ContainsKey(DefaultViewport) ? "desktop" : DefaultViewport;
         _commands = new DesignDocumentCommandStack(CreateNewDocument("Untitled", DesignDocumentTemplateKind.Blank));
         _commands.DocumentChanged += OnCommandStackDocumentChanged;
@@ -163,6 +165,10 @@ public partial class DesignerShell : IDisposable
 
     private IReadOnlyList<string> SavedDocumentNames => _savedDocuments.Select(static item => item.Name).ToArray();
     private IReadOnlyList<string> CanvasThemeOptions => AgtTheme.All.SelectMany(static theme => new[] { theme.LightVariantId, theme.DarkVariantId }).OrderBy(static id => id, StringComparer.Ordinal).ToArray();
+    private IReadOnlyList<string> CanvasThemeFamilyOptions => AgtTheme.All
+        .Select(static theme => theme.Name)
+        .OrderBy(static id => id, StringComparer.Ordinal)
+        .ToArray();
     private IReadOnlyList<DesignDocumentTemplates.TemplateDefinition> TemplateOptions => DesignDocumentTemplates.DefinitionsList;
     private IReadOnlyList<DesignDocumentTemplates.TemplateDefinition> AddPageTemplateOptions => TemplateOptions
         .Where(static template => template.Kind is not DesignDocumentTemplateKind.Blank and not DesignDocumentTemplateKind.SidebarApp)
@@ -217,6 +223,7 @@ public partial class DesignerShell : IDisposable
         && _commands.Document.Pages[0].Nodes.Count > 0
         && _commands.Document.Pages[0].Nodes.All(static node => string.Equals(node.ComponentType, "RadzenRow", StringComparison.Ordinal));
     private int TotalComponentCount => _commands.Document.Pages.Sum(static page => CountNodes(page.Nodes));
+    private bool _isDarkMode => _canvasTheme.EndsWith("-dark", StringComparison.OrdinalIgnoreCase);
     private IReadOnlyList<DesignerCommandPaletteItem> FilteredCommandItems => BuildFilteredCommandItems();
     private IReadOnlyList<DesignerCommandGroup> FilteredCommandGroups => GroupFilteredCommandItems(FilteredCommandItems);
     private IReadOnlyList<string> UsedEntities => _commands.Document.DataModel.Entities
@@ -595,7 +602,7 @@ public partial class DesignerShell : IDisposable
         var result = _projectExporter.ExportProject(
             _commands.Document,
             _commands.Document.Name,
-            _canvasTheme.Split('-')[0],
+            ExtractThemeFamilyId(_canvasTheme),
             _exportIncludeSeedData);
         await JS.InvokeVoidAsync("designerInterop.saveBytesFile", $"{_commands.Document.Name}.zip", "application/zip", result.ZipData);
         _showExportDialog = false;
@@ -1028,8 +1035,19 @@ public partial class DesignerShell : IDisposable
         await Task.Yield();
 
         _canvasTheme = targetTheme;
+        _canvasThemeFamily = ExtractThemeFamilyId(_canvasTheme);
         await JS.InvokeVoidAsync("designerInterop.applyDesignerTheme", _canvasTheme);
         await CanvasThemeChanged.InvokeAsync(_canvasTheme);
+    }
+
+    private Task OnToolbarCanvasThemeFamilyValueChanged(string value)
+        => OnThemeFamilyChanged(value);
+
+    private Task OnThemeFamilyChanged(string value)
+    {
+        var family = string.IsNullOrWhiteSpace(value) ? "plum" : value;
+        var targetTheme = _isDarkMode ? $"{family}-dark" : $"{family}-light";
+        return OnCanvasThemeChanged(targetTheme);
     }
 
     private Task OnToolbarCanvasThemeValueChanged(string value)
@@ -1074,6 +1092,38 @@ public partial class DesignerShell : IDisposable
 
         var targetTheme = isDark ? $"{family}-light" : $"{family}-dark";
         return OnCanvasThemeChanged(targetTheme);
+    }
+
+    private static string ExtractThemeFamilyId(string? variantId)
+    {
+        if (string.IsNullOrWhiteSpace(variantId))
+        {
+            return "plum";
+        }
+
+        if (variantId.EndsWith("-dark", StringComparison.OrdinalIgnoreCase))
+        {
+            return variantId[..^5];
+        }
+
+        if (variantId.EndsWith("-light", StringComparison.OrdinalIgnoreCase))
+        {
+            return variantId[..^6];
+        }
+
+        return variantId;
+    }
+
+    private static string GetThemeSwatchColor(string familyId)
+    {
+        var theme = AgtTheme.All.FirstOrDefault(candidate => string.Equals(candidate.Name, familyId, StringComparison.OrdinalIgnoreCase));
+        return theme?.PreviewPrimary ?? "var(--agt-color-primary-500)";
+    }
+
+    private static string FormatThemeFamilyName(string familyId)
+    {
+        var theme = AgtTheme.All.FirstOrDefault(candidate => string.Equals(candidate.Name, familyId, StringComparison.OrdinalIgnoreCase));
+        return theme?.DisplayName ?? familyId;
     }
 
     private async Task CloseRadzenPopupsBestEffortAsync()
